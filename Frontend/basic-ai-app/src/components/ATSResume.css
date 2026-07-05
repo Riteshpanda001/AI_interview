@@ -1,0 +1,229 @@
+.ats-section {
+  padding: 100px 8%;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 80px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #ffffff  0%,
+      #cec6dc 60%,
+      #ccc9db 100%
+    );
+}
+
+/* LEFT */
+
+.ats-left {
+  flex: 1;
+}
+
+.ats-tag {
+  display: inline-block;
+
+  padding: 10px 18px;
+
+  border-radius: 999px;
+
+  background: rgba(124,58,237,0.1);
+
+  color: #7c3aed;
+
+  font-weight: 600;
+
+  margin-bottom: 25px;
+}
+
+.ats-left h2 {
+  font-size: 3rem;
+  font-weight: 700;
+
+  color: #111827;
+
+  margin-bottom: 20px;
+}
+
+.ats-left h2 span {
+  color: #ee5025;
+}
+
+.ats-left p {
+  color: #6b7280;
+
+  font-size: 1.1rem;
+
+  line-height: 1.8;
+
+  margin-bottom: 30px;
+}
+
+/* FEATURES */
+
+.ats-features {
+  display: grid;
+  gap: 18px;
+
+  margin-bottom: 35px;
+}
+
+.ats-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.check-circle {
+  width: 28px;
+  height: 28px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  border-radius: 50%;
+
+  color: white;
+
+  background: linear-gradient(
+    135deg,
+    #7c3aed,
+    #a855f7
+  );
+}
+
+/* BUTTON */
+
+.upload-btn {
+  padding: 14px 32px;
+
+  border: none;
+  border-radius: 14px;
+
+  cursor: pointer;
+
+  color: white;
+  font-size: 16px;
+  font-weight: 700;
+
+  background: linear-gradient(
+    135deg,
+    #7c3aed,
+    #9333ea
+  );
+
+  transition: 0.3s;
+}
+
+.upload-btn:hover {
+  transform: translateY(-3px);
+
+  box-shadow:
+    0 12px 30px rgba(124,58,237,0.35);
+}
+
+/* RIGHT CARD */
+
+.ats-right {
+  flex: 1;
+
+  display: flex;
+  justify-content: center;
+}
+
+.ats-card {
+  width: 450px;
+
+  background: white;
+
+  border-radius: 25px;
+
+  padding: 35px;
+
+  box-shadow:
+    0 20px 50px rgba(0,0,0,0.08);
+}
+
+.score-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  margin-bottom: 20px;
+}
+
+.score-header h3 {
+  color: #111827;
+}
+
+.score {
+  font-size: 2rem;
+  font-weight: 800;
+
+  color: #7c3aed;
+}
+
+.progress-bar {
+  height: 12px;
+
+  border-radius: 999px;
+
+  background: #e5e7eb;
+
+  overflow: hidden;
+
+  margin-bottom: 30px;
+}
+
+.progress-fill {
+  width: 92%;
+  height: 100%;
+
+  background: linear-gradient(
+    135deg,
+    #7c3aed,
+    #a855f7
+  );
+}
+
+.analysis-box {
+  margin-bottom: 25px;
+}
+
+.analysis-box h4 {
+  color: #111827;
+
+  margin-bottom: 12px;
+}
+
+.analysis-box ul {
+  padding-left: 18px;
+
+  color: #6b7280;
+
+  line-height: 1.9;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 992px) {
+
+  .ats-section {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .ats-card {
+    width: 100%;
+    max-width: 500px;
+  }
+
+  .ats-item {
+    justify-content: center;
+  }
+}

@@ -1,0 +1,142 @@
+.resume-preview-container {
+  background: #ffffff;
+  border: 1px solid #ece8ff;
+  border-radius: 16px;
+  padding: 32px;
+  max-width: 800px;
+  margin: 30px auto;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 15px 40px rgba(124, 58, 237, 0.08);
+}
+
+.preview-header h2 {
+  font-size: 1.6rem;
+  color: #111827;
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+
+.preview-header p {
+  color: #9ca3af;
+  font-size: 0.95rem;
+  margin-bottom: 24px;
+}
+
+.highlight-controls {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.highlight-controls button {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  color: #9ca3af;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.highlight-controls button.active {
+  background: #7c3aed;
+  border-color: #7c3aed;
+  color: white;
+}
+
+.resume-paper {
+  background: #ffffff;
+  color: #1f2937;
+  border-radius: 8px;
+  padding: 40px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  font-family: 'Times New Roman', Times, serif;
+  line-height: 1.6;
+}
+
+.resume-header-mock {
+  text-align: center;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 16px;
+  margin-bottom: 24px;
+}
+
+.resume-header-mock .name {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 4px;
+}
+
+.resume-header-mock .contact {
+  font-size: 0.9rem;
+  color: #4b5563;
+}
+
+.resume-section-mock {
+  margin-bottom: 24px;
+}
+
+.section-title-mock {
+  font-size: 1.25rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #111827;
+  border-bottom: 1px solid #111827;
+  margin-bottom: 12px;
+  padding-bottom: 2px;
+  transition: all 0.2s ease;
+}
+
+.job-mock {
+  margin-bottom: 16px;
+}
+
+.job-header-mock {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin-bottom: 6px;
+}
+
+.resume-section-mock ul {
+  padding-left: 20px;
+  margin: 0;
+}
+
+.resume-section-mock li {
+  margin-bottom: 6px;
+  font-size: 0.9rem;
+}
+
+.skills-list-mock {
+  font-size: 0.95rem;
+}
+
+/* Dynamic Highlights */
+.word-mock {
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.highlight-keyword {
+  background-color: rgba(16, 185, 129, 0.2);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  color: #047857;
+}
+
+.highlight-warning {
+  background-color: rgba(245, 158, 11, 0.2);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  color: #b45309;
+}
+
+.highlight-heading {
+  background-color: rgba(59, 130, 246, 0.15);
+  border-left: 3px solid #3b82f6;
+  padding-left: 6px;
+}

@@ -1,0 +1,116 @@
+/* ===============================
+   AI Interview Section
+================================= */
+
+.ai-section{
+
+    padding:110px 8%;
+
+    background:#ffffff;
+}
+
+.ai-container{
+
+    display:grid;
+
+    grid-template-columns:1fr 1fr;
+
+    align-items:center;
+
+    gap:70px;
+}
+
+.ai-image{
+
+    display:flex;
+
+    justify-content:center;
+}
+
+.ai-image img{
+
+    width:100%;
+
+    max-width:720px;
+
+    border-radius:24px;
+
+    box-shadow:0 20px 45px rgba(124,58,237,.18);
+
+    transition:.35s;
+}
+
+.ai-image img:hover{
+
+    transform:scale(1.03);
+}
+
+.ai-content h2{
+
+    font-size:40px;
+
+    line-height:1.2;
+
+    color:#111827;
+
+    margin-bottom:25px;
+}
+
+.ai-content p{
+
+    font-size:19px;
+
+    line-height:1.9;
+
+    color:#6b7280;
+
+    margin-bottom:35px;
+}
+
+.ai-list{
+
+    display:grid;
+
+    grid-template-columns:repeat(2,1fr);
+
+    gap:18px;
+
+    margin-bottom:35px;
+}
+
+.ai-list div{
+
+    font-size:16px;
+
+    font-weight:500;
+
+    color:#111827;
+}
+
+@media(max-width:1000px){
+
+.ai-container{
+
+grid-template-columns:1fr;
+
+}
+
+.ai-content{
+
+text-align:center;
+
+}
+
+.ai-content h2{
+
+font-size:38px;
+
+}
+
+.ai-list{
+
+grid-template-columns:1fr;
+
+}
+
+}

@@ -1,0 +1,109 @@
+/* ==========================================
+   HOW IT WORKS
+========================================== */
+
+.how-section {
+  width: 100%;
+  padding: 90px 8%;
+  background: #ffffff;
+}
+
+.how-container {
+  max-width: 1400px;
+  margin: auto;
+}
+
+.how-header {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.how-tag {
+  display: inline-block;
+  padding: 8px 18px;
+  background: #ede9fe;
+  color: #7c3aed;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 20px;
+}
+
+.how-header h2 {
+  font-size: 3rem;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 20px;
+}
+
+.how-header p {
+  max-width: 700px;
+  margin: auto;
+  color: #6b7280;
+  font-size: 1.1rem;
+  line-height: 1.8;
+}
+
+.how-steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 40px;
+  margin-top: 40px;
+}
+
+.how-card {
+  background: #fff;
+  border: 1px solid #ececec;
+  border-radius: 20px;
+  padding: 40px 30px;
+  text-align: center;
+  position: relative;
+  transition: all 0.35s ease;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+.how-card:hover {
+  transform: translateY(-8px);
+  border-color: #7c3aed;
+  box-shadow: 0 20px 40px rgba(124, 58, 237, 0.15);
+}
+
+.how-step-num {
+  position: absolute;
+  top: 20px;
+  right: 25px;
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: #ede9fe;
+  opacity: 0.8;
+}
+
+.how-icon {
+  font-size: 3rem;
+  margin-bottom: 25px;
+}
+
+.how-card h3 {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 15px;
+}
+
+.how-card p {
+  color: #6b7280;
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .how-steps {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+  
+  .how-header h2 {
+    font-size: 2.4rem;
+  }
+}

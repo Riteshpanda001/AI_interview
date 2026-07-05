@@ -1,0 +1,418 @@
+/* ==========================================
+   RESUME BUILDER PAGE
+========================================== */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+.resume-page{
+    width:100%;
+    overflow-x:hidden;
+
+    background:
+        radial-gradient(circle at top right,#ede9fe 0%,transparent 30%),
+        radial-gradient(circle at bottom left,#f3e8ff 0%,transparent 30%),
+        linear-gradient(
+            135deg,
+            #ffffff,
+            #faf7ff,
+            #f5f3ff
+        );
+}
+
+/* ==========================================
+   COMMON SECTION
+========================================== */
+
+section{
+    width:100%;
+    padding:100px 8%;
+}
+
+.section-title{
+    text-align:center;
+    font-size:2.5rem;
+    font-weight:700;
+    color:#111827;
+    margin-bottom:20px;
+    line-height:1.2;
+}
+
+.section-title span{
+    color:#7c3aed;
+}
+
+.section-subtitle{
+    max-width:760px;
+    margin:auto;
+    text-align:center;
+    font-size:18px;
+    color:#6b7280;
+    line-height:1.8;
+    margin-bottom:70px;
+}
+
+/* ==========================================
+   COMMON CARD
+========================================== */
+
+.card{
+    background:rgba(255,255,255,.9);
+
+    backdrop-filter:blur(18px);
+
+    border-radius:24px;
+
+    border:1px solid rgba(124,58,237,.08);
+
+    box-shadow:
+        0 20px 60px rgba(124,58,237,.08);
+
+    transition:.35s ease;
+}
+
+.card:hover{
+
+    transform:translateY(-8px);
+
+    box-shadow:
+        0 25px 60px rgba(124,58,237,.18);
+
+    border-color:#7c3aed;
+}
+
+/* ==========================================
+   CTA SECTION
+========================================== */
+
+.resume-cta{
+
+    padding:120px 8%;
+
+    background:
+        linear-gradient(
+            135deg,
+            #7c3aed,
+            #9333ea,
+            #a855f7
+        );
+
+    position:relative;
+
+    overflow:hidden;
+}
+
+/* Decorative Circles */
+
+.resume-cta::before{
+
+    content:"";
+
+    position:absolute;
+
+    width:350px;
+    height:350px;
+
+    border-radius:50%;
+
+    background:rgba(255,255,255,.08);
+
+    top:-120px;
+    right:-120px;
+}
+
+.resume-cta::after{
+
+    content:"";
+
+    position:absolute;
+
+    width:250px;
+    height:250px;
+
+    border-radius:50%;
+
+    background:rgba(255,255,255,.05);
+
+    bottom:-100px;
+    left:-80px;
+}
+
+.resume-cta-container{
+
+    max-width:900px;
+
+    margin:auto;
+
+    text-align:center;
+
+    position:relative;
+
+    z-index:2;
+
+    color:#fff;
+}
+
+.resume-cta h2{
+
+    font-size:2.5rem;
+
+    font-weight:700;
+
+    margin-bottom:25px;
+}
+
+.resume-cta p{
+
+    font-size:20px;
+
+    line-height:1.9;
+
+    opacity:.95;
+
+    margin-bottom:45px;
+}
+
+/* ==========================================
+   CTA BUTTONS
+========================================== */
+
+.resume-cta-buttons{
+
+    display:flex;
+
+    justify-content:center;
+
+    gap:20px;
+
+    flex-wrap:wrap;
+}
+
+.resume-btn{
+
+    padding:16px 40px;
+
+    border:none;
+
+    border-radius:14px;
+
+    cursor:pointer;
+
+    background:#fff;
+
+    color:#7c3aed;
+
+    font-size:17px;
+
+    font-weight:700;
+
+    transition:.35s ease;
+}
+
+.resume-btn:hover{
+
+    transform:translateY(-5px);
+
+    box-shadow:
+        0 18px 40px rgba(255,255,255,.30);
+}
+
+.template-btn{
+
+    padding:16px 40px;
+
+    border:2px solid #fff;
+
+    border-radius:14px;
+
+    cursor:pointer;
+
+    background:transparent;
+
+    color:#fff;
+
+    font-size:17px;
+
+    font-weight:700;
+
+    transition:.35s ease;
+}
+
+.template-btn:hover{
+
+    background:#fff;
+
+    color:#7c3aed;
+
+    transform:translateY(-5px);
+}
+
+/* ==========================================
+   PREMIUM GRADIENT DIVIDER
+========================================== */
+
+.gradient-divider{
+
+    width:120px;
+
+    height:6px;
+
+    border-radius:999px;
+
+    margin:25px auto;
+
+    background:
+        linear-gradient(
+            135deg,
+            #7c3aed,
+            #a855f7
+        );
+}
+
+/* ==========================================
+   FLOATING ANIMATION
+========================================== */
+
+.float{
+
+    animation:float 4s ease-in-out infinite;
+}
+
+@keyframes float{
+
+    0%{
+
+        transform:translateY(0);
+    }
+
+    50%{
+
+        transform:translateY(-12px);
+    }
+
+    100%{
+
+        transform:translateY(0);
+    }
+}
+
+/* ==========================================
+   FADE UP ANIMATION
+========================================== */
+
+.fade-up{
+
+    animation:fadeUp .8s ease;
+}
+
+@keyframes fadeUp{
+
+    from{
+
+        opacity:0;
+
+        transform:translateY(40px);
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:translateY(0);
+    }
+}
+
+/* ==========================================
+   RESPONSIVE
+========================================== */
+
+@media(max-width:992px){
+
+    section{
+
+        padding:90px 7%;
+    }
+
+    .section-title{
+
+        font-size:2.2rem;
+    }
+
+    .resume-cta h2{
+
+        font-size:2.2rem;
+    }
+
+    .resume-cta p{
+
+        font-size:18px;
+    }
+
+}
+
+@media(max-width:768px){
+
+    section{
+
+        padding:70px 25px;
+    }
+
+    .section-title{
+
+        font-size:1.8rem;
+    }
+
+    .section-subtitle{
+
+        font-size:16px;
+    }
+
+    .resume-cta{
+
+        padding:80px 25px;
+    }
+
+    .resume-cta h2{
+
+        font-size:1.8rem;
+    }
+
+    .resume-cta p{
+
+        font-size:16px;
+    }
+
+    .resume-cta-buttons{
+
+        flex-direction:column;
+    }
+
+    .resume-btn,
+    .template-btn{
+
+        width:100%;
+    }
+
+}
+
+@media(max-width:480px){
+
+    .section-title{
+
+        font-size:1.6rem;
+    }
+
+    .resume-cta h2{
+
+        font-size:1.5rem;
+    }
+
+    .resume-cta p{
+
+        font-size:15px;
+    }
+
+}

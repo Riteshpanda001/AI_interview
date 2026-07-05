@@ -1,0 +1,267 @@
+/* ==========================================
+   CODING PROBLEMS CSS
+   ========================================== */
+
+.coding-problems-section {
+  padding: 40px 8% 60px;
+  background: #faf8ff;
+  border-top: 1px solid #ece8ff;
+}
+
+.coding-problems-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* FILTERS PANEL */
+.problems-filter-panel {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  gap: 20px;
+  margin-bottom: 20px;
+  background: white;
+}
+
+.search-wrap {
+  position: relative;
+  flex-grow: 1;
+  max-width: 450px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  color: #9ca3af;
+}
+
+.search-wrap input {
+  width: 100%;
+  padding: 12px 16px 12px 42px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.3s;
+}
+
+.search-wrap input:focus {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12);
+}
+
+.dropdowns-wrap {
+  display: flex;
+  gap: 12px;
+}
+
+.filter-select {
+  padding: 12px 18px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 14px;
+  background: white;
+  color: #4b5563;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.filter-select:focus {
+  border-color: #7c3aed;
+}
+
+/* ACTIVE CHIPS */
+.active-filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: #ede9fe;
+  color: #7c3aed;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 100px;
+}
+
+.filter-chip button {
+  background: none;
+  border: none;
+  color: #7c3aed;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* TABLE STYLING */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  background: white;
+}
+
+.problems-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 14.5px;
+}
+
+.problems-table th {
+  background: #f9fafb;
+  padding: 18px 24px;
+  font-weight: 700;
+  color: #374151;
+  border-bottom: 1px solid #ece8ff;
+}
+
+.problems-table td {
+  padding: 20px 24px;
+  border-bottom: 1px solid #f3f4f6;
+  color: #4b5563;
+  vertical-align: middle;
+}
+
+.problems-table tbody tr {
+  transition: all 0.2s;
+}
+
+.problems-table tbody tr:hover {
+  background: #fdfcff;
+}
+
+/* STATUS BADGES */
+.status-badge {
+  display: inline-block;
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 6px;
+}
+
+.status-badge.solved {
+  background: rgba(16, 185, 129, 0.08);
+  color: #10b981;
+}
+
+.status-badge.in-progress {
+  background: rgba(245, 158, 11, 0.08);
+  color: #f59e0b;
+}
+
+.status-badge.unsolved {
+  background: rgba(107, 114, 128, 0.08);
+  color: #6b7280;
+}
+
+/* DIFFICULTY CHIPS */
+.diff-chip {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 999px;
+  text-transform: uppercase;
+}
+
+.diff-chip.easy {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+
+.diff-chip.medium {
+  background: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+}
+
+.diff-chip.hard {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.category-cell-tag {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #111827;
+}
+
+/* MINI COMPANY TAGS */
+.company-logos-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.mini-company-tag {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 4px;
+  text-transform: capitalize;
+  background: #f3f4f6;
+  color: #4b5563;
+}
+
+.mini-company-tag.google { background: rgba(66, 133, 244, 0.08); color: #4285f4; }
+.mini-company-tag.meta { background: rgba(6, 104, 225, 0.08); color: #0668e1; }
+.mini-company-tag.amazon { background: rgba(255, 153, 0, 0.08); color: #d97706; }
+.mini-company-tag.microsoft { background: rgba(242, 80, 34, 0.08); color: #ea580c; }
+.mini-company-tag.apple { background: rgba(17, 24, 39, 0.08); color: #111827; }
+.mini-company-tag.netflix { background: rgba(229, 9, 20, 0.08); color: #e50914; }
+
+/* ACTION BUTTON */
+.problem-solve-cta {
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(124, 58, 237, 0.15);
+  transition: all 0.2s;
+}
+
+.problem-solve-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(124, 58, 237, 0.25);
+}
+
+.empty-results-cell {
+  text-align: center;
+  padding: 40px !important;
+  color: #6b7280;
+  font-size: 15px;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .problems-filter-panel {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .search-wrap {
+    max-width: 100%;
+  }
+  .dropdowns-wrap {
+    justify-content: space-between;
+  }
+  .filter-select {
+    flex-grow: 1;
+  }
+}

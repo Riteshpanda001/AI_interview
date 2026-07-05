@@ -1,0 +1,134 @@
+/* ==========================================
+   CODING CATEGORIES CSS
+   ========================================== */
+
+.coding-categories-section {
+  padding: 40px 8% 60px;
+  background: #faf8ff;
+  border-top: 1px solid #ece8ff;
+  border-bottom: 1px solid #ece8ff;
+}
+
+.coding-categories-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.categories-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 24px;
+}
+
+.category-card {
+  padding: 24px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.category-card.active {
+  border-color: #7c3aed;
+  background: #faf5ff;
+  box-shadow: 0 20px 45px rgba(124, 58, 237, 0.15);
+  transform: translateY(-5px);
+}
+
+.category-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.cat-icon {
+  font-size: 26px;
+  width: 45px;
+  height: 45px;
+  background: rgba(124, 58, 237, 0.06);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 12px;
+  transition: all 0.3s;
+}
+
+.category-card:hover .cat-icon {
+  background: #7c3aed;
+  transform: scale(1.1);
+}
+
+.category-card.active .cat-icon {
+  background: #7c3aed;
+  color: white;
+}
+
+.cat-level-badge {
+  font-size: 11px;
+  font-weight: 600;
+  color: #6b7280;
+  background: #f3f4f6;
+  padding: 4px 10px;
+  border-radius: 6px;
+}
+
+.category-card h3 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 10px;
+}
+
+.category-card p {
+  font-size: 13.5px;
+  color: #4b5563;
+  line-height: 1.6;
+  margin-bottom: 24px;
+  flex-grow: 1;
+}
+
+/* PROGRESS BAR */
+.cat-progress-container {
+  margin-bottom: 16px;
+}
+
+.cat-progress-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  margin-bottom: 6px;
+}
+
+.cat-progress-bar {
+  width: 100%;
+  height: 5px;
+  background: #e5e7eb;
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.cat-progress-fill {
+  height: 100%;
+  background: #7c3aed;
+  border-radius: 99px;
+}
+
+/* ACTION LINK */
+.category-action-link {
+  font-size: 13px;
+  font-weight: 700;
+  color: #7c3aed;
+  text-align: right;
+  transition: all 0.3s;
+}
+
+.category-card:hover .category-action-link {
+  transform: translateX(4px);
+}
+
+.category-card.active .category-action-link {
+  color: #6d28d9;
+}

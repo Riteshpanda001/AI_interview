@@ -1,0 +1,334 @@
+.preview-section {
+  width: 100%;
+  padding: 100px 8%;
+  background: linear-gradient(135deg, #ffffff, #faf7ff, #f5f3ff);
+}
+
+.preview-badge {
+  display: inline-block;
+  padding: 10px 22px;
+  border-radius: 999px;
+  background: #ede9fe;
+  color: #7c3aed;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  margin-bottom: 20px;
+}
+
+.preview-container {
+  max-width: 900px;
+  margin: auto;
+}
+
+.preview-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  padding: 20px 30px;
+  border: 1px solid rgba(124, 58, 237, 0.08);
+  border-radius: 18px 18px 0 0;
+  border-bottom: none;
+  box-shadow: 0 10px 30px rgba(124, 58, 237, 0.04);
+}
+
+.active-tpl-indicator {
+  font-size: 15px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.active-tpl-indicator span {
+  color: #7c3aed;
+  font-weight: 700;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 15px;
+}
+
+.preview-action-btn {
+  padding: 10px 22px;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.preview-action-btn.primary {
+  background: linear-gradient(135deg, #7c3aed, #9333ea);
+  color: white;
+}
+
+.preview-action-btn.primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(124, 58, 237, 0.25);
+}
+
+.preview-action-btn.secondary {
+  background: white;
+  border: 1.5px solid #7c3aed;
+  color: #7c3aed;
+}
+
+.preview-action-btn.secondary:hover {
+  background: #7c3aed;
+  color: white;
+}
+
+/* ==========================================
+   RESUME PAPER SIMULATOR
+   ========================================== */
+
+.resume-paper {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0 0 24px 24px;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.06);
+  padding: 50px;
+  text-align: left;
+  min-height: 1000px;
+  color: #1f2937;
+  display: flex;
+  flex-direction: column;
+}
+
+.resume-header {
+  margin-bottom: 30px;
+  border-bottom: 2px solid var(--tpl-accent);
+  padding-bottom: 20px;
+}
+
+.resume-header .name {
+  font-size: 36px;
+  font-weight: 800;
+  color: #111827;
+  margin-bottom: 5px;
+}
+
+.resume-header .role {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.contact-info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  font-size: 14px;
+  color: #4b5563;
+}
+
+.resume-body {
+  display: flex;
+  gap: 40px;
+  flex-grow: 1;
+}
+
+.main-col {
+  flex: 2;
+}
+
+.side-col {
+  flex: 1;
+  border-left: 1px solid #f3f4f6;
+  padding-left: 30px;
+}
+
+.preview-sub-section {
+  margin-bottom: 25px;
+}
+
+.section-heading {
+  font-size: 18px;
+  font-weight: 800;
+  color: #111827;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.summary-text {
+  font-size: 14px;
+  color: #4b5563;
+  line-height: 1.7;
+}
+
+.preview-item {
+  margin-bottom: 20px;
+}
+
+.preview-item-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 15px;
+  color: #111827;
+}
+
+.preview-item-sub {
+  font-size: 14px;
+  color: #4b5563;
+  margin: 3px 0 8px;
+}
+
+.preview-item-desc {
+  font-size: 13.5px;
+  color: #4b5563;
+  line-height: 1.6;
+  white-space: pre-line;
+}
+
+.preview-skills-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.preview-skill-tag {
+  background: #f3f4f6;
+  color: #1f2937;
+  padding: 5px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.preview-edu-item {
+  font-size: 14px;
+  margin-bottom: 15px;
+}
+
+.preview-edu-item div {
+  color: #4b5563;
+  margin: 2px 0 5px;
+}
+
+.preview-edu-item .date {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+/* ==========================================
+   TEMPLATE VARIANT SELECTORS
+   ========================================== */
+
+/* 1. Silicon Valley Tech (Purple Accent) */
+.resume-paper.tech {
+  --tpl-accent: #7c3aed;
+  font-family: 'Inter', sans-serif;
+}
+.resume-paper.tech .preview-skill-tag {
+  border-left: 3px solid #7c3aed;
+}
+
+/* 2. Creative Modern (Blue/Cyan Accent) */
+.resume-paper.modern {
+  --tpl-accent: #06b6d4;
+  font-family: 'Outfit', 'Inter', sans-serif;
+  background: #fafcff;
+}
+.resume-paper.modern .resume-body {
+  flex-direction: column;
+}
+.resume-paper.modern .side-col {
+  width: 100%;
+  border-left: none;
+  padding-left: 0;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 25px;
+}
+.resume-paper.modern .preview-skills-list {
+  gap: 12px;
+}
+.resume-paper.modern .preview-skill-tag {
+  background: #ecfeff;
+  color: #0891b2;
+  border-radius: 999px;
+  padding: 6px 15px;
+}
+
+/* 3. Executive Minimalist (Emerald Accent) */
+.resume-paper.minimal {
+  --tpl-accent: #10b981;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+.resume-paper.minimal .resume-header {
+  text-align: center;
+  border-bottom: 1.5px solid #d1d5db;
+}
+.resume-paper.minimal .contact-info {
+  justify-content: center;
+}
+.resume-paper.minimal .resume-body {
+  flex-direction: row-reverse;
+}
+.resume-paper.minimal .side-col {
+  border-left: none;
+  border-right: 1px solid #e5e7eb;
+  padding-left: 0;
+  padding-right: 30px;
+}
+
+/* 4. Academic Classic (Warm Amber, Serif Font) */
+.resume-paper.academic {
+  --tpl-accent: #b45309;
+  font-family: "Georgia", Times, serif;
+  line-height: 1.8;
+}
+.resume-paper.academic .resume-header {
+  border-bottom: 2px double #b45309;
+}
+.resume-paper.academic .resume-body {
+  flex-direction: column;
+}
+.resume-paper.academic .side-col {
+  width: 100%;
+  border-left: none;
+  padding-left: 0;
+  margin-top: 20px;
+}
+.resume-paper.academic .preview-skill-tag {
+  background: transparent;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+}
+
+@media (max-width: 768px) {
+  .preview-actions {
+    flex-direction: column;
+    gap: 15px;
+    align-items: flex-start;
+  }
+  .action-buttons {
+    width: 100%;
+  }
+  .preview-action-btn {
+    flex: 1;
+    text-align: center;
+  }
+  .resume-paper {
+    padding: 24px;
+  }
+  .resume-body {
+    flex-direction: column;
+    gap: 25px;
+  }
+  .side-col {
+    border-left: none;
+    padding-left: 0;
+  }
+}
+
+.section-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+}
+
+.preview-section .section-title span {
+  color: #0284c7;
+}

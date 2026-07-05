@@ -1,0 +1,13 @@
+/* ==========================================
+   COMPANY PREPARATION MAIN LAYOUT CSS
+   ========================================== */
+
+.company-dynamic-content {
+  background: #ffffff;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+

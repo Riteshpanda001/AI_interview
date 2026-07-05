@@ -1,0 +1,88 @@
+/* ==========================================
+   CODING ROADMAP CSS
+   ========================================== */
+
+.coding-roadmap-section {
+  padding: 60px 8%;
+  background: #ffffff;
+}
+
+.coding-roadmap-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* GRID LAYOUT */
+.roadmap-grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 25px;
+}
+
+.roadmap-step-card {
+  background: #ffffff;
+  border: 1px solid #ece8ff;
+  border-radius: 20px;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all 0.3s;
+  box-shadow: 0 10px 25px rgba(124, 58, 237, 0.02);
+}
+
+.roadmap-step-card:hover {
+  transform: translateY(-5px);
+  border-color: #0284c7;
+  box-shadow: 0 15px 35px rgba(2, 132, 199, 0.08);
+}
+
+.roadmap-step-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.step-phase-tag {
+  background: #f5efff;
+  color: #7c3aed;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 6px;
+}
+
+.step-duration {
+  font-size: 12px;
+  font-weight: 700;
+  color: #6b7280;
+  font-family: monospace;
+}
+
+.roadmap-step-card h3 {
+  font-size: 1.25rem;
+  color: #111827;
+  font-weight: 700;
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+
+.roadmap-step-card p {
+  font-size: 14.5px;
+  color: #6b7280;
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+.step-footer {
+  border-top: 1px solid #f3efff;
+  padding-top: 15px;
+}
+
+.step-check {
+  font-size: 12px;
+  color: #10b981;
+  font-weight: 700;
+}

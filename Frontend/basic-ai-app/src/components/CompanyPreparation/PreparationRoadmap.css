@@ -1,0 +1,130 @@
+/* ==========================================
+   PREPARATION ROADMAP CSS
+   ========================================== */
+
+.prep-roadmap-section {
+  padding: 40px 8%;
+  background: #ffffff;
+}
+
+.prep-roadmap-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* MINI HEADER */
+.section-header-mini {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.section-mini-tag {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: #ede9fe;
+  color: #7c3aed;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.section-header-mini h2 {
+  font-size: 2.5rem;
+  color: #111827;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.section-header-mini p {
+  font-size: 16px;
+  color: #6b7280;
+  max-width: 650px;
+  margin: 0 auto;
+}
+
+/* ROADMAP GRID */
+.roadmap-grid-timeline {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 30px;
+}
+
+.roadmap-week-card {
+  background: #ffffff;
+  border: 1px solid #ece8ff;
+  border-radius: 24px;
+  padding: 30px;
+  box-shadow: 0 10px 25px rgba(124, 58, 237, 0.02);
+  transition: all 0.3s;
+}
+
+.roadmap-week-card:hover {
+  transform: translateY(-5px);
+  border-color: #0284c7;
+  box-shadow: 0 15px 35px rgba(2, 132, 199, 0.08);
+}
+
+.week-badge-row {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 18px;
+}
+
+.week-label-tag {
+  background: linear-gradient(135deg, #7c3aed, #0284c7);
+  color: white;
+  font-size: 13px;
+  font-weight: 800;
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-family: monospace;
+}
+
+.week-goal-title {
+  font-size: 1.15rem;
+  color: #111827;
+  font-weight: 700;
+}
+
+.week-focus-para {
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: #4b5563;
+  margin-bottom: 20px;
+}
+
+.week-checklist strong {
+  display: block;
+  font-size: 13px;
+  color: #374151;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.week-checklist ul {
+  list-style: none;
+}
+
+.week-checklist li {
+  font-size: 13.5px;
+  color: #4b5563;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.checkbox-dot {
+  color: #9ca3af;
+  font-weight: 700;
+  font-size: 16px;
+}
+
+@media (max-width: 992px) {
+  .roadmap-grid-timeline {
+    grid-template-columns: 1fr;
+  }
+}

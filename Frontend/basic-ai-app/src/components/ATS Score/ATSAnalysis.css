@@ -1,0 +1,132 @@
+.ats-analysis-container {
+  background: #ffffff;
+  border: 1px solid #ece8ff;
+  border-radius: 16px;
+  padding: 32px;
+  max-width: 800px;
+  margin: 30px auto;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 15px 40px rgba(124, 58, 237, 0.08);
+}
+
+.analysis-header h2 {
+  font-size: 1.6rem;
+  color: #111827;
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+
+.analysis-header p {
+  color: #9ca3af;
+  font-size: 0.95rem;
+  margin-bottom: 24px;
+}
+
+.category-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid #ece8ff;
+  padding-bottom: 16px;
+}
+
+.category-filters button {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  color: #9ca3af;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.category-filters button:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.category-filters button.active {
+  background: #7c3aed;
+  border-color: #7c3aed;
+  color: white;
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+}
+
+.analysis-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.analysis-item {
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid #ece8ff;
+  transition: all 0.2s ease;
+}
+
+.analysis-item:hover {
+  transform: translateY(-2px);
+}
+
+.analysis-item.pass {
+  background: rgba(16, 185, 129, 0.03);
+  border-left: 4px solid #10b981;
+}
+
+.analysis-item.warning {
+  background: rgba(245, 158, 11, 0.03);
+  border-left: 4px solid #f59e0b;
+}
+
+.analysis-item.fail {
+  background: rgba(239, 68, 68, 0.03);
+  border-left: 4px solid #ef4444;
+}
+
+.item-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.item-title {
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: #111827;
+}
+
+.status-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 99px;
+  text-transform: uppercase;
+}
+
+.status-badge.pass {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+}
+
+.status-badge.warning {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+}
+
+.status-badge.fail {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+.item-detail {
+  font-size: 0.9rem;
+  color: #9ca3af;
+  line-height: 1.5;
+}

@@ -1,0 +1,103 @@
+/* ===========================
+   TRUSTED COMPANIES
+=========================== */
+
+.trusted{
+    padding:100px 8%;
+    background:#fff;
+}
+
+.trusted-heading{
+    text-align:center;
+    margin-bottom:70px;
+}
+
+.trusted-heading span{
+    display:inline-block;
+    color:#7c3aed;
+    font-size:15px;
+    font-weight:700;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    margin-bottom:10px;
+}
+
+.trusted-heading h2{
+    font-size:46px;
+    color:#111827;
+    margin-bottom:15px;
+}
+
+.trusted-heading p{
+    max-width:700px;
+    margin:auto;
+    color:#6b7280;
+    font-size:18px;
+    line-height:1.8;
+}
+
+.company-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:30px;
+}
+
+.company-card{
+    background:#fff;
+    border-radius:20px;
+    padding:35px;
+    text-align:center;
+    cursor:pointer;
+    border:1px solid #ececec;
+    transition:all .35s ease;
+    box-shadow:0 10px 30px rgba(0,0,0,.08);
+}
+
+.company-card:hover{
+    transform:translateY(-10px);
+    border-color:#7c3aed;
+    box-shadow:0 20px 45px rgba(124,58,237,.20);
+}
+
+.company-card img{
+    width:80px;
+    height:80px;
+    object-fit:contain;
+    margin-bottom:20px;
+}
+
+.company-card h4{
+    font-size:22px;
+    color:#111827;
+    margin-bottom:10px;
+}
+
+.company-card p{
+    color:#6b7280;
+    font-size:15px;
+    line-height:1.6;
+}
+
+@media (max-width:992px){
+    .company-grid{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .trusted-heading h2{
+        font-size:38px;
+    }
+}
+
+@media (max-width:600px){
+    .company-grid{
+        grid-template-columns:1fr;
+    }
+
+    .trusted-heading h2{
+        font-size:30px;
+    }
+
+    .trusted-heading p{
+        font-size:16px;
+    }
+}

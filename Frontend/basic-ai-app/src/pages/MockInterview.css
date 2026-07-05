@@ -1,0 +1,318 @@
+/* ==========================================
+   GLOBAL
+========================================== */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    overflow-x:hidden;
+    font-family:"Poppins",sans-serif;
+    background:#fff;
+}
+
+.mock-page{
+    width:100%;
+    overflow-x:hidden;
+    background:linear-gradient(
+        135deg,
+        #ffffff,
+        #faf7ff,
+        #f5f3ff
+    );
+}
+
+/* ==========================================
+   SECTION
+========================================== */
+
+section{
+    width:100%;
+    padding:90px 8%;
+}
+
+section:nth-child(even){
+    background:#fff;
+}
+
+section:nth-child(odd){
+    background:#faf8ff;
+}
+
+/* ==========================================
+   COMMON TITLE
+========================================== */
+
+.section-title{
+    font-size:3rem;
+    font-weight:800;
+    text-align:center;
+    color:#111827;
+    margin-bottom:20px;
+}
+
+.section-title span{
+    color:#7c3aed;
+}
+
+.section-subtitle{
+    max-width:760px;
+    margin:auto;
+    text-align:center;
+    color:#6b7280;
+    font-size:1.1rem;
+    line-height:1.9;
+    margin-bottom:70px;
+}
+
+/* ==========================================
+   COMMON CONTAINER
+========================================== */
+
+.container{
+    max-width:1400px;
+    margin:auto;
+}
+
+/* ==========================================
+   COMMON CARD
+========================================== */
+
+.card{
+    background:#fff;
+    border-radius:22px;
+    border:1px solid #ececec;
+    overflow:hidden;
+
+    transition:.35s;
+
+    box-shadow:
+        0 10px 30px rgba(0,0,0,.05);
+}
+
+.card:hover{
+
+    transform:translateY(-8px);
+
+    border-color:#7c3aed;
+
+    box-shadow:
+        0 25px 50px rgba(124,58,237,.18);
+}
+
+/* ==========================================
+   IMAGE
+========================================== */
+
+.section-image{
+    width:100%;
+    border-radius:20px;
+    display:block;
+
+    transition:.4s;
+}
+
+.section-image:hover{
+
+    transform:scale(1.03);
+}
+
+/* ==========================================
+   CTA
+========================================== */
+
+.mock-cta{
+
+    padding:110px 8%;
+
+    background:linear-gradient(
+        135deg,
+        #7c3aed,
+        #9333ea,
+        #a855f7
+    );
+}
+
+.mock-cta-container{
+
+    max-width:900px;
+
+    margin:auto;
+
+    text-align:center;
+
+    color:#fff;
+}
+
+.mock-cta h2{
+
+    font-size:3rem;
+
+    font-weight:800;
+
+    margin-bottom:20px;
+}
+
+.mock-cta p{
+
+    font-size:1.15rem;
+
+    line-height:1.9;
+
+    opacity:.95;
+
+    margin-bottom:45px;
+}
+
+/* ==========================================
+   BUTTONS
+========================================== */
+
+.primary-btn{
+
+    background:linear-gradient(
+        135deg,
+        #7c3aed,
+        #9333ea
+    );
+
+    color:white;
+
+    border:none;
+
+    padding:15px 35px;
+
+    border-radius:14px;
+
+    cursor:pointer;
+
+    font-weight:700;
+
+    transition:.35s;
+}
+
+.primary-btn:hover{
+
+    transform:translateY(-4px);
+
+    box-shadow:
+        0 15px 35px rgba(124,58,237,.30);
+}
+
+.secondary-btn{
+
+    background:white;
+
+    color:#7c3aed;
+
+    border:2px solid #7c3aed;
+
+    padding:15px 35px;
+
+    border-radius:14px;
+
+    cursor:pointer;
+
+    transition:.35s;
+}
+
+.secondary-btn:hover{
+
+    background:#7c3aed;
+
+    color:white;
+}
+
+/* ==========================================
+   ANIMATION
+========================================== */
+
+.fade-up{
+
+    animation:fadeUp .8s ease;
+}
+
+@keyframes fadeUp{
+
+    from{
+
+        opacity:0;
+
+        transform:translateY(50px);
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:translateY(0);
+    }
+}
+
+/* ==========================================
+   RESPONSIVE
+========================================== */
+
+@media(max-width:992px){
+
+    section{
+
+        padding:70px 6%;
+    }
+
+    .section-title{
+
+        font-size:2.4rem;
+    }
+
+    .mock-cta h2{
+
+        font-size:2.4rem;
+    }
+}
+
+@media(max-width:768px){
+
+    section{
+
+        padding:60px 20px;
+    }
+
+    .section-title{
+
+        font-size:2rem;
+    }
+
+    .section-subtitle{
+
+        font-size:1rem;
+    }
+
+    .mock-cta{
+
+        padding:70px 20px;
+    }
+
+    .mock-cta h2{
+
+        font-size:2rem;
+    }
+
+    .mock-cta-buttons{
+
+        flex-direction:column;
+    }
+
+    .mock-cta .start-btn,
+    .mock-cta .demo-btn{
+
+        width:100%;
+    }
+}

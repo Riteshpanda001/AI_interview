@@ -1,0 +1,316 @@
+/* ==========================================
+   CODING PRACTICE PAGE
+========================================== */
+
+*{
+
+    margin:0;
+
+    padding:0;
+
+    box-sizing:border-box;
+
+}
+
+.coding-page{
+
+    width:100%;
+
+    overflow-x:hidden;
+
+    background:
+
+        radial-gradient(circle at bottom right,
+        rgba(192,132,252,.12),
+        transparent 35%),
+
+        linear-gradient(
+            135deg,
+            #ffffff,
+            #faf7ff,
+            #f5efff,
+            #ffffff
+        );
+}
+
+/* ==========================================
+   COMMON SECTION
+========================================== */
+
+.coding-page section:not(.coding-hero){
+
+    padding:110px 8%;
+
+}
+
+.section-title{
+
+    font-size:2.5rem;
+
+    font-weight:700;
+
+    text-align:center;
+
+    color:#111827;
+
+    margin-bottom:18px;
+}
+
+.section-title span{
+
+    color:#7c3aed;
+}
+
+.section-subtitle{
+
+    max-width:760px;
+
+    margin:auto;
+
+    text-align:center;
+
+    font-size:18px;
+
+    color:#6b7280;
+
+    line-height:1.8;
+
+    margin-bottom:70px;
+}
+
+/* ==========================================
+   CTA
+========================================== */
+
+.coding-cta{
+
+    padding:120px 8%;
+
+    text-align:center;
+
+    background:
+
+    linear-gradient(
+        135deg,
+        #7c3aed,
+        #9333ea,
+        #a855f7
+    );
+}
+
+.coding-cta-container{
+
+    max-width:900px;
+
+    margin:auto;
+
+    color:white;
+}
+
+.coding-tag{
+
+    display:inline-block;
+
+    padding:10px 22px;
+
+    border-radius:999px;
+
+    background:rgba(255,255,255,.15);
+
+    backdrop-filter:blur(12px);
+
+    font-size:15px;
+
+    font-weight:700;
+
+    margin-bottom:25px;
+}
+
+.coding-cta h2{
+
+    font-size:2.5rem;
+
+    font-weight:700;
+
+    margin-bottom:22px;
+}
+
+.coding-cta p{
+
+    font-size:18px;
+
+    line-height:1.9;
+
+    opacity:.95;
+
+    margin-bottom:45px;
+}
+
+/* ==========================================
+   BUTTONS
+========================================== */
+
+.coding-cta .coding-buttons{
+
+    display:flex;
+
+    justify-content:center;
+
+    gap:20px;
+
+    flex-wrap:wrap;
+}
+
+.start-btn{
+
+    padding:16px 38px;
+
+    border:none;
+
+    border-radius:14px;
+
+    background:white;
+
+    color:#7c3aed;
+
+    font-size:17px;
+
+    font-weight:700;
+
+    cursor:pointer;
+
+    transition:.35s;
+}
+
+.start-btn:hover{
+
+    transform:translateY(-5px);
+
+    box-shadow:
+        0 15px 35px rgba(255,255,255,.25);
+}
+
+.explore-btn{
+
+    padding:16px 38px;
+
+    border:2px solid white;
+
+    border-radius:14px;
+
+    background:transparent;
+
+    color:white;
+
+    font-size:17px;
+
+    font-weight:700;
+
+    cursor:pointer;
+
+    transition:.35s;
+}
+
+.explore-btn:hover{
+
+    background:white;
+
+    color:#7c3aed;
+
+    transform:translateY(-5px);
+}
+
+/* ==========================================
+   COMMON CARD
+========================================== */
+
+.card{
+
+    background:white;
+
+    border-radius:24px;
+
+    border:1px solid #ece8ff;
+
+    box-shadow:
+        0 15px 35px rgba(124,58,237,.08);
+
+    transition:.35s;
+}
+
+.card:hover{
+
+    transform:translateY(-8px);
+
+    border-color:#7c3aed;
+
+    box-shadow:
+        0 25px 55px rgba(124,58,237,.18);
+}
+
+/* ==========================================
+   RESPONSIVE
+========================================== */
+
+@media(max-width:992px){
+
+.coding-cta h2{
+
+font-size:2.2rem;
+
+}
+
+.section-title{
+
+font-size:2.2rem;
+
+}
+
+}
+
+@media(max-width:768px){
+
+.coding-page section:not(.coding-hero){
+
+padding:80px 25px;
+
+}
+
+.coding-cta .coding-buttons{
+
+flex-direction:column;
+
+}
+
+.start-btn,
+.explore-btn{
+
+width:100%;
+
+}
+
+.coding-cta h2{
+
+font-size:2rem;
+
+}
+
+.coding-cta p{
+
+font-size:16px;
+
+}
+
+.section-title{
+
+font-size:2rem;
+
+}
+
+.section-subtitle{
+
+font-size:16px;
+
+}
+
+}

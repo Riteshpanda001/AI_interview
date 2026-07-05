@@ -1,0 +1,404 @@
+/* ==========================================
+   RESUME HOW IT WORKS
+========================================== */
+
+.resume-work{
+    width:100%;
+    padding:110px 8%;
+
+    background:
+    linear-gradient(
+        135deg,
+        #faf7ff,
+        #ffffff,
+        #f5f3ff
+    );
+}
+
+/* ==========================================
+   HEADER
+========================================== */
+
+.resume-work-header{
+    text-align:center;
+    margin-bottom:80px;
+}
+
+.resume-work-header span{
+    display:inline-block;
+    padding:10px 22px;
+    border-radius:999px;
+    background:#ede9fe;
+    color:#7c3aed;
+    font-size:15px;
+    font-weight:700;
+    letter-spacing:1px;
+    margin-bottom:20px;
+}
+
+.resume-work-header h2{
+    font-size:2.5rem;
+    font-weight:700;
+    color:#111827;
+    margin-bottom:20px;
+    line-height:1.2;
+}
+
+.resume-work-header h2 span{
+    color:#7c3aed;
+}
+
+.resume-work-header p{
+    max-width:760px;
+    margin:auto;
+    color:#6b7280;
+    font-size:19px;
+    line-height:1.8;
+}
+
+/* ==========================================
+   GRID
+========================================== */
+
+.resume-work-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:30px;
+    margin-bottom:90px;
+}
+
+/* ==========================================
+   CARD
+========================================== */
+
+.work-card{
+    position:relative;
+
+    background:white;
+
+    padding:45px 30px;
+
+    border-radius:24px;
+
+    text-align:center;
+
+    border:1px solid rgba(124,58,237,.08);
+
+    box-shadow:
+    0 20px 45px rgba(124,58,237,.08);
+
+    transition:.35s;
+}
+
+.work-card:hover{
+
+    transform:translateY(-10px);
+
+    border-color:#7c3aed;
+
+    box-shadow:
+    0 30px 60px rgba(124,58,237,.18);
+}
+
+/* ==========================================
+   STEP NUMBER
+========================================== */
+
+.step-number{
+
+    position:absolute;
+
+    top:20px;
+    right:20px;
+
+    font-size:18px;
+
+    font-weight:800;
+
+    color:#d8b4fe;
+}
+
+/* ==========================================
+   ICON
+========================================== */
+
+.step-icon{
+
+    width:90px;
+    height:90px;
+
+    margin:auto;
+
+    margin-bottom:25px;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    border-radius:22px;
+
+    background:
+    linear-gradient(
+        135deg,
+        #7c3aed,
+        #9333ea
+    );
+
+    color:white;
+
+    font-size:42px;
+
+    box-shadow:
+    0 20px 45px rgba(124,58,237,.25);
+}
+
+/* ==========================================
+   TITLE
+========================================== */
+
+.work-card h3{
+
+    font-size:2rem;
+
+    color:#111827;
+
+    margin-bottom:18px;
+
+    font-weight:600;
+}
+
+/* ==========================================
+   DESCRIPTION
+========================================== */
+
+.work-card p{
+
+    color:#6b7280;
+
+    font-size:17px;
+
+    line-height:1.8;
+}
+
+/* ==========================================
+   TIMELINE
+========================================== */
+
+.resume-timeline{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    flex-wrap:wrap;
+
+    gap:0;
+
+    margin-top:20px;
+}
+
+.timeline-item{
+
+    display:flex;
+
+    flex-direction:column;
+
+    align-items:center;
+}
+
+.timeline-circle{
+
+    width:60px;
+    height:60px;
+
+    border-radius:50%;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    font-size:20px;
+
+    font-weight:700;
+
+    color:white;
+
+    background:
+    linear-gradient(
+        135deg,
+        #7c3aed,
+        #9333ea
+    );
+
+    box-shadow:
+    0 15px 35px rgba(124,58,237,.25);
+}
+
+.timeline-item p{
+
+    margin-top:15px;
+
+    color:#374151;
+
+    font-weight:600;
+
+    font-size:16px;
+}
+
+.timeline-line{
+
+    width:120px;
+
+    height:4px;
+
+    background:
+    linear-gradient(
+        90deg,
+        #7c3aed,
+        #c084fc
+    );
+
+    margin:0 10px;
+}
+
+/* ==========================================
+   HOVER
+========================================== */
+
+.work-card:hover .step-icon{
+
+    transform:rotate(-8deg) scale(1.05);
+
+    transition:.35s;
+}
+
+.work-card:hover h3{
+
+    color:#7c3aed;
+}
+
+/* ==========================================
+   RESPONSIVE
+========================================== */
+
+@media(max-width:1200px){
+
+.resume-work-grid{
+
+grid-template-columns:repeat(2,1fr);
+
+}
+
+.timeline-line{
+
+display:none;
+
+}
+
+.resume-timeline{
+
+gap:30px;
+
+}
+
+}
+
+@media(max-width:768px){
+
+.resume-work{
+
+padding:80px 25px;
+
+}
+
+.resume-work-header h2{
+
+font-size:2rem;
+
+}
+
+.resume-work-header p{
+
+font-size:17px;
+
+}
+
+.resume-work-grid{
+
+grid-template-columns:1fr;
+
+gap:25px;
+
+}
+
+.work-card{
+
+padding:35px 25px;
+
+}
+
+.step-icon{
+
+width:80px;
+height:80px;
+
+font-size:36px;
+
+}
+
+.work-card h3{
+
+font-size:1.6rem;
+
+font-weight:600;
+
+}
+
+.work-card p{
+
+font-size:16px;
+
+}
+
+.resume-timeline{
+
+flex-direction:column;
+
+gap:20px;
+
+}
+
+.timeline-line{
+
+display:none;
+
+}
+
+}
+
+@media(max-width:480px){
+
+.resume-work-header h2{
+
+font-size:1.8rem;
+
+}
+
+.step-icon{
+
+width:70px;
+height:70px;
+
+font-size:30px;
+
+}
+
+.work-card h3{
+
+font-size:22px;
+
+}
+
+}

@@ -1,0 +1,154 @@
+/* ==========================================
+   COMPANY QUESTIONS CSS
+   ========================================== */
+
+.company-questions-section {
+  padding: 40px 8%;
+  background: radial-gradient(circle at top left, rgba(168, 85, 247, 0.02), transparent 60%);
+}
+
+.company-questions-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* MINI HEADER */
+.section-header-mini {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.section-mini-tag {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: #ede9fe;
+  color: #7c3aed;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.section-header-mini h2 {
+  font-size: 2.5rem;
+  color: #111827;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.section-header-mini p {
+  font-size: 16px;
+  color: #6b7280;
+  max-width: 650px;
+  margin: 0 auto;
+}
+
+/* FILTER BAR */
+.questions-filter-bar {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 35px;
+}
+
+.filter-diff-btn {
+  padding: 8px 18px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+  color: #4b5563;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.filter-diff-btn:hover {
+  border-color: #cbd5e1;
+}
+
+.filter-diff-btn.active.all { background: #e0e7ff; color: #3730a3; border-color: #3730a3; }
+.filter-diff-btn.active.easy { background: #d1fae5; color: #065f46; border-color: #10b981; }
+.filter-diff-btn.active.medium { background: #fef3c7; color: #92400e; border-color: #f59e0b; }
+.filter-diff-btn.active.hard { background: #fee2e2; color: #991b1b; border-color: #ef4444; }
+
+/* QUESTIONS GRID */
+.company-questions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+.company-q-card {
+  background: #ffffff;
+  border: 1px solid #ece8ff;
+  border-radius: 20px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all 0.3s;
+  box-shadow: 0 10px 25px rgba(124, 58, 237, 0.02);
+}
+
+.company-q-card:hover {
+  transform: translateY(-5px);
+  border-color: #7c3aed;
+  box-shadow: 0 15px 35px rgba(124, 58, 237, 0.08);
+}
+
+.q-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.acceptance-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #6b7280;
+  font-family: monospace;
+}
+
+.company-q-card h3 {
+  font-size: 1.15rem;
+  color: #111827;
+  font-weight: 700;
+  margin-bottom: 10px;
+  line-height: 1.4;
+}
+
+.q-topic {
+  font-size: 13px;
+  color: #6b7280;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.q-solve-now-btn {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  color: #374151;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 10px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  width: 100%;
+  transition: all 0.3s;
+}
+
+.company-q-card:hover .q-solve-now-btn {
+  background: #7c3aed;
+  color: white;
+  border-color: transparent;
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.2);
+}
+
+.no-filtered-questions {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 40px 0;
+  color: #6b7280;
+}

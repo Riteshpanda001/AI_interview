@@ -1,0 +1,833 @@
+/* ==========================================
+   ATS HERO SECTION
+========================================== */
+
+.ats-page .ats-hero,
+.ats-hero{
+    width:100%;
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    gap:80px;
+
+    padding:40px 8%;
+
+    position:relative;
+    overflow:hidden;
+
+    background:
+    radial-gradient(circle at top left,
+    rgba(168,85,247,.18),
+    transparent 35%),
+
+    radial-gradient(circle at bottom right,
+    rgba(192,132,252,.16),
+    transparent 35%),
+
+    linear-gradient(
+    135deg,
+    #ffffff,
+    #faf7ff,
+    #f5efff,
+    #ffffff);
+}
+
+/* Decorative circles */
+
+.ats-hero::before{
+
+    content:"";
+
+    position:absolute;
+
+    width:320px;
+    height:320px;
+
+    border-radius:50%;
+
+    background:rgba(168,85,247,.08);
+
+    top:-120px;
+    left:-120px;
+
+    filter:blur(40px);
+}
+
+.ats-hero::after{
+
+    content:"";
+
+    position:absolute;
+
+    width:260px;
+    height:260px;
+
+    border-radius:50%;
+
+    background:rgba(168,85,247,.08);
+
+    right:-80px;
+    bottom:-80px;
+
+    filter:blur(35px);
+}
+
+/* ==========================================
+   LEFT SIDE
+========================================== */
+
+.ats-hero-left{
+
+    flex:1;
+
+    max-width:650px;
+
+    position:relative;
+
+    z-index:2;
+}
+
+/* Badge */
+
+.ats-badge{
+
+    display:inline-block;
+
+    padding:12px 24px;
+
+    border-radius:50px;
+
+    background:#ede9fe;
+
+    color:#7c3aed;
+
+    font-size:15px;
+
+    font-weight:700;
+
+    margin-bottom:28px;
+}
+
+/* Heading */
+
+.ats-hero-left h2{
+
+    font-size:60px;
+
+    font-weight:700;
+
+    line-height:1.15;
+
+    color:#111827;
+
+    margin-bottom:25px;
+}
+
+.ats-hero-left h2 span{
+
+    background:linear-gradient(
+    135deg,
+    #7c3aed,
+    #9333ea);
+
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+}
+
+/* Description */
+
+.ats-hero-left p{
+
+    font-size:19px;
+
+    color:#6b7280;
+
+    line-height:1.9;
+
+    margin-bottom:35px;
+}
+
+/* ==========================================
+   FEATURES
+========================================== */
+
+.ats-feature-list{
+
+    display:grid;
+
+    grid-template-columns:repeat(2,1fr);
+
+    gap:18px;
+
+    margin-bottom:45px;
+}
+
+.ats-feature{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:12px;
+
+    font-size:17px;
+
+    font-weight:600;
+
+    color:#111827;
+}
+
+.feature-check{
+
+    width:30px;
+    height:30px;
+
+    border-radius:50%;
+
+    background:linear-gradient(
+    135deg,
+    #7c3aed,
+    #9333ea);
+
+    color:#ffffff;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    font-size:15px;
+
+    box-shadow:
+    0 8px 18px rgba(124,58,237,.25);
+}
+
+/* ==========================================
+   BUTTONS
+========================================== */
+
+.ats-buttons{
+
+    display:flex;
+
+    gap:20px;
+
+    margin-top:10px;
+}
+
+.ats-primary-btn{
+
+    padding:16px 34px;
+
+    border:none;
+
+    border-radius:14px;
+
+    background:linear-gradient(
+    135deg,
+    #7c3aed,
+    #9333ea);
+
+    color:#ffffff;
+
+    font-size:16px;
+
+    font-weight:700;
+
+    cursor:pointer;
+
+    transition:.35s ease;
+
+    box-shadow:
+    0 15px 35px rgba(124,58,237,.25);
+}
+
+.ats-primary-btn:hover{
+
+    transform:translateY(-4px);
+
+    box-shadow:
+    0 20px 45px rgba(124,58,237,.35);
+}
+
+.ats-secondary-btn{
+
+    padding:16px 34px;
+
+    border:1px solid #e9ddff;
+
+    background:#ffffff;
+
+    color:#111827;
+
+    border-radius:14px;
+
+    font-size:16px;
+
+    font-weight:700;
+
+    cursor:pointer;
+
+    transition:.35s ease;
+}
+
+.ats-secondary-btn:hover{
+
+    background:linear-gradient(
+    135deg,
+    #7c3aed,
+    #9333ea);
+
+    color:#ffffff;
+
+    border-color:transparent;
+
+    transform:translateY(-4px);
+
+    box-shadow:
+    0 18px 40px rgba(124,58,237,.25);
+}
+/* ==========================================
+   RIGHT SIDE
+========================================== */
+
+.ats-hero-right{
+    flex:1;
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+    position:relative;
+    z-index:2;
+}
+
+/* ==========================================
+   IMAGE CARD
+========================================== */
+
+.ats-image-card{
+
+    position:relative;
+
+    width:100%;
+    max-width:620px;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.ats-hero-image{
+
+    width:100%;
+    max-width:560px;
+
+    border-radius:30px;
+
+    border:8px solid rgba(255,255,255,.9);
+
+    background:#ffffff;
+
+    box-shadow:
+        0 30px 70px rgba(124,58,237,.18);
+
+    animation:heroFloat 5s ease-in-out infinite;
+}
+
+/* ==========================================
+   FLOATING ATS SCORE CARD
+========================================== */
+
+.floating-score{
+
+    position:absolute;
+
+    top:40px;
+    left:-40px;
+
+    background:#ffffff;
+
+    padding:22px;
+
+    width:180px;
+
+    border-radius:22px;
+
+    text-align:center;
+
+    border:1px solid #ece8ff;
+
+    box-shadow:
+        0 20px 45px rgba(124,58,237,.15);
+
+    animation:cardFloat 4s ease-in-out infinite;
+}
+
+.floating-score h4{
+
+    color:#6b7280;
+
+    font-size:15px;
+
+    margin-bottom:10px;
+}
+
+.floating-score h2{
+
+    font-size:46px;
+
+    color:#7c3aed;
+
+    font-weight:800;
+
+    margin-bottom:10px;
+}
+
+.floating-score span{
+
+    display:block;
+
+    color:#10b981;
+
+    font-size:15px;
+
+    font-weight:700;
+}
+
+/* ==========================================
+   AI SUGGESTION CARD
+========================================== */
+
+.floating-card{
+
+    position:absolute;
+
+    bottom:40px;
+    right:-20px;
+
+    background:#ffffff;
+
+    display:flex;
+    align-items:center;
+
+    gap:18px;
+
+    padding:18px 22px;
+
+    border-radius:20px;
+
+    border:1px solid #ece8ff;
+
+    box-shadow:
+        0 20px 50px rgba(124,58,237,.15);
+
+    animation:cardFloat 5s ease-in-out infinite;
+}
+
+.floating-icon{
+
+    width:55px;
+    height:55px;
+
+    border-radius:50%;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    font-size:26px;
+
+    background:linear-gradient(
+        135deg,
+        #7c3aed,
+        #9333ea);
+
+    color:#ffffff;
+}
+
+.floating-content h4{
+
+    font-size:18px;
+
+    color:#111827;
+
+    margin-bottom:6px;
+}
+
+.floating-content p{
+
+    font-size:14px;
+
+    color:#6b7280;
+}
+
+/* ==========================================
+   STATISTICS
+========================================== */
+
+.ats-statistics{
+
+    display:flex;
+
+    justify-content:center;
+
+    gap:22px;
+
+    margin-top:30px;
+}
+
+.ats-stat-card{
+
+    flex:1;
+
+    background:#ffffff;
+
+    padding:22px;
+
+    border-radius:20px;
+
+    text-align:center;
+
+    border:1px solid #ece8ff;
+
+    box-shadow:
+        0 15px 35px rgba(124,58,237,.08);
+
+    transition:.35s ease;
+}
+
+.ats-stat-card:hover{
+
+    transform:translateY(-6px);
+
+    border-color:#7c3aed;
+
+    box-shadow:
+        0 22px 50px rgba(124,58,237,.18);
+}
+
+.ats-stat-card h2{
+
+    font-size:36px;
+
+    color:#7c3aed;
+
+    font-weight:800;
+
+    margin-bottom:10px;
+}
+
+.ats-stat-card p{
+
+    color:#6b7280;
+
+    font-size:15px;
+
+    font-weight:600;
+}
+
+/* ==========================================
+   ANIMATIONS
+========================================== */
+
+@keyframes heroFloat{
+
+    0%{
+        transform:translateY(0px);
+    }
+
+    50%{
+        transform:translateY(-12px);
+    }
+
+    100%{
+        transform:translateY(0px);
+    }
+
+}
+
+@keyframes cardFloat{
+
+    0%{
+        transform:translateY(0px);
+    }
+
+    50%{
+        transform:translateY(-10px);
+    }
+
+    100%{
+        transform:translateY(0px);
+    }
+
+}
+/* ==========================================
+   RESPONSIVE DESIGN
+========================================== */
+
+@media (max-width: 1400px) {
+
+  .ats-hero {
+    gap: 60px;
+  }
+
+  .ats-hero-left h2 {
+    font-size: 56px;
+  }
+
+  .ats-hero-image {
+    max-width: 500px;
+  }
+
+}
+
+@media (max-width: 1200px) {
+
+  .ats-page .ats-hero,
+  .ats-hero {
+    padding: 40px 6%;
+    gap: 50px;
+  }
+
+  .ats-hero-left h2 {
+    font-size: 48px;
+  }
+
+  .ats-feature-list {
+    grid-template-columns: 1fr;
+  }
+
+  .ats-statistics {
+    flex-wrap: wrap;
+  }
+
+}
+
+@media (max-width: 992px) {
+
+  .ats-page .ats-hero,
+  .ats-hero {
+
+    flex-direction: column;
+
+    text-align: center;
+
+    padding: 40px 5%;
+
+    gap: 40px;
+  }
+
+  .ats-hero-left {
+
+    max-width: 100%;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+  }
+
+  .ats-hero-right {
+
+    width: 100%;
+  }
+
+  .ats-buttons {
+
+    justify-content: center;
+
+    flex-wrap: wrap;
+  }
+
+  .ats-feature {
+
+    justify-content: center;
+  }
+
+  .floating-score {
+
+    left: 20px;
+
+    top: 20px;
+
+    width: 160px;
+  }
+
+  .floating-card {
+
+    right: 20px;
+
+    bottom: 20px;
+  }
+
+}
+
+@media (max-width: 768px) {
+
+  .ats-page .ats-hero,
+  .ats-hero {
+
+    padding: 40px 20px;
+  }
+
+  .ats-badge {
+
+    font-size: 13px;
+
+    padding: 10px 18px;
+  }
+
+  .ats-hero-left h2 {
+
+    font-size: 40px;
+
+    line-height: 1.2;
+  }
+
+  .ats-hero-left p {
+
+    font-size: 17px;
+  }
+
+  .ats-buttons {
+
+    width: 100%;
+
+    flex-direction: column;
+
+    gap: 16px;
+  }
+
+  .ats-primary-btn,
+  .ats-secondary-btn {
+
+    width: 100%;
+  }
+
+  .ats-image-card {
+
+    max-width: 100%;
+  }
+
+  .ats-hero-image {
+
+    max-width: 100%;
+  }
+
+  .floating-score {
+
+    position: relative;
+
+    left: auto;
+
+    top: auto;
+
+    margin: 20px auto;
+  }
+
+  .floating-card {
+
+    position: relative;
+
+    right: auto;
+
+    bottom: auto;
+
+    margin: 20px auto;
+
+    width: fit-content;
+  }
+
+  .ats-statistics {
+
+    flex-direction: column;
+
+    width: 100%;
+  }
+
+}
+
+@media (max-width: 576px) {
+
+  .ats-hero-left h2 {
+
+    font-size: 34px;
+  }
+
+  .ats-hero-left p {
+
+    font-size: 16px;
+  }
+
+  .feature-check {
+
+    width: 26px;
+    height: 26px;
+
+    font-size: 13px;
+  }
+
+  .ats-feature {
+
+    font-size: 15px;
+  }
+
+  .floating-score {
+
+    width: 150px;
+
+    padding: 18px;
+  }
+
+  .floating-score h2 {
+
+    font-size: 36px;
+  }
+
+  .floating-card {
+
+    flex-direction: column;
+
+    text-align: center;
+
+    gap: 10px;
+
+    padding: 18px;
+  }
+
+  .floating-icon {
+
+    width: 50px;
+    height: 50px;
+
+    font-size: 22px;
+  }
+
+  .ats-stat-card {
+
+    padding: 18px;
+  }
+
+  .ats-stat-card h2 {
+
+    font-size: 30px;
+  }
+
+}
+
+/* ==========================================
+   SMOOTH SCROLL
+========================================== */
+
+html {
+
+  scroll-behavior: smooth;
+
+}
+
+section {
+
+  scroll-margin-top: 100px;
+
+}

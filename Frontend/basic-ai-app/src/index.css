@@ -1,0 +1,463 @@
+/* ==========================================
+   GLOBAL PREMIUM DARK-CYBER THEME
+   ========================================== */
+
+/* @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --bg-dark: #05020c;
+  --bg-card: rgba(255, 255, 255, 0.03);
+  --border-light: rgba(168, 85, 247, 0.15);
+  --border-hover: rgba(168, 85, 247, 0.55);
+  --text-white: #ffffff;
+  --text-muted: #a3a3c2;
+  --accent-purple: #7c3aed;
+  --accent-blue: #2563eb;
+  --accent-gradient: linear-gradient(135deg, #7c3aed, #a855f7);
+  --cyber-grid: linear-gradient(rgba(124, 58, 237, 0.03) 1.5px, transparent 1.5px),
+                linear-gradient(90deg, rgba(124, 58, 237, 0.03) 1.5px, transparent 1.5px);
+  --radial-1: rgba(124, 58, 237, 0.15);
+  --radial-2: rgba(59, 130, 246, 0.12);
+  --border-bottom-dim: rgba(124, 58, 237, 0.08);
+  --accent-glow: rgba(124, 58, 237, 0.4);
+  --accent-glow-strong: rgba(124, 58, 237, 0.65);
+  --border-hover-glow: rgba(168, 85, 247, 0.25);
+  --text-gradient: linear-gradient(135deg, #a855f7, #60a5fa, #3b82f6);
+  --badge-bg: rgba(124, 58, 237, 0.16);
+  --badge-color: #c084fc;
+  --badge-border: rgba(168, 85, 247, 0.35);
+  --badge-shadow: rgba(124, 58, 237, 0.2);
+  --bg-navbar: rgba(5, 2, 12, 0.75);
+  --bg-dropdown: #090614;
+  --dropdown-hover: rgba(124, 58, 237, 0.12);
+  --dropdown-icon-bg: rgba(124, 58, 237, 0.25);
+  --input-bg: rgba(5, 2, 12, 0.5);
+  --input-focus-bg: rgba(5, 2, 12, 0.8);
+} */
+
+/* ==========================================
+   THEME PRESETS (DYNAMIC OVERRIDES)
+   ========================================== */
+
+/* body.theme-cyber-purple {
+  --bg-dark: #05020c;
+  --border-light: rgba(168, 85, 247, 0.15);
+  --border-hover: rgba(168, 85, 247, 0.55);
+  --accent-purple: #7c3aed;
+  --accent-blue: #2563eb;
+  --accent-gradient: linear-gradient(135deg, #7c3aed, #a855f7);
+  --cyber-grid: linear-gradient(rgba(124, 58, 237, 0.03) 1.5px, transparent 1.5px),
+                linear-gradient(90deg, rgba(124, 58, 237, 0.03) 1.5px, transparent 1.5px);
+  --radial-1: rgba(124, 58, 237, 0.15);
+  --radial-2: rgba(59, 130, 246, 0.12);
+  --border-bottom-dim: rgba(124, 58, 237, 0.08);
+  --accent-glow: rgba(124, 58, 237, 0.4);
+  --accent-glow-strong: rgba(124, 58, 237, 0.65);
+  --border-hover-glow: rgba(168, 85, 247, 0.25);
+  --text-gradient: linear-gradient(135deg, #a855f7, #60a5fa, #3b82f6);
+  --badge-bg: rgba(124, 58, 237, 0.16);
+  --badge-color: #c084fc;
+  --badge-border: rgba(168, 85, 247, 0.35);
+  --badge-shadow: rgba(124, 58, 237, 0.2);
+  --bg-navbar: rgba(5, 2, 12, 0.75);
+  --bg-dropdown: #090614;
+  --dropdown-hover: rgba(124, 58, 237, 0.12);
+  --dropdown-icon-bg: rgba(124, 58, 237, 0.25);
+  --input-bg: rgba(5, 2, 12, 0.5);
+  --input-focus-bg: rgba(5, 2, 12, 0.8);
+}
+
+body.theme-midnight-royal {
+  --bg-dark: #020817;
+  --border-light: rgba(59, 130, 246, 0.15);
+  --border-hover: rgba(59, 130, 246, 0.55);
+  --accent-purple: #2563eb;
+  --accent-blue: #06b6d4;
+  --accent-gradient: linear-gradient(135deg, #2563eb, #3b82f6);
+  --cyber-grid: linear-gradient(rgba(59, 130, 246, 0.03) 1.5px, transparent 1.5px),
+                linear-gradient(90deg, rgba(59, 130, 246, 0.03) 1.5px, transparent 1.5px);
+  --radial-1: rgba(37, 99, 235, 0.18);
+  --radial-2: rgba(6, 182, 212, 0.12);
+  --border-bottom-dim: rgba(37, 99, 235, 0.08);
+  --accent-glow: rgba(37, 99, 235, 0.4);
+  --accent-glow-strong: rgba(37, 99, 235, 0.65);
+  --border-hover-glow: rgba(59, 130, 246, 0.25);
+  --text-gradient: linear-gradient(135deg, #60a5fa, #38bdf8, #06b6d4);
+  --badge-bg: rgba(37, 99, 235, 0.16);
+  --badge-color: #93c5fd;
+  --badge-border: rgba(59, 130, 246, 0.35);
+  --badge-shadow: rgba(37, 99, 235, 0.2);
+  --bg-navbar: rgba(2, 8, 23, 0.75);
+  --bg-dropdown: #030c24;
+  --dropdown-hover: rgba(37, 99, 235, 0.12);
+  --dropdown-icon-bg: rgba(37, 99, 235, 0.25);
+  --input-bg: rgba(2, 8, 23, 0.5);
+  --input-focus-bg: rgba(2, 8, 23, 0.8);
+}
+
+body.theme-deep-emerald {
+  --bg-dark: #010a05;
+  --border-light: rgba(16, 185, 129, 0.15);
+  --border-hover: rgba(16, 185, 129, 0.55);
+  --accent-purple: #10b981;
+  --accent-blue: #14b8a6;
+  --accent-gradient: linear-gradient(135deg, #10b981, #059669);
+  --cyber-grid: linear-gradient(rgba(16, 185, 129, 0.03) 1.5px, transparent 1.5px),
+                linear-gradient(90deg, rgba(16, 185, 129, 0.03) 1.5px, transparent 1.5px);
+  --radial-1: rgba(16, 185, 129, 0.15);
+  --radial-2: rgba(20, 184, 166, 0.12);
+  --border-bottom-dim: rgba(16, 185, 129, 0.08);
+  --accent-glow: rgba(16, 185, 129, 0.4);
+  --accent-glow-strong: rgba(16, 185, 129, 0.65);
+  --border-hover-glow: rgba(16, 185, 129, 0.25);
+  --text-gradient: linear-gradient(135deg, #34d399, #2dd4bf, #0ea5e9);
+  --badge-bg: rgba(16, 185, 129, 0.16);
+  --badge-color: #6ee7b7;
+  --badge-border: rgba(16, 185, 129, 0.35);
+  --badge-shadow: rgba(16, 185, 129, 0.2);
+  --bg-navbar: rgba(1, 10, 5, 0.75);
+  --bg-dropdown: #02140a;
+  --dropdown-hover: rgba(16, 185, 129, 0.12);
+  --dropdown-icon-bg: rgba(16, 185, 129, 0.25);
+  --input-bg: rgba(1, 10, 5, 0.5);
+  --input-focus-bg: rgba(1, 10, 5, 0.8);
+}
+
+body.theme-sunset-aurora {
+  --bg-dark: #0b010a;
+  --border-light: rgba(244, 63, 94, 0.15);
+  --border-hover: rgba(244, 63, 94, 0.55);
+  --accent-purple: #f43f5e;
+  --accent-blue: #f59e0b;
+  --accent-gradient: linear-gradient(135deg, #f43f5e, #ec4899);
+  --cyber-grid: linear-gradient(rgba(244, 63, 94, 0.03) 1.5px, transparent 1.5px),
+                linear-gradient(90deg, rgba(244, 63, 94, 0.03) 1.5px, transparent 1.5px);
+  --radial-1: rgba(244, 63, 94, 0.15);
+  --radial-2: rgba(245, 158, 11, 0.1);
+  --border-bottom-dim: rgba(244, 63, 94, 0.08);
+  --accent-glow: rgba(244, 63, 94, 0.4);
+  --accent-glow-strong: rgba(244, 63, 94, 0.65);
+  --border-hover-glow: rgba(244, 63, 94, 0.25);
+  --text-gradient: linear-gradient(135deg, #f43f5e, #fb923c, #f59e0b);
+  --badge-bg: rgba(244, 63, 94, 0.16);
+  --badge-color: #fda4af;
+  --badge-border: rgba(244, 63, 94, 0.35);
+  --badge-shadow: rgba(244, 63, 94, 0.2);
+  --bg-navbar: rgba(11, 1, 10, 0.75);
+  --bg-dropdown: #170215;
+  --dropdown-hover: rgba(244, 63, 94, 0.12);
+  --dropdown-icon-bg: rgba(244, 63, 94, 0.25);
+  --input-bg: rgba(11, 1, 10, 0.5);
+  --input-focus-bg: rgba(11, 1, 10, 0.8);
+}
+
+body.theme-cosmic-nebula {
+  --bg-dark: #09040e;
+  --border-light: rgba(139, 92, 246, 0.15);
+  --border-hover: rgba(139, 92, 246, 0.55);
+  --accent-purple: #8b5cf6;
+  --accent-blue: #ec4899;
+  --accent-gradient: linear-gradient(135deg, #8b5cf6, #d946ef);
+  --cyber-grid: linear-gradient(rgba(139, 92, 246, 0.03) 1.5px, transparent 1.5px),
+                linear-gradient(90deg, rgba(139, 92, 246, 0.03) 1.5px, transparent 1.5px);
+  --radial-1: rgba(139, 92, 246, 0.18);
+  --radial-2: rgba(236, 72, 153, 0.12);
+  --border-bottom-dim: rgba(139, 92, 246, 0.08);
+  --accent-glow: rgba(139, 92, 246, 0.4);
+  --accent-glow-strong: rgba(139, 92, 246, 0.65);
+  --border-hover-glow: rgba(139, 92, 246, 0.25);
+  --text-gradient: linear-gradient(135deg, #c084fc, #f472b6, #fb7185);
+  --badge-bg: rgba(139, 92, 246, 0.16);
+  --badge-color: #d8b4fe;
+  --badge-border: rgba(139, 92, 246, 0.35);
+  --badge-shadow: rgba(139, 92, 246, 0.2);
+  --bg-navbar: rgba(9, 4, 14, 0.75);
+  --bg-dropdown: #150824;
+  --dropdown-hover: rgba(139, 92, 246, 0.12);
+  --dropdown-icon-bg: rgba(139, 92, 246, 0.25);
+  --input-bg: rgba(9, 4, 14, 0.5);
+  --input-focus-bg: rgba(9, 4, 14, 0.8);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg-dark);
+  color: var(--text-white);
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  transition: background-color 0.4s ease, border-color 0.4s ease;
+} */
+
+/* ==========================================
+   SEMANTIC SECTION AND OVERLAYS
+   ========================================== */
+
+/* section, .resume-page, .hero, .mock-hero, footer {
+  background: 
+    radial-gradient(circle at 20% 30%, var(--radial-1), transparent 45%),
+    radial-gradient(circle at 80% 70%, var(--radial-2), transparent 45%),
+    var(--cyber-grid),
+    var(--bg-dark) !important;
+  background-size: 100% 100%, 100% 100%, 50px 50px, 50px 50px !important;
+  color: var(--text-white) !important;
+  border: none !important;
+  border-bottom: 1px solid var(--border-bottom-dim) !important;
+  position: relative;
+  transition: background 0.4s ease, border-color 0.4s ease !important;
+} */
+
+/* Translucent Glassmorphic Sticky Header */
+/* .navbar {
+  background: var(--bg-navbar) !important;
+  backdrop-filter: blur(16px) !important;
+  border-bottom: 1px solid var(--border-light) !important;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5) !important;
+  transition: background 0.4s ease, border-color 0.4s ease !important;
+}
+
+.logo h2 {
+  color: var(--text-white) !important;
+}
+
+.nav-links a {
+  color: var(--text-muted) !important;
+}
+
+.nav-links a.active, .nav-links a:hover {
+  color: var(--text-white) !important;
+  background: var(--accent-gradient) !important;
+  box-shadow: 0 0 20px var(--accent-glow) !important;
+} */
+
+/* ==========================================
+   GLASSMORPHIC CARDS WITH NEON GLOWS
+   ========================================== */
+
+/* .feature-card, .ats-card, .work-card, .resume-feature-card, .template-card, 
+.suggestion-card, .ats-card.score-gauge-card, .ats-card.keyword-feedback-card,
+.faq-item-card, .testimonial-card, .prep-card, .pricing-card, .stat-card,
+.dashboard-card, .floating-card, .nested-item-card, .preview-container {
+  background: var(--bg-card) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid var(--border-light) !important;
+  box-shadow: 
+    0 15px 35px rgba(0, 0, 0, 0.5), 
+    inset 0 1px 1px rgba(255, 255, 255, 0.07) !important;
+  color: var(--text-white) !important;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
+} */
+
+/* .feature-card:hover, .ats-card:hover, .work-card:hover, .resume-feature-card:hover, 
+.template-card:hover, .suggestion-card:hover, .faq-item-card:hover, 
+.testimonial-card:hover, .prep-card:hover, .pricing-card:hover, .dashboard-card:hover {
+  transform: translateY(-8px) scale(1.02) !important;
+  border-color: var(--border-hover) !important;
+  box-shadow: 
+    0 0 25px var(--border-hover-glow),
+    0 25px 50px rgba(0, 0, 0, 0.6), 
+    inset 0 1px 1px rgba(255, 255, 255, 0.15) !important;
+} */
+
+/* ==========================================
+   TYPOGRAPHY & GLOWING GRADIENT HEADINGS
+   ========================================== */
+/* 
+h1, h2, h3, h4, h5, h6,
+section h1, section h2, section h3, section h4, section h5, section h6,
+.resume-page h1, .resume-page h2, .resume-page h3, .resume-page h4 {
+  font-family: 'Outfit', sans-serif !important;
+  font-weight: 800 !important;
+  color: var(--text-white) !important;
+  letter-spacing: -0.5px !important;
+} */
+
+/* Bold Hero Typography */
+/* .hero-left h1, .mock-hero-left h1, .resume-hero-left h1 {
+  font-size: 4rem !important;
+  font-weight: 900 !important;
+  line-height: 1.12 !important;
+  letter-spacing: -1.8px !important;
+  text-shadow: 0 0 40px var(--radial-1) !important;
+} */
+
+/* .hero-left h1 span, .mock-hero-left h1 span, .resume-hero-left h1 span, .section-title span, .logo-title span {
+  background: var(--text-gradient) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  text-shadow: none !important;
+} */
+
+
+
+/* p, span, li, label, em,
+section p, section span, section li, section label, section em,
+.resume-page p, .resume-page span, .resume-page li, .resume-page label {
+  color: var(--text-muted) !important;
+  font-weight: 500 !important;
+} */
+
+/* ==========================================
+   BUTTONS AND CTAS
+   ========================================== */
+
+/* .primary-btn, .start-btn, .build-btn, .practice-btn, .apply-sug-btn, .add-btn, .preview-action-btn.primary, .upload-btn {
+  background: var(--accent-gradient) !important;
+  box-shadow: 0 4px 20px var(--accent-glow) !important;
+  color: var(--text-white) !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.5px !important;
+  border: none !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.primary-btn:hover, .start-btn:hover, .build-btn:hover, .practice-btn:hover, .apply-sug-btn:hover, .add-btn:hover, .preview-action-btn.primary:hover, .upload-btn:hover {
+  transform: translateY(-3px) scale(1.03) !important;
+  box-shadow: 
+    0 4px 25px var(--accent-glow-strong), 
+    0 0 15px var(--border-hover-glow) !important;
+}
+
+.secondary-btn, .login-btn, .demo-btn, .template-btn, .preview-action-btn.secondary, .select-tpl-btn {
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1.5px solid var(--border-light) !important;
+  color: var(--text-white) !important;
+  font-weight: 700 !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.secondary-btn:hover, .login-btn:hover, .demo-btn:hover, .template-btn:hover, .preview-action-btn.secondary:hover, .select-tpl-btn:hover {
+  background: var(--accent-gradient) !important;
+  border-color: transparent !important;
+  color: var(--text-white) !important;
+  transform: translateY(-3px) scale(1.03) !important;
+  box-shadow: 0 8px 25px var(--accent-glow) !important;
+} */
+
+/* Ensure active tag and bullets keep color */
+/* .check-icon, .check-circle {
+  color: #ffffff !important;
+  background: var(--accent-gradient) !important;
+} */
+
+/* Glowing Badges */
+/* .hero-badge, .templates-badge, .form-badge, .preview-badge, .suggestions-badge, .ats-score-badge, .faq-badge {
+  background: var(--badge-bg) !important;
+  color: var(--badge-color) !important;
+  border: 1.5px solid var(--badge-border) !important;
+  box-shadow: 0 0 15px var(--badge-shadow) !important;
+  text-transform: uppercase !important;
+  letter-spacing: 1.2px !important;
+  font-weight: 700 !important;
+} */
+
+/* ==========================================
+   INPUTS AND FORMS
+   ========================================== */
+
+/* .input-group label {
+  color: var(--text-white) !important;
+}
+
+.input-group input, .input-group textarea {
+  background: var(--input-bg) !important;
+  border: 1.5px solid var(--border-light) !important;
+  color: var(--text-white) !important;
+  transition: all 0.3s ease !important;
+}
+
+.input-group input:focus, .input-group textarea:focus {
+  border-color: var(--accent-purple) !important;
+  background: var(--input-focus-bg) !important;
+  box-shadow: 0 0 15px var(--accent-glow) !important;
+} */
+
+/* ==========================================
+   PREVIEW DOCUMENT OVERRIDES
+   ========================================== */
+
+/* .resume-paper {
+  background: #ffffff !important;
+  color: #1f2937 !important;
+}
+
+.resume-paper h1, .resume-paper h2, .resume-paper h3, .resume-paper h4, .resume-paper h5, .resume-paper h6,
+.resume-paper p, .resume-paper span, .resume-paper li, .resume-paper label, .resume-paper em {
+  font-family: inherit !important;
+  background: none !important;
+  -webkit-text-fill-color: initial !important;
+  color: inherit !important;
+  text-shadow: none !important;
+}
+
+.resume-paper .name {
+  color: #111827 !important;
+}
+
+.resume-paper .role {
+  color: var(--tpl-accent) !important;
+}
+
+.resume-paper .preview-skill-tag {
+  background: #f3f4f6 !important;
+  color: #1f2937 !important;
+  border: none !important;
+}
+
+.resume-paper.modern .preview-skill-tag {
+  background: #ecfeff !important;
+  color: #0891b2 !important;
+}
+
+.resume-paper.academic .preview-skill-tag {
+  background: transparent !important;
+  border: 1px solid #d1d5db !important;
+} */
+
+/* ==========================================
+   FEATURE DROPDOWN SYSTEM
+   ========================================== */
+
+/* .feature-dropdown {
+  background: var(--bg-dropdown) !important;
+  border: 1.5px solid var(--border-light) !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.75) !important;
+}
+
+.dropdown-item h4 {
+  color: var(--text-white) !important;
+}
+
+.dropdown-item p {
+  color: var(--text-muted) !important;
+}
+
+.dropdown-item:hover {
+  background: var(--dropdown-hover) !important;
+}
+
+.dropdown-icon {
+  background: var(--dropdown-icon-bg) !important;
+} */
+
+/* ==========================================
+   FOOTER SECTION
+   ========================================== */
+
+/* .footer {
+  border-top: 1px solid var(--border-light) !important;
+}
+
+.footer-link, .footer-col ul li a {
+  color: var(--text-muted) !important;
+}
+
+.footer-link:hover, .footer-col ul li a:hover {
+  color: var(--text-white) !important;
+} */

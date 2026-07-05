@@ -1,0 +1,120 @@
+/* ==========================================
+   CODING FAQ CSS
+   ========================================== */
+
+.coding-faq-section {
+  padding: 40px 8% 100px;
+  background: #ffffff;
+}
+
+.coding-faq-container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* MINI HEADER */
+.section-header-mini {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.section-mini-tag {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: #ede9fe;
+  color: #7c3aed;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.section-header-mini h2 {
+  font-size: 2.5rem;
+  color: #111827;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.section-header-mini p {
+  font-size: 16px;
+  color: #6b7280;
+  max-width: 650px;
+  margin: 0 auto;
+}
+
+/* Accordion is styled identically to CompanyFAQ for design harmony */
+.faq-accordion-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.company-faq-item {
+  background: #ffffff;
+  border: 1px solid #ece8ff;
+  border-radius: 16px;
+  padding: 22px 28px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.company-faq-item:hover {
+  border-color: #0284c7;
+  box-shadow: 0 10px 25px rgba(2, 132, 199, 0.06);
+}
+
+.company-faq-item.open {
+  border-color: #7c3aed;
+  box-shadow: 0 10px 30px rgba(124, 58, 237, 0.08);
+  background: #faf8ff;
+}
+
+.faq-question-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.faq-question-row h3 {
+  font-size: 1.15rem;
+  color: #1f2937;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.faq-arrow {
+  color: #9ca3af;
+  font-size: 13px;
+  transition: transform 0.3s;
+}
+
+.faq-arrow.rotate {
+  transform: rotate(180deg);
+  color: #7c3aed;
+}
+
+.faq-answer-row {
+  margin-top: 15px;
+  border-top: 1px solid #ece8ff;
+  padding-top: 15px;
+  animation: expandFade 0.3s ease-out;
+}
+
+.faq-answer-row p {
+  font-size: 14.5px;
+  color: #4b5563;
+  line-height: 1.7;
+}
+
+@keyframes expandFade {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 768px) {
+  .faq-question-row h3 {
+    font-size: 1rem;
+  }
+}

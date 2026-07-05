@@ -1,0 +1,128 @@
+/* ==========================================
+   INTERVIEW ROUNDS CSS
+   ========================================== */
+
+.interview-rounds-section {
+  padding: 40px 8%;
+  background: #ffffff;
+}
+
+.interview-rounds-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* MINI HEADER */
+.section-header-mini {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.section-mini-tag {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: #ede9fe;
+  color: #7c3aed;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.section-header-mini h2 {
+  font-size: 2.5rem;
+  color: #111827;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.section-header-mini p {
+  font-size: 16px;
+  color: #6b7280;
+  max-width: 650px;
+  margin: 0 auto;
+}
+
+/* ROUNDS TABLE CARD */
+.rounds-table-card {
+  background: #ffffff;
+  border: 1px solid #ece8ff;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 12px 30px rgba(124, 58, 237, 0.03);
+}
+
+.rounds-table-header {
+  display: grid;
+  grid-template-columns: 1fr 100px 1.2fr 1.5fr;
+  background: #faf8ff;
+  border-bottom: 1px solid #ede9fe;
+  padding: 20px 24px;
+  font-weight: 700;
+  color: #374151;
+  font-size: 15px;
+}
+
+.rounds-table-row {
+  display: grid;
+  grid-template-columns: 1fr 100px 1.2fr 1.5fr;
+  padding: 24px;
+  border-bottom: 1px solid #f5efff;
+  align-items: center;
+  transition: background 0.3s;
+}
+
+.rounds-table-row:last-child {
+  border-bottom: none;
+}
+
+.rounds-table-row:hover {
+  background: #fafbfe;
+}
+
+.round-name-cell strong {
+  font-size: 16px;
+  color: #111827;
+}
+
+.round-duration-cell span {
+  font-size: 13px;
+  color: #6b7280;
+  font-weight: 700;
+  font-family: monospace;
+}
+
+.round-focus-cell span {
+  font-size: 14px;
+  color: #4b5563;
+  line-height: 1.5;
+  background: #f3f4f6;
+  padding: 6px 12px;
+  border-radius: 8px;
+}
+
+.round-tip-cell p {
+  font-size: 14px;
+  color: #5b21b6;
+  background: #f5efff;
+  border-left: 3px solid #7c3aed;
+  padding: 10px 14px;
+  border-radius: 0 8px 8px 0;
+  margin: 0;
+  line-height: 1.5;
+}
+
+@media (max-width: 992px) {
+  .rounds-table-header {
+    display: none; /* Hide header on mobile view */
+  }
+  .rounds-table-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 20px;
+    border-bottom: 1px solid #ede9fe;
+  }
+  .round-focus-cell span {
+    display: inline-block;
+  }
+}

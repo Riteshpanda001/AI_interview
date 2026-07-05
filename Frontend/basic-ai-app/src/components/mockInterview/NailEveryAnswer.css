@@ -1,0 +1,172 @@
+/* ==========================
+   Nail Every Answer
+========================== */
+
+.nail-answer{
+
+    padding:100px 8%;
+
+}
+
+.nail-container{
+
+    display:grid;
+
+    grid-template-columns:1fr 1fr;
+
+    align-items:center;
+
+    gap:70px;
+}
+
+/* Left */
+
+.nail-content{
+
+    animation:fadeLeft .8s ease;
+}
+
+.nail-content h2{
+
+    font-size:40px;
+
+    line-height:1.2;
+
+    color:#111827;
+
+    margin-bottom:25px;
+
+    font-weight:700;
+}
+
+.nail-content p{
+
+    font-size:19px;
+
+    color:#6b7280;
+
+    line-height:1.9;
+
+    margin-bottom:35px;
+}
+
+.nail-features{
+
+    display:grid;
+
+    grid-template-columns:repeat(2,1fr);
+
+    gap:18px;
+
+    margin-bottom:40px;
+}
+
+.nail-features div{
+
+    font-size:16px;
+
+    font-weight:500;
+
+    color:#111827;
+}
+
+/* Right */
+
+.nail-image{
+
+    display:flex;
+
+    justify-content:center;
+
+    animation:fadeRight .8s ease;
+}
+
+.nail-image img{
+
+    width:100%;
+
+    max-width:720px;
+
+    border-radius:25px;
+
+    box-shadow:0 20px 45px rgba(124,58,237,.18);
+
+    transition:.4s;
+}
+
+.nail-image img:hover{
+
+    transform:scale(1.03);
+}
+
+/* Animation */
+
+@keyframes fadeLeft{
+
+from{
+
+opacity:0;
+
+transform:translateX(-60px);
+
+}
+
+to{
+
+opacity:1;
+
+transform:translateX(0);
+
+}
+
+}
+
+@keyframes fadeRight{
+
+from{
+
+opacity:0;
+
+transform:translateX(60px);
+
+}
+
+to{
+
+opacity:1;
+
+transform:translateX(0);
+
+}
+
+}
+
+/* Responsive */
+
+@media(max-width:1000px){
+
+.nail-container{
+
+grid-template-columns:1fr;
+
+}
+
+.nail-content{
+
+text-align:center;
+
+}
+
+.nail-content h2{
+
+font-size:40px;
+
+}
+
+.nail-features{
+
+grid-template-columns:1fr;
+
+}
+
+}

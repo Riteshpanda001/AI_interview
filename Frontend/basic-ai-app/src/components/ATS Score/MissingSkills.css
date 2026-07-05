@@ -1,0 +1,140 @@
+.missing-skills-container {
+  background: #ffffff;
+  border: 1px solid #ece8ff;
+  border-radius: 16px;
+  padding: 32px;
+  max-width: 800px;
+  margin: 30px auto;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 15px 40px rgba(124, 58, 237, 0.08);
+}
+
+.skills-header h2 {
+  font-size: 1.6rem;
+  color: #111827;
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+
+.skills-header p {
+  color: #9ca3af;
+  font-size: 0.95rem;
+  margin-bottom: 24px;
+}
+
+.skills-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.skill-card {
+  background: #f9fafb;
+  border: 1px solid #ece8ff;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.skill-card:hover {
+  transform: translateY(-2px);
+  background: #f9fafb;
+}
+
+.skill-card.added {
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.skill-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 120px;
+}
+
+.skill-cat {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.importance-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+  text-align: center;
+  width: fit-content;
+}
+
+.importance-badge.high {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+.importance-badge.medium {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+}
+
+.skill-info {
+  flex: 1;
+}
+
+.skill-info h3 {
+  font-size: 1.1rem;
+  color: #111827;
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+
+.skill-info p {
+  font-size: 0.85rem;
+  color: #9ca3af;
+  line-height: 1.4;
+}
+
+.add-skill-action-btn {
+  background: #ffffff;
+  border: 1px solid #ece8ff;
+  color: #374151;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.add-skill-action-btn:hover {
+  background: #7c3aed;
+  border-color: #7c3aed;
+  color: white;
+}
+
+.add-skill-action-btn.active {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: #10b981;
+  color: #10b981;
+}
+
+@media (max-width: 650px) {
+  .skill-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .add-skill-action-btn {
+    align-self: stretch;
+    text-align: center;
+  }
+}
