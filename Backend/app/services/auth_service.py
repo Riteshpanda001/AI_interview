@@ -4,6 +4,7 @@ from app.schemas.auth_schema import UserRegisterRequest, UserLoginRequest
 from app.schemas.user_schema import UserUpdateRequest
 from app.services.jwt_service import JWTService
 from app.services.otp_service import OTPService
+from app.services.email_service import EmailService
 from app.constants import ERROR_INVALID_CREDENTIALS, ERROR_USER_NOT_FOUND, ROLE_USER, PLAN_FREE
 from bson import ObjectId
 from datetime import datetime
@@ -42,7 +43,7 @@ class AuthService:
             "full_name": request.full_name,
             "role": ROLE_USER,
             "plan_type": PLAN_FREE,
-            "is_active": True,
+            "is_active": False, # Requires OTP verification first
             "created_at": datetime.utcnow(),
             "updated_at": datetime.utcnow()
         }
@@ -61,6 +62,14 @@ class AuthService:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail=ERROR_INVALID_CREDENTIALS
+            )
+            
+        if not user.get("is_active", True):
+            # Account exists but not verified. Resend OTP and notify
+            await OTPService.send_otp(email)
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Account not verified. A verification code has been sent to your email. Please verify."
             )
             
         token = JWTService.create_access_token({"sub": str(user["_id"])})
@@ -87,6 +96,40 @@ class AuthService:
                 detail=ERROR_USER_NOT_FOUND
             )
             
+        # Activate user in database
+        await db["users"].update_one(
+            {"_id": user["_id"]},
+            {"$set": {"is_active": True, "updated_at": datetime.utcnow()}}
+        )
+        
+        # Send confirmation email
+        subject = "Welcome to PreNovaAi - Account Created Successfully!"
+        html_content = f"""
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 30px; border: 1px solid rgba(124, 58, 237, 0.2); border-radius: 12px; background-color: #05020c; color: #ffffff; box-shadow: 0 4px 20px rgba(124, 58, 237, 0.15);">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <h1 style="color: #c084fc; margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -0.5px;">PreNovaAi</h1>
+                <p style="color: #a3a3c2; margin: 5px 0 0 0; font-size: 14px;">Next-Gen AI Interview Preparation</p>
+            </div>
+            <hr style="border: 0; border-top: 1px solid rgba(168, 85, 247, 0.15); margin: 20px 0;" />
+            <h2 style="color: #ffffff; margin-top: 0; font-size: 20px; font-weight: 600;">Welcome aboard, {user.get("full_name", "User")}! 🚀</h2>
+            <p style="color: #a3a3c2; font-size: 15px; line-height: 1.6;">Your account on <b>PreNovaAi</b> has been successfully created and verified.</p>
+            <p style="color: #a3a3c2; font-size: 15px; line-height: 1.6;">You now have full access to our complete AI-powered interview preparation platform, which includes:</p>
+            <ul style="color: #a3a3c2; font-size: 15px; line-height: 1.6; padding-left: 20px;">
+                <li style="margin-bottom: 8px;"><strong style="color: #ffffff;">AI Mock Interviews:</strong> Real-time behavioral & technical practice with smart grading.</li>
+                <li style="margin-bottom: 8px;"><strong style="color: #ffffff;">ATS Resume Scoring:</strong> Instant analysis and optimization recommendations.</li>
+                <li style="margin-bottom: 8px;"><strong style="color: #ffffff;">Coding Practice Sandbox:</strong> Solve problems and get direct feedback on code quality.</li>
+                <li style="margin-bottom: 8px;"><strong style="color: #ffffff;">Company Preparation:</strong> Targeted questions for top tech firms.</li>
+            </ul>
+            <div style="text-align: center; margin: 35px 0;">
+                <a href="http://localhost:5173/login" style="background: linear-gradient(135deg, #7c3aed, #a855f7); color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3); display: inline-block;">Start Preparing</a>
+            </div>
+            <p style="color: #a3a3c2; font-size: 14px; line-height: 1.6; margin-top: 30px;">Happy Prep!<br/>The PreNovaAi Team</p>
+            <hr style="border: 0; border-top: 1px solid rgba(168, 85, 247, 0.15); margin: 20px 0;" />
+            <p style="color: #52527a; font-size: 11px; text-align: center; margin: 0;">This email was sent by PreNovaAi. Please do not reply directly to this mail.</p>
+        </div>
+        """
+        await EmailService.send_email(email, subject, html_content)
+        
         token = JWTService.create_access_token({"sub": str(user["_id"])})
         return {
             "access_token": token,

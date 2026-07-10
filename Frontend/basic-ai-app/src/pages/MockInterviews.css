@@ -1,0 +1,919 @@
+/* ==========================================================
+   MOCK INTERVIEW PAGE
+========================================================== */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+.mockInterview{
+
+    display:flex;
+
+    width:100%;
+
+    min-height:100vh;
+
+    background:#f5f7fb;
+
+    font-family:'Poppins',sans-serif;
+
+    overflow:hidden;
+}
+
+/* ==========================================================
+   SIDEBAR
+========================================================== */
+
+.sidebar{
+
+    width:280px;
+
+    min-height:100vh;
+
+    background:linear-gradient(
+        180deg,
+        #6d28d9,
+        #7c3aed,
+        #8b5cf6
+    );
+
+    color:#ffffff;
+
+    display:flex;
+
+    flex-direction:column;
+
+    justify-content:flex-start;
+
+    padding:30px 20px;
+
+    box-shadow:6px 0 20px rgba(0,0,0,.15);
+}
+
+/* ==========================================================
+   LOGO
+========================================================== */
+
+.logo{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:15px;
+
+    margin-bottom:45px;
+}
+
+.logo svg{
+
+    font-size:38px;
+
+    color:#ffffff;
+}
+
+.logo h2{
+
+    font-size:24px;
+
+    font-weight:700;
+
+    letter-spacing:.5px;
+}
+
+/* ==========================================================
+   MENU BUTTONS
+========================================================== */
+
+.menuBtn{
+
+    width:100%;
+
+    display:flex;
+
+    align-items:center;
+
+    gap:14px;
+
+    padding:15px 18px;
+
+    margin-bottom:15px;
+
+    border:none;
+
+    border-radius:14px;
+
+    background:transparent;
+
+    color:#ffffff;
+
+    font-size:16px;
+
+    font-weight:600;
+
+    cursor:pointer;
+
+    transition:.35s ease;
+}
+
+.menuBtn svg{
+
+    font-size:18px;
+}
+
+.menuBtn:hover{
+
+    background:rgba(255,255,255,.15);
+
+    transform:translateX(6px);
+}
+
+.menuBtn:focus{
+
+    outline:none;
+
+    background:#ffffff;
+
+    color:#6d28d9;
+}
+
+/* ==========================================================
+   LOGOUT BUTTON
+========================================================== */
+
+.logoutBtn{
+
+    margin-top:auto;
+
+    width:100%;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    gap:12px;
+
+    padding:16px;
+
+    border:none;
+
+    border-radius:14px;
+
+    background:#ef4444;
+
+    color:#ffffff;
+
+    font-size:16px;
+
+    font-weight:700;
+
+    cursor:pointer;
+
+    transition:.35s ease;
+}
+
+.logoutBtn:hover{
+
+    background:#dc2626;
+
+    transform:translateY(-3px);
+
+    box-shadow:0 12px 25px rgba(220,38,38,.35);
+}
+
+.logoutBtn svg{
+
+    font-size:18px;
+}
+/* ==========================================================
+   MAIN CONTENT
+========================================================== */
+
+.mockContent{
+
+    flex:1;
+
+    padding:40px;
+
+    overflow-y:auto;
+
+    background:#f8fafc;
+
+}
+
+/* ==========================================================
+   DASHBOARD
+========================================================== */
+
+.dashboard{
+
+    width:100%;
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:35px;
+
+}
+
+/* ==========================================================
+   WELCOME CARD
+========================================================== */
+
+.welcomeCard{
+
+    background:linear-gradient(
+        135deg,
+        #7c3aed,
+        #8b5cf6
+    );
+
+    border-radius:25px;
+
+    padding:45px;
+
+    color:#ffffff;
+
+    box-shadow:0 20px 45px rgba(124,58,237,.25);
+
+}
+
+.welcomeCard h1{
+
+    font-size:40px;
+
+    margin-bottom:15px;
+
+    font-weight:700;
+
+}
+
+.welcomeCard p{
+
+    font-size:18px;
+
+    line-height:1.8;
+
+    opacity:.95;
+
+    max-width:700px;
+
+}
+
+/* ==========================================================
+   PRACTICE BUTTON
+========================================================== */
+
+.practiceBtn{
+
+    margin-top:35px;
+
+    padding:16px 35px;
+
+    border:none;
+
+    border-radius:15px;
+
+    background:#ffffff;
+
+    color:#6d28d9;
+
+    font-size:18px;
+
+    font-weight:700;
+
+    cursor:pointer;
+
+    transition:.35s;
+
+}
+
+.practiceBtn:hover{
+
+    transform:translateY(-4px);
+
+    background:#f3f4f6;
+
+    box-shadow:0 15px 35px rgba(255,255,255,.35);
+
+}
+
+/* ==========================================================
+   STATISTICS
+========================================================== */
+
+.statsGrid{
+
+    display:grid;
+
+    grid-template-columns:repeat(4,1fr);
+
+    gap:25px;
+
+}
+
+.statCard{
+
+    background:#ffffff;
+
+    border-radius:20px;
+
+    padding:30px;
+
+    box-shadow:0 10px 25px rgba(0,0,0,.08);
+
+    transition:.35s;
+
+    text-align:center;
+
+}
+
+.statCard:hover{
+
+    transform:translateY(-8px);
+
+}
+
+.statCard h2{
+
+    font-size:34px;
+
+    color:#7c3aed;
+
+    margin-bottom:10px;
+
+}
+
+.statCard p{
+
+    color:#6b7280;
+
+    font-size:16px;
+
+}
+
+/* ==========================================================
+   FEATURE CARDS
+========================================================== */
+
+.featureGrid{
+
+    display:grid;
+
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+
+    gap:25px;
+
+}
+
+.featureCard{
+
+    background:#ffffff;
+
+    border-radius:20px;
+
+    padding:30px;
+
+    transition:.35s;
+
+    box-shadow:0 10px 25px rgba(0,0,0,.08);
+
+}
+
+.featureCard:hover{
+
+    transform:translateY(-8px);
+
+    box-shadow:0 18px 40px rgba(124,58,237,.15);
+
+}
+
+.featureCard svg{
+
+    font-size:42px;
+
+    color:#7c3aed;
+
+    margin-bottom:18px;
+
+}
+
+.featureCard h3{
+
+    font-size:22px;
+
+    margin-bottom:12px;
+
+    color:#111827;
+
+}
+
+.featureCard p{
+
+    color:#6b7280;
+
+    line-height:1.7;
+
+}
+
+/* ==========================================================
+   SECTION TITLE
+========================================================== */
+
+.sectionTitle{
+
+    font-size:28px;
+
+    font-weight:700;
+
+    color:#111827;
+
+    margin-bottom:20px;
+
+}
+/* ==========================================================
+   AI INTERVIEW ROOM
+========================================================== */
+
+.interviewRoom{
+
+    width:100%;
+
+    background:#ffffff;
+
+    border-radius:25px;
+
+    padding:35px;
+
+    box-shadow:0 15px 35px rgba(0,0,0,.08);
+
+}
+
+.interviewHeader{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    margin-bottom:30px;
+
+    padding-bottom:20px;
+
+    border-bottom:1px solid #e5e7eb;
+
+}
+
+.interviewHeader h2{
+
+    font-size:30px;
+
+    color:#111827;
+
+}
+
+.aiStatus{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+    color:#10b981;
+
+    font-weight:600;
+
+}
+
+.aiDot{
+
+    width:12px;
+
+    height:12px;
+
+    border-radius:50%;
+
+    background:#10b981;
+
+    animation:pulse 1.5s infinite;
+
+}
+
+/* ==========================================================
+   QUESTION CARD
+========================================================== */
+
+.questionCard{
+
+    background:#f8fafc;
+
+    border-left:6px solid #7c3aed;
+
+    border-radius:18px;
+
+    padding:30px;
+
+    margin-bottom:30px;
+
+}
+
+.questionCard h3{
+
+    color:#7c3aed;
+
+    margin-bottom:15px;
+
+}
+
+.questionCard p{
+
+    font-size:18px;
+
+    line-height:1.8;
+
+    color:#374151;
+
+}
+
+/* ==========================================================
+   ANSWER BOX
+========================================================== */
+
+.answerBox textarea{
+
+    width:100%;
+
+    min-height:180px;
+
+    padding:20px;
+
+    border:2px solid #e5e7eb;
+
+    border-radius:18px;
+
+    resize:none;
+
+    font-size:16px;
+
+    outline:none;
+
+    transition:.3s;
+
+}
+
+.answerBox textarea:focus{
+
+    border-color:#7c3aed;
+
+    box-shadow:0 0 0 4px rgba(124,58,237,.12);
+
+}
+
+/* ==========================================================
+   INTERVIEW BUTTONS
+========================================================== */
+
+.interviewActions{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    margin-top:30px;
+
+}
+
+.primaryBtn{
+
+    padding:15px 35px;
+
+    border:none;
+
+    border-radius:12px;
+
+    background:#7c3aed;
+
+    color:#ffffff;
+
+    font-size:16px;
+
+    font-weight:700;
+
+    cursor:pointer;
+
+    transition:.3s;
+
+}
+
+.primaryBtn:hover{
+
+    background:#6d28d9;
+
+    transform:translateY(-3px);
+
+}
+
+.secondaryBtn{
+
+    padding:15px 30px;
+
+    border:none;
+
+    border-radius:12px;
+
+    background:#e5e7eb;
+
+    cursor:pointer;
+
+    font-weight:600;
+
+}
+
+.secondaryBtn:hover{
+
+    background:#d1d5db;
+
+}
+
+/* ==========================================================
+   TIMER
+========================================================== */
+
+.timer{
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    width:120px;
+
+    height:120px;
+
+    margin:30px auto;
+
+    border-radius:50%;
+
+    background:#7c3aed;
+
+    color:#ffffff;
+
+    font-size:30px;
+
+    font-weight:700;
+
+    box-shadow:0 15px 30px rgba(124,58,237,.3);
+
+}
+
+/* ==========================================================
+   HISTORY
+========================================================== */
+
+.historyCard{
+
+    background:#ffffff;
+
+    padding:25px;
+
+    border-radius:20px;
+
+    margin-bottom:20px;
+
+    box-shadow:0 8px 20px rgba(0,0,0,.08);
+
+}
+
+.historyCard h3{
+
+    color:#111827;
+
+    margin-bottom:8px;
+
+}
+
+.historyCard p{
+
+    color:#6b7280;
+
+}
+
+/* ==========================================================
+   SETTINGS
+========================================================== */
+
+.settingsCard{
+
+    background:#ffffff;
+
+    padding:35px;
+
+    border-radius:20px;
+
+    box-shadow:0 10px 25px rgba(0,0,0,.08);
+
+}
+
+.settingsCard h2{
+
+    margin-bottom:25px;
+
+    color:#111827;
+
+}
+
+.settingItem{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    padding:18px 0;
+
+    border-bottom:1px solid #f1f5f9;
+
+}
+
+.settingItem:last-child{
+
+    border:none;
+
+}
+
+/* ==========================================================
+   SCROLLBAR
+========================================================== */
+
+.mockContent::-webkit-scrollbar{
+
+    width:8px;
+
+}
+
+.mockContent::-webkit-scrollbar-thumb{
+
+    background:#7c3aed;
+
+    border-radius:20px;
+
+}
+
+.mockContent::-webkit-scrollbar-track{
+
+    background:#f1f5f9;
+
+}
+
+/* ==========================================================
+   ANIMATION
+========================================================== */
+
+@keyframes pulse{
+
+    0%{
+
+        transform:scale(1);
+
+        opacity:1;
+
+    }
+
+    50%{
+
+        transform:scale(1.4);
+
+        opacity:.6;
+
+    }
+
+    100%{
+
+        transform:scale(1);
+
+        opacity:1;
+
+    }
+
+}
+
+/* ==========================================================
+   RESPONSIVE
+========================================================== */
+
+@media(max-width:1100px){
+
+    .sidebar{
+
+        width:230px;
+
+    }
+
+    .statsGrid{
+
+        grid-template-columns:repeat(2,1fr);
+
+    }
+
+}
+
+@media(max-width:768px){
+
+    .mockInterview{
+
+        flex-direction:column;
+
+    }
+
+    .sidebar{
+
+        width:100%;
+
+        min-height:auto;
+
+        padding:20px;
+
+    }
+
+    .mockContent{
+
+        padding:20px;
+
+    }
+
+    .statsGrid{
+
+        grid-template-columns:1fr;
+
+    }
+
+    .featureGrid{
+
+        grid-template-columns:1fr;
+
+    }
+
+    .interviewActions{
+
+        flex-direction:column;
+
+        gap:15px;
+
+    }
+
+    .primaryBtn,
+    .secondaryBtn{
+
+        width:100%;
+
+    }
+
+}
+
+@media(max-width:480px){
+
+    .welcomeCard{
+
+        padding:25px;
+
+    }
+
+    .welcomeCard h1{
+
+        font-size:28px;
+
+    }
+
+    .interviewHeader{
+
+        flex-direction:column;
+
+        gap:15px;
+
+        align-items:flex-start;
+
+    }
+
+    .timer{
+
+        width:90px;
+
+        height:90px;
+
+        font-size:22px;
+
+    }
+
+}

@@ -1,16 +1,19 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import "./MockHero.css";
 
 import heroImage from "../../assets/hero.png";
 
 const MockHero = () => {
+  const navigate = useNavigate();
+
   return (
     <section className="mock-hero">
 
       <div className="mock-hero-left">
         <h2>
           Ace Interviews with our
-          <span>AI Mock Interview</span>
+          <span> AI Mock Interview</span>
           Platform
         </h2>
 
@@ -26,7 +29,10 @@ const MockHero = () => {
 
         <div className="hero-buttons">
 
-          <button className="practice-btn">
+          <button 
+            className="practice-btn"
+            onClick={() => navigate("/mock-interviews")}
+          >
             Practice Now
           </button>
 

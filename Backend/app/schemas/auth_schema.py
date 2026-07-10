@@ -23,3 +23,7 @@ class OTPVerifyRequest(BaseModel):
 class OTPResponse(BaseModel):
     success: bool
     message: str
+
+class EmailCheckRequest(BaseModel):
+    email: EmailStr
+

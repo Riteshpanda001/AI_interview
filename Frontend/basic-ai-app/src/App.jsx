@@ -5,6 +5,7 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import MockInterview from "./pages/MockInterview";
+import MockInterviews from "./pages/MockInterviews";
 import ResumeBuilder from "./pages/ResumeBuilder";
 import CodingPractice from "./pages/CodingPractice";
 import CompanyPreparation from "./pages/CompanyPreparation";
@@ -24,6 +25,7 @@ function App() {
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/mock-interview" element={<MockInterview />} />
+      <Route path="/mock-interviews" element={<MockInterviews />} />
       <Route path="/resume-builder" element={<ResumeBuilder />} />
       <Route path="/coding-practice" element={<CodingPractice />} />
       <Route path="/company-preparation" element={<CompanyPreparation />} />

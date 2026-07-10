@@ -1,10 +1,15 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from app.schemas.auth_schema import UserRegisterRequest, UserLoginRequest, TokenResponse, OTPVerifyRequest, OTPResponse
+from app.schemas.auth_schema import UserRegisterRequest, UserLoginRequest, TokenResponse, OTPVerifyRequest, OTPResponse, EmailCheckRequest
 from app.dependencies import get_db
 from app.services.auth_service import AuthService
 from app.services.jwt_service import JWTService
 
 router = APIRouter()
+
+@router.post("/check-email")
+async def check_email(request: EmailCheckRequest, db = Depends(get_db)):
+    user = await db["users"].find_one({"email": request.email})
+    return {"exists": user is not None}
 
 @router.post("/register", response_model=OTPResponse, status_code=status.HTTP_201_CREATED)
 async def register(request: UserRegisterRequest, db = Depends(get_db)):

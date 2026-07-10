@@ -8,10 +8,21 @@ class EmailService:
     async def send_email(to_email: str, subject: str, html_content: str):
         # In a real system, you would connect to SMTP server
         # For boilerplate / local dev, we will log to console to prevent blocking
-        print(f"--- Sending Email To: {to_email} ---")
-        print(f"Subject: {subject}")
-        print(f"Content: {html_content}")
-        print("---------------------------------")
+        try:
+            print(f"--- Sending Email To: {to_email} ---")
+            print(f"Subject: {subject}")
+            print(f"Content: {html_content}")
+            print("---------------------------------")
+        except Exception:
+            try:
+                safe_subject = subject.encode('ascii', errors='replace').decode('ascii')
+                safe_content = html_content.encode('ascii', errors='replace').decode('ascii')
+                print(f"--- Sending Email To: {to_email} (Fallback: Non-ASCII characters replaced) ---")
+                print(f"Subject: {safe_subject}")
+                print(f"Content: {safe_content}")
+                print("---------------------------------")
+            except Exception:
+                pass
         
         # SMTP logic commented out for mock execution:
         """

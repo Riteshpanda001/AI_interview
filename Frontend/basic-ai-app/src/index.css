@@ -458,6 +458,207 @@ section p, section span, section li, section label, section em,
   color: var(--text-muted) !important;
 }
 
-.footer-link:hover, .footer-col ul li a:hover {
+/* .footer-link:hover, .footer-col ul li a:hover {
   color: var(--text-white) !important;
 } */
+
+/* ==========================================
+   PROFILE DASHBOARD SECTION
+   ========================================== */
+.profile-dashboard-section {
+  padding: 120px 40px 60px;
+  background: var(--bg-dark);
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-image: var(--cyber-grid);
+}
+
+.profile-dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  gap: 40px;
+  width: 1200px;
+  max-width: 100%;
+}
+
+.profile-summary-card, .profile-edit-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--border-light);
+  border-radius: 24px;
+  padding: 40px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.profile-summary-card:hover, .profile-edit-card:hover {
+  border-color: var(--border-hover);
+  box-shadow: 0 8px 32px var(--border-hover-glow);
+}
+
+.profile-summary-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.profile-avatar-large {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #7c3aed, #a855f7);
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 36px;
+  font-weight: 800;
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 20px;
+  box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4);
+}
+
+.profile-summary-card h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 6px;
+}
+
+.profile-email {
+  color: var(--text-muted);
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+.profile-meta-badges {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 30px;
+}
+
+.profile-badge {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: 1px solid var(--badge-border);
+}
+
+.profile-badge.role {
+  background: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+.profile-badge.plan {
+  background: var(--badge-bg);
+  color: var(--badge-color);
+}
+
+.profile-details-list {
+  width: 100%;
+  border-top: 1px solid var(--border-light);
+  padding-top: 20px;
+}
+
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  font-size: 14px;
+}
+
+.detail-item:last-child {
+  border-bottom: none;
+}
+
+.detail-label {
+  color: var(--text-muted);
+}
+
+.detail-value {
+  color: white;
+  font-weight: 600;
+}
+
+.detail-value.text-green {
+  color: #10b981;
+}
+
+.profile-edit-card h3 {
+  font-size: 22px;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 30px;
+  border-bottom: 1px solid var(--border-light);
+  padding-bottom: 12px;
+}
+
+.profile-edit-card .input-group label {
+  color: var(--text-muted);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.profile-edit-card .input-group input {
+  background: var(--input-bg);
+  border: 1px solid var(--border-light);
+  color: white;
+  border-radius: 12px;
+  padding: 14px;
+  width: 100%;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.profile-edit-card .input-group input:focus {
+  border-color: var(--border-hover);
+  background: var(--input-focus-bg);
+  box-shadow: 0 0 10px rgba(168, 85, 247, 0.15);
+}
+
+.profile-save-btn {
+  width: 100%;
+  padding: 15px;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 700;
+  color: white;
+  background: var(--accent-gradient);
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(124, 58, 237, 0.2);
+  transition: all 0.3s ease;
+  margin-top: 10px;
+}
+
+.profile-save-btn:hover {
+  opacity: 0.9;
+  box-shadow: 0 4px 20px rgba(124, 58, 237, 0.45);
+  transform: translateY(-2px);
+}
+
+.profile-save-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+@media (max-width: 900px) {
+  .profile-dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+  .profile-dashboard-section {
+    padding: 100px 20px 40px;
+  }
+}
+

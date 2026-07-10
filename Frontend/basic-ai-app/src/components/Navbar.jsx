@@ -3,10 +3,12 @@ import "./Navbar.css";
 import logo from "../assets/prenova_ai_logo.png";
 import FeatureDropdown from "./FeatureDropdown";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 const Navbar = () => {
 
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
 
   // Active Menu
   const [active, setActive] = useState("Home");
@@ -100,23 +102,44 @@ const Navbar = () => {
 
       </ul>
 
-      {/* ================= Buttons ================= */}
-      <div className="nav-buttons">
+      {/* ================= Buttons / Profile ================= */}
+      <div className="nav-buttons-container">
+        {user ? (
+          <div className="navbar-profile-box">
+            <div className="navbar-avatar">
+              {user.full_name ? user.full_name.charAt(0).toUpperCase() : "U"}
+            </div>
+            <div className="navbar-profile-details">
+              <span className="navbar-username">{user.full_name}</span>
+              <span className="navbar-tier">{user.plan_type.toUpperCase()}</span>
+            </div>
+            <button
+              className="navbar-logout-btn"
+              onClick={() => {
+                logout();
+                navigate("/login");
+              }}
+            >
+              Logout
+            </button>
+          </div>
+        ) : (
+          <div className="nav-buttons">
+            <button
+              className="navbar-login-btn"
+              onClick={() => navigate("/login")}
+            >
+              Login
+            </button>
 
-        <button
-          className="navbar-login-btn"
-          onClick={() => navigate("/login")}
-        >
-          Login
-        </button>
-
-        <button
-          className="navbar-start-btn"
-          onClick={() => navigate("/register")}
-        >
-          Get Started
-        </button>
-
+            <button
+              className="navbar-start-btn"
+              onClick={() => navigate("/register")}
+            >
+              Get Started
+            </button>
+          </div>
+        )}
       </div>
 
     </nav>
