@@ -4,6 +4,7 @@ import { Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import DashboardPage from "./pages/DashboardPage";
 import MockInterview from "./pages/MockInterview";
 import MockInterviews from "./pages/MockInterviews";
 import ResumeBuilder from "./pages/ResumeBuilder";
@@ -24,6 +25,7 @@ function App() {
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/dashboard" element={<DashboardPage />} />
       <Route path="/mock-interview" element={<MockInterview />} />
       <Route path="/mock-interviews" element={<MockInterviews />} />
       <Route path="/resume-builder" element={<ResumeBuilder />} />

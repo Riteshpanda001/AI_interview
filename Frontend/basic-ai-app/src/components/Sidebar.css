@@ -1,0 +1,217 @@
+/* ================================================
+   SIDEBAR — Premium Purple Design
+   Matches the screenshot: dark purple bg, white text,
+   icon nav items, red logout button at bottom.
+================================================ */
+
+/* ── Shell ── */
+.sidebar {
+  width: 260px;
+  min-width: 260px;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(160deg, #5b21b6 0%, #7c3aed 50%, #6d28d9 100%);
+  box-shadow: 4px 0 30px rgba(124, 58, 237, 0.35);
+  z-index: 100;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+/* ── Logo area ── */
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 28px 24px 20px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.sidebar-logo:hover {
+  opacity: 0.85;
+}
+
+.sidebar-logo-img {
+  height: 52px;
+  width: auto;
+  /* Invert to white since logo is dark on a purple bg */
+  filter: brightness(0) invert(1);
+  object-fit: contain;
+}
+
+/* ── User mini-profile card ── */
+.sidebar-user-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 16px 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.sidebar-user-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 800;
+  flex-shrink: 0;
+  letter-spacing: 0.5px;
+}
+
+.sidebar-user-info {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  gap: 2px;
+}
+
+.sidebar-user-name {
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar-user-email {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Divider ── */
+.sidebar-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.12);
+  margin: 12px 20px;
+}
+
+/* ── Section label ── */
+.sidebar-section-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+  padding: 0 20px 10px;
+}
+
+/* ── Nav ── */
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 12px;
+}
+
+/* ── Nav Button (shared by nav items AND settings) ── */
+.sidebar-nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 13px 16px;
+  border: none;
+  border-radius: 12px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  text-align: left;
+  position: relative;
+  font-family: 'Poppins', 'Segoe UI', sans-serif;
+}
+
+.sidebar-nav-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  transform: translateX(3px);
+}
+
+.sidebar-nav-btn.active {
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* ── Nav Icon ── */
+.sidebar-nav-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  flex-shrink: 0;
+  opacity: 0.9;
+}
+
+/* ── Active indicator dot ── */
+.sidebar-active-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #fff;
+  margin-left: auto;
+  flex-shrink: 0;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.7);
+}
+
+/* ── Spacer pushes bottom section down ── */
+.sidebar-spacer {
+  flex: 1;
+}
+
+/* ── Bottom section (settings + logout) ── */
+.sidebar-bottom {
+  padding: 0 12px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* ── Logout button ── */
+.sidebar-logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 13px 16px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  text-align: left;
+  font-family: 'Poppins', 'Segoe UI', sans-serif;
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.35);
+  margin-top: 4px;
+}
+
+.sidebar-logout-btn:hover {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(239, 68, 68, 0.45);
+}
+
+.sidebar-logout-btn .sidebar-nav-icon {
+  opacity: 1;
+}

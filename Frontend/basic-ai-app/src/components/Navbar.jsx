@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import "./Navbar.css";
 import logo from "../assets/prenova_ai_logo.png";
 import FeatureDropdown from "./FeatureDropdown";
@@ -6,12 +6,45 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 const Navbar = () => {
-
   const navigate = useNavigate();
   const { user, logout } = useAuth();
 
-  // Active Menu
   const [active, setActive] = useState("Home");
+  const [profileOpen, setProfileOpen] = useState(false);
+  const profileRef = useRef(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (profileRef.current && !profileRef.current.contains(e.target)) {
+        setProfileOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleLogout = () => {
+    setProfileOpen(false);
+    logout();
+    navigate("/login");
+  };
+
+  const getInitials = (name) => {
+    if (!name) return "U";
+    const parts = name.trim().split(" ");
+    return parts.length >= 2
+      ? parts[0][0].toUpperCase() + parts[1][0].toUpperCase()
+      : parts[0][0].toUpperCase();
+  };
+
+  const getPlanColor = (plan) => {
+    if (!plan) return { bg: "#ede9fe", color: "#7c3aed" };
+    const p = plan.toLowerCase();
+    if (p === "pro") return { bg: "#fef3c7", color: "#d97706" };
+    if (p === "enterprise") return { bg: "#dcfce7", color: "#16a34a" };
+    return { bg: "#ede9fe", color: "#7c3aed" };
+  };
 
   return (
     <nav className="navbar">
@@ -44,17 +77,10 @@ const Navbar = () => {
             className={active === "Features" ? "active" : ""}
           >
             Features
-            <span
-              className={
-                active === "Features"
-                  ? "arrow rotate"
-                  : "arrow"
-              }
-            >
+            <span className={active === "Features" ? "arrow rotate" : "arrow"}>
               ▼
             </span>
           </a>
-
           <FeatureDropdown />
         </li>
 
@@ -105,23 +131,100 @@ const Navbar = () => {
       {/* ================= Buttons / Profile ================= */}
       <div className="nav-buttons-container">
         {user ? (
-          <div className="navbar-profile-box">
-            <div className="navbar-avatar">
-              {user.full_name ? user.full_name.charAt(0).toUpperCase() : "U"}
-            </div>
-            <div className="navbar-profile-details">
-              <span className="navbar-username">{user.full_name}</span>
-              <span className="navbar-tier">{user.plan_type.toUpperCase()}</span>
-            </div>
+          <div className="navbar-profile-wrapper" ref={profileRef}>
+
+          {/* Dashboard quick link */}
             <button
-              className="navbar-logout-btn"
-              onClick={() => {
-                logout();
-                navigate("/login");
-              }}
+              className="navbar-dashboard-btn"
+              onClick={() => navigate("/dashboard")}
             >
-              Logout
+              My Dashboard
             </button>
+
+            {/* Clickable Avatar Pill */}
+            <button
+              id="navbar-profile-pill"
+              className={`navbar-profile-pill${profileOpen ? " open" : ""}`}
+              onClick={() => setProfileOpen((prev) => !prev)}
+              aria-expanded={profileOpen}
+              aria-haspopup="true"
+            >
+              <div className="navbar-avatar">
+                {getInitials(user.full_name)}
+              </div>
+              <div className="navbar-profile-details">
+                <span className="navbar-username">{user.full_name || "User"}</span>
+                <span className="navbar-tier">{(user.plan_type || "free").toUpperCase()}</span>
+              </div>
+              <span
+                className="navbar-chevron"
+                style={{ transform: profileOpen ? "rotate(180deg)" : "rotate(0deg)" }}
+              >
+                ▼
+              </span>
+            </button>
+
+            {/* Profile Dropdown */}
+            {profileOpen && (
+              <div className="profile-dropdown" role="menu">
+
+                {/* Header */}
+                <div className="profile-dropdown-header">
+                  <div className="profile-dropdown-avatar">
+                    {getInitials(user.full_name)}
+                  </div>
+                  <div className="profile-dropdown-info">
+                    <span className="profile-dropdown-name">{user.full_name || "User"}</span>
+                    <span className="profile-dropdown-email">{user.email}</span>
+                  </div>
+                </div>
+
+                <div className="profile-dropdown-divider" />
+
+                {/* Badges Row */}
+                <div className="profile-dropdown-badges">
+                  <span
+                    className="profile-plan-badge"
+                    style={{
+                      background: getPlanColor(user.plan_type).bg,
+                      color: getPlanColor(user.plan_type).color,
+                    }}
+                  >
+                    {(user.plan_type || "Free").toUpperCase()} PLAN
+                  </span>
+                  <span className="profile-verified-badge">
+                    ✓ Verified
+                  </span>
+                </div>
+
+                {/* Member Since */}
+                {user.created_at && (
+                  <div className="profile-dropdown-meta">
+                    <span className="profile-meta-label">Member since</span>
+                    <span className="profile-meta-value">
+                      {new Date(user.created_at).toLocaleDateString("en-US", {
+                        month: "long",
+                        year: "numeric",
+                      })}
+                    </span>
+                  </div>
+                )}
+
+                <div className="profile-dropdown-divider" />
+
+                {/* Logout */}
+                <button
+                  id="navbar-logout-btn"
+                  className="profile-dropdown-logout"
+                  onClick={handleLogout}
+                  role="menuitem"
+                >
+                  <span className="logout-icon">⏻</span>
+                  Sign Out
+                </button>
+
+              </div>
+            )}
           </div>
         ) : (
           <div className="nav-buttons">

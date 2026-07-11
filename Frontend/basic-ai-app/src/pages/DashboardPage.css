@@ -1,0 +1,161 @@
+/* ================================================
+   DASHBOARD PAGE — Shell layout with sidebar
+================================================ */
+
+/* ── Loading ── */
+.dashboard-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  gap: 20px;
+  background: #f8f7ff;
+  font-family: 'Poppins', sans-serif;
+  color: #6b7280;
+}
+
+.dashboard-spinner {
+  width: 44px;
+  height: 44px;
+  border: 4px solid #e5e7eb;
+  border-top-color: #7c3aed;
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Shell: sidebar + main side by side ── */
+.dashboard-shell {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  font-family: 'Poppins', 'Segoe UI', sans-serif;
+  background: #f3f0ff;
+}
+
+/* ── Main area ── */
+.dashboard-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+
+/* ── Top bar ── */
+.dashboard-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 36px 20px;
+  background: #ffffff;
+  border-bottom: 1px solid rgba(124, 58, 237, 0.08);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  flex-shrink: 0;
+}
+
+.topbar-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.topbar-title {
+  font-size: 26px;
+  font-weight: 800;
+  color: #111827;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.topbar-subtitle {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.topbar-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #7c3aed, #a855f7);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 16px;
+  border: 2.5px solid rgba(124, 58, 237, 0.2);
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25);
+  flex-shrink: 0;
+}
+
+/* ── Content scroll area ── */
+.dashboard-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 32px 36px;
+  background: #f8f7ff;
+}
+
+/* Scrollbar styling */
+.dashboard-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.dashboard-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.dashboard-content::-webkit-scrollbar-thumb {
+  background: rgba(124, 58, 237, 0.2);
+  border-radius: 3px;
+}
+
+.dashboard-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(124, 58, 237, 0.4);
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .dashboard-shell {
+    flex-direction: column;
+    height: auto;
+    min-height: 100vh;
+  }
+
+  .sidebar {
+    width: 100% !important;
+    min-width: unset !important;
+    height: auto !important;
+    position: relative !important;
+    flex-direction: row;
+    flex-wrap: wrap;
+    padding: 12px;
+  }
+
+  .dashboard-main {
+    height: auto;
+    overflow: visible;
+  }
+
+  .dashboard-content {
+    overflow-y: visible;
+    padding: 20px 16px;
+  }
+
+  .dashboard-topbar {
+    padding: 16px 20px;
+  }
+}
