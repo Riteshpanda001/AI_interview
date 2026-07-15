@@ -298,6 +298,130 @@
   border-radius: 4px;
 }
 
+/* 5. Executive Corporate Navy (Slate Navy) */
+.resume-paper.corporate_navy {
+  --tpl-accent: #1e3a8a;
+  font-family: 'Georgia', Garamond, serif;
+  background: #ffffff;
+  color: #1e293b;
+}
+.resume-paper.corporate_navy .resume-header {
+  text-align: center;
+  border-top: 8px solid #1e3a8a;
+  border-bottom: 3px double #1e3a8a;
+  padding-top: 20px;
+  padding-bottom: 15px;
+  margin-bottom: 25px;
+}
+.resume-paper.corporate_navy .resume-header .name {
+  font-size: 32px;
+  letter-spacing: 1px;
+  color: #0f172a;
+  margin-bottom: 5px;
+}
+.resume-paper.corporate_navy .resume-header .role {
+  text-transform: uppercase;
+  font-size: 15px;
+  letter-spacing: 2px;
+  color: #1e3a8a;
+}
+.resume-paper.corporate_navy .contact-info {
+  justify-content: center;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+}
+.resume-paper.corporate_navy .resume-body {
+  flex-direction: column;
+}
+.resume-paper.corporate_navy .side-col {
+  width: 100%;
+  border-left: none;
+  padding-left: 0;
+  border-top: 1.5px solid #cbd5e1;
+  margin-top: 25px;
+  padding-top: 20px;
+}
+.resume-paper.corporate_navy .section-heading {
+  font-size: 16px;
+  border-bottom: 1px solid #94a3b8;
+  padding-bottom: 3px;
+  color: #0f172a;
+  letter-spacing: 1px;
+}
+.resume-paper.corporate_navy .section-divider {
+  display: none;
+}
+.resume-paper.corporate_navy .preview-skill-tag {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: #1e293b;
+  border-radius: 4px;
+}
+
+/* 6. Creative Left Sidebar (Rose Accent, Left Column Sidebar) */
+.resume-paper.creative_sidebar {
+  --tpl-accent: #ec4899;
+  font-family: 'Outfit', 'Inter', sans-serif;
+  background: #ffffff;
+  padding: 0;
+}
+.resume-paper.creative_sidebar .resume-header {
+  padding: 40px 40px 20px;
+  margin-bottom: 0;
+  border-bottom: 3px solid #ec4899;
+  background: linear-gradient(135deg, #fdf2f8, #ffffff);
+}
+.resume-paper.creative_sidebar .resume-header .name {
+  font-size: 34px;
+  color: #0f172a;
+}
+.resume-paper.creative_sidebar .resume-header .role {
+  color: #ec4899;
+}
+.resume-paper.creative_sidebar .resume-body {
+  flex-direction: row-reverse;
+  gap: 0;
+}
+.resume-paper.creative_sidebar .side-col {
+  flex: 1.1;
+  background: #1e293b;
+  color: #f1f5f9;
+  border-left: none;
+  padding: 30px 25px;
+}
+.resume-paper.creative_sidebar .side-col .section-heading {
+  color: #ffffff;
+  border-bottom: 1.5px solid #ec4899;
+  padding-bottom: 4px;
+}
+.resume-paper.creative_sidebar .side-col .section-divider {
+  display: none;
+}
+.resume-paper.creative_sidebar .side-col .preview-edu-item {
+  border-bottom: 1px solid #334155;
+  padding-bottom: 10px;
+}
+.resume-paper.creative_sidebar .side-col .preview-edu-item div {
+  color: #cbd5e1;
+}
+.resume-paper.creative_sidebar .side-col .preview-edu-item .date {
+  color: #94a3b8;
+}
+.resume-paper.creative_sidebar .main-col {
+  flex: 2;
+  padding: 30px 30px;
+}
+.resume-paper.creative_sidebar .main-col .section-heading {
+  color: #1e293b;
+}
+.resume-paper.creative_sidebar .preview-skill-tag {
+  background: #ec4899;
+  color: #ffffff;
+  border-radius: 6px;
+  font-size: 11px;
+}
+
+
 @media (max-width: 768px) {
   .preview-actions {
     flex-direction: column;

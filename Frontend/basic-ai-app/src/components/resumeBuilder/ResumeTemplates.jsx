@@ -33,6 +33,22 @@ const templatesList = [
     desc: "Traditional serif styling, ideal for detailed publications, research work, and academic projects.",
     previewBg: "linear-gradient(to right, #2b1f1d, #4a3532)",
     accentColor: "#f59e0b"
+  },
+  {
+    id: "corporate_navy",
+    name: "Executive Corporate Navy",
+    tag: "Executive",
+    desc: "Refined navy accents, double border lines, centered layout. Perfect for finance, corporate and management positions.",
+    previewBg: "linear-gradient(to right, #0f172a, #1e293b)",
+    accentColor: "#0f172a"
+  },
+  {
+    id: "creative_sidebar",
+    name: "Creative Left Sidebar",
+    tag: "Creative",
+    desc: "Striking left-sidebar style with dark contrast background for contacts/skills and clean white right pane for experience.",
+    previewBg: "linear-gradient(to right, #ec4899, #f43f5e)",
+    accentColor: "#ec4899"
   }
 ];
 

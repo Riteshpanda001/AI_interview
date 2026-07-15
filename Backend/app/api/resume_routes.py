@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
-from app.schemas.resume_schema import ResumeResponse
+from app.schemas.resume_schema import ResumeResponse, OptimizeResumeRequest, OptimizeResumeResponse
 from app.dependencies import get_current_active_user, get_db
 from app.services.resume_service import ResumeService
 
@@ -20,3 +20,12 @@ async def upload_resume(
         db=db
     )
     return resume_details
+
+@router.post("/optimize", response_model=OptimizeResumeResponse)
+async def optimize_resume(
+    request: OptimizeResumeRequest,
+    current_user = Depends(get_current_active_user)
+):
+    optimized = await ResumeService.optimize_resume(request.model_dump())
+    return optimized
+

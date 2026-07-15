@@ -3,7 +3,7 @@ import "./ResumeHero.css";
 
 import heroImage from "../../assets/resume/resume-hero.png";
 
-const ResumeHero = () => {
+const ResumeHero = ({ onBuildClick }) => {
   return (
     <section className="resume-hero">
 
@@ -45,7 +45,7 @@ const ResumeHero = () => {
 
           <div className="resume-buttons">
 
-            <button className="build-btn">
+            <button className="build-btn" onClick={onBuildClick}>
               Build Resume
             </button>
 

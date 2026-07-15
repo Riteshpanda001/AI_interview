@@ -6,6 +6,7 @@ import ResumeHero from "../components/resumeBuilder/ResumeHero";
 import ResumeFeatures from "../components/resumeBuilder/ResumeFeatures";
 import ResumeHowItWorks from "../components/resumeBuilder/ResumeHowItWorks";
 import ResumeTemplates from "../components/resumeBuilder/ResumeTemplates";
+import ResumeRoleTemplates from "../components/resumeBuilder/ResumeRoleTemplates";
 import ResumeForm from "../components/resumeBuilder/ResumeForm";
 import ResumePreview from "../components/resumeBuilder/ResumePreview";
 import AIResumeSuggestions from "../components/resumeBuilder/AIResumeSuggestions";
@@ -49,7 +50,12 @@ const ResumeBuilder = () => {
     ]
   });
 
-
+  const handleScrollToTemplates = () => {
+    const section = document.getElementById("resume-templates-section");
+    if (section) {
+      section.scrollIntoView({ behavior: "smooth" });
+    }
+  };
 
   return (
     <div className="resume-page">
@@ -58,7 +64,7 @@ const ResumeBuilder = () => {
       <Navbar />
 
       {/* Hero Section */}
-      <ResumeHero />
+      <ResumeHero onBuildClick={handleScrollToTemplates} />
 
       {/* Features */}
       <ResumeFeatures />
@@ -72,6 +78,13 @@ const ResumeBuilder = () => {
         setSelectedTemplate={setSelectedTemplate} 
       />
 
+      {/* Role Templates Pre-fill */}
+      <ResumeRoleTemplates 
+        onSelectRole={(roleData) => {
+          setResumeData(roleData);
+        }}
+      />
+
       {/* Resume Form */}
       <ResumeForm 
         resumeData={resumeData} 
@@ -82,6 +95,7 @@ const ResumeBuilder = () => {
       <ResumePreview 
         resumeData={resumeData} 
         selectedTemplate={selectedTemplate} 
+        setResumeData={setResumeData}
       />
 
       {/* AI Suggestions */}
@@ -104,4 +118,4 @@ const ResumeBuilder = () => {
   );
 };
 
-export default ResumeBuilder;
+export default ResumeBuilder;
