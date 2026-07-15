@@ -1,0 +1,171 @@
+.history-container {
+  font-family: 'Poppins', sans-serif;
+}
+
+.history-header {
+  margin-bottom: 30px;
+}
+
+.history-header h2 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 8px;
+}
+
+.history-header p {
+  color: #6b7280;
+}
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.history-card-custom {
+  background: #ffffff;
+  padding: 30px;
+  border-radius: 20px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+}
+
+.history-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.history-card-title {
+  font-size: 18px;
+  color: #1f2937;
+  font-weight: 700;
+}
+
+.history-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #6b7280;
+  margin-top: 6px;
+}
+
+.history-card-divider {
+  color: #d1d5db;
+}
+
+.history-verdict {
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.history-verdict.hire {
+  color: #10b981;
+}
+
+.history-verdict.nohire {
+  color: #ef4444;
+}
+
+.history-score-wrapper {
+  text-align: right;
+}
+
+.history-score-val {
+  font-size: 28px;
+  font-weight: 800;
+}
+
+.history-score-val.high {
+  color: #10b981;
+}
+
+.history-score-val.medium {
+  color: #d97706;
+}
+
+.history-score-val.low {
+  color: #ef4444;
+}
+
+.history-score-label {
+  font-size: 12px;
+  color: #9ca3af;
+  margin-top: 2px;
+}
+
+.history-breakdown-grid {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px dashed #e5e7eb;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.history-breakdown-label {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.history-progress-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.history-progress-track {
+  flex: 1;
+  height: 6px;
+  background: #e5e7eb;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.history-progress-fill {
+  height: 100%;
+  background: #7c3aed;
+}
+
+.history-progress-val {
+  font-size: 14px;
+  font-weight: 700;
+  color: #374151;
+}
+
+.history-loading {
+  text-align: center;
+  padding: 40px;
+}
+
+.history-spinner {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #7c3aed;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: history-spin 1s linear infinite;
+  margin: 0 auto 15px;
+}
+
+@keyframes history-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.history-loading-text {
+  color: #4b5563;
+}
+
+.history-empty-state {
+  background: #ffffff;
+  padding: 50px;
+  border-radius: 20px;
+  text-align: center;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+  color: #6b7280;
+}

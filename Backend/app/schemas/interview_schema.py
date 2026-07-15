@@ -5,6 +5,11 @@ from datetime import datetime
 class InterviewCreateRequest(BaseModel):
     role_target: str
     interview_type: str = "technical"  # hr, technical, behavioral
+    experience_level: Optional[str] = None
+    language: Optional[str] = "English"
+    duration: Optional[int] = 10
+    difficulty: Optional[str] = "Medium"
+    resume_id: Optional[str] = None
 
 class QuestionResponse(BaseModel):
     question_id: str

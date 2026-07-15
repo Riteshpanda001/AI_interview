@@ -133,14 +133,6 @@ const Navbar = () => {
         {user ? (
           <div className="navbar-profile-wrapper" ref={profileRef}>
 
-          {/* Dashboard quick link */}
-            <button
-              className="navbar-dashboard-btn"
-              onClick={() => navigate("/dashboard")}
-            >
-              My Dashboard
-            </button>
-
             {/* Clickable Avatar Pill */}
             <button
               id="navbar-profile-pill"

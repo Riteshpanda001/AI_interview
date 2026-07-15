@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 import { FaLaptopCode, FaCommentDots, FaAward, FaCalendarAlt } from "react-icons/fa";
+import "./Dashboard.css";
 
 const API_BASE_URL = "http://localhost:8000/api";
 
@@ -71,6 +72,12 @@ const Dashboard = ({ onPracticeNow }) => {
     }
   }, [token]);
 
+  const getScoreClass = (score) => {
+    if (score >= 80) return "high";
+    if (score >= 60) return "medium";
+    return "low";
+  };
+
   return (
     <div className="dashboard">
       {/* Welcome Card */}
@@ -136,49 +143,30 @@ const Dashboard = ({ onPracticeNow }) => {
           <div>
             {metrics.recent_activity.map((activity) => (
               <div className="historyCard" key={activity.id}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div className="dashboard-card-header">
                   <div>
                     <h3>{activity.role_target}</h3>
-                    <p style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "14px", marginTop: "4px" }}>
-                      <span className={`profile-badge`} style={{
-                        background: activity.interview_type === "technical" ? "#e0e7ff" : "#fef3c7",
-                        color: activity.interview_type === "technical" ? "#4f46e5" : "#d97706",
-                        padding: "2px 8px",
-                        borderRadius: "4px",
-                        fontSize: "12px",
-                        textTransform: "uppercase",
-                        fontWeight: "bold"
-                      }}>
+                    <p className="dashboard-card-meta">
+                      <span className={`profile-badge ${activity.interview_type === "technical" ? "technical" : "hr"}`}>
                         {activity.interview_type}
                       </span>
-                      <span style={{ color: "#9ca3af" }}>•</span>
-                      <FaCalendarAlt style={{ color: "#9ca3af", fontSize: "12px" }} />
+                      <span className="dashboard-card-dot">•</span>
+                      <FaCalendarAlt className="dashboard-card-icon" />
                       <span>{new Date(activity.created_at).toLocaleDateString()}</span>
                     </p>
                   </div>
-                  <div style={{ textAlign: "right" }}>
-                    <span style={{
-                      fontSize: "24px",
-                      fontWeight: "bold",
-                      color: activity.overall_score >= 80 ? "#10b981" : activity.overall_score >= 60 ? "#f59e0b" : "#ef4444"
-                    }}>
+                  <div className="dashboard-card-score-wrapper">
+                    <span className={`dashboard-score-val ${getScoreClass(activity.overall_score)}`}>
                       {activity.overall_score}%
                     </span>
-                    <p style={{ fontSize: "12px", color: "#9ca3af", marginTop: "2px" }}>Overall Score</p>
+                    <p className="dashboard-score-label">Overall Score</p>
                   </div>
                 </div>
               </div>
             ))}
           </div>
         ) : (
-          <div style={{
-            background: "#ffffff",
-            padding: "40px",
-            borderRadius: "20px",
-            textAlign: "center",
-            boxShadow: "0 10px 25px rgba(0,0,0,.08)",
-            color: "#6b7280"
-          }}>
+          <div className="dashboard-empty-state">
             No interviews taken yet. Click "Practice Now" above to get started!
           </div>
         )}

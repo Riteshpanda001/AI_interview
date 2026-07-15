@@ -3,27 +3,30 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import "./MockInterviews.css";
 
+import logo from "../assets/prenova_ai_logo.png";
+
 import {
-  FaRobot,
+  FaHome,
+  FaPlus,
   FaHistory,
   FaCog,
   FaSignOutAlt,
-  FaPlus,
-  FaHome,
 } from "react-icons/fa";
 
-import Dashboard from "./Dashboard";
-import InterviewSetup from "./InterviewSetup";
-import AIInterviewRoom from "./AIInterviewRoom";
-import InterviewHistory from "./InterviewHistory";
-import Settings from "./Settings";
+import Dashboard from "../components/MockInterviews/Dashboard";
+import InterviewSetup from "../components/MockInterviews/InterviewSetup";
+import AIInterviewRoom from "../components/MockInterviews/AIInterviewRoom";
+import InterviewHistory from "../components/MockInterviews/InterviewHistory";
+import Settings from "../components/MockInterviews/Settings";
 
 const MockInterviews = () => {
   const navigate = useNavigate();
-  const { user, token, loading, logout } = useAuth();
+  const { token, loading, logout } = useAuth();
 
   const [activePage, setActivePage] = useState("dashboard");
+
   const [interviewStarted, setInterviewStarted] = useState(false);
+
   const [interviewDetails, setInterviewDetails] = useState({
     company: "",
     role: "",
@@ -33,48 +36,39 @@ const MockInterviews = () => {
     duration: "",
   });
 
-  // Redirect to login if user is not authenticated
+  /* ======================================
+     Redirect to Login
+  ====================================== */
+
   useEffect(() => {
     if (!loading && !token) {
       navigate("/login");
     }
   }, [loading, token, navigate]);
 
+  /* ======================================
+     Loader
+  ====================================== */
+
   if (loading) {
     return (
-      <div style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        minHeight: "100vh",
-        background: "#f5f7fb",
-        fontFamily: "'Poppins', sans-serif"
-      }}>
-        <div style={{ textAlign: "center" }}>
-          <div style={{
-            border: "4px solid #f3f3f3",
-            borderTop: "4px solid #7c3aed",
-            borderRadius: "50%",
-            width: "50px",
-            height: "50px",
-            animation: "spin 1s linear infinite",
-            margin: "0 auto 20px"
-          }} />
-          <h3 style={{ color: "#374151" }}>Loading PrepNova AI Dashboard...</h3>
-          <style>{`
-            @keyframes spin {
-              0% { transform: rotate(0deg); }
-              100% { transform: rotate(360deg); }
-            }
-          `}</style>
+      <div className="loader-container">
+        <div className="loader-box">
+          <div className="loader-spinner"></div>
+
+          <h3 className="loader-text">
+            Loading PrepNova AI Dashboard...
+          </h3>
         </div>
       </div>
     );
   }
 
-  if (!token) {
-    return null; // Prevents render flicker before redirect
-  }
+  if (!token) return null;
+
+  /* ======================================
+     Handlers
+  ====================================== */
 
   const handlePracticeNow = () => {
     setActivePage("setup");
@@ -91,69 +85,88 @@ const MockInterviews = () => {
     navigate("/login");
   };
 
+  /* ======================================
+     JSX
+  ====================================== */
+
   return (
     <div className="mockInterview">
 
-      {/* Sidebar */}
+      {/* ================= Sidebar ================= */}
 
       <aside className="sidebar">
 
-        <div className="logo">
-          <FaRobot />
-          <h2>PrepNova AI</h2>
+        <div className="sidebarHeader">
+
+          <img
+            src={logo}
+            alt="PrepNova AI"
+            className="sidebarLogo"
+          />
+
+          <span className="sidebarSubtitle">AI Interview Assistant</span>
+
         </div>
 
-        <button
-          className={`menuBtn ${activePage === "dashboard" ? "active" : ""}`}
-          onClick={() => {
-            setInterviewStarted(false);
-            setActivePage("dashboard");
-          }}
-        >
-          <FaHome />
-          Dashboard
-        </button>
+        <div className="sidebarMenu">
 
-        <button
-          className={`menuBtn ${activePage === "setup" || activePage === "room" ? "active" : ""}`}
-          onClick={() => {
-            setInterviewStarted(false);
-            setActivePage("setup");
-          }}
-        >
-          <FaPlus />
-          New Interview
-        </button>
+          <button
+            className={`menuBtn ${activePage === "dashboard" ? "active" : ""}`}
+            onClick={() => {
+              setInterviewStarted(false);
+              setActivePage("dashboard");
+            }}
+          >
+            <FaHome />
+            <span>Dashboard</span>
+          </button>
 
-        <button
-          className={`menuBtn ${activePage === "history" ? "active" : ""}`}
-          onClick={() => setActivePage("history")}
-        >
-          <FaHistory />
-          Interview History
-        </button>
+          <button
+            className={`menuBtn ${activePage === "setup" || activePage === "room" ? "active" : ""}`}
+            onClick={() => {
+              setInterviewStarted(false);
+              setActivePage("setup");
+            }}
+          >
+            <FaPlus />
+            <span>New Interview</span>
+          </button>
 
-        <button
-          className={`menuBtn ${activePage === "settings" ? "active" : ""}`}
-          onClick={() => setActivePage("settings")}
-        >
-          <FaCog />
-          Settings
-        </button>
+          <button
+            className={`menuBtn ${activePage === "history" ? "active" : ""}`}
+            onClick={() => setActivePage("history")}
+          >
+            <FaHistory />
+            <span>Interview History</span>
+          </button>
 
-        <button
-          className="logoutBtn"
-          onClick={handleLogout}
-        >
-          <FaSignOutAlt />
-          Logout
-        </button>
+        </div>
+
+        <div className="bottomMenu">
+
+          <button
+            className={`menuBtn ${activePage === "settings" ? "active" : ""}`}
+            onClick={() => setActivePage("settings")}
+          >
+            <FaCog />
+            <span>Settings</span>
+          </button>
+
+          <button
+            className="logoutBtn"
+            onClick={handleLogout}
+          >
+            <FaSignOutAlt />
+            <span>Logout</span>
+          </button>
+
+        </div>
 
       </aside>
 
-      {/* Main Content */}
+      {/* ================= Main Content ================= */}
 
-      <div className="mockContent">
+      <main className="mockContent">
 
         {activePage === "dashboard" && (
           <Dashboard
@@ -181,7 +194,7 @@ const MockInterviews = () => {
           <Settings />
         )}
 
-      </div>
+      </main>
 
     </div>
   );

@@ -2,11 +2,11 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import logo from "../assets/prenova_ai_logo.png";
-import Dashboard from "./Dashboard";
-import InterviewSetup from "./InterviewSetup";
-import AIInterviewRoom from "./AIInterviewRoom";
-import InterviewHistory from "./InterviewHistory";
-import Settings from "./Settings";
+import Dashboard from "../components/MockInterviews/Dashboard";
+import InterviewSetup from "../components/MockInterviews/InterviewSetup";
+import AIInterviewRoom from "../components/MockInterviews/AIInterviewRoom";
+import InterviewHistory from "../components/MockInterviews/InterviewHistory";
+import Settings from "../components/MockInterviews/Settings";
 import "./DashboardPage.css";
 
 // Which "tab" to show based on internal state

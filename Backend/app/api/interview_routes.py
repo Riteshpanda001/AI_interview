@@ -16,6 +16,11 @@ async def start_interview(
         user_id=str(current_user["_id"]),
         role_target=request.role_target,
         interview_type=request.interview_type,
+        experience_level=request.experience_level,
+        language=request.language,
+        duration=request.duration,
+        difficulty=request.difficulty,
+        resume_id=request.resume_id,
         db=db
     )
     return session

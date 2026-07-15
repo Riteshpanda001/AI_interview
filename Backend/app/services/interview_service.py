@@ -7,14 +7,53 @@ from app.schemas.interview_schema import SubmitAnswerRequest
 
 class InterviewService:
     @staticmethod
-    async def create_session(user_id: str, role_target: str, interview_type: str, db) -> dict:
+    async def create_session(
+        user_id: str,
+        role_target: str,
+        interview_type: str,
+        db,
+        experience_level: str = None,
+        language: str = None,
+        duration: int = None,
+        difficulty: str = None,
+        resume_id: str = None
+    ) -> dict:
+        # Get parsed resume content if resume_id is provided
+        resume_text = ""
+        if resume_id:
+            try:
+                resume_record = await db["resumes"].find_one({"_id": ObjectId(resume_id), "user_id": user_id})
+                if resume_record:
+                    resume_text = resume_record.get("extracted_text", "") or resume_record.get("parsed_content", {}).get("raw_text", "")
+            except Exception as e:
+                print(f"Error fetching resume details: {e}")
+
+        # Let's count questions based on duration (e.g. 5 questions per 10 mins, min 3, max 10)
+        num_questions = 5
+        if duration:
+            num_questions = max(3, min(10, int(duration // 2)))
+
         # Generate interview questions using AI engine
-        generated_questions = await InterviewGenerator.generate_questions(role_target, interview_type, count=5)
+        generated_questions = await InterviewGenerator.generate_questions(
+            role_target=role_target,
+            interview_type=interview_type,
+            experience_level=experience_level,
+            language=language,
+            duration=duration,
+            difficulty=difficulty,
+            resume_text=resume_text,
+            count=num_questions
+        )
         
         session_record = {
             "user_id": user_id,
             "role_target": role_target,
             "interview_type": interview_type,
+            "experience_level": experience_level,
+            "language": language,
+            "duration": duration,
+            "difficulty": difficulty,
+            "resume_id": resume_id,
             "status": "pending",
             "questions": generated_questions,
             "responses": [],

@@ -4,10 +4,38 @@ import uuid
 
 class InterviewGenerator:
     @staticmethod
-    async def generate_questions(role_target: str, interview_type: str, count: int = 5) -> list:
-        prompt = f"Role: {role_target}, Interview Type: {interview_type}, Count: {count}"
+    async def generate_questions(
+        role_target: str,
+        interview_type: str,
+        experience_level: str = None,
+        language: str = None,
+        duration: int = None,
+        difficulty: str = None,
+        resume_text: str = None,
+        count: int = 5
+    ) -> list:
+        prompt_parts = [
+            f"Role: {role_target}",
+            f"Interview Type: {interview_type}",
+            f"Question Count: {count}"
+        ]
+        if experience_level:
+            prompt_parts.append(f"Experience Level Required: {experience_level}")
+        if language:
+            prompt_parts.append(f"Language: {language}")
+        if duration:
+            prompt_parts.append(f"Expected Duration: {duration} minutes")
+        if difficulty:
+            prompt_parts.append(f"Difficulty Level: {difficulty}")
+        if resume_text:
+            prompt_parts.append(f"Candidate's Resume Text:\n{resume_text[:2000]}")
+
+        prompt = ", ".join(prompt_parts)
+        
         system_instruction = (
             "You are a Senior Interviewer. Generate a list of realistic interview questions based on the input parameters. "
+            "Make sure to design the questions to target the specified experience level, difficulty level, and resume experience. "
+            "If a specific language is requested, generate the questions and texts in that language. "
             "Output a JSON list of objects containing 'question_id' (a unique slug/string) and 'text' (the question itself) and 'type' (e.g. technical, HR)."
         )
         

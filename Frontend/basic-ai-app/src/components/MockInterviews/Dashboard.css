@@ -1,0 +1,78 @@
+.dashboard-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dashboard-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+.dashboard-card-dot {
+  color: #9ca3af;
+}
+
+.dashboard-card-icon {
+  color: #9ca3af;
+  font-size: 12px;
+}
+
+.dashboard-card-score-wrapper {
+  text-align: right;
+}
+
+.dashboard-score-val {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.dashboard-score-val.high {
+  color: #10b981;
+}
+
+.dashboard-score-val.medium {
+  color: #f59e0b;
+}
+
+.dashboard-score-val.low {
+  color: #ef4444;
+}
+
+.dashboard-score-label {
+  font-size: 12px;
+  color: #9ca3af;
+  margin-top: 2px;
+}
+
+.dashboard-empty-state {
+  background: #ffffff;
+  padding: 40px;
+  border-radius: 20px;
+  text-align: center;
+  box-shadow: 0 10px 25px rgba(0,0,0,.08);
+  color: #6b7280;
+}
+
+.profile-badge.technical {
+  background: #e0e7ff;
+  color: #4f46e5;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+.profile-badge.hr {
+  background: #fef3c7;
+  color: #d97706;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  text-transform: uppercase;
+  font-weight: bold;
+}
