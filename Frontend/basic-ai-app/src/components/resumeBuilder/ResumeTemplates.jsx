@@ -3,52 +3,68 @@ import "./ResumeTemplates.css";
 
 const templatesList = [
   {
-    id: "tech",
-    name: "Silicon Valley Tech",
-    tag: "Most Popular",
-    desc: "Clean, linear design emphasizing technical skills, systems, and measurable metrics. ATS optimized.",
-    previewBg: "linear-gradient(to right, #0d0822, #1b0f3a)",
-    accentColor: "#7c3aed"
+    id: "london",
+    name: "London Modern Classic",
+    tag: "London Style",
+    desc: "A clean, modern single-column design with elegant spacing and a crisp blue professional touch.",
+    previewBg: "linear-gradient(to right, #1e3a8a, #3b82f6)",
+    accentColor: "#2563eb"
   },
   {
-    id: "modern",
-    name: "Creative Modern",
-    tag: "Trending",
-    desc: "Elegant layout with gradient dividers, bold subheadings, and a highly polished professional flow.",
-    previewBg: "linear-gradient(to right, #001f3f, #0056b3)",
-    accentColor: "#06b6d4"
-  },
-  {
-    id: "minimal",
-    name: "Executive Minimalist",
-    tag: "Corporate",
-    desc: "High-contrast, sleek typography focusing on readability, hierarchy, and experience.",
-    previewBg: "linear-gradient(to right, #1a1a1a, #333333)",
+    id: "santiago",
+    name: "Santiago Bold Mint",
+    tag: "Santiago Style",
+    desc: "A structured, bold format featuring strong emerald accents and modern professional dividers.",
+    previewBg: "linear-gradient(to right, #064e3b, #10b981)",
     accentColor: "#10b981"
   },
   {
-    id: "academic",
-    name: "Academic Classic",
-    tag: "Scientific",
-    desc: "Traditional serif styling, ideal for detailed publications, research work, and academic projects.",
-    previewBg: "linear-gradient(to right, #2b1f1d, #4a3532)",
-    accentColor: "#f59e0b"
+    id: "dublin",
+    name: "Dublin Split Teal",
+    tag: "Dublin Style",
+    desc: "A stunning two-column split layout with a full-height teal sidebar for contacts and skills.",
+    previewBg: "linear-gradient(to right, #0f766e, #14b8a6)",
+    accentColor: "#0d9488"
   },
   {
-    id: "corporate_navy",
-    name: "Executive Corporate Navy",
-    tag: "Executive",
-    desc: "Refined navy accents, double border lines, centered layout. Perfect for finance, corporate and management positions.",
-    previewBg: "linear-gradient(to right, #0f172a, #1e293b)",
-    accentColor: "#0f172a"
+    id: "helsinki",
+    name: "Helsinki Nordic Minimal",
+    tag: "Helsinki Style",
+    desc: "A ultra-clean, minimalist Nordic style with charcoal tones, thin lines, and heavy emphasis on whitespace.",
+    previewBg: "linear-gradient(to right, #1f2937, #4b5563)",
+    accentColor: "#1e293b"
   },
   {
-    id: "creative_sidebar",
-    name: "Creative Left Sidebar",
-    tag: "Creative",
-    desc: "Striking left-sidebar style with dark contrast background for contacts/skills and clean white right pane for experience.",
-    previewBg: "linear-gradient(to right, #ec4899, #f43f5e)",
-    accentColor: "#ec4899"
+    id: "milan",
+    name: "Milan Elegant Serif",
+    tag: "Milan Style",
+    desc: "High-end fashion inspired serif typography with centered header elements and elegant double dividers.",
+    previewBg: "linear-gradient(to right, #7f1d1d, #b91c1c)",
+    accentColor: "#991b1b"
+  },
+  {
+    id: "stockholm",
+    name: "Stockholm Royal Banner",
+    tag: "Stockholm Style",
+    desc: "Features a beautiful deep purple gradient top header banner, separating personal info from the corporate content.",
+    previewBg: "linear-gradient(to right, #4c1d95, #7c3aed)",
+    accentColor: "#6d28d9"
+  },
+  {
+    id: "brussels",
+    name: "Brussels Slate Sidebar",
+    tag: "Brussels Style",
+    desc: "A premium split-pane design utilizing a subtle grey left sidebar and deep indigo headings.",
+    previewBg: "linear-gradient(to right, #312e81, #4f46e5)",
+    accentColor: "#4338ca"
+  },
+  {
+    id: "prague",
+    name: "Prague Amber Grid",
+    tag: "Prague Style",
+    desc: "A creative, contemporary grid layout grouping skills and education inside modern amber-bordered block containers.",
+    previewBg: "linear-gradient(to right, #78350f, #d97706)",
+    accentColor: "#d97706"
   }
 ];
 
