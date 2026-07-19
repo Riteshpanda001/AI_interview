@@ -1,82 +1,137 @@
 import React from "react";
 import "./CodingCategories.css";
+import { PROBLEMS } from "./CodingProblems";
 
 const CATEGORIES = [
   {
-    id: "Arrays & Hashing",
+    id: "Time & Space Complexity",
+    icon: "⏱️",
+    title: "Time & Space Complexity",
+    desc: "Big O notation, worst/average/best case analyses, and complexity computation.",
+    solved: "1/1",
+    percent: 100,
+    level: "Easy"
+  },
+  {
+    id: "Array",
     icon: "🔢",
-    title: "Arrays & Hashing",
-    desc: "HashMaps, sets, sorting, dynamic arrays, sub-arrays, and linear scans.",
-    solved: "12/25",
-    percent: 48,
+    title: "Array",
+    desc: "Linear search, binary search, reversing arrays, finding min/max, and prefix sums.",
+    solved: "3/5",
+    percent: 60,
     level: "Easy - Medium"
   },
   {
-    id: "Two Pointers",
-    icon: "⇄",
-    title: "Two Pointers",
-    desc: "Optimizing search intervals, index collisions, and list partitions.",
-    solved: "8/15",
-    percent: 53,
-    level: "Easy - Medium"
-  },
-  {
-    id: "Sliding Window",
-    icon: "↔️",
-    title: "Sliding Window",
-    desc: "Dynamic subarrays, substring searches, and fixed interval maximums.",
-    solved: "6/12",
+    id: "Linked Lists",
+    icon: "🔗",
+    title: "Linked Lists",
+    desc: "Singly, doubly, and circular linked lists. Traversals, insertion, deletion, and merging.",
+    solved: "2/4",
     percent: 50,
-    level: "Medium - Hard"
-  },
-  {
-    id: "Stacks & Queues",
-    icon: "🥞",
-    title: "Stacks & Queues",
-    desc: "LIFO/FIFO mechanisms, monotonic stacks, and breadth-first pipelines.",
-    solved: "5/14",
-    percent: 35,
     level: "Easy - Medium"
   },
   {
-    id: "Binary Trees",
+    id: "Stack & Queue",
+    icon: "🥞",
+    title: "Stack & Queue",
+    desc: "LIFO/FIFO structures, stack/queue implementations, parentheses matching, and recent calls.",
+    solved: "4/7",
+    percent: 57,
+    level: "Easy - Medium"
+  },
+  {
+    id: "Strings",
+    icon: "🔤",
+    title: "Strings",
+    desc: "Sequence of characters, palindrome checks, reversing, casing, and basic manipulations.",
+    solved: "2/4",
+    percent: 50,
+    level: "Easy"
+  },
+  {
+    id: "Searching",
+    icon: "🔍",
+    title: "Searching",
+    desc: "Linear and binary search algorithms on sorted and unsorted collections.",
+    solved: "2/3",
+    percent: 66,
+    level: "Easy"
+  },
+  {
+    id: "Sorting",
+    icon: "📊",
+    title: "Sorting",
+    desc: "Insertion sort, merge sort, quick sort, and selection sort algorithms.",
+    solved: "2/4",
+    percent: 50,
+    level: "Easy - Medium"
+  },
+  {
+    id: "Hashing",
+    icon: "🔑",
+    title: "Hashing",
+    desc: "Hash maps, hash sets, collision handling, open addressing, and chaining.",
+    solved: "1/2",
+    percent: 50,
+    level: "Easy"
+  },
+  {
+    id: "Recursion",
+    icon: "🔄",
+    title: "Recursion",
+    desc: "Base cases, call stack tracking, factorials, Fibonacci sequences, and mathematical powers.",
+    solved: "3/5",
+    percent: 60,
+    level: "Easy - Medium"
+  },
+  {
+    id: "Trees",
     icon: "🌳",
-    title: "Binary Trees",
-    desc: "DFS, BFS, BST mutations, ancestor trees, and depth-first searches.",
-    solved: "9/22",
+    title: "Trees",
+    desc: "Binary trees, traversals (inorder, preorder, postorder), depth calculations, and path sums.",
+    solved: "3/6",
+    percent: 50,
+    level: "Easy - Medium"
+  },
+  {
+    id: "Heap",
+    icon: "🏔️",
+    title: "Heap",
+    desc: "Min/Max heap structures, heapify operations, insertion/deletion, and heap sort.",
+    solved: "2/5",
     percent: 40,
-    level: "Medium - Hard"
+    level: "Easy - Medium"
+  },
+  {
+    id: "Greedy Algorithm",
+    icon: "💰",
+    title: "Greedy Algorithm",
+    desc: "Local optimization, interval partitions, resource allocation, and change-making problems.",
+    solved: "2/5",
+    percent: 40,
+    level: "Easy"
   },
   {
     id: "Dynamic Programming",
-    icon: "🧗",
+    icon: "📐",
     title: "Dynamic Programming",
-    desc: "Memoization patterns, tabulation matrices, grid paths, and Knapsacks.",
-    solved: "3/28",
-    percent: 10,
-    level: "Medium - Hard"
-  },
-  {
-    id: "Graphs",
-    icon: "🕸️",
-    title: "Graphs",
-    desc: "BFS/DFS matrices, Dijkstra's algorithm, Kruskal's MST, union-find.",
-    solved: "4/20",
+    desc: "Overlapping subproblems, memoization, tabulation, climbing stairs, and stock trading.",
+    solved: "1/5",
     percent: 20,
-    level: "Medium - Hard"
+    level: "Easy - Medium"
   },
   {
-    id: "Backtracking",
-    icon: "🔄",
-    title: "Backtracking",
-    desc: "Recursion state trees, combinations, subsets, Sudoku, N-Queens.",
-    solved: "1/14",
-    percent: 7,
-    level: "Medium - Hard"
+    id: "Graph",
+    icon: "🕸️",
+    title: "Graph",
+    desc: "Adjacency matrices & lists, BFS (Rotting Oranges), DFS (Islands, cycle detection).",
+    solved: "2/5",
+    percent: 40,
+    level: "Medium"
   }
 ];
 
-const CodingCategories = ({ selectedCategory, onSelectCategory }) => {
+const CodingCategories = ({ selectedCategory, onSelectCategory, onSelectProblem }) => {
   return (
     <section className="coding-categories-section">
       <div className="coding-categories-container">
@@ -114,12 +169,64 @@ const CodingCategories = ({ selectedCategory, onSelectCategory }) => {
                 </div>
 
                 <div className="category-action-link">
-                  {isActive ? "Viewing Problems ✓" : "Filter by Category →"}
+                  {isActive ? "Viewing Problems ✓" : "Explore Topic →"}
                 </div>
               </div>
             );
           })}
         </div>
+
+        {/* Selected Category Details Panel */}
+        {selectedCategory && (
+          <div className="category-details-panel card">
+            <div className="panel-header">
+              <div className="panel-title-area">
+                <span className="panel-icon">{CATEGORIES.find(c => c.id === selectedCategory)?.icon}</span>
+                <div>
+                  <h3>{selectedCategory} Questions</h3>
+                  <p>{CATEGORIES.find(c => c.id === selectedCategory)?.desc}</p>
+                </div>
+              </div>
+              <button className="panel-close-btn" onClick={() => onSelectCategory(null)}>
+                × Close Topic
+              </button>
+            </div>
+
+            <div className="category-questions-list">
+              {PROBLEMS.filter(p => p.category === selectedCategory).map((prob, idx) => (
+                <div key={prob.id} className="category-question-item">
+                  <div className="q-left">
+                    <span className="q-number">{(idx + 1).toString().padStart(2, '0')}</span>
+                    <span className="q-title">{prob.title}</span>
+                    <span className={`diff-chip ${prob.difficulty.toLowerCase()}`}>
+                      {prob.difficulty}
+                    </span>
+                    <span className="q-acceptance">Acceptance: {prob.acceptance}</span>
+                  </div>
+
+                  <div className="q-actions">
+                    {prob.practiceLink && (
+                      <a 
+                        href={prob.practiceLink} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="official-link-btn"
+                      >
+                        {prob.practiceLink.includes("leetcode.com") ? "LeetCode 🔗" : prob.practiceLink.includes("geeksforgeeks.org") ? "GeeksforGeeks 🔗" : "Practice 🔗"}
+                      </a>
+                    )}
+                    <button 
+                      className="solve-sandbox-btn"
+                      onClick={() => onSelectProblem(prob)}
+                    >
+                      Solve locally 💻
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
       </div>
     </section>

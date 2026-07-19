@@ -536,7 +536,7 @@ const CreateNewWorkspace = ({ selectedTemplate, resumeData, setResumeData, onBac
       <div className="workspace-toolbar">
         <div className="toolbar-left">
           <button className="exit-workspace-btn" onClick={onBack}>
-            ← Exit Workspace
+            <span className="arrow">←</span> <span className="text">Exit Workspace</span>
           </button>
           <span className="template-badge-label">
             Active Format: <span>{selectedTemplate.toUpperCase()} Layout</span>
@@ -590,10 +590,7 @@ const CreateNewWorkspace = ({ selectedTemplate, resumeData, setResumeData, onBac
 
         {/* Right Column: Visual Resume Template Preview */}
         <div className="workspace-pane right-preview-pane">
-          <div className="pane-title-header">
-            <h3>👁️ Live Visual Preview</h3>
-            <p>Observe edits update dynamically on your A4 document sheet.</p>
-          </div>
+
           <div className="pane-scroll-area preview-sheet-area">
             <ResumePreview 
               resumeData={resumeData}

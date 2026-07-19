@@ -19,14 +19,14 @@ const DailyChallenge = ({ onSolve }) => {
 
           <div className="challenge-details">
             <div className="challenge-meta">
-              <span className="challenge-difficulty medium">Medium</span>
-              <span className="challenge-acceptance">📂 String / Sliding Window</span>
-              <span className="challenge-score">Points: +50 XP</span>
+              <span className="challenge-difficulty easy">Easy</span>
+              <span className="challenge-acceptance">📂 Array / Searching</span>
+              <span className="challenge-score">Points: +30 XP</span>
             </div>
 
-            <h3>Longest Substring Without Repeating Characters</h3>
+            <h3>Binary Search</h3>
             <p className="challenge-desc">
-              Given a string <code>s</code>, find the length of the longest substring without repeating characters. You must optimize for <code>O(N)</code> runtime execution using sliding window protocols.
+              Given a sorted array of integers <code>arr</code> and a target value <code>k</code>, return its index. If target is not found, return <code>-1</code> using <code>O(log N)</code> search logic.
             </p>
 
             <div className="streak-stats-row">
@@ -47,7 +47,7 @@ const DailyChallenge = ({ onSolve }) => {
             <div className="challenge-action-row">
               <button 
                 className="challenge-solve-btn" 
-                onClick={onSolve || (() => alert("Launching compiler workspace for Daily Challenge: 'Longest Substring'"))}
+                onClick={onSolve || (() => alert("Launching compiler workspace for Daily Challenge: 'Binary Search'"))}
               >
                 Start Solving Now →
               </button>

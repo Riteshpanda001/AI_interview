@@ -39,16 +39,16 @@ const CodingHero = ({ onStartCoding, onExploreRoadmap }) => {
 
           <div className="coding-buttons">
             <button
-              className="secondary-btn"
-              onClick={onExploreRoadmap}
-            >
-              Explore Roadmap
-            </button>
-            <button
               className="primary-btn"
               onClick={onStartCoding}
             >
               Start Coding
+            </button>
+            <button
+              className="secondary-btn"
+              onClick={onExploreRoadmap}
+            >
+              Explore Roadmap
             </button>
           </div>
         </div>

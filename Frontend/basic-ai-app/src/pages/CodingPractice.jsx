@@ -45,8 +45,8 @@ const CodingPractice = () => {
   };
 
   const handleSolveDailyChallenge = () => {
-    // Find Longest Substring in database
-    const dailyProb = PROBLEMS.find((p) => p.id === "longest-substring") || PROBLEMS[0];
+    // Find Binary Search in database
+    const dailyProb = PROBLEMS.find((p) => p.id === "arr-binary-search") || PROBLEMS[0];
     handleSelectProblem(dailyProb);
   };
 
@@ -68,6 +68,7 @@ const CodingPractice = () => {
         <CodingCategories 
           selectedCategory={selectedCategory} 
           onSelectCategory={setSelectedCategory} 
+          onSelectProblem={handleSelectProblem}
         />
 
         {/* Company Target Selector */}
