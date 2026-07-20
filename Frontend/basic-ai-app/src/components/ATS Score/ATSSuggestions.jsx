@@ -1,36 +1,51 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./ATSSuggestions.css";
 
-const ATSSuggestions = () => {
-  const [suggestions, setSuggestions] = useState([
-    {
-      id: 1,
-      title: "Use action verbs to describe experience",
-      impact: "High",
-      desc: "Begin your experience bullet points with strong, varied action verbs (e.g., 'Implemented', 'Led', 'Optimized') rather than passive phrases.",
-      before: "Responsible for managing the software development lifecycle and team operations.",
-      after: "Spearheaded the software development lifecycle, improving delivery velocity by 25%.",
-      expanded: false
-    },
-    {
-      id: 2,
-      title: "Quantify your achievements and results",
-      impact: "High",
-      desc: "ATS algorithms and recruiters value measurable impact. Provide percentages, dollar amounts, and hours saved.",
-      before: "Worked on reducing page load times and code cleaning.",
-      after: "Optimized critical frontend assets to reduce page load time by 42% for over 100k daily users.",
-      expanded: false
-    },
-    {
-      id: 3,
-      title: "Simplify section headings for readability",
-      impact: "Medium",
-      desc: "Use standard headings like 'Work Experience' or 'Employment History' instead of creative names like 'Where I've Been' or 'Career Journey'.",
-      before: "My Coding Adventures",
-      after: "Technical Experience",
-      expanded: false
+const ATSSuggestions = ({ recommendations = [], detailedFeedback = "" }) => {
+  const [suggestions, setSuggestions] = useState([]);
+
+  useEffect(() => {
+    if (recommendations.length > 0) {
+      setSuggestions(
+        recommendations.map((rec, idx) => {
+          let title = rec;
+          let desc = "Follow this AI recommendation to enhance your ATS score and compatibility.";
+          
+          if (rec.includes(":")) {
+            const parts = rec.split(":");
+            title = parts[0].trim();
+            desc = parts.slice(1).join(":").trim();
+          }
+
+          let before = "Created basic API endpoints and worked on databases.";
+          let after = "Architected high-performance REST APIs, optimizing database query response times by 35%.";
+          
+          if (title.toLowerCase().includes("docker") || title.toLowerCase().includes("container")) {
+            before = "Ran the application locally using simple scripts.";
+            after = "Containerized application workflows using Docker, ensuring consistent multi-environment deployment.";
+          } else if (title.toLowerCase().includes("aws") || title.toLowerCase().includes("cloud")) {
+            before = "Deployed codebase to local server settings.";
+            after = "Leveraged AWS cloud infrastructure (S3, EC2) to scale storage and server capacity dynamically.";
+          } else if (title.toLowerCase().includes("testing") || title.toLowerCase().includes("jest")) {
+            before = "Tested the features manually by clicking around.";
+            after = "Implemented comprehensive unit testing using Jest/React Testing Library, raising test coverage to 85%.";
+          }
+
+          return {
+            id: idx + 1,
+            title,
+            impact: idx === 0 ? "High" : "Medium",
+            desc,
+            before,
+            after,
+            expanded: idx === 0
+          };
+        })
+      );
+    } else {
+      setSuggestions([]);
     }
-  ]);
+  }, [recommendations]);
 
   const toggleExpand = (id) => {
     setSuggestions(prev => prev.map(s => s.id === id ? { ...s, expanded: !s.expanded } : s));
@@ -41,6 +56,12 @@ const ATSSuggestions = () => {
       <div className="suggestions-header">
         <h2>AI Optimization Suggestions</h2>
         <p>Follow these specific, personalized recommendations to improve ATS compatibility and readability.</p>
+        {detailedFeedback && (
+          <div className="feedback-overview-box">
+            <h4>AI Recruiter Summary</h4>
+            <p>{detailedFeedback}</p>
+          </div>
+        )}
       </div>
 
       <div className="suggestions-list">

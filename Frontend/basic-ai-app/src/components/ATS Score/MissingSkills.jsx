@@ -1,14 +1,24 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./MissingSkills.css";
 
-const MissingSkills = () => {
-  const [skills, setSkills] = useState([
-    { name: "Docker", importance: "High", category: "DevOps", reason: "Found in 84% of related Software Engineer postings.", added: false },
-    { name: "Kubernetes", importance: "Medium", category: "DevOps", reason: "Highly requested for container orchestration and scaling.", added: false },
-    { name: "AWS Cloud Services", importance: "High", category: "Cloud", reason: "Critical for applications hosted in cloud-native infrastructures.", added: false },
-    { name: "Unit Testing (Jest/React Testing Library)", importance: "High", category: "Frontend Testing", reason: "Essential for robust front-end deployment reliability.", added: false },
-    { name: "CI/CD Pipeline Design", importance: "Medium", category: "DevOps", reason: "Ensures automated deployment flow competence.", added: false }
-  ]);
+const MissingSkills = ({ missingSkills = [] }) => {
+  const [skills, setSkills] = useState([]);
+
+  useEffect(() => {
+    if (missingSkills.length > 0) {
+      setSkills(
+        missingSkills.map((name, idx) => ({
+          name,
+          importance: idx % 2 === 0 ? "High" : "Medium",
+          category: name.toLowerCase().includes("aws") || name.toLowerCase().includes("cloud") ? "Cloud" : "Technical Skill",
+          reason: `Highly requested keyword missing in comparison with target job description.`,
+          added: false
+        }))
+      );
+    } else {
+      setSkills([]);
+    }
+  }, [missingSkills]);
 
   const toggleSkillAdded = (idx) => {
     setSkills(prev => prev.map((s, i) => i === idx ? { ...s, added: !s.added } : s));
@@ -21,30 +31,38 @@ const MissingSkills = () => {
         <p>AI identified these high-frequency missing skills based on your target job categories.</p>
       </div>
 
-      <div className="skills-list">
-        {skills.map((skill, idx) => (
-          <div key={idx} className={`skill-card ${skill.importance.toLowerCase()} ${skill.added ? "added" : ""}`}>
-            <div className="skill-meta">
-              <span className="skill-cat">{skill.category}</span>
-              <span className={`importance-badge ${skill.importance.toLowerCase()}`}>
-                {skill.importance} Priority
-              </span>
-            </div>
-            
-            <div className="skill-info">
-              <h3>{skill.name}</h3>
-              <p>{skill.reason}</p>
-            </div>
+      {skills.length === 0 ? (
+        <div className="no-missing-skills">
+          <div className="success-emoji">🎉</div>
+          <h3>Zero Missing Skills!</h3>
+          <p>Your resume contains all core technical skills requested in the job description.</p>
+        </div>
+      ) : (
+        <div className="skills-list">
+          {skills.map((skill, idx) => (
+            <div key={idx} className={`skill-card ${skill.importance.toLowerCase()} ${skill.added ? "added" : ""}`}>
+              <div className="skill-meta">
+                <span className="skill-cat">{skill.category}</span>
+                <span className={`importance-badge ${skill.importance.toLowerCase()}`}>
+                  {skill.importance} Priority
+                </span>
+              </div>
+              
+              <div className="skill-info">
+                <h3>{skill.name}</h3>
+                <p>{skill.reason}</p>
+              </div>
 
-            <button 
-              className={`add-skill-action-btn ${skill.added ? "active" : ""}`}
-              onClick={() => toggleSkillAdded(idx)}
-            >
-              {skill.added ? "✓ Marked Added" : "+ Add to Resume"}
-            </button>
-          </div>
-        ))}
-      </div>
+              <button 
+                className={`add-skill-action-btn ${skill.added ? "active" : ""}`}
+                onClick={() => toggleSkillAdded(idx)}
+              >
+                {skill.added ? "✓ Marked Added" : "+ Add to Resume"}
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

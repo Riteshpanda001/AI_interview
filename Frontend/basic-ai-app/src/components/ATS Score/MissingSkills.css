@@ -138,3 +138,28 @@
     text-align: center;
   }
 }
+
+.no-missing-skills {
+  text-align: center;
+  padding: 30px 10px;
+  background: rgba(16, 185, 129, 0.03);
+  border: 1px dashed rgba(16, 185, 129, 0.2);
+  border-radius: 12px;
+}
+
+.no-missing-skills .success-emoji {
+  font-size: 2.5rem;
+  margin-bottom: 12px;
+}
+
+.no-missing-skills h3 {
+  font-size: 1.25rem;
+  color: #10b981;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.no-missing-skills p {
+  color: #6b7280;
+  font-size: 0.9rem;
+}

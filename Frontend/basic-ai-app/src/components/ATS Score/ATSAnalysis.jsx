@@ -1,17 +1,25 @@
 import React, { useState } from "react";
 import "./ATSAnalysis.css";
 
-const ATSAnalysis = () => {
+const ATSAnalysis = ({ analysisResult }) => {
   const [activeCategory, setActiveCategory] = useState("all");
+
+  const matchedSkills = analysisResult?.matched_skills || [];
+  const missingSkills = analysisResult?.missing_skills || [];
+  const hasMissingKeywords = missingSkills.length > 0;
+  
+  const keywordsDetail = hasMissingKeywords 
+    ? `Missing matching industry terms from job description: ${missingSkills.slice(0, 3).map(s => `'${s}'`).join(', ')}.`
+    : "Excellent match! All key terms from the job description were identified.";
 
   const checkItems = [
     { id: 1, title: "Contact Information Found", category: "essential", status: "pass", detail: "Email, phone number, and LinkedIn profile were parsed successfully." },
-    { id: 2, title: "File Format Compatibility", category: "formatting", status: "pass", detail: "PDF format is highly compatible with modern ATS parsers." },
+    { id: 2, title: "File Format Compatibility", category: "formatting", status: "pass", detail: "File format is compatible with modern ATS parsers." },
     { id: 3, title: "Standard Section Headings", category: "formatting", status: "pass", detail: "Standard titles like 'Experience', 'Education', 'Skills' are used." },
-    { id: 4, title: "Uncommon Font Style", category: "formatting", status: "warning", detail: "Some non-standard fonts were detected. Try using Arial, Calibri, or Helvetica." },
-    { id: 5, title: "Missing Core Tech Stack Keywords", category: "keywords", status: "fail", detail: "Missing matching industry terms: 'React Hooks', 'CI/CD Pipelines'." },
-    { id: 6, title: "Quantitative Achievements", category: "readability", status: "warning", detail: "Only 2 bullet points contain metric achievements. Try adding percentages, values, or timelines." },
-    { id: 7, title: "No Table or Textbox Containers", category: "formatting", status: "pass", detail: "Your resume structure is clean and flowable for ATS." }
+    { id: 4, title: "Uncommon Font Style", category: "formatting", status: "warning", detail: "Some non-standard fonts may be present. Stick to Arial, Calibri, or Helvetica for best parsing results." },
+    { id: 5, title: "Core Tech Stack Keywords Match", category: "keywords", status: hasMissingKeywords ? "fail" : "pass", detail: keywordsDetail },
+    { id: 6, title: "Quantitative Achievements", category: "readability", status: "warning", detail: "Add more metric achievements (e.g. percentages, budgets, timeframes) to prove business value." },
+    { id: 7, title: "No Structural Obstacles", category: "formatting", status: "pass", detail: "Your resume does not contain complex tables or textboxes that hinder ATS parsing." }
   ];
 
   const filteredItems = activeCategory === "all" 

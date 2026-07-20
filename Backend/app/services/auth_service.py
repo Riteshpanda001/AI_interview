@@ -1,6 +1,6 @@
 from fastapi import HTTPException, status
 import bcrypt
-from app.schemas.auth_schema import UserRegisterRequest, UserLoginRequest
+from app.schemas.auth_schema import UserRegisterRequest, UserLoginRequest, ChangePasswordRequest
 from app.schemas.user_schema import UserUpdateRequest
 from app.services.jwt_service import JWTService
 from app.services.otp_service import OTPService
@@ -160,3 +160,93 @@ class AuthService:
         user = await db["users"].find_one({"_id": ObjectId(user_id)})
         user["id"] = str(user["_id"])
         return user
+
+    @staticmethod
+    async def forgot_password(email: str, db) -> dict:
+        user = await db["users"].find_one({"email": email})
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No account associated with this email address was found."
+            )
+
+        # Generate and send recovery OTP
+        await OTPService.send_password_reset_otp(email)
+        return {"success": True, "message": "Password recovery code sent to your email."}
+
+    @staticmethod
+    async def reset_password(email: str, otp: str, new_password: str, db) -> dict:
+        is_valid = await OTPService.verify_password_reset_otp(email, otp)
+        if not is_valid:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid or expired password recovery code."
+            )
+
+        user = await db["users"].find_one({"email": email})
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=ERROR_USER_NOT_FOUND
+            )
+
+        hashed_password = AuthService.get_password_hash(new_password)
+        await db["users"].update_one(
+            {"_id": user["_id"]},
+            {"$set": {
+                "hashed_password": hashed_password,
+                "is_active": True,  # Ensure user is activated upon recovery
+                "updated_at": datetime.utcnow()
+            }}
+        )
+
+        # Send confirmation email
+        subject = "🔐 Your PreNovaAi Password Has Been Changed"
+        html_content = f"""
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 30px; border: 1px solid rgba(124, 58, 237, 0.2); border-radius: 12px; background-color: #05020c; color: #ffffff; box-shadow: 0 4px 20px rgba(124, 58, 237, 0.15);">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <h1 style="color: #c084fc; margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -0.5px;">PreNovaAi</h1>
+                <p style="color: #a3a3c2; margin: 5px 0 0 0; font-size: 14px;">Next-Gen AI Interview Preparation</p>
+            </div>
+            <hr style="border: 0; border-top: 1px solid rgba(168, 85, 247, 0.15); margin: 20px 0;" />
+            <h2 style="color: #ffffff; margin-top: 0; font-size: 20px; font-weight: 600;">Password Updated Successfully! 🔐</h2>
+            <p style="color: #a3a3c2; font-size: 15px; line-height: 1.6;">The password for your <b>PreNovaAi</b> account has been successfully reset.</p>
+            <p style="color: #a3a3c2; font-size: 15px; line-height: 1.6;">If you did not perform this change, please immediately reset your password or contact our support team to secure your account.</p>
+            <div style="text-align: center; margin: 35px 0;">
+                <a href="http://localhost:5173/login" style="background: linear-gradient(135deg, #7c3aed, #a855f7); color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3); display: inline-block;">Go to Login</a>
+            </div>
+            <p style="color: #a3a3c2; font-size: 14px; line-height: 1.6; margin-top: 30px;">Best regards,<br/>The PreNovaAi Team</p>
+            <hr style="border: 0; border-top: 1px solid rgba(168, 85, 247, 0.15); margin: 20px 0;" />
+            <p style="color: #52527a; font-size: 11px; text-align: center; margin: 0;">This email was sent by PreNovaAi. Please do not reply directly to this mail.</p>
+        </div>
+        """
+        await EmailService.send_email(email, subject, html_content)
+        
+        return {"success": True, "message": "Password reset successfully. You can now login with your new credentials."}
+
+    @staticmethod
+    async def change_password(user_id: str, request: ChangePasswordRequest, db) -> dict:
+        user = await db["users"].find_one({"_id": ObjectId(user_id)})
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=ERROR_USER_NOT_FOUND
+            )
+
+        if not AuthService.verify_password(request.old_password, user["hashed_password"]):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Incorrect current password."
+            )
+
+        hashed_password = AuthService.get_password_hash(request.new_password)
+        await db["users"].update_one(
+            {"_id": ObjectId(user_id)},
+            {"$set": {
+                "hashed_password": hashed_password,
+                "updated_at": datetime.utcnow()
+            }}
+        )
+
+        return {"success": True, "message": "Password changed successfully."}
+

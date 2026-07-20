@@ -198,6 +198,80 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Forgot Password (trigger recovery email)
+  const forgotPassword = async (email) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.detail || "Forgot password request failed");
+      }
+      return data;
+    } catch (error) {
+      console.error("Forgot password error:", error);
+      throw error;
+    }
+  };
+
+  // Reset Password using OTP
+  const resetPassword = async (email, otp, newPassword) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/reset-password`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          otp,
+          new_password: newPassword,
+        }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.detail || "Reset password failed");
+      }
+      return data;
+    } catch (error) {
+      console.error("Reset password error:", error);
+      throw error;
+    }
+  };
+
+  // Change password for authenticated users
+  const changePassword = async (oldPassword, newPassword) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/users/change-password`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          old_password: oldPassword,
+          new_password: newPassword,
+        }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.detail || "Failed to change password");
+      }
+      return data;
+    } catch (error) {
+      console.error("Change password error:", error);
+      throw error;
+    }
+  };
+
   // Logout
   const logout = () => {
     localStorage.removeItem("access_token");
@@ -217,6 +291,9 @@ export const AuthProvider = ({ children }) => {
         login,
         loginSimulated,
         updateProfile,
+        forgotPassword,
+        resetPassword,
+        changePassword,
         logout,
       }}
     >

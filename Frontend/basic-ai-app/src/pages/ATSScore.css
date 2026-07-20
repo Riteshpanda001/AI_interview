@@ -388,3 +388,172 @@ margin-bottom:50px;
 }
 
 }
+
+/* ==========================================
+   ATS WORKSPACE DASHBOARD
+   ========================================== */
+
+.ats-workspace-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #f8fafc;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Inter', sans-serif;
+  overflow: hidden;
+  animation: workspaceFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes workspaceFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ats-workspace-toolbar {
+  height: 70px;
+  background: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 0 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+  flex-shrink: 0;
+}
+
+.workspace-toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.exit-workspace-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #7c3aed, #9333ea);
+  border: none;
+  padding: 8px 18px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.3);
+  transition: all 0.2s ease;
+}
+
+.exit-workspace-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.4);
+}
+
+.workspace-file-info {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.workspace-file-info h3 {
+  font-size: 1rem;
+  color: #0f172a;
+  font-weight: 700;
+  margin: 0;
+}
+
+.workspace-file-info span {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.workspace-toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.workspace-mini-score {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+  padding: 6px 14px;
+  border-radius: 99px;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.workspace-mini-score.fail {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.workspace-mini-score.warning {
+  background: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+}
+
+.ats-workspace-body {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  height: calc(100vh - 70px);
+  overflow: hidden;
+}
+
+.ats-workspace-left-col {
+  padding: 24px 30px;
+  overflow-y: auto;
+  border-right: 1px solid #e2e8f0;
+  background: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.ats-workspace-right-col {
+  padding: 24px 30px;
+  overflow-y: auto;
+  background: #f1f5f9;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+/* Restructure component spacing inside workspace columns */
+.ats-workspace-left-col > div {
+  margin: 0 !important;
+  max-width: 100% !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03) !important;
+}
+
+.ats-workspace-right-col > div {
+  margin: 0 !important;
+  max-width: 100% !important;
+  width: 100% !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03) !important;
+}
+
+@media(max-width:1024px){
+  .ats-workspace-body {
+    grid-template-columns: 1fr;
+    overflow-y: auto;
+  }
+  .ats-workspace-left-col,
+  .ats-workspace-right-col {
+    overflow-y: visible;
+    height: auto;
+  }
+}

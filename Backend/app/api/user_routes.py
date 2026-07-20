@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends
 from app.schemas.user_schema import UserResponse, UserUpdateRequest
+from app.schemas.auth_schema import ChangePasswordRequest
 from app.dependencies import get_current_active_user, get_db
 from app.services.auth_service import AuthService
 from bson import ObjectId
@@ -20,3 +21,12 @@ async def update_me(
 ):
     updated_user = await AuthService.update_user_profile(str(current_user["_id"]), request, db)
     return updated_user
+
+@router.post("/change-password")
+async def change_password(
+    request: ChangePasswordRequest,
+    current_user = Depends(get_current_active_user),
+    db = Depends(get_db)
+):
+    return await AuthService.change_password(str(current_user["_id"]), request, db)
+

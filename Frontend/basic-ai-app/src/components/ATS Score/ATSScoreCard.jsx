@@ -1,12 +1,17 @@
 import React from "react";
 import "./ATSScoreCard.css";
 
-const ATSScoreCard = ({ score = 78 }) => {
+const ATSScoreCard = ({ score = 78, matchedSkills = [], missingSkills = [] }) => {
+  const matchedCount = matchedSkills.length;
+  const missingCount = missingSkills.length;
+  const totalKeywords = matchedCount + missingCount;
+  const keywordScore = totalKeywords > 0 ? Math.round((matchedCount / totalKeywords) * 100) : 65;
+
   const categories = [
-    { name: "Keyword Match", value: 65, color: "#f59e0b" },
+    { name: "Keyword Match", value: keywordScore, color: keywordScore >= 80 ? "#10b981" : keywordScore >= 60 ? "#3b82f6" : "#f59e0b" },
     { name: "Formatting & Layout", value: 92, color: "#10b981" },
     { name: "Section Headings", value: 85, color: "#10b981" },
-    { name: "Content Quality", value: 70, color: "#3b82f6" }
+    { name: "Content Quality", value: score, color: score >= 80 ? "#10b981" : score >= 60 ? "#3b82f6" : "#f59e0b" }
   ];
 
   const getScoreClass = (val) => {

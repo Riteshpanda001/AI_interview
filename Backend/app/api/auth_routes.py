@@ -1,5 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from app.schemas.auth_schema import UserRegisterRequest, UserLoginRequest, TokenResponse, OTPVerifyRequest, OTPResponse, EmailCheckRequest
+from app.schemas.auth_schema import (
+    UserRegisterRequest, UserLoginRequest, TokenResponse, 
+    OTPVerifyRequest, OTPResponse, EmailCheckRequest,
+    ForgotPasswordRequest, ResetPasswordRequest
+)
 from app.dependencies import get_db
 from app.services.auth_service import AuthService
 from app.services.jwt_service import JWTService
@@ -25,3 +29,12 @@ async def login(request: UserLoginRequest, db = Depends(get_db)):
 async def verify_otp(request: OTPVerifyRequest, db = Depends(get_db)):
     token_details = await AuthService.verify_user_otp(request.email, request.otp, db)
     return token_details
+
+@router.post("/forgot-password")
+async def forgot_password(request: ForgotPasswordRequest, db = Depends(get_db)):
+    return await AuthService.forgot_password(request.email, db)
+
+@router.post("/reset-password")
+async def reset_password(request: ResetPasswordRequest, db = Depends(get_db)):
+    return await AuthService.reset_password(request.email, request.otp, request.new_password, db)
+
