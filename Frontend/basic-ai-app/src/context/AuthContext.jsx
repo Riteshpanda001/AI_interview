@@ -7,9 +7,88 @@ const API_BASE_URL = "http://localhost:8000/api";
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem("access_token") || null);
+  const [refreshTokenStr, setRefreshTokenStr] = useState(localStorage.getItem("refresh_token") || null);
   const [loading, setLoading] = useState(true);
 
-  // Fetch current user details if token exists
+  // Helper: Save tokens to state & localStorage
+  const saveTokens = (accessToken, newRefreshToken) => {
+    if (accessToken) {
+      localStorage.setItem("access_token", accessToken);
+      setToken(accessToken);
+    }
+    if (newRefreshToken) {
+      localStorage.setItem("refresh_token", newRefreshToken);
+      setRefreshTokenStr(newRefreshToken);
+    }
+  };
+
+  // Helper: Clear tokens from state & localStorage
+  const clearTokens = () => {
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+    setToken(null);
+    setRefreshTokenStr(null);
+    setUser(null);
+  };
+
+  // Perform Token Refresh
+  const refreshToken = async () => {
+    const currentRefreshToken = localStorage.getItem("refresh_token");
+    if (!currentRefreshToken) {
+      clearTokens();
+      return null;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ refresh_token: currentRefreshToken }),
+      });
+
+      if (!response.ok) {
+        clearTokens();
+        return null;
+      }
+
+      const data = await response.json();
+      saveTokens(data.access_token, data.refresh_token);
+      return data.access_token;
+    } catch (err) {
+      console.error("Token refresh failed:", err);
+      clearTokens();
+      return null;
+    }
+  };
+
+  // Authenticated Fetch Wrapper with Automatic Token Renewal on 401
+  const authFetch = async (url, options = {}) => {
+    let currentToken = localStorage.getItem("access_token");
+
+    const headers = {
+      ...(options.headers || {}),
+      Authorization: `Bearer ${currentToken}`,
+    };
+
+    let response = await fetch(url, { ...options, headers });
+
+    if (response.status === 401) {
+      // Access token expired, attempt refresh
+      const newToken = await refreshToken();
+      if (newToken) {
+        // Retry original request with fresh token
+        const retryHeaders = {
+          ...(options.headers || {}),
+          Authorization: `Bearer ${newToken}`,
+        };
+        response = await fetch(url, { ...options, headers: retryHeaders });
+      }
+    }
+
+    return response;
+  };
+
+  // Fetch current user details
   const fetchCurrentUser = async (authToken) => {
     if (authToken === "mock-access-token-12345") {
       setUser({
@@ -17,25 +96,22 @@ export const AuthProvider = ({ children }) => {
         full_name: "Simulated PrepNova Candidate",
         role: "User",
         plan_type: "free",
-        created_at: new Date().toISOString()
+        target_role: "Software Engineer",
+        experience_level: "Mid Level",
+        bio: "AI Interview enthusiast",
+        created_at: new Date().toISOString(),
       });
       setLoading(false);
       return;
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/users/me`, {
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-        },
-      });
-
+      const response = await authFetch(`${API_BASE_URL}/users/me`);
       if (response.ok) {
         const userData = await response.json();
         setUser(userData);
       } else {
-        // Token might be expired or invalid
-        logout();
+        clearTokens();
       }
     } catch (error) {
       console.error("Error fetching current user:", error);
@@ -45,14 +121,16 @@ export const AuthProvider = ({ children }) => {
   };
 
   const loginSimulated = () => {
-    localStorage.setItem("access_token", "mock-access-token-12345");
-    setToken("mock-access-token-12345");
+    saveTokens("mock-access-token-12345", "mock-refresh-token-12345");
     setUser({
       email: "simulated@prepnova.ai",
       full_name: "Simulated PrepNova Candidate",
       role: "User",
       plan_type: "free",
-      created_at: new Date().toISOString()
+      target_role: "Software Engineer",
+      experience_level: "Mid Level",
+      bio: "AI Interview enthusiast",
+      created_at: new Date().toISOString(),
     });
   };
 
@@ -69,16 +147,11 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await fetch(`${API_BASE_URL}/auth/check-email`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to check email");
-      }
-
+      if (!response.ok) throw new Error("Failed to check email");
       const data = await response.json();
       return data.exists;
     } catch (error) {
@@ -87,19 +160,13 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Register a new user (requires verification next)
+  // Register a new user
   const register = async (fullName, email, password) => {
     try {
       const response = await fetch(`${API_BASE_URL}/auth/register`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email,
-          password,
-          full_name: fullName,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password, full_name: fullName }),
       });
 
       const data = await response.json();
@@ -113,14 +180,32 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Verify OTP to active account and log in
+  // Resend OTP Code
+  const resendOtp = async (email) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/resend-otp`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.detail || "Failed to resend verification code");
+      }
+      return data;
+    } catch (error) {
+      console.error("Resend OTP error:", error);
+      throw error;
+    }
+  };
+
+  // Verify OTP & save dual tokens
   const verifyOtp = async (email, otp) => {
     try {
       const response = await fetch(`${API_BASE_URL}/auth/verify-otp`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, otp }),
       });
 
@@ -129,8 +214,7 @@ export const AuthProvider = ({ children }) => {
         throw new Error(data.detail || "OTP verification failed");
       }
 
-      localStorage.setItem("access_token", data.access_token);
-      setToken(data.access_token);
+      saveTokens(data.access_token, data.refresh_token);
       await fetchCurrentUser(data.access_token);
       return data;
     } catch (error) {
@@ -139,28 +223,28 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Standard login for active users
+  // Login
   const login = async (email, password) => {
     try {
       const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
 
       const data = await response.json();
       if (!response.ok) {
-        // Pass along verification requirements
         if (response.status === 403) {
           throw { status: 403, message: data.detail };
         }
         throw new Error(data.detail || "Login failed");
       }
 
-      localStorage.setItem("access_token", data.access_token);
-      setToken(data.access_token);
+      if (data.require_otp) {
+        return data;
+      }
+
+      saveTokens(data.access_token, data.refresh_token);
       await fetchCurrentUser(data.access_token);
       return data;
     } catch (error) {
@@ -169,20 +253,13 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Update profile details
-  const updateProfile = async (fullName, password) => {
+  // Update Profile
+  const updateProfile = async (updateData) => {
     try {
-      const bodyData = {};
-      if (fullName !== undefined) bodyData.full_name = fullName;
-      if (password !== undefined) bodyData.password = password;
-
-      const response = await fetch(`${API_BASE_URL}/users/me`, {
+      const response = await authFetch(`${API_BASE_URL}/users/me`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(bodyData),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updateData),
       });
 
       const data = await response.json();
@@ -198,63 +275,12 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Forgot Password (trigger recovery email)
-  const forgotPassword = async (email) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email }),
-      });
-
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.detail || "Forgot password request failed");
-      }
-      return data;
-    } catch (error) {
-      console.error("Forgot password error:", error);
-      throw error;
-    }
-  };
-
-  // Reset Password using OTP
-  const resetPassword = async (email, otp, newPassword) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/auth/reset-password`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email,
-          otp,
-          new_password: newPassword,
-        }),
-      });
-
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.detail || "Reset password failed");
-      }
-      return data;
-    } catch (error) {
-      console.error("Reset password error:", error);
-      throw error;
-    }
-  };
-
-  // Change password for authenticated users
+  // Change Password
   const changePassword = async (oldPassword, newPassword) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/users/change-password`, {
+      const response = await authFetch(`${API_BASE_URL}/users/change-password`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           old_password: oldPassword,
           new_password: newPassword,
@@ -272,11 +298,60 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Logout
-  const logout = () => {
-    localStorage.removeItem("access_token");
-    setToken(null);
-    setUser(null);
+  // Forgot Password
+  const forgotPassword = async (email) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.detail || "Forgot password request failed");
+      }
+      return data;
+    } catch (error) {
+      console.error("Forgot password error:", error);
+      throw error;
+    }
+  };
+
+  // Reset Password
+  const resetPassword = async (email, otp, newPassword) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/reset-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, otp, new_password: newPassword }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.detail || "Reset password failed");
+      }
+      return data;
+    } catch (error) {
+      console.error("Reset password error:", error);
+      throw error;
+    }
+  };
+
+  // Logout Endpoint & Session Cleanup
+  const logout = async () => {
+    try {
+      if (token && token !== "mock-access-token-12345") {
+        await fetch(`${API_BASE_URL}/auth/logout`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      }
+    } catch (err) {
+      console.warn("Logout API call failed, proceeding to clear local session:", err);
+    } finally {
+      clearTokens();
+    }
   };
 
   return (
@@ -287,14 +362,17 @@ export const AuthProvider = ({ children }) => {
         loading,
         checkEmail,
         register,
+        resendOtp,
         verifyOtp,
         login,
         loginSimulated,
+        refreshToken,
         updateProfile,
         forgotPassword,
         resetPassword,
         changePassword,
         logout,
+        authFetch,
       }}
     >
       {children}

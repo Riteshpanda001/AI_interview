@@ -15,6 +15,7 @@ import CompanyPreparation from "./pages/CompanyPreparation";
 import ATSScore from "./pages/ATSScore";
 import Pricing from "./pages/Pricing";
 import Contact from "./pages/Contact";
+import Profile from "./pages/Profile";
 
 function App() {
   useEffect(() => {
@@ -30,6 +31,7 @@ function App() {
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/dashboard" element={<DashboardPage />} />
+      <Route path="/profile" element={<Profile />} />
 
       <Route path="/mock-interview" element={<MockInterview />} />
       <Route path="/mock-interviews" element={<MockInterviews />} />

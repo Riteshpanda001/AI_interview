@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import "./Login.css";
@@ -7,7 +7,7 @@ import googleLogo from "../assets/google.png";
 
 const Login = () => {
   const navigate = useNavigate();
-  const { login, checkEmail, verifyOtp } = useAuth();
+  const { login, checkEmail, verifyOtp, resendOtp } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -18,11 +18,86 @@ const Login = () => {
   const [errorMsg, setErrorMsg] = useState("");
   const [infoMsg, setInfoMsg] = useState("");
   
-  // OTP Verification States
+  // OTP Verification States (6 Digits)
   const [showOtpModal, setShowOtpModal] = useState(false);
-  const [otpCode, setOtpCode] = useState("");
+  const [otpDigits, setOtpDigits] = useState(["", "", "", "", "", ""]);
   const [otpError, setOtpError] = useState("");
   const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
+  const [resendTimer, setResendTimer] = useState(0);
+  const [isResending, setIsResending] = useState(false);
+  
+  const inputRefs = Array.from({ length: 6 }, () => React.createRef());
+
+  useEffect(() => {
+    let timer;
+    if (resendTimer > 0) {
+      timer = setInterval(() => {
+        setResendTimer((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [resendTimer]);
+
+  const handleResendCode = async () => {
+    if (resendTimer > 0 || isResending) return;
+    setIsResending(true);
+    setOtpError("");
+    try {
+      await resendOtp(email);
+      setResendTimer(60);
+      setOtpDigits(["", "", "", "", "", ""]);
+    } catch (err) {
+      setOtpError(err.message || "Failed to resend code.");
+    } finally {
+      setIsResending(false);
+    }
+  };
+
+  const handleDigitChange = (index, value) => {
+    const cleanValue = value.replace(/\D/g, "");
+    if (cleanValue.length > 1) {
+      const digits = cleanValue.slice(0, 6).split("");
+      const newOtp = [...otpDigits];
+      digits.forEach((d, idx) => {
+        if (index + idx < 6) {
+          newOtp[index + idx] = d;
+        }
+      });
+      setOtpDigits(newOtp);
+      const nextFocus = Math.min(index + digits.length, 5);
+      inputRefs[nextFocus]?.current?.focus();
+      return;
+    }
+
+    const newOtp = [...otpDigits];
+    newOtp[index] = cleanValue;
+    setOtpDigits(newOtp);
+
+    if (cleanValue && index < 5) {
+      inputRefs[index + 1]?.current?.focus();
+    }
+  };
+
+  const handleKeyDown = (index, e) => {
+    if (e.key === "Backspace" && !otpDigits[index] && index > 0) {
+      inputRefs[index - 1]?.current?.focus();
+    }
+  };
+
+  const handlePaste = (e) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+    if (!pastedData) return;
+
+    const digits = pastedData.split("");
+    const newOtp = ["", "", "", "", "", ""];
+    digits.forEach((d, i) => {
+      newOtp[i] = d;
+    });
+    setOtpDigits(newOtp);
+    const focusIdx = Math.min(digits.length, 5);
+    inputRefs[focusIdx]?.current?.focus();
+  };
 
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
@@ -46,16 +121,22 @@ const Login = () => {
         return;
       }
 
-      // 2. Attempt login
-      await login(email, password);
-      // Redirect to homepage on success
-      navigate("/");
+      // 2. Attempt login (triggers OTP sending to Gmail if credentials valid)
+      const loginRes = await login(email, password);
+      if (loginRes?.require_otp) {
+        setInfoMsg(loginRes.message || "A 6-digit OTP code has been sent to your Gmail for verification.");
+        setShowOtpModal(true);
+        setOtpDigits(["", "", "", "", "", ""]);
+        setResendTimer(60);
+      } else {
+        navigate("/dashboard");
+      }
     } catch (err) {
       if (err.status === 403) {
-        // Account exists but not verified. Show OTP modal.
         setErrorMsg("");
         setInfoMsg("Account requires verification. An OTP has been sent to your email.");
         setShowOtpModal(true);
+        setResendTimer(60);
       } else {
         setErrorMsg(err.message || "Invalid credentials. Please try again.");
       }
@@ -66,8 +147,9 @@ const Login = () => {
 
   const handleOtpSubmit = async (e) => {
     e.preventDefault();
-    if (otpCode.length !== 6) {
-      setOtpError("Please enter a valid 6-digit OTP code.");
+    const fullOtp = otpDigits.join("");
+    if (fullOtp.length !== 6) {
+      setOtpError("Please enter all 6 digits of your verification code.");
       return;
     }
 
@@ -75,10 +157,10 @@ const Login = () => {
     setOtpError("");
 
     try {
-      await verifyOtp(email, otpCode);
-      setInfoMsg("Account successfully verified and logged in!");
+      await verifyOtp(email, fullOtp);
+      setInfoMsg("Account successfully verified! Redirecting to dashboard...");
       setTimeout(() => {
-        navigate("/");
+        navigate("/dashboard");
       }, 1500);
       setShowOtpModal(false);
     } catch (err) {
@@ -148,7 +230,7 @@ const Login = () => {
             </div>
 
             <button type="submit" className="login-btn-main" disabled={isLoading}>
-              {isLoading ? "Checking Details..." : "Login"}
+              {isLoading ? "Verifying Credentials..." : "Login"}
             </button>
 
 
@@ -169,22 +251,53 @@ const Login = () => {
       {showOtpModal && (
         <div className="otp-modal-overlay">
           <div className="otp-modal">
-            <h3>Enter Verification Code</h3>
-            <p>We've sent a 6-digit verification code to <strong>{email}</strong>.</p>
+            <div className="otp-icon-header">
+              <span>🔐</span>
+            </div>
+            <h3>Verify Your Gmail</h3>
+            <p>Enter the 6-digit random code sent to <strong>{email}</strong></p>
             
             {otpError && <div className="alert-message error">{otpError}</div>}
             
             <form onSubmit={handleOtpSubmit}>
-              <div className="otp-input-container">
-                <input
-                  type="text"
-                  maxLength="6"
-                  placeholder="123456"
-                  value={otpCode}
-                  onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))}
-                  required
-                  className="otp-code-input"
-                />
+              <div className="otp-boxes-container" onPaste={handlePaste}>
+                {otpDigits.map((digit, index) => (
+                  <input
+                    key={index}
+                    ref={inputRefs[index]}
+                    type="text"
+                    maxLength="1"
+                    className="otp-box-digit"
+                    value={digit}
+                    onChange={(e) => handleDigitChange(index, e.target.value)}
+                    onKeyDown={(e) => handleKeyDown(index, e)}
+                    autoFocus={index === 0}
+                  />
+                ))}
+              </div>
+
+              <div className="resend-otp-container" style={{ margin: "16px 0", textAlign: "center" }}>
+                <button
+                  type="button"
+                  className="resend-otp-btn"
+                  onClick={handleResendCode}
+                  disabled={resendTimer > 0 || isResending}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    color: resendTimer > 0 ? "#71717a" : "#c084fc",
+                    cursor: resendTimer > 0 ? "not-allowed" : "pointer",
+                    fontSize: "0.9rem",
+                    fontWeight: "600",
+                    textDecoration: "underline"
+                  }}
+                >
+                  {isResending
+                    ? "Sending code..."
+                    : resendTimer > 0
+                    ? `Resend code in ${resendTimer}s`
+                    : "Resend 6-Digit Code"}
+                </button>
               </div>
               
               <div className="otp-modal-buttons">
@@ -201,14 +314,14 @@ const Login = () => {
                 <button
                   type="submit"
                   className="otp-submit-btn"
-                  disabled={isVerifyingOtp}
+                  disabled={isVerifyingOtp || otpDigits.join("").length !== 6}
                 >
                   {isVerifyingOtp ? "Verifying..." : "Verify & Login"}
                 </button>
               </div>
             </form>
             <p className="otp-helper-text">
-              Don't see it? Check your spam folder or enter "123456" in local dev environment.
+              Check your inbox & spam folder. (Local Dev Test Code: 123456)
             </p>
           </div>
         </div>

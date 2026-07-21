@@ -5,6 +5,19 @@ from app.services.email_service import EmailService
 
 class OTPService:
     @staticmethod
+    async def resend_otp(email: str) -> str:
+        redis = db_manager.redis_client
+        if redis:
+            ttl = await redis.ttl(f"otp:{email}")
+            if ttl > 285:
+                from fastapi import HTTPException, status
+                raise HTTPException(
+                    status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                    detail="Please wait a few seconds before requesting another verification code."
+                )
+        return await OTPService.send_otp(email)
+
+    @staticmethod
     async def send_otp(email: str) -> str:
         # Generate 6-digit numeric OTP
         otp = "".join([str(random.randint(0, 9)) for _ in range(6)])

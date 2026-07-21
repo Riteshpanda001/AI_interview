@@ -8,7 +8,7 @@ import googleLogo from "../assets/google.png";
 const Register = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { register, verifyOtp } = useAuth();
+  const { register, verifyOtp, resendOtp } = useAuth();
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -33,6 +33,32 @@ const Register = () => {
   const [otpCode, setOtpCode] = useState("");
   const [otpError, setOtpError] = useState("");
   const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
+  const [resendTimer, setResendTimer] = useState(0);
+  const [isResending, setIsResending] = useState(false);
+
+  useEffect(() => {
+    let timer;
+    if (resendTimer > 0) {
+      timer = setInterval(() => {
+        setResendTimer((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [resendTimer]);
+
+  const handleResendCode = async () => {
+    if (resendTimer > 0 || isResending) return;
+    setIsResending(true);
+    setOtpError("");
+    try {
+      await resendOtp(email);
+      setResendTimer(60);
+    } catch (err) {
+      setOtpError(err.message || "Failed to resend code.");
+    } finally {
+      setIsResending(false);
+    }
+  };
 
   const handleRegisterSubmit = async (e) => {
     e.preventDefault();
@@ -181,6 +207,30 @@ const Register = () => {
                   required
                   className="otp-code-input"
                 />
+              </div>
+
+              <div className="resend-otp-container" style={{ margin: "12px 0", textAlign: "center" }}>
+                <button
+                  type="button"
+                  className="resend-otp-btn"
+                  onClick={handleResendCode}
+                  disabled={resendTimer > 0 || isResending}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    color: resendTimer > 0 ? "#71717a" : "#a855f7",
+                    cursor: resendTimer > 0 ? "not-allowed" : "pointer",
+                    fontSize: "0.9rem",
+                    fontWeight: "600",
+                    textDecoration: "underline"
+                  }}
+                >
+                  {isResending
+                    ? "Sending code..."
+                    : resendTimer > 0
+                    ? `Resend code in ${resendTimer}s`
+                    : "Resend Verification Code"}
+                </button>
               </div>
               
               <div className="otp-modal-buttons">

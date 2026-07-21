@@ -73,7 +73,7 @@ const Sidebar = () => {
 
       {/* ── User mini-profile ── */}
       {user && (
-        <div className="sidebar-user-card">
+        <div className="sidebar-user-card" onClick={() => navigate("/profile")} style={{ cursor: "pointer" }}>
           <div className="sidebar-user-avatar">{getInitials(user.full_name)}</div>
           <div className="sidebar-user-info">
             <span className="sidebar-user-name">{user.full_name || "User"}</span>
@@ -111,8 +111,8 @@ const Sidebar = () => {
 
         <button
           id="sidebar-settings"
-          className={`sidebar-nav-btn${isActive("/dashboard/settings") ? " active" : ""}`}
-          onClick={() => navigate("/dashboard/settings")}
+          className={`sidebar-nav-btn${isActive("/profile") ? " active" : ""}`}
+          onClick={() => navigate("/profile")}
         >
           <span className="sidebar-nav-icon">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">

@@ -2,9 +2,10 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from app.schemas.auth_schema import (
     UserRegisterRequest, UserLoginRequest, TokenResponse, 
     OTPVerifyRequest, OTPResponse, EmailCheckRequest,
-    ForgotPasswordRequest, ResetPasswordRequest
+    ForgotPasswordRequest, ResetPasswordRequest,
+    RefreshTokenRequest, ResendOTPRequest
 )
-from app.dependencies import get_db
+from app.dependencies import get_db, oauth2_scheme
 from app.services.auth_service import AuthService
 from app.services.jwt_service import JWTService
 
@@ -20,6 +21,10 @@ async def register(request: UserRegisterRequest, db = Depends(get_db)):
     result = await AuthService.register_user(request, db)
     return result
 
+@router.post("/resend-otp", response_model=OTPResponse)
+async def resend_otp(request: ResendOTPRequest, db = Depends(get_db)):
+    return await AuthService.resend_user_otp(request.email, db)
+
 @router.post("/login", response_model=TokenResponse)
 async def login(request: UserLoginRequest, db = Depends(get_db)):
     token_details = await AuthService.authenticate_user(request.email, request.password, db)
@@ -30,6 +35,14 @@ async def verify_otp(request: OTPVerifyRequest, db = Depends(get_db)):
     token_details = await AuthService.verify_user_otp(request.email, request.otp, db)
     return token_details
 
+@router.post("/refresh", response_model=TokenResponse)
+async def refresh_token(request: RefreshTokenRequest, db = Depends(get_db)):
+    return await AuthService.refresh_token(request.refresh_token, db)
+
+@router.post("/logout")
+async def logout(token: str = Depends(oauth2_scheme), db = Depends(get_db)):
+    return await AuthService.logout_user(token, db)
+
 @router.post("/forgot-password")
 async def forgot_password(request: ForgotPasswordRequest, db = Depends(get_db)):
     return await AuthService.forgot_password(request.email, db)
@@ -37,4 +50,5 @@ async def forgot_password(request: ForgotPasswordRequest, db = Depends(get_db)):
 @router.post("/reset-password")
 async def reset_password(request: ResetPasswordRequest, db = Depends(get_db)):
     return await AuthService.reset_password(request.email, request.otp, request.new_password, db)
+
 

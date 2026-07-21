@@ -204,6 +204,31 @@ const Navbar = () => {
 
                 <div className="profile-dropdown-divider" />
 
+                <button
+                  className="profile-dropdown-item"
+                  onClick={() => {
+                    setProfileOpen(false);
+                    navigate("/profile");
+                  }}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    width: "100%",
+                    padding: "10px 14px",
+                    background: "none",
+                    border: "none",
+                    color: "#e4e4e7",
+                    fontSize: "14px",
+                    fontWeight: "600",
+                    cursor: "pointer",
+                    textAlign: "left",
+                    borderRadius: "6px"
+                  }}
+                >
+                  <span>👤</span> My Profile & Security
+                </button>
+
                 {/* Logout */}
                 <button
                   id="navbar-logout-btn"

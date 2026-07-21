@@ -8,6 +8,10 @@ class UserBase(BaseModel):
     role: str
     plan_type: str
     is_active: bool
+    target_role: Optional[str] = "Software Engineer"
+    experience_level: Optional[str] = "Mid Level"
+    bio: Optional[str] = ""
+    avatar_url: Optional[str] = None
 
 class UserResponse(UserBase):
     id: str
@@ -21,4 +25,7 @@ class UserResponse(UserBase):
 
 class UserUpdateRequest(BaseModel):
     full_name: Optional[str] = None
-    password: Optional[str] = None
+    target_role: Optional[str] = None
+    experience_level: Optional[str] = None
+    bio: Optional[str] = None
+    avatar_url: Optional[str] = None

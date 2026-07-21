@@ -24,11 +24,19 @@ async def get_current_user(
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
+        redis = db_manager.redis_client
+        if redis and await redis.get(f"blacklist:{token}"):
+            raise credentials_exception
+
         payload = jwt.decode(
             token, 
             settings.JWT_SECRET, 
             algorithms=[settings.JWT_ALGORITHM]
         )
+        token_type = payload.get("type", "access")
+        if token_type != "access":
+            raise credentials_exception
+
         user_id: str = payload.get("sub")
         if user_id is None:
             raise credentials_exception

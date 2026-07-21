@@ -64,21 +64,61 @@ class AuthService:
                 detail=ERROR_INVALID_CREDENTIALS
             )
             
-        if not user.get("is_active", True):
-            # Account exists but not verified. Resend OTP and notify
-            await OTPService.send_otp(email)
+        # Valid email & password entered -> Generate and send 6-digit random OTP to Gmail
+        await OTPService.send_otp(email)
+
+        return {
+            "require_otp": True,
+            "email": email,
+            "message": f"A 6-digit verification code has been sent to {email}. Please enter it to complete login."
+        }
+
+    @staticmethod
+    async def resend_user_otp(email: str, db) -> dict:
+        user = await db["users"].find_one({"email": email})
+        if not user:
             raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Account not verified. A verification code has been sent to your email. Please verify."
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=ERROR_USER_NOT_FOUND
+            )
+        await OTPService.resend_otp(email)
+        return {"success": True, "message": f"Verification code re-sent to {email}"}
+
+    @staticmethod
+    async def refresh_token(refresh_token_str: str, db) -> dict:
+        payload = JWTService.decode_token(refresh_token_str)
+        if not payload or payload.get("type") != "refresh":
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid or expired refresh token"
             )
             
-        token = JWTService.create_access_token({"sub": str(user["_id"])})
+        user_id = payload.get("sub")
+        user = await db["users"].find_one({"_id": ObjectId(user_id)})
+        if not user or not user.get("is_active", True):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="User account inactive or not found"
+            )
+
+        new_access_token = JWTService.create_access_token({"sub": str(user["_id"])})
+        new_refresh_token = JWTService.create_refresh_token({"sub": str(user["_id"])})
         return {
-            "access_token": token,
+            "access_token": new_access_token,
+            "refresh_token": new_refresh_token,
             "token_type": "bearer",
             "role": user.get("role", ROLE_USER),
             "plan_type": user.get("plan_type", PLAN_FREE)
         }
+
+    @staticmethod
+    async def logout_user(token_str: str, db) -> dict:
+        from app.database import db_manager
+        redis = db_manager.redis_client
+        if redis and token_str:
+            # Blacklist token for 24 hours
+            await redis.set(f"blacklist:{token_str}", "1", ex=86400)
+        return {"success": True, "message": "Successfully logged out"}
 
     @staticmethod
     async def verify_user_otp(email: str, otp: str, db) -> dict:
@@ -130,9 +170,11 @@ class AuthService:
         """
         await EmailService.send_email(email, subject, html_content)
         
-        token = JWTService.create_access_token({"sub": str(user["_id"])})
+        access_token = JWTService.create_access_token({"sub": str(user["_id"])})
+        refresh_token = JWTService.create_refresh_token({"sub": str(user["_id"])})
         return {
-            "access_token": token,
+            "access_token": access_token,
+            "refresh_token": refresh_token,
             "token_type": "bearer",
             "role": user.get("role", ROLE_USER),
             "plan_type": user.get("plan_type", PLAN_FREE)
@@ -143,8 +185,14 @@ class AuthService:
         update_data = {}
         if request.full_name is not None:
             update_data["full_name"] = request.full_name
-        if request.password is not None:
-            update_data["hashed_password"] = AuthService.get_password_hash(request.password)
+        if request.target_role is not None:
+            update_data["target_role"] = request.target_role
+        if request.experience_level is not None:
+            update_data["experience_level"] = request.experience_level
+        if request.bio is not None:
+            update_data["bio"] = request.bio
+        if request.avatar_url is not None:
+            update_data["avatar_url"] = request.avatar_url
             
         if not update_data:
             user = await db["users"].find_one({"_id": ObjectId(user_id)})

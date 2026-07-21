@@ -33,8 +33,9 @@ class EmailService:
         Falls back to console logging if SMTP credentials are not configured.
         """
         # Detect unconfigured / placeholder credentials and fall back to console logging
-        placeholder_emails = {"user@example.com", "noreply@example.com", ""}
-        if settings.SMTP_USER in placeholder_emails or settings.SMTP_PASSWORD in {"password", ""}:
+        placeholder_emails = {"user@example.com", "noreply@example.com", "your-gmail@gmail.com", ""}
+        placeholder_passwords = {"password", "your-16-char-app-password", ""}
+        if settings.SMTP_USER in placeholder_emails or settings.SMTP_PASSWORD in placeholder_passwords:
             print(f"\n{'='*60}")
             print(f"[EMAIL SERVICE] ⚠️  SMTP not configured — printing to console")
             print(f"  To     : {to_email}")

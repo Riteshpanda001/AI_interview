@@ -11,10 +11,20 @@ class UserLoginRequest(BaseModel):
     password: str
 
 class TokenResponse(BaseModel):
-    access_token: str
+    access_token: Optional[str] = None
+    refresh_token: Optional[str] = None
     token_type: str = "bearer"
-    role: str
-    plan_type: str
+    role: Optional[str] = None
+    plan_type: Optional[str] = None
+    require_otp: Optional[bool] = False
+    message: Optional[str] = None
+    email: Optional[str] = None
+
+class RefreshTokenRequest(BaseModel):
+    refresh_token: str
+
+class ResendOTPRequest(BaseModel):
+    email: EmailStr
 
 class OTPVerifyRequest(BaseModel):
     email: EmailStr
