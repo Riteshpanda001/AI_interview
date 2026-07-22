@@ -2,14 +2,9 @@
    ATS SCORE PAGE
 ========================================== */
 
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-}
-
 .ats-page{
     width:100%;
+    max-width:100vw;
     overflow-x:hidden;
     position:relative;
 
@@ -556,4 +551,25 @@ margin-bottom:50px;
     overflow-y: visible;
     height: auto;
   }
+}
+
+/* Hide scrollbars across ATS page and workspace containers */
+.ats-page,
+.ats-workspace-overlay,
+.ats-workspace-body,
+.ats-workspace-left-col,
+.ats-workspace-right-col {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.ats-page::-webkit-scrollbar,
+.ats-workspace-overlay::-webkit-scrollbar,
+.ats-workspace-body::-webkit-scrollbar,
+.ats-workspace-left-col::-webkit-scrollbar,
+.ats-workspace-right-col::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  background: transparent !important;
 }

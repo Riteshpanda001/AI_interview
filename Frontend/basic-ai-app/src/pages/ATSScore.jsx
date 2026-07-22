@@ -23,6 +23,17 @@ const ATSScore = () => {
   const [analysisResult, setAnalysisResult] = useState(null);
   const [error, setError] = useState("");
 
+  React.useEffect(() => {
+    if (analysisResult) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [analysisResult]);
+
   const handleStartScan = async () => {
     if (!resumeData || !resumeData.id) {
       setError("Please upload your resume first.");

@@ -8,14 +8,14 @@
 
     display:flex;
     justify-content:space-between;
-    align-items:center;
+    align-items:flex-start;
 
-    gap:80px;
+    gap:30px;
 
     padding:40px 8%;
 
     position:relative;
-    overflow:hidden;
+    /* overflow:hidden; */
 
     background:
     radial-gradient(circle at top left,
@@ -297,6 +297,7 @@
     display:flex;
     justify-content:center;
     align-items:flex-start;
+    margin-top: 71px;
     position:relative;
     z-index:2;
 }
@@ -310,7 +311,7 @@
     position:relative;
 
     width:100%;
-    max-width:620px;
+    max-width:720px;
 
     display:flex;
     justify-content:center;
@@ -320,12 +321,9 @@
 .ats-hero-image{
 
     width:100%;
-    max-width:560px;
+    max-width:720px;
 
     border-radius:30px;
-
-    border:8px solid rgba(255,255,255,.9);
-
     background:#ffffff;
 
     box-shadow:

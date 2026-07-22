@@ -24,13 +24,25 @@ class Settings(BaseSettings):
     GEMINI_API_KEY: Optional[str] = None
     GROQ_API_KEY: Optional[str] = None
 
+    # Google OAuth Settings
+    GOOGLE_CLIENT_ID: Optional[str] = None
+
     # SMTP Credentials
     SMTP_HOST: str = "smtp.gmail.com"
     SMTP_PORT: int = 587
-    SMTP_USER: str = "user@example.com"
-    SMTP_PASSWORD: str = "password"
-    EMAILS_FROM_EMAIL: str = "noreply@example.com"
-    EMAILS_FROM_NAME: str = "AI Interview Prep"
+    SMTP_USER: Optional[str] = None
+    SMTP_EMAIL: Optional[str] = None
+    SMTP_PASSWORD: str = ""
+    EMAILS_FROM_EMAIL: Optional[str] = None
+    EMAILS_FROM_NAME: str = "PreNova AI"
+
+    @property
+    def effective_smtp_user(self) -> str:
+        return self.SMTP_EMAIL or self.SMTP_USER or "prenovaai001@gmail.com"
+
+    @property
+    def effective_emails_from(self) -> str:
+        return self.EMAILS_FROM_EMAIL or self.effective_smtp_user
 
     # Directory Paths
     STATIC_DIR: str = os.path.join(os.path.dirname(os.path.dirname(__file__)), "static")

@@ -7,7 +7,7 @@ import googleLogo from "../assets/google.png";
 
 const Login = () => {
   const navigate = useNavigate();
-  const { login, checkEmail, verifyOtp, resendOtp } = useAuth();
+  const { login, checkEmail, verifyOtp, resendOtp, googleLogin } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -15,8 +15,10 @@ const Login = () => {
   
   // UI States
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [infoMsg, setInfoMsg] = useState("");
+  const [isUnverified, setIsUnverified] = useState(false);
   
   // OTP Verification States (6 Digits)
   const [showOtpModal, setShowOtpModal] = useState(false);
@@ -38,12 +40,27 @@ const Login = () => {
     return () => clearInterval(timer);
   }, [resendTimer]);
 
+  // Load Google OAuth script
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.src = "https://accounts.google.com/gsi/client";
+    script.async = true;
+    script.defer = true;
+    document.body.appendChild(script);
+
+    return () => {
+      if (document.body.contains(script)) {
+        document.body.removeChild(script);
+      }
+    };
+  }, []);
+
   const handleResendCode = async () => {
     if (resendTimer > 0 || isResending) return;
     setIsResending(true);
     setOtpError("");
     try {
-      await resendOtp(email);
+      await resendOtp(email, "email_verification");
       setResendTimer(60);
       setOtpDigits(["", "", "", "", "", ""]);
     } catch (err) {
@@ -109,9 +126,9 @@ const Login = () => {
     setIsLoading(true);
     setErrorMsg("");
     setInfoMsg("");
+    setIsUnverified(false);
 
     try {
-      // 1. Check if email exists
       const exists = await checkEmail(email);
       if (!exists) {
         setInfoMsg("Account does not exist! Redirecting to Registration...");
@@ -121,10 +138,9 @@ const Login = () => {
         return;
       }
 
-      // 2. Attempt login (triggers OTP sending to Gmail if credentials valid)
       const loginRes = await login(email, password);
       if (loginRes?.require_otp) {
-        setInfoMsg(loginRes.message || "A 6-digit OTP code has been sent to your Gmail for verification.");
+        setInfoMsg(loginRes.message || "A 6-digit OTP code has been sent to your email for verification.");
         setShowOtpModal(true);
         setOtpDigits(["", "", "", "", "", ""]);
         setResendTimer(60);
@@ -133,15 +149,46 @@ const Login = () => {
       }
     } catch (err) {
       if (err.status === 403) {
-        setErrorMsg("");
-        setInfoMsg("Account requires verification. An OTP has been sent to your email.");
-        setShowOtpModal(true);
-        setResendTimer(60);
+        setIsUnverified(true);
+        setErrorMsg("Please verify your email before logging in.");
       } else {
         setErrorMsg(err.message || "Invalid credentials. Please try again.");
       }
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = () => {
+    setIsGoogleLoading(true);
+    setErrorMsg("");
+    if (window.google?.accounts?.id) {
+      window.google.accounts.id.initialize({
+        client_id: "1057492984572-mockclientid.apps.googleusercontent.com",
+        callback: async (response) => {
+          try {
+            await googleLogin(response.credential);
+            navigate("/dashboard");
+          } catch (err) {
+            setErrorMsg(err.message || "Google Sign-In failed.");
+          } finally {
+            setIsGoogleLoading(false);
+          }
+        },
+      });
+      window.google.accounts.id.prompt();
+    } else {
+      setTimeout(async () => {
+        try {
+          const fakeToken = "mock_google_jwt_token_for_dev_testing";
+          await googleLogin(fakeToken);
+          navigate("/dashboard");
+        } catch (err) {
+          setErrorMsg("Google Sign-In error: " + (err.message || err));
+        } finally {
+          setIsGoogleLoading(false);
+        }
+      }, 1000);
     }
   };
 
@@ -157,7 +204,7 @@ const Login = () => {
     setOtpError("");
 
     try {
-      await verifyOtp(email, fullOtp);
+      await verifyOtp(email, fullOtp, "email_verification");
       setInfoMsg("Account successfully verified! Redirecting to dashboard...");
       setTimeout(() => {
         navigate("/dashboard");
@@ -170,7 +217,6 @@ const Login = () => {
     }
   };
 
-
   return (
     <div className="login-page">
       <div className="login-container">
@@ -179,7 +225,7 @@ const Login = () => {
           <img src={logo} alt="PrepNova AI" className="logo" />
           <h1>Welcome <span>Back</span> 👋</h1>
           <p>
-            Sign in to continue your interview preparation journey with PrepNova AI (PreNovaAi).
+            Sign in to continue your interview preparation journey with PrepNova AI.
           </p>
           <img src="/images/login-ai.png" alt="AI Interview" className="login-image" />
         </div>
@@ -188,7 +234,30 @@ const Login = () => {
         <div className="login-right">
           <h2>Login</h2>
 
-          {errorMsg && <div className="alert-message error">{errorMsg}</div>}
+          {errorMsg && (
+            <div className="alert-message error">
+              {errorMsg}
+              {isUnverified && (
+                <div style={{ marginTop: "12px", display: "flex", gap: "10px", flexWrap: "wrap" }}>
+                  <button
+                    type="button"
+                    onClick={() => navigate(`/verify-otp?email=${encodeURIComponent(email)}`)}
+                    style={{
+                      background: "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)",
+                      color: "white",
+                      border: "none",
+                      padding: "8px 16px",
+                      borderRadius: "8px",
+                      fontWeight: "600",
+                      cursor: "pointer"
+                    }}
+                  >
+                    Verify Email Now 🔐
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
           {infoMsg && <div className="alert-message info">{infoMsg}</div>}
 
           <form onSubmit={handleLoginSubmit}>
@@ -233,10 +302,14 @@ const Login = () => {
               {isLoading ? "Verifying Credentials..." : "Login"}
             </button>
 
-
-            <button type="button" className="google-btn">
+            <button
+              type="button"
+              className="google-btn"
+              onClick={handleGoogleSignIn}
+              disabled={isGoogleLoading}
+            >
               <img src={googleLogo} alt="Google" className="google-icon" />
-              Continue with Google
+              {isGoogleLoading ? "Connecting to Google..." : "Continue with Google"}
             </button>
 
             <p className="signup-text">
@@ -254,7 +327,7 @@ const Login = () => {
             <div className="otp-icon-header">
               <span>🔐</span>
             </div>
-            <h3>Verify Your Gmail</h3>
+            <h3>Verify Your Email</h3>
             <p>Enter the 6-digit random code sent to <strong>{email}</strong></p>
             
             {otpError && <div className="alert-message error">{otpError}</div>}
@@ -296,7 +369,7 @@ const Login = () => {
                     ? "Sending code..."
                     : resendTimer > 0
                     ? `Resend code in ${resendTimer}s`
-                    : "Resend 6-Digit Code"}
+                    : "Resend Verification Code"}
                 </button>
               </div>
               
@@ -321,7 +394,7 @@ const Login = () => {
               </div>
             </form>
             <p className="otp-helper-text">
-              Check your inbox & spam folder. (Local Dev Test Code: 123456)
+              Check your email inbox & spam folder for your 6-digit verification code.
             </p>
           </div>
         </div>

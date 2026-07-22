@@ -8,6 +8,10 @@ class UserBase(BaseModel):
     role: str
     plan_type: str
     is_active: bool
+    is_verified: bool = False
+    provider: Optional[str] = "email"
+    google_id: Optional[str] = None
+    profile_picture: Optional[str] = None
     target_role: Optional[str] = "Software Engineer"
     experience_level: Optional[str] = "Mid Level"
     bio: Optional[str] = ""
@@ -29,3 +33,4 @@ class UserUpdateRequest(BaseModel):
     experience_level: Optional[str] = None
     bio: Optional[str] = None
     avatar_url: Optional[str] = None
+    profile_picture: Optional[str] = None

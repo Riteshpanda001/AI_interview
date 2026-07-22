@@ -8,7 +8,7 @@
 
     display:flex;
     justify-content:space-between;
-    align-items:center;
+    align-items:flex-start;
 
     padding:80px 8%;
 
@@ -189,6 +189,10 @@
     display:flex;
 
     justify-content:center;
+
+    align-items:flex-start;
+
+    margin-top:0;
 }
 
 .mock-hero-right img{

@@ -73,10 +73,8 @@ export const AuthProvider = ({ children }) => {
     let response = await fetch(url, { ...options, headers });
 
     if (response.status === 401) {
-      // Access token expired, attempt refresh
       const newToken = await refreshToken();
       if (newToken) {
-        // Retry original request with fresh token
         const retryHeaders = {
           ...(options.headers || {}),
           Authorization: `Bearer ${newToken}`,
@@ -161,12 +159,17 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Register a new user
-  const register = async (fullName, email, password) => {
+  const register = async (fullName, email, password, confirmPassword) => {
     try {
       const response = await fetch(`${API_BASE_URL}/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, full_name: fullName }),
+        body: JSON.stringify({
+          email,
+          password,
+          confirm_password: confirmPassword,
+          full_name: fullName,
+        }),
       });
 
       const data = await response.json();
@@ -181,12 +184,12 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Resend OTP Code
-  const resendOtp = async (email) => {
+  const resendOtp = async (email, purpose = "email_verification") => {
     try {
       const response = await fetch(`${API_BASE_URL}/auth/resend-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, purpose }),
       });
 
       const data = await response.json();
@@ -201,12 +204,12 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Verify OTP & save dual tokens
-  const verifyOtp = async (email, otp) => {
+  const verifyOtp = async (email, otp, purpose = "email_verification") => {
     try {
       const response = await fetch(`${API_BASE_URL}/auth/verify-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, otp }),
+        body: JSON.stringify({ email, otp, purpose }),
       });
 
       const data = await response.json();
@@ -223,7 +226,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Login
+  // Login with Email & Password
   const login = async (email, password) => {
     try {
       const response = await fetch(`${API_BASE_URL}/auth/login`, {
@@ -235,7 +238,7 @@ export const AuthProvider = ({ children }) => {
       const data = await response.json();
       if (!response.ok) {
         if (response.status === 403) {
-          throw { status: 403, message: data.detail };
+          throw { status: 403, message: data.detail || "Verify your email first." };
         }
         throw new Error(data.detail || "Login failed");
       }
@@ -249,6 +252,29 @@ export const AuthProvider = ({ children }) => {
       return data;
     } catch (error) {
       console.error("Login error:", error);
+      throw error;
+    }
+  };
+
+  // Google Login
+  const googleLogin = async (credential) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/google`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ credential }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.detail || "Google authentication failed");
+      }
+
+      saveTokens(data.access_token, data.refresh_token);
+      await fetchCurrentUser(data.access_token);
+      return data;
+    } catch (error) {
+      console.error("Google login error:", error);
       throw error;
     }
   };
@@ -276,7 +302,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Change Password
-  const changePassword = async (oldPassword, newPassword) => {
+  const changePassword = async (oldPassword, newPassword, confirmPassword) => {
     try {
       const response = await authFetch(`${API_BASE_URL}/users/change-password`, {
         method: "POST",
@@ -284,6 +310,7 @@ export const AuthProvider = ({ children }) => {
         body: JSON.stringify({
           old_password: oldPassword,
           new_password: newPassword,
+          confirm_password: confirmPassword,
         }),
       });
 
@@ -319,12 +346,17 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Reset Password
-  const resetPassword = async (email, otp, newPassword) => {
+  const resetPassword = async (email, otp, newPassword, confirmPassword) => {
     try {
       const response = await fetch(`${API_BASE_URL}/auth/reset-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, otp, new_password: newPassword }),
+        body: JSON.stringify({
+          email,
+          otp,
+          new_password: newPassword,
+          confirm_password: confirmPassword,
+        }),
       });
 
       const data = await response.json();
@@ -365,6 +397,7 @@ export const AuthProvider = ({ children }) => {
         resendOtp,
         verifyOtp,
         login,
+        googleLogin,
         loginSimulated,
         refreshToken,
         updateProfile,

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from app.schemas.auth_schema import (
-    UserRegisterRequest, UserLoginRequest, TokenResponse, 
+    UserRegisterRequest, UserLoginRequest, GoogleAuthRequest, TokenResponse, 
     OTPVerifyRequest, OTPResponse, EmailCheckRequest,
     ForgotPasswordRequest, ResetPasswordRequest,
     RefreshTokenRequest, ResendOTPRequest
@@ -13,7 +13,7 @@ router = APIRouter()
 
 @router.post("/check-email")
 async def check_email(request: EmailCheckRequest, db = Depends(get_db)):
-    user = await db["users"].find_one({"email": request.email})
+    user = await db["users"].find_one({"email": request.email.lower().strip()})
     return {"exists": user is not None}
 
 @router.post("/register", response_model=OTPResponse, status_code=status.HTTP_201_CREATED)
@@ -23,16 +23,28 @@ async def register(request: UserRegisterRequest, db = Depends(get_db)):
 
 @router.post("/resend-otp", response_model=OTPResponse)
 async def resend_otp(request: ResendOTPRequest, db = Depends(get_db)):
-    return await AuthService.resend_user_otp(request.email, db)
+    purpose = request.purpose or "email_verification"
+    return await AuthService.resend_user_otp(request.email, purpose=purpose, db=db)
 
 @router.post("/login", response_model=TokenResponse)
 async def login(request: UserLoginRequest, db = Depends(get_db)):
     token_details = await AuthService.authenticate_user(request.email, request.password, db)
     return token_details
 
+@router.post("/google", response_model=TokenResponse)
+async def google_login(request: GoogleAuthRequest, db = Depends(get_db)):
+    token_str = request.credential or request.id_token
+    if not token_str:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Google ID token credential is required."
+        )
+    return await AuthService.google_login(token_str, db)
+
 @router.post("/verify-otp", response_model=TokenResponse)
 async def verify_otp(request: OTPVerifyRequest, db = Depends(get_db)):
-    token_details = await AuthService.verify_user_otp(request.email, request.otp, db)
+    purpose = request.purpose or "email_verification"
+    token_details = await AuthService.verify_user_otp(request.email, request.otp, purpose=purpose, db=db)
     return token_details
 
 @router.post("/refresh", response_model=TokenResponse)
@@ -49,6 +61,10 @@ async def forgot_password(request: ForgotPasswordRequest, db = Depends(get_db)):
 
 @router.post("/reset-password")
 async def reset_password(request: ResetPasswordRequest, db = Depends(get_db)):
-    return await AuthService.reset_password(request.email, request.otp, request.new_password, db)
-
-
+    return await AuthService.reset_password(
+        email=request.email,
+        otp=request.otp,
+        new_password=request.new_password,
+        confirm_password=request.confirm_password,
+        db=db
+    )

@@ -124,20 +124,32 @@ class MockDatabase:
             self.collections[name] = MockCollection(name)
         return self.collections[name]
 
+import time
+
 class MockPipeline:
     def __init__(self, mock_redis):
         self.mock_redis = mock_redis
+        self.ops = []
 
     def incr(self, key):
-        val = self.mock_redis.data.get(key, 0)
-        self.mock_redis.data[key] = int(val) + 1
+        self.ops.append(("incr", key))
         return self
 
     def expire(self, key, window):
+        self.ops.append(("expire", key, window))
         return self
 
     async def execute(self):
-        return [True]
+        results = []
+        for op in self.ops:
+            if op[0] == "incr":
+                res = await self.mock_redis.incr(op[1])
+                results.append(res)
+            elif op[0] == "expire":
+                res = await self.mock_redis.expire(op[1], op[2])
+                results.append(res)
+        self.ops.clear()
+        return results
 
     async def __aenter__(self):
         return self
@@ -148,18 +160,67 @@ class MockPipeline:
 class MockRedis:
     def __init__(self):
         self.data = {}
+        self.expires = {}
+
+    def _is_expired(self, key):
+        if key in self.expires:
+            if time.time() > self.expires[key]:
+                del self.expires[key]
+                if key in self.data:
+                    del self.data[key]
+                return True
+        return False
 
     async def set(self, key, value, ex=None):
         self.data[key] = str(value)
+        if ex is not None:
+            self.expires[key] = time.time() + float(ex)
+        elif key in self.expires:
+            del self.expires[key]
         return True
 
     async def get(self, key):
+        if self._is_expired(key):
+            return None
         return self.data.get(key)
 
     async def delete(self, key):
         if key in self.data:
             del self.data[key]
+        if key in self.expires:
+            del self.expires[key]
         return True
+
+    async def exists(self, key):
+        if self._is_expired(key):
+            return 0
+        return 1 if key in self.data else 0
+
+    async def ttl(self, key):
+        if self._is_expired(key) or key not in self.data:
+            return -2
+        if key in self.expires:
+            remaining = int(self.expires[key] - time.time())
+            return max(remaining, 0)
+        return -1
+
+    async def incr(self, key):
+        if self._is_expired(key):
+            val = 0
+        else:
+            val = int(self.data.get(key, 0))
+        val += 1
+        self.data[key] = str(val)
+        return val
+
+    async def expire(self, key, window):
+        if key in self.data:
+            self.expires[key] = time.time() + float(window)
+            return True
+        return False
+
+    async def ping(self):
+        return "PONG"
 
     def pipeline(self, transaction=True):
         return MockPipeline(self)

@@ -69,7 +69,7 @@ const ContactSection = () => {
 
             <div>
               <h3>Email</h3>
-              <p>support@prepnova.ai</p>
+              <p>prenovaai001@gmail.com</p>
             </div>
           </div>
 
@@ -78,7 +78,7 @@ const ContactSection = () => {
 
             <div>
               <h3>Phone</h3>
-              <p>+91 98765 43210</p>
+              <p>+91 9692229676</p>
             </div>
           </div>
 

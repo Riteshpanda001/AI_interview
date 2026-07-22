@@ -1,16 +1,10 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
 .hero {
   min-height: calc(100vh - 95px);
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding:20px 8% 80px;
-  gap:100px;
+  align-items: flex-start;
+  padding: 60px 8% 80px;
+  gap: 100px;
   background:
     radial-gradient(
       circle at top right,
@@ -55,7 +49,7 @@
   font-weight: 600;
   font-size: 14px;
   border-radius: 999px;
-  margin-bottom: 0px;
+  margin-bottom: 20px;
 }
 
 .hero-left h2 {
@@ -90,7 +84,8 @@
   flex: 1;
   display: flex;
   justify-content: flex-end;
-  align-items: center;
+  align-items: flex-start;
+  margin-top: 58px;
   position:relative;
 }
 
@@ -103,7 +98,6 @@
     0 25px 60px rgba(124,58,237,0.25);
 
   animation: float 4s ease-in-out infinite;
-  border:6px solid rgba(255,255,255,0.8);
   backdrop-filter: blur(10px);
 }
 /* FEATURES */

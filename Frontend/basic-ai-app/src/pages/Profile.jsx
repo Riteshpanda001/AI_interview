@@ -81,7 +81,7 @@ const Profile = () => {
     setSecurityMessage({ type: "", text: "" });
 
     try {
-      await changePassword(oldPassword, newPassword);
+      await changePassword(oldPassword, newPassword, confirmPassword);
       setSecurityMessage({ type: "success", text: "Password changed successfully!" });
       setOldPassword("");
       setNewPassword("");

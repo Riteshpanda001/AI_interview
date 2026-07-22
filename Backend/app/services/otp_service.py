@@ -1,299 +1,149 @@
-import random
+import secrets
+from datetime import datetime, timedelta
+from fastapi import HTTPException, status
 from app.database import db_manager
 from app.services.email_service import EmailService
 
-
 class OTPService:
+    MAX_ATTEMPTS = 5
+    OTP_EXPIRY_MINUTES = 1
+    RESEND_COOLDOWN_SECONDS = 60
+
     @staticmethod
-    async def resend_otp(email: str) -> str:
+    def _generate_6digit_otp() -> str:
+        return "".join(secrets.choice("0123456789") for _ in range(6))
+
+    @staticmethod
+    async def send_otp(email: str, purpose: str = "email_verification", user_name: str = "") -> str:
+        clean_email = email.lower().strip()
+        now = datetime.utcnow()
+        db = db_manager.db
+
+        # 1. Enforce 60-second resend cooldown check
+        if db is not None:
+            last_otp = await db["otps"].find_one({
+                "email": clean_email,
+                "purpose": purpose
+            })
+            if last_otp:
+                created_at = last_otp.get("created_at")
+                if created_at and (now - created_at).total_seconds() < OTPService.RESEND_COOLDOWN_SECONDS:
+                    wait_seconds = int(OTPService.RESEND_COOLDOWN_SECONDS - (now - created_at).total_seconds())
+                    raise HTTPException(
+                        status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                        detail=f"Please wait {wait_seconds} seconds before requesting another code."
+                    )
+                # Invalidate existing previous OTP for this purpose
+                await db["otps"].delete_many({"email": clean_email, "purpose": purpose})
+
+        # 2. Generate 6-digit random OTP
+        otp_code = OTPService._generate_6digit_otp()
+        expires_at = now + timedelta(minutes=OTPService.OTP_EXPIRY_MINUTES)
+
+        # 3. Store in MongoDB 'otps' collection
+        otp_record = {
+            "email": clean_email,
+            "otp": otp_code,
+            "purpose": purpose,
+            "expires_at": expires_at,
+            "created_at": now,
+            "attempts": 0
+        }
+        if db is not None:
+            await db["otps"].insert_one(otp_record)
+
+        # 4. Store in Redis cache with 5-minute TTL
         redis = db_manager.redis_client
         if redis:
-            ttl = await redis.ttl(f"otp:{email}")
-            if ttl > 285:
-                from fastapi import HTTPException, status
+            cache_key = f"otp:{purpose}:{clean_email}"
+            await redis.set(cache_key, otp_code, ex=OTPService.OTP_EXPIRY_MINUTES * 60)
+
+        # 5. Send branded HTML Email
+        if purpose == "password_reset":
+            subject = "🔑 Reset Your PreNova AI Password"
+            html_content = EmailService.build_password_reset_email_html(user_name, otp_code)
+        else:
+            subject = "🔐 Verify Your Email – PreNova AI"
+            html_content = EmailService.build_verification_email_html(user_name, otp_code)
+
+        await EmailService.send_email(clean_email, subject, html_content)
+        return otp_code
+
+    @staticmethod
+    async def resend_otp(email: str, purpose: str = "email_verification", user_name: str = "") -> str:
+        return await OTPService.send_otp(email, purpose=purpose, user_name=user_name)
+
+    @staticmethod
+    async def verify_otp(email: str, otp: str, purpose: str = "email_verification") -> bool:
+        clean_email = email.lower().strip()
+        clean_otp = otp.strip()
+        now = datetime.utcnow()
+        db = db_manager.db
+
+        # 2. Check in MongoDB 'otps' collection
+        if db is not None:
+            record = await db["otps"].find_one({
+                "email": clean_email,
+                "purpose": purpose
+            })
+
+            if not record:
+                # Check Redis fallback
+                redis = db_manager.redis_client
+                if redis:
+                    cached = await redis.get(f"otp:{purpose}:{clean_email}")
+                    if cached == clean_otp:
+                        await redis.delete(f"otp:{purpose}:{clean_email}")
+                        return True
+                return False
+
+            # Check max attempts limit (5 attempts)
+            attempts = record.get("attempts", 0) + 1
+            if attempts > OTPService.MAX_ATTEMPTS:
+                await db["otps"].delete_many({"email": clean_email, "purpose": purpose})
                 raise HTTPException(
-                    status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-                    detail="Please wait a few seconds before requesting another verification code."
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Maximum OTP attempts exceeded. Please request a new verification code."
                 )
-        return await OTPService.send_otp(email)
 
-    @staticmethod
-    async def send_otp(email: str) -> str:
-        # Generate 6-digit numeric OTP
-        otp = "".join([str(random.randint(0, 9)) for _ in range(6)])
+            # Update attempt counter
+            await db["otps"].update_one(
+                {"_id": record["_id"]},
+                {"$set": {"attempts": attempts}}
+            )
 
-        # Store in Redis with 5-minute expiry
+            # Check expiration (5 minutes)
+            expires_at = record.get("expires_at")
+            if expires_at and now > expires_at:
+                await db["otps"].delete_many({"email": clean_email, "purpose": purpose})
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Verification code has expired. Please request a new code."
+                )
+
+            # Validate OTP code match
+            if record.get("otp") == clean_otp:
+                # Valid OTP! Clean up record
+                await db["otps"].delete_many({"email": clean_email, "purpose": purpose})
+                redis = db_manager.redis_client
+                if redis:
+                    await redis.delete(f"otp:{purpose}:{clean_email}")
+                return True
+
+        # Fallback to Redis if DB not available
         redis = db_manager.redis_client
         if redis:
-            await redis.set(f"otp:{email}", otp, ex=300)
+            cached_otp = await redis.get(f"otp:{purpose}:{clean_email}")
+            if cached_otp == clean_otp:
+                await redis.delete(f"otp:{purpose}:{clean_email}")
+                return True
 
-        # Build premium branded OTP email
-        subject = "🔐 Your PreNovaAi Verification Code"
-        html_content = f"""
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-          <meta charset="UTF-8" />
-          <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-          <title>Verify Your Email – PreNovaAi</title>
-        </head>
-        <body style="margin:0;padding:0;background-color:#07040f;font-family:'Segoe UI',Arial,sans-serif;">
-          <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#07040f;padding:40px 20px;">
-            <tr>
-              <td align="center">
-                <table width="600" cellpadding="0" cellspacing="0"
-                  style="background:linear-gradient(135deg,#0f0818 0%,#12062a 100%);
-                         border:1px solid rgba(168,85,247,0.25);
-                         border-radius:16px;
-                         overflow:hidden;
-                         box-shadow:0 8px 40px rgba(124,58,237,0.3);">
-
-                  <!-- Header -->
-                  <tr>
-                    <td align="center"
-                      style="background:linear-gradient(135deg,#4c1d95,#7c3aed);
-                             padding:32px 40px;">
-                      <h1 style="margin:0;color:#ffffff;font-size:30px;font-weight:800;
-                                 letter-spacing:-0.5px;text-shadow:0 2px 8px rgba(0,0,0,0.3);">
-                        PreNovaAi
-                      </h1>
-                      <p style="margin:6px 0 0 0;color:rgba(255,255,255,0.75);font-size:14px;
-                                letter-spacing:1px;text-transform:uppercase;">
-                        Next-Gen AI Interview Preparation
-                      </p>
-                    </td>
-                  </tr>
-
-                  <!-- Body -->
-                  <tr>
-                    <td style="padding:40px 48px;">
-                      <h2 style="margin:0 0 12px 0;color:#ffffff;font-size:22px;font-weight:700;">
-                        Verify your email address 📧
-                      </h2>
-                      <p style="margin:0 0 28px 0;color:#a3a3c2;font-size:15px;line-height:1.7;">
-                        Thanks for signing up! Enter the 6-digit code below to complete your
-                        account verification. This code expires in <strong style="color:#c084fc;">5 minutes</strong>.
-                      </p>
-
-                      <!-- OTP Box -->
-                      <table width="100%" cellpadding="0" cellspacing="0">
-                        <tr>
-                          <td align="center" style="padding:10px 0 32px 0;">
-                            <div style="display:inline-block;
-                                        background:linear-gradient(135deg,rgba(124,58,237,0.15),rgba(168,85,247,0.1));
-                                        border:2px solid rgba(168,85,247,0.4);
-                                        border-radius:14px;
-                                        padding:28px 52px;">
-                              <span style="font-size:48px;font-weight:900;letter-spacing:12px;
-                                           color:#c084fc;text-shadow:0 0 20px rgba(192,132,252,0.5);">
-                                {otp}
-                              </span>
-                            </div>
-                          </td>
-                        </tr>
-                      </table>
-
-                      <!-- Steps -->
-                      <table width="100%" cellpadding="0" cellspacing="0"
-                        style="background:rgba(255,255,255,0.03);border-radius:10px;
-                               border:1px solid rgba(168,85,247,0.1);margin-bottom:28px;">
-                        <tr>
-                          <td style="padding:20px 24px;">
-                            <p style="margin:0 0 8px 0;color:#ffffff;font-size:14px;font-weight:600;">
-                              How to verify:
-                            </p>
-                            <p style="margin:0;color:#a3a3c2;font-size:14px;line-height:1.8;">
-                              1. Go back to the PreNovaAi registration page.<br/>
-                              2. Enter the 6-digit code shown above.<br/>
-                              3. Click <strong style="color:#c084fc;">Verify &amp; Login</strong> to activate your account.
-                            </p>
-                          </td>
-                        </tr>
-                      </table>
-
-                      <!-- Security Notice -->
-                      <table width="100%" cellpadding="0" cellspacing="0"
-                        style="background:rgba(239,68,68,0.07);border-radius:10px;
-                               border:1px solid rgba(239,68,68,0.2);margin-bottom:32px;">
-                        <tr>
-                          <td style="padding:16px 20px;">
-                            <p style="margin:0;color:#fca5a5;font-size:13px;line-height:1.6;">
-                              🔒 <strong>Security tip:</strong> PreNovaAi will never ask for this code via phone,
-                              chat, or any other channel. Do not share it with anyone.
-                            </p>
-                          </td>
-                        </tr>
-                      </table>
-
-                      <p style="margin:0;color:#6b6b8a;font-size:13px;line-height:1.6;">
-                        If you did not create an account on PreNovaAi, you can safely ignore this email.
-                        No account will be created without verification.
-                      </p>
-                    </td>
-                  </tr>
-
-                  <!-- Footer -->
-                  <tr>
-                    <td style="padding:24px 48px;border-top:1px solid rgba(168,85,247,0.1);">
-                      <p style="margin:0;color:#52527a;font-size:12px;text-align:center;line-height:1.6;">
-                        © 2025 PreNovaAi · All rights reserved<br/>
-                        This is an automated message. Please do not reply to this email.
-                      </p>
-                    </td>
-                  </tr>
-
-                </table>
-              </td>
-            </tr>
-          </table>
-        </body>
-        </html>
-        """
-
-        await EmailService.send_email(email, subject, html_content)
-        return otp
+        return False
 
     @staticmethod
-    async def verify_otp(email: str, otp: str) -> bool:
-        redis = db_manager.redis_client
-        if not redis:
-            # Redis offline → allow universal dev fallback
-            return otp == "123456"
-
-        cached_otp = await redis.get(f"otp:{email}")
-        if cached_otp == otp:
-            await redis.delete(f"otp:{email}")
-            return True
-
-        return otp == "123456"  # Universal test code for local dev fallback
-
-    @staticmethod
-    async def send_password_reset_otp(email: str) -> str:
-        # Generate 6-digit numeric OTP
-        otp = "".join([str(random.randint(0, 9)) for _ in range(6)])
-
-        # Store in Redis with 5-minute expiry
-        redis = db_manager.redis_client
-        if redis:
-            await redis.set(f"password_reset_otp:{email}", otp, ex=300)
-
-        # Build premium branded password recovery email
-        subject = "🔑 Reset Your PreNovaAi Password"
-        html_content = f"""
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-          <meta charset="UTF-8" />
-          <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-          <title>Reset Your Password – PreNovaAi</title>
-        </head>
-        <body style="margin:0;padding:0;background-color:#07040f;font-family:'Segoe UI',Arial,sans-serif;">
-          <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#07040f;padding:40px 20px;">
-            <tr>
-              <td align="center">
-                <table width="600" cellpadding="0" cellspacing="0"
-                  style="background:linear-gradient(135deg,#0f0818 0%,#12062a 100%);
-                         border:1px solid rgba(168,85,247,0.25);
-                         border-radius:16px;
-                         overflow:hidden;
-                         box-shadow:0 8px 40px rgba(124,58,237,0.3);">
-
-                  <!-- Header -->
-                  <tr>
-                    <td align="center"
-                      style="background:linear-gradient(135deg,#7c3aed,#a855f7);
-                             padding:32px 40px;">
-                      <h1 style="margin:0;color:#ffffff;font-size:30px;font-weight:800;
-                                 letter-spacing:-0.5px;text-shadow:0 2px 8px rgba(0,0,0,0.3);">
-                        PreNovaAi
-                      </h1>
-                      <p style="margin:6px 0 0 0;color:rgba(255,255,255,0.75);font-size:14px;
-                                letter-spacing:1px;text-transform:uppercase;">
-                        Password Recovery Request
-                      </p>
-                    </td>
-                  </tr>
-
-                  <!-- Body -->
-                  <tr>
-                    <td style="padding:40px 48px;">
-                      <h2 style="margin:0 0 12px 0;color:#ffffff;font-size:22px;font-weight:700;">
-                        Reset your account password 🔑
-                      </h2>
-                      <p style="margin:0 0 28px 0;color:#a3a3c2;font-size:15px;line-height:1.7;">
-                        We received a request to reset your password. Enter the 6-digit recovery code below on the password reset page. This code is valid for <strong style="color:#c084fc;">5 minutes</strong>.
-                      </p>
-
-                      <!-- OTP Box -->
-                      <table width="100%" cellpadding="0" cellspacing="0">
-                        <tr>
-                          <td align="center" style="padding:10px 0 32px 0;">
-                            <div style="display:inline-block;
-                                        background:linear-gradient(135deg,rgba(124,58,237,0.15),rgba(168,85,247,0.1));
-                                        border:2px solid rgba(168,85,247,0.4);
-                                        border-radius:14px;
-                                        padding:28px 52px;">
-                              <span style="font-size:48px;font-weight:900;letter-spacing:12px;
-                                           color:#c084fc;text-shadow:0 0 20px rgba(192,132,252,0.5);">
-                                {otp}
-                              </span>
-                            </div>
-                          </td>
-                        </tr>
-                      </table>
-
-                      <!-- Security Notice -->
-                      <table width="100%" cellpadding="0" cellspacing="0"
-                        style="background:rgba(239,68,68,0.07);border-radius:10px;
-                               border:1px solid rgba(239,68,68,0.2);margin-bottom:32px;">
-                        <tr>
-                          <td style="padding:16px 20px;">
-                            <p style="margin:0;color:#fca5a5;font-size:13px;line-height:1.6;">
-                              🔒 <strong>Security Warning:</strong> If you did not request a password reset, please ignore this email. Your current password will remain active and secure.
-                            </p>
-                          </td>
-                        </tr>
-                      </table>
-
-                      <p style="margin:0;color:#6b6b8a;font-size:13px;line-height:1.6;">
-                        If you have any issues, please contact our support desk.
-                      </p>
-                    </td>
-                  </tr>
-
-                  <!-- Footer -->
-                  <tr>
-                    <td style="padding:24px 48px;border-top:1px solid rgba(168,85,247,0.1);">
-                      <p style="margin:0;color:#52527a;font-size:12px;text-align:center;line-height:1.6;">
-                        © 2025 PreNovaAi · All rights reserved<br/>
-                        This is an automated message. Please do not reply to this email.
-                      </p>
-                    </td>
-                  </tr>
-
-                </table>
-              </td>
-            </tr>
-          </table>
-        </body>
-        </html>
-        """
-
-        await EmailService.send_email(email, subject, html_content)
-        return otp
+    async def send_password_reset_otp(email: str, user_name: str = "") -> str:
+        return await OTPService.send_otp(email, purpose="password_reset", user_name=user_name)
 
     @staticmethod
     async def verify_password_reset_otp(email: str, otp: str) -> bool:
-        redis = db_manager.redis_client
-        if not redis:
-            # Redis offline → allow universal dev fallback
-            return otp == "123456"
-
-        cached_otp = await redis.get(f"password_reset_otp:{email}")
-        if cached_otp == otp:
-            await redis.delete(f"password_reset_otp:{email}")
-            return True
-
-        return otp == "123456"  # Universal test code for local dev fallback
-
-
+        return await OTPService.verify_otp(email, otp, purpose="password_reset")

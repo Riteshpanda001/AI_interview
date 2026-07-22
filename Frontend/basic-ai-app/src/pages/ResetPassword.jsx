@@ -52,7 +52,7 @@ const ResetPassword = () => {
     setSuccessMsg("");
 
     try {
-      await resetPassword(email, otp, newPassword);
+      await resetPassword(email, otp, newPassword, confirmPassword);
       setSuccessMsg("Password successfully reset! Redirecting to login page...");
       setTimeout(() => {
         navigate("/login");
