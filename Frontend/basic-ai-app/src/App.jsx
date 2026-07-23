@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 
 import Home from "./pages/Home";
 import Login from "./pages/Login";
@@ -18,6 +18,16 @@ import Pricing from "./pages/Pricing";
 import Contact from "./pages/Contact";
 import Profile from "./pages/Profile";
 
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+}
+
 function App() {
   useEffect(() => {
     const savedTheme = localStorage.getItem("app-theme") || "theme-cyber-purple";
@@ -25,26 +35,29 @@ function App() {
   }, []);
 
   return (
-    <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/forgot-password" element={<ForgotPassword />} />
-      <Route path="/reset-password" element={<ResetPassword />} />
-      <Route path="/verify-otp" element={<VerifyOTP />} />
-      <Route path="/dashboard" element={<DashboardPage />} />
-      <Route path="/profile" element={<Profile />} />
+    <>
+      <ScrollToTop />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/verify-otp" element={<VerifyOTP />} />
+        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/profile" element={<Profile />} />
 
-      <Route path="/mock-interview" element={<MockInterview />} />
-      <Route path="/mock-interviews" element={<MockInterviews />} />
-      <Route path="/resume-builder" element={<ResumeBuilder />} />
-      <Route path="/coding-practice" element={<CodingPractice />} />
-      <Route path="/company-preparation" element={<CompanyPreparation />} />
-      <Route path="/ats-score" element={<ATSScore />} />
-      <Route path="/resume-upload" element={<ATSScore />} />
-      <Route path="/pricing" element={<Pricing />} />
-      <Route path="/contact" element={<Contact />} />
-    </Routes>
+        <Route path="/mock-interview" element={<MockInterview />} />
+        <Route path="/mock-interviews" element={<MockInterviews />} />
+        <Route path="/resume-builder" element={<ResumeBuilder />} />
+        <Route path="/coding-practice" element={<CodingPractice />} />
+        <Route path="/company-preparation" element={<CompanyPreparation />} />
+        <Route path="/ats-score" element={<ATSScore />} />
+        <Route path="/resume-upload" element={<ATSScore />} />
+        <Route path="/pricing" element={<Pricing />} />
+        <Route path="/contact" element={<Contact />} />
+      </Routes>
+    </>
   );
 }
 

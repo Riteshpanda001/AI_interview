@@ -37,10 +37,10 @@ const Footer = () => {
 
           <h3>Resources</h3>
 
-          <a href="/">AI Mock Interview</a>
-          <a href="/">ATS Resume Analyzer</a>
-          <a href="/">Coding Practice</a>
-          <a href="/">Company Preparation</a>
+          <a href="/mock-interview">AI Mock Interview</a>
+          <a href="/ats-score">ATS Resume Analyzer</a>
+          <a href="/coding-practice">Coding Practice</a>
+          <a href="/company-preparation">Company Preparation</a>
 
         </div>
 

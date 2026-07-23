@@ -48,7 +48,16 @@ const AIMockInterview = () => {
 
         </div>
 
-        <button className="mock-btn" onClick={() => navigate("/mock-interview")}>
+        <button 
+          className="mock-btn" 
+          onClick={() => {
+            if (window.location.pathname === "/mock-interview") {
+              navigate("/mock-interviews");
+            } else {
+              navigate("/mock-interview");
+            }
+          }}
+        >
           Start Mock Interview
         </button>
 
