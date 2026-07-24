@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends
-from app.schemas.ats_schema import ATSAnalysisRequest, ATSAnalysisResponse
+from app.schemas.ats_schema import ATSAnalysisRequest, ATSAnalysisResponse, TailorResumeRequest
 from app.dependencies import get_current_active_user, get_db
 from app.services.ats_service import ATSService
 
@@ -18,3 +18,13 @@ async def analyze_resume_ats(
         db=db
     )
     return analysis
+
+@router.post("/tailor")
+async def tailor_resume(
+    request: TailorResumeRequest,
+    current_user = Depends(get_current_active_user)
+):
+    return await ATSService.tailor_resume(
+        resume_data=request.resume_data,
+        job_description=request.job_description
+    )

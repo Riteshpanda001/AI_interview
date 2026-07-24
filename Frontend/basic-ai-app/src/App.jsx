@@ -11,6 +11,7 @@ import DashboardPage from "./pages/DashboardPage";
 import MockInterview from "./pages/MockInterview";
 import MockInterviews from "./pages/MockInterviews";
 import ResumeBuilder from "./pages/ResumeBuilder";
+import SharedResumePage from "./pages/SharedResumePage";
 import CodingPractice from "./pages/CodingPractice";
 import CompanyPreparation from "./pages/CompanyPreparation";
 import ATSScore from "./pages/ATSScore";
@@ -50,6 +51,7 @@ function App() {
         <Route path="/mock-interview" element={<MockInterview />} />
         <Route path="/mock-interviews" element={<MockInterviews />} />
         <Route path="/resume-builder" element={<ResumeBuilder />} />
+        <Route path="/share/resume/:shareToken" element={<SharedResumePage />} />
         <Route path="/coding-practice" element={<CodingPractice />} />
         <Route path="/company-preparation" element={<CompanyPreparation />} />
         <Route path="/ats-score" element={<ATSScore />} />

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
@@ -11,13 +11,19 @@ import ResumeForm from "../components/resumeBuilder/ResumeForm";
 import ResumePreview from "../components/resumeBuilder/ResumePreview";
 import AIResumeSuggestions from "../components/resumeBuilder/AIResumeSuggestions";
 import ATSResumeScore from "../components/resumeBuilder/ATSResumeScore";
-import ResumeFAQ from "../components/resumeBuilder/ResumeFAQ";
 import CreateNewWorkspace from "../components/resumeBuilder/CreateNewWorkspace";
+import AIGeneratorModal from "../components/resumeBuilder/AIGeneratorModal";
+import ResumeFAQ from "../components/resumeBuilder/ResumeFAQ";
 
 import "./ResumeBuilder.css";
 
+const API_BASE_URL = "http://localhost:8000/api";
+
 const ResumeBuilder = () => {
+  const [isWorkspaceActive, setIsWorkspaceActive] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState("london");
+  const [currentResumeId, setCurrentResumeId] = useState(null);
+  
   const [resumeData, setResumeData] = useState({
     personal: {
       name: "Alex Carter",
@@ -26,13 +32,13 @@ const ResumeBuilder = () => {
       linkedin: "linkedin.com/in/alexcarter",
       role: "Frontend Engineer"
     },
-    summary: "Results-driven Software Engineer with 3+ years of experience designing, building, and deploying scalable web applications using React, Node.js, and cloud platforms. Proven track record of optimizing performance and collaborating in agile teams.",
+    summary: "Results-driven Software Engineer with 3+ years of experience designing, building, and deploying scalable web applications using React, Node.js, and cloud platforms.",
     experience: [
       {
         company: "TechNova Solutions",
         role: "Software Engineer",
         duration: "2024 - Present",
-        details: "Developed and maintained responsive web applications using React and Redux.\nOptimized API performance, reducing page load times by 35%.\nCollaborated with UI/UX designers to implement clean, glassmorphic interfaces."
+        details: "Developed responsive web applications using React and Redux.\nOptimized API performance, reducing page load times by 35%."
       }
     ],
     education: [
@@ -45,20 +51,19 @@ const ResumeBuilder = () => {
     skills: ["React", "JavaScript", "HTML/CSS", "Node.js", "Git", "REST APIs", "TypeScript", "AWS"],
     projects: [
       {
-        name: "AI Interview Simulator",
-        description: "Built an AI-powered mock interview app with real-time feedback using OpenAI API and React."
+        name: "AI Resume Platform",
+        description: "Built an AI-powered mock interview and resume app with real-time feedback using OpenAI API and React."
       }
     ]
   });
 
   const [showStartModal, setShowStartModal] = useState(false);
-  const [pendingTemplate, setPendingTemplate] = useState(null);
+  const [showAIGeneratorModal, setShowAIGeneratorModal] = useState(false);
   const [modalStep, setModalStep] = useState("options"); // "options" | "upload"
-  const [isDragOver, setIsDragOver] = useState(false);
+  const [pendingTemplate, setPendingTemplate] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [fileName, setFileName] = useState("");
-  const [isWorkspaceActive, setIsWorkspaceActive] = useState(false);
 
   const handleScrollToTemplates = () => {
     const section = document.getElementById("resume-templates-section");
@@ -67,11 +72,39 @@ const ResumeBuilder = () => {
     }
   };
 
-  const handleCreateNew = () => {
+  const handleSaveResume = async (updatedData, template) => {
+    const token = localStorage.getItem("token");
+    const payload = {
+      id: currentResumeId,
+      title: updatedData.personal?.name ? `${updatedData.personal.name}'s Resume` : "Untitled Resume",
+      selected_template: template || selectedTemplate,
+      resume_data: updatedData,
+      ats_score: 85
+    };
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/resume/save`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) {
+        const saved = await res.json();
+        if (saved.id) setCurrentResumeId(saved.id);
+      }
+    } catch (err) {
+      console.warn("Error auto-saving to server:", err);
+    }
+  };
+
+  const handleCreateBlank = () => {
     if (pendingTemplate) {
       setSelectedTemplate(pendingTemplate);
     }
-    // Set to blank state so they can start fresh
+    setCurrentResumeId(null);
     setResumeData({
       personal: { name: "", email: "", phone: "", linkedin: "", role: "" },
       summary: "",
@@ -81,7 +114,66 @@ const ResumeBuilder = () => {
       projects: [{ name: "", description: "" }]
     });
     setShowStartModal(false);
-    setIsWorkspaceActive(true); // Switch directly to workspace screen
+    setIsWorkspaceActive(true);
+  };
+
+  const handleAIGeneratedSubmit = async (params) => {
+    const token = localStorage.getItem("token");
+    try {
+      const res = await fetch(`${API_BASE_URL}/resume/generate`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(params)
+      });
+      if (res.ok) {
+        const generated = await res.json();
+        setResumeData(generated);
+        setShowAIGeneratorModal(false);
+        setIsWorkspaceActive(true);
+        alert("✨ AI Resume generated successfully!");
+      } else {
+        throw new Error("AI Generator endpoint error");
+      }
+    } catch (err) {
+      console.warn("AI generator server offline, running fallback generator:", err);
+      setResumeData({
+        personal: {
+          name: "Jordan Lee",
+          email: "jordan.lee@example.com",
+          phone: "+1 (555) 789-0123",
+          linkedin: "linkedin.com/in/jordanlee",
+          role: params.role || "Software Specialist"
+        },
+        summary: `Accomplished ${params.experience_level || "Mid-Level"} ${params.role} in ${params.industry || "Technology"} with hands-on experience building scalable applications and optimizing workflows.`,
+        experience: [
+          {
+            company: "Tech Corp",
+            role: params.role || "Developer",
+            duration: "2022 - Present",
+            details: `Spearheaded engineering initiatives for high-traffic web apps.\nOptimized API query performance by 35% and introduced automated CI/CD.`
+          }
+        ],
+        education: [
+          {
+            institution: "State University",
+            degree: "B.S. in Computer Science",
+            duration: "2018 - 2022"
+          }
+        ],
+        skills: params.key_skills ? params.key_skills.split(",").map(s=>s.trim()) : ["React", "JavaScript", "Python", "Node.js", "AWS", "Git"],
+        projects: [
+          {
+            name: `${params.role} Platform`,
+            description: "Designed high performance cloud platform with real-time feedback."
+          }
+        ]
+      });
+      setShowAIGeneratorModal(false);
+      setIsWorkspaceActive(true);
+    }
   };
 
   const processResumeFile = async (file) => {
@@ -89,7 +181,6 @@ const ResumeBuilder = () => {
     setUploading(true);
     setProgress(0);
 
-    // Progress simulation
     const interval = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 100) {
@@ -98,18 +189,16 @@ const ResumeBuilder = () => {
         }
         return prev + 10;
       });
-    }, 100);
+    }, 80);
 
     const token = localStorage.getItem("token");
     const formData = new FormData();
     formData.append("file", file);
 
     try {
-      const response = await fetch("http://localhost:8000/api/resume/upload", {
+      const response = await fetch(`${API_BASE_URL}/resume/upload`, {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`
-        },
+        headers: { Authorization: `Bearer ${token}` },
         body: formData
       });
 
@@ -120,18 +209,17 @@ const ResumeBuilder = () => {
         }
         if (data.parsed_content) {
           setResumeData(data.parsed_content);
-        } else if (data.resume_data) {
-          setResumeData(data.resume_data);
         }
+        if (data.id) setCurrentResumeId(data.id);
         setUploading(false);
         setShowStartModal(false);
-        setIsWorkspaceActive(true); // Switch directly to workspace screen
-        alert("✨ Success! Your resume has been uploaded and parsed successfully.");
+        setIsWorkspaceActive(true);
+        alert("✨ Success! Resume uploaded & parsed successfully.");
       } else {
-        throw new Error("Parser response error");
+        throw new Error("Upload error");
       }
     } catch (err) {
-      console.warn("Backend parse endpoint failed. Simulating local fallback:", err);
+      console.warn("Upload endpoint failed. Using fallback:", err);
       setTimeout(() => {
         if (pendingTemplate) {
           setSelectedTemplate(pendingTemplate);
@@ -144,13 +232,13 @@ const ResumeBuilder = () => {
             linkedin: "linkedin.com/in/johndoe",
             role: "Software Developer"
           },
-          summary: "Highly skilled Software Developer with experience in web applications. Passionate about building robust backend APIs and responsive frontend user interfaces.",
+          summary: "Highly skilled Software Developer with experience in web applications and backend APIs.",
           experience: [
             {
               company: "Global Tech Inc.",
               role: "Software Developer",
               duration: "2022 - Present",
-              details: "Developed full-stack web applications using React, Node.js, and SQL.\nCollaborated with cross-functional teams to deliver key feature updates."
+              details: "Developed full-stack web applications using React, Node.js, and SQL."
             }
           ],
           education: [
@@ -160,40 +248,40 @@ const ResumeBuilder = () => {
               duration: "2018 - 2022"
             }
           ],
-          skills: ["React", "JavaScript", "Node.js", "SQL", "Git", "REST APIs", "HTML", "CSS"],
+          skills: ["React", "JavaScript", "Node.js", "SQL", "Git", "REST APIs"],
           projects: [
             {
               name: "Portfolio Website",
-              description: "Designed and deployed a responsive personal portfolio site using React and CSS."
+              description: "Designed and deployed a responsive personal portfolio site."
             }
           ]
         });
         setUploading(false);
         setShowStartModal(false);
-        setIsWorkspaceActive(true); // Switch directly to workspace screen
-        alert("✨ Success! Local parser has imported details from your resume file.");
-      }, 1000);
+        setIsWorkspaceActive(true);
+      }, 800);
     }
   };
 
   return (
     <div className="resume-page">
-
-      {/* Navbar */}
       <Navbar />
 
       {isWorkspaceActive ? (
-        <CreateNewWorkspace 
+        <CreateNewWorkspace
           selectedTemplate={selectedTemplate}
+          setSelectedTemplate={setSelectedTemplate}
           resumeData={resumeData}
           setResumeData={setResumeData}
+          currentResumeId={currentResumeId}
+          onSaveResume={handleSaveResume}
           onBack={() => setIsWorkspaceActive(false)}
         />
       ) : (
         <>
-          {/* Hero Section */}
+          {/* Landing Hero Section */}
           <ResumeHero onBuildClick={handleScrollToTemplates} />
-
+          
           {/* Features */}
           <ResumeFeatures />
 
@@ -201,43 +289,44 @@ const ResumeBuilder = () => {
           <ResumeHowItWorks />
 
           {/* Resume Templates */}
-          <ResumeTemplates 
-            selectedTemplate={selectedTemplate} 
+          <ResumeTemplates
+            selectedTemplate={selectedTemplate}
             setSelectedTemplate={(tplId) => {
               setPendingTemplate(tplId);
               setModalStep("options");
               setShowStartModal(true);
-            }} 
+            }}
           />
 
           {/* Role Templates Pre-fill */}
-          <ResumeRoleTemplates 
+          <ResumeRoleTemplates
             onSelectRole={(roleData) => {
               setResumeData(roleData);
+              setIsWorkspaceActive(true);
             }}
           />
 
           {/* Resume Form */}
-          <ResumeForm 
-            resumeData={resumeData} 
-            setResumeData={setResumeData} 
+          <ResumeForm
+            resumeData={resumeData}
+            setResumeData={setResumeData}
           />
 
           {/* Live Resume Preview */}
-          <ResumePreview 
-            resumeData={resumeData} 
-            selectedTemplate={selectedTemplate} 
+          <ResumePreview
+            resumeData={resumeData}
+            selectedTemplate={selectedTemplate}
             setResumeData={setResumeData}
           />
 
           {/* AI Suggestions */}
-          <AIResumeSuggestions 
-            setResumeData={setResumeData} 
+          <AIResumeSuggestions
+            setResumeData={setResumeData}
           />
 
           {/* ATS Resume Score */}
-          <ATSResumeScore 
-            resumeData={resumeData} 
+          <ATSResumeScore
+            resumeData={resumeData}
           />
 
           {/* FAQ */}
@@ -245,10 +334,16 @@ const ResumeBuilder = () => {
         </>
       )}
 
-      {/* Footer */}
       <Footer />
 
-      {/* How do you want to start? Modal overlay */}
+      {/* AI Generator Modal */}
+      <AIGeneratorModal
+        isOpen={showAIGeneratorModal}
+        onClose={() => setShowAIGeneratorModal(false)}
+        onGenerate={handleAIGeneratedSubmit}
+      />
+
+      {/* Start Modal Overlay */}
       {showStartModal && (
         <div className="modal-overlay select-modal">
           <div className="modal-card">
@@ -260,12 +355,23 @@ const ResumeBuilder = () => {
               <div className="modal-content select-start">
                 <h2>How do you want to start?</h2>
                 <div className="modal-options">
-                  <button className="modal-option-row" onClick={handleCreateNew}>
+                  <button className="modal-option-row" onClick={handleCreateBlank}>
                     <div className="option-left">
                       <span className="option-icon">📄</span>
                       <div className="option-text">
-                        <strong>Create new resume</strong>
-                        <p>Start from a clean template and build your profile</p>
+                        <strong>Create new blank resume</strong>
+                        <p>Start fresh from a clean template</p>
+                      </div>
+                    </div>
+                    <span className="option-arrow">➔</span>
+                  </button>
+
+                  <button className="modal-option-row" onClick={() => { setShowStartModal(false); setShowAIGeneratorModal(true); }}>
+                    <div className="option-left">
+                      <span className="option-icon">✨</span>
+                      <div className="option-text">
+                        <strong>Generate with AI</strong>
+                        <p>Build a tailored resume from your target job title</p>
                       </div>
                     </div>
                     <span className="option-arrow">➔</span>
@@ -287,28 +393,26 @@ const ResumeBuilder = () => {
               <div className="modal-content select-upload">
                 <h2>Upload your resume</h2>
                 <p className="modal-sub">Import details automatically from PDF or DOCX</p>
-                <div 
-                  className={`modal-dropzone ${isDragOver ? "drag-over" : ""}`}
-                  onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
-                  onDragLeave={() => setIsDragOver(false)}
+                <div
+                  className="modal-dropzone"
+                  onDragOver={(e) => e.preventDefault()}
                   onDrop={(e) => {
                     e.preventDefault();
-                    setIsDragOver(false);
                     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
                       processResumeFile(e.dataTransfer.files[0]);
                     }
                   }}
                 >
-                  <input 
-                    type="file" 
-                    id="modalFileInput" 
-                    accept=".pdf,.docx,.doc" 
+                  <input
+                    type="file"
+                    id="modalFileInput"
+                    accept=".pdf,.docx,.doc"
                     onChange={(e) => {
                       if (e.target.files && e.target.files[0]) {
                         processResumeFile(e.target.files[0]);
                       }
                     }}
-                    hidden 
+                    hidden
                   />
                   {!uploading ? (
                     <label htmlFor="modalFileInput" className="dropzone-label">
@@ -335,9 +439,8 @@ const ResumeBuilder = () => {
           </div>
         </div>
       )}
-
     </div>
   );
 };
 
-export default ResumeBuilder;
+export default ResumeBuilder;

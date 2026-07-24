@@ -9,12 +9,10 @@ import InterviewHistory from "../components/MockInterviews/InterviewHistory";
 import Settings from "../components/MockInterviews/Settings";
 import "./DashboardPage.css";
 
-// Which "tab" to show based on internal state
 const DashboardPage = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
 
-  // Determine active section from the URL pathname
   const pathname = window.location.pathname;
   const getSection = () => {
     if (pathname.includes("new-interview")) return "new-interview";
@@ -24,8 +22,6 @@ const DashboardPage = () => {
   };
 
   const [section, setSection] = useState(getSection);
-
-  // Sub-state for interview flow
   const [interviewConfig, setInterviewConfig] = useState(null);
   const [interviewActive, setInterviewActive] = useState(false);
 
@@ -55,7 +51,6 @@ const DashboardPage = () => {
   };
 
   const renderContent = () => {
-    // When a live interview session is running, take over full content
     if (interviewActive && interviewConfig) {
       return (
         <AIInterviewRoom
@@ -81,7 +76,6 @@ const DashboardPage = () => {
     }
   };
 
-  // Page title mapping
   const pageTitles = {
     dashboard: "Dashboard",
     "new-interview": "New Interview",
@@ -91,12 +85,9 @@ const DashboardPage = () => {
 
   return (
     <div className="dashboard-shell">
-      {/* Sidebar — intercepts nav clicks via URL state */}
       <SidebarWithState section={section} setSection={setSection} />
 
-      {/* Main content area */}
       <main className="dashboard-main">
-        {/* Top bar */}
         <header className="dashboard-topbar">
           <div className="topbar-left">
             <h1 className="topbar-title">{pageTitles[section] || "Dashboard"}</h1>
@@ -112,7 +103,6 @@ const DashboardPage = () => {
           </div>
         </header>
 
-        {/* Dynamic page content */}
         <div className="dashboard-content">
           {renderContent()}
         </div>
@@ -121,12 +111,15 @@ const DashboardPage = () => {
   );
 };
 
-/* ── Sidebar wrapper that intercepts nav clicks instead of using real routes ── */
 const SidebarWithState = ({ section, setSection }) => {
   const navigate = useNavigate();
   const { logout } = useAuth();
 
   const handleNav = (path) => {
+    if (path.includes("resume-builder")) {
+      navigate("/resume-builder");
+      return;
+    }
     if (path.includes("new-interview")) setSection("new-interview");
     else if (path.includes("history")) setSection("history");
     else if (path.includes("settings")) setSection("settings");
@@ -162,7 +155,12 @@ const SidebarInner = ({ onNav, section, onLogout }) => {
     {
       id: "new-interview",
       label: "New Interview",
-      icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="16" /><line x1="8" y1="12" x2="16" y2="12" /></svg>,
+      icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" /><line x1="8" y1="12" x2="16" y2="12" /></svg>,
+    },
+    {
+      id: "resume-builder",
+      label: "AI Resume Builder",
+      icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>,
     },
     {
       id: "history",
@@ -173,7 +171,6 @@ const SidebarInner = ({ onNav, section, onLogout }) => {
 
   return (
     <aside className="sidebar">
-      {/* Logo */}
       <div className="sidebar-logo">
         <img
           src={logo}
@@ -182,7 +179,6 @@ const SidebarInner = ({ onNav, section, onLogout }) => {
         />
       </div>
 
-      {/* User card */}
       {user && (
         <div className="sidebar-user-card">
           <div className="sidebar-user-avatar">{getInitials(user.full_name)}</div>
@@ -195,7 +191,6 @@ const SidebarInner = ({ onNav, section, onLogout }) => {
 
       <div className="sidebar-divider" />
 
-      {/* Main nav */}
       <nav className="sidebar-nav">
         <p className="sidebar-section-label">Main Menu</p>
         {NAV.map((item) => (
@@ -203,7 +198,7 @@ const SidebarInner = ({ onNav, section, onLogout }) => {
             key={item.id}
             id={`sidebar-${item.id}`}
             className={`sidebar-nav-btn${section === item.id ? " active" : ""}`}
-            onClick={() => onNav(`/dashboard/${item.id}`)}
+            onClick={() => onNav(item.id === "resume-builder" ? "/resume-builder" : `/dashboard/${item.id}`)}
           >
             <span className="sidebar-nav-icon">{item.icon}</span>
             <span className="sidebar-nav-label">{item.label}</span>
@@ -214,7 +209,6 @@ const SidebarInner = ({ onNav, section, onLogout }) => {
 
       <div className="sidebar-spacer" />
 
-      {/* Bottom: Settings + Logout */}
       <div className="sidebar-bottom">
         <div className="sidebar-divider" />
 
