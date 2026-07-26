@@ -6,7 +6,7 @@ const API_BASE_URL = "http://localhost:8000/api";
 
 const ResumePreview = ({ resumeData, selectedTemplate, setResumeData }) => {
   const { authFetch } = useAuth();
-  const { personal, summary, experience, education, skills, projects } = resumeData;
+  const { personal, summary, experience, education, skills, projects, certifications, achievements, languages } = resumeData || {};
   const [loading, setLoading] = useState(false);
 
   const handleDownload = () => {
@@ -170,96 +170,158 @@ const ResumePreview = ({ resumeData, selectedTemplate, setResumeData }) => {
         {/* Paper Sheet Simulator */}
         <div className={`resume-paper ${selectedTemplate}`}>
           {/* Header */}
-          <header className="resume-header">
-            <h1 className="name">{personal.name || "Your Name"}</h1>
-            <h4 className="role" style={{ color: "var(--tpl-accent)" }}>
-              {personal.role || "Professional Role"}
-            </h4>
-            <div className="contact-info">
-              {personal.email && <span>📧 {personal.email}</span>}
-              {personal.phone && <span>📞 {personal.phone}</span>}
-              {personal.linkedin && <span>🔗 {personal.linkedin}</span>}
+          <header className="resume-header centered-header">
+            <h1 className="name">{personal.name || "Your Full Name"}</h1>
+            {personal.address && <div className="header-address-line">{personal.address}</div>}
+            <div className="contact-info centered-contact">
+              {[
+                personal.phone,
+                personal.email,
+                personal.linkedin ? `LinkedIn: ${personal.linkedin}` : null,
+                personal.github ? `GitHub: ${personal.github}` : null,
+                personal.portfolio ? `Portfolio: ${personal.portfolio}` : null
+              ]
+                .filter(Boolean)
+                .join("  |  ")}
             </div>
           </header>
 
           <div className="resume-body">
-            {/* Left/Main Column */}
             <div className="main-col">
-              {/* Summary */}
+              {/* 2. Professional Summary */}
               {summary && (
                 <section className="preview-sub-section">
-                  <h3 className="section-heading">Professional Summary</h3>
-                  <div className="section-divider"></div>
+                  <h3 className="section-heading">PROFESSIONAL SUMMARY</h3>
                   <p className="summary-text">{summary}</p>
                 </section>
               )}
 
-              {/* Experience */}
-              {experience && experience.length > 0 && (
-                <section className="preview-sub-section">
-                  <h3 className="section-heading">Work Experience</h3>
-                  <div className="section-divider"></div>
-                  {experience.map((exp, idx) => (
-                    <div key={idx} className="preview-item">
-                      <div className="preview-item-header">
-                        <strong>{exp.role || "Role"}</strong>
-                        <span>{exp.duration || "Duration"}</span>
-                      </div>
-                      <div className="preview-item-sub">
-                        <em>{exp.company || "Company"}</em>
-                      </div>
-                      <p className="preview-item-desc">{exp.details}</p>
-                    </div>
-                  ))}
-                </section>
-              )}
-
-              {/* Projects */}
-              {projects && projects.length > 0 && (
-                <section className="preview-sub-section">
-                  <h3 className="section-heading">Projects</h3>
-                  <div className="section-divider"></div>
-                  {projects.map((proj, idx) => (
-                    <div key={idx} className="preview-item">
-                      <div className="preview-item-header">
-                        <strong>{proj.name || "Project Title"}</strong>
-                      </div>
-                      <p className="preview-item-desc">{proj.description}</p>
-                    </div>
-                  ))}
-                </section>
-              )}
-            </div>
-
-            {/* Sidebar (for template layout variant if needed) or simple side-section */}
-            <div className="side-col">
-              {/* Skills */}
+              {/* 3. Technical Skills */}
               {skills && skills.length > 0 && (
                 <section className="preview-sub-section">
-                  <h3 className="section-heading">Skills</h3>
-                  <div className="section-divider"></div>
-                  <div className="preview-skills-list">
+                  <h3 className="section-heading">TECHNICAL SKILLS</h3>
+                  <div className="preview-skills-grid-2col">
                     {skills.map((skill, idx) => (
-                      <span key={idx} className="preview-skill-tag">
+                      <div key={idx} className="preview-skill-grid-item">
                         {skill}
-                      </span>
+                      </div>
                     ))}
                   </div>
                 </section>
               )}
 
-              {/* Education */}
-              {education && education.length > 0 && (
-                <section className="preview-sub-section" style={{ marginTop: "25px" }}>
-                  <h3 className="section-heading">Education</h3>
-                  <div className="section-divider"></div>
-                  {education.map((edu, idx) => (
-                    <div key={idx} className="preview-edu-item">
-                      <strong>{edu.degree || "Degree"}</strong>
-                      <div>{edu.institution || "Institution"}</div>
-                      <span className="date">{edu.duration}</span>
+              {/* 4. Work Experience */}
+              {experience && experience.length > 0 && (
+                <section className="preview-sub-section">
+                  <h3 className="section-heading">WORK EXPERIENCE</h3>
+                  {experience.map((exp, idx) => (
+                    <div key={idx} className="preview-item">
+                      <div className="preview-item-header">
+                        <strong className="company-name">{exp.company || "Company Name"}</strong>
+                        <span className="exp-duration-right">{exp.duration || "Jan 2024 – Present"}</span>
+                      </div>
+                      {exp.role && <div className="exp-job-title">{exp.role}</div>}
+                      {exp.details && (
+                        <div className="preview-item-desc">
+                          {exp.details.split("\n").map((line, lIdx) => (
+                            <div key={lIdx} className="bullet-point">
+                              {line.replace(/^[•\-\s]+/, "")}
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   ))}
+                </section>
+              )}
+
+              {/* 5. Projects */}
+              {projects && projects.length > 0 && (
+                <section className="preview-sub-section">
+                  <h3 className="section-heading">PROJECTS</h3>
+                  {projects.map((proj, idx) => (
+                    <div key={idx} className="preview-item">
+                      <div className="preview-project-inline-header">
+                        <strong className="proj-title">{proj.name || "Project Title"}</strong>
+                        {proj.skillsUsed && (
+                          <span className="proj-skills-tag"> | {proj.skillsUsed}</span>
+                        )}
+                      </div>
+                      {proj.link && (
+                        <div className="proj-sub-links">
+                          <a href={proj.link} target="_blank" rel="noopener noreferrer" className="proj-link-tag">
+                            🔗 {proj.link}
+                          </a>
+                        </div>
+                      )}
+                      {proj.description && (
+                        <div className="preview-item-desc">
+                          {proj.description.split("\n").map((line, lIdx) => (
+                            <div key={lIdx} className="bullet-point">
+                              {line.replace(/^[•\-\s]+/, "")}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </section>
+              )}
+
+              {/* 6. Education */}
+              {education && education.length > 0 && (
+                <section className="preview-sub-section">
+                  <h3 className="section-heading">EDUCATION</h3>
+                  {education.map((edu, idx) => (
+                    <div key={idx} className="preview-edu-row">
+                      <div className="edu-left-info">
+                        <strong className="edu-institution">{edu.institution || "College / School Name"}</strong>
+                        <div className="edu-sub-details">
+                          {[edu.degree, edu.branch, edu.cgpa ? `CGPA/Percentage: ${edu.cgpa}` : null]
+                            .filter(Boolean)
+                            .join(" | ")}
+                        </div>
+                      </div>
+                      <div className="edu-right-duration">{edu.duration || "2021 – 2025"}</div>
+                    </div>
+                  ))}
+                </section>
+              )}
+
+              {/* 7. Certifications */}
+              {certifications && certifications.length > 0 && (
+                <section className="preview-sub-section">
+                  <h3 className="section-heading">CERTIFICATIONS</h3>
+                  {certifications.map((cert, idx) => (
+                    <div key={idx} className="preview-item">
+                      <strong className="cert-name">{cert.name || "Certification Name"}</strong>
+                      <div className="cert-sub-info">
+                        {[cert.issuer, cert.year].filter(Boolean).join(" | ")}
+                      </div>
+                    </div>
+                  ))}
+                </section>
+              )}
+
+              {/* 8. Key Achievements */}
+              {achievements && achievements.length > 0 && (
+                <section className="preview-sub-section">
+                  <h3 className="section-heading">KEY ACHIEVEMENTS</h3>
+                  {achievements.map((ach, idx) => (
+                    <div key={idx} className="bullet-point">
+                      {ach.title} {ach.description ? `: ${ach.description}` : ""}
+                    </div>
+                  ))}
+                </section>
+              )}
+
+              {/* 9. Languages */}
+              {languages && languages.length > 0 && (
+                <section className="preview-sub-section">
+                  <h3 className="section-heading">LANGUAGES</h3>
+                  <div className="languages-inline-list">
+                    {languages.join("  |  ")}
+                  </div>
                 </section>
               )}
             </div>

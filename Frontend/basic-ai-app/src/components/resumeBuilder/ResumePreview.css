@@ -84,133 +84,261 @@
    RESUME PAPER SIMULATOR
    ========================================== */
 
+/* ==========================================
+   RESUME PAPER SIMULATOR
+   ========================================== */
+
 .resume-paper {
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 0 0 24px 24px;
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.06);
-  padding: 50px;
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px !important;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.08) !important;
+  padding: 32px 38px !important;
   text-align: left;
-  min-height: 1000px;
-  color: #1f2937;
+  width: 100%;
+  max-width: 800px;
+  aspect-ratio: 1 / 1.414; /* Standard A4 aspect ratio */
+  color: #0f172a;
   display: flex;
   flex-direction: column;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
-.resume-header {
-  margin-bottom: 30px;
-  border-bottom: 2px solid var(--tpl-accent);
-  padding-bottom: 20px;
+.resume-header.centered-header {
+  text-align: center;
+  margin-bottom: 10px;
+  border-bottom: none;
+  padding-bottom: 0;
 }
 
-.resume-header .name {
-  font-size: 36px;
+.resume-header.centered-header .name {
+  font-size: 22px;
   font-weight: 800;
-  color: #111827;
-  margin-bottom: 5px;
+  color: #0f172a;
+  margin-bottom: 2px;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
 }
 
-.resume-header .role {
-  font-size: 18px;
-  font-weight: 700;
-  margin-bottom: 12px;
+.header-address-line {
+  font-size: 13px;
+  color: #475569;
+  font-weight: 500;
+  margin-bottom: 4px;
 }
 
-.contact-info {
+.contact-info.centered-contact {
   display: flex;
+  justify-content: center;
+  align-items: center;
   flex-wrap: wrap;
-  gap: 15px;
-  font-size: 14px;
-  color: #4b5563;
+  gap: 4px 10px;
+  font-size: 12px;
+  color: #334155;
+  font-weight: 500;
+  text-align: center;
+}
+
+.resume-black-line {
+  display: none !important;
 }
 
 .resume-body {
-  display: flex;
-  gap: 40px;
-  flex-grow: 1;
+  display: block;
+  width: 100%;
+  flex: 1;
 }
 
 .main-col {
-  flex: 2;
-}
-
-.side-col {
-  flex: 1;
-  border-left: 1px solid #f3f4f6;
-  padding-left: 30px;
+  width: 100%;
 }
 
 .preview-sub-section {
-  margin-bottom: 25px;
+  margin-bottom: 11px;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
 }
 
 .section-heading {
-  font-size: 18px;
+  font-size: 13px;
   font-weight: 800;
-  color: #111827;
-  margin-bottom: 10px;
+  color: #0f172a;
+  margin-bottom: 5px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.6px;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.section-divider {
+  display: none;
 }
 
 .summary-text {
-  font-size: 14px;
-  color: #4b5563;
-  line-height: 1.7;
+  font-size: 12.5px;
+  color: #334155;
+  line-height: 1.45;
+  margin: 0;
 }
 
 .preview-item {
-  margin-bottom: 20px;
+  margin-bottom: 7px;
+}
+
+.preview-item:last-child {
+  margin-bottom: 0;
 }
 
 .preview-item-header {
   display: flex;
   justify-content: space-between;
-  font-size: 15px;
-  color: #111827;
+  align-items: baseline;
+  font-size: 13.5px;
+  color: #0f172a;
 }
 
-.preview-item-sub {
-  font-size: 14px;
-  color: #4b5563;
-  margin: 3px 0 8px;
+.company-name {
+  font-weight: 700;
+  font-size: 13.5px;
+  color: #0f172a;
+}
+
+.exp-job-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+  margin: 2px 0 4px;
+}
+
+.exp-duration-right,
+.edu-right-duration {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #475569;
+  text-align: right;
+  white-space: nowrap;
 }
 
 .preview-item-desc {
-  font-size: 13.5px;
-  color: #4b5563;
-  line-height: 1.6;
-  white-space: pre-line;
+  font-size: 13px;
+  color: #334155;
+  line-height: 1.5;
+  margin: 3px 0 0 0;
 }
 
-.preview-skills-list {
+.bullet-point {
+  font-size: 13px;
+  color: #334155;
+  line-height: 1.5;
+  margin-top: 3px;
+}
+
+/* Technical Skills 2 Column Grid */
+.preview-skills-grid-2col {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px 20px;
+  font-size: 13px;
+  color: #1e293b;
+}
+
+.preview-skill-grid-item {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.preview-skill-tag {
-  background: #f3f4f6;
-  color: #1f2937;
-  padding: 5px 12px;
-  border-radius: 6px;
-  font-size: 12px;
+  align-items: center;
+  gap: 6px;
   font-weight: 600;
 }
 
-.preview-edu-item {
+.preview-skill-grid-item .bullet {
+  color: #000000;
   font-size: 14px;
-  margin-bottom: 15px;
 }
 
-.preview-edu-item div {
-  color: #4b5563;
-  margin: 2px 0 5px;
+/* Projects Inline Header */
+.preview-project-inline-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 13.5px;
+  color: #0f172a;
+  margin-bottom: 2px;
 }
 
-.preview-edu-item .date {
-  font-size: 12px;
-  color: #9ca3af;
+.proj-title {
+  font-weight: 700;
+  color: #0f172a;
+  font-size: 13.5px;
+}
+
+.proj-skills-tag {
+  font-size: 13px;
+  color: #475569;
+  font-weight: 600;
+}
+
+.proj-sub-links {
+  margin-bottom: 4px;
+}
+
+.proj-link-tag {
+  font-size: 12.5px;
+  color: #2563eb;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.proj-link-tag:hover {
+  text-decoration: underline;
+}
+
+/* Education Row Layout */
+.preview-edu-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+  font-size: 13px;
+}
+
+.preview-edu-row:last-child {
+  margin-bottom: 0;
+}
+
+.edu-institution {
+  color: #0f172a;
+  font-size: 13.5px;
+  font-weight: 700;
+}
+
+.edu-sub-details {
+  color: #334155;
+  font-weight: 600;
+  font-size: 13px;
+  margin-top: 2px;
+}
+
+.cert-name {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #0f172a;
+  display: block;
+}
+
+.cert-sub-info {
+  font-size: 12.5px;
+  color: #475569;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.languages-inline-list {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e293b;
 }
 
 /* ==========================================
@@ -752,6 +880,52 @@
 .section-title {
   font-size: 2.5rem;
   font-weight: 700;
+}
+
+/* Strict Single-Page A4 Print Export */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+  body {
+    background: #ffffff !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  .workspace-header,
+  .left-form-pane,
+  .preview-actions,
+  .section-header,
+  .exit-workspace-btn {
+    display: none !important;
+  }
+  .workspace-editor-body {
+    display: block !important;
+    height: auto !important;
+  }
+  .right-preview-pane,
+  .preview-sheet-area {
+    background: #ffffff !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+  }
+  .resume-paper {
+    width: 210mm !important;
+    height: 297mm !important;
+    max-height: 297mm !important;
+    padding: 10mm 14mm !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    overflow: hidden !important;
+    page-break-after: avoid !important;
+    page-break-inside: avoid !important;
+    margin: 0 auto !important;
+  }
 }
 
 .preview-section .section-title span {

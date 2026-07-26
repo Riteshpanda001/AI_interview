@@ -121,14 +121,14 @@ const CreateNewWorkspace = ({
     setResumeData({
       ...resumeData,
       education: [
-        ...resumeData.education,
-        { institution: "", degree: "", duration: "" }
+        ...(resumeData.education || []),
+        { institution: "", degree: "", branch: "", cgpa: "", duration: "" }
       ]
     });
   };
 
   const removeEducation = (index) => {
-    const newEdu = resumeData.education.filter((_, i) => i !== index);
+    const newEdu = (resumeData.education || []).filter((_, i) => i !== index);
     setResumeData({
       ...resumeData,
       education: newEdu
@@ -136,7 +136,8 @@ const CreateNewWorkspace = ({
   };
 
   const handleProjectChange = (index, field, val) => {
-    const newProj = [...resumeData.projects];
+    const newProj = [...(resumeData.projects || [])];
+    if (!newProj[index]) newProj[index] = { name: "", skillsUsed: "", link: "", description: "" };
     newProj[index][field] = val;
     setResumeData({
       ...resumeData,
@@ -148,8 +149,8 @@ const CreateNewWorkspace = ({
     setResumeData({
       ...resumeData,
       projects: [
-        ...resumeData.projects,
-        { name: "", description: "" }
+        ...(resumeData.projects || []),
+        { name: "", skillsUsed: "", link: "", description: "" }
       ]
     });
   };
@@ -168,6 +169,52 @@ const CreateNewWorkspace = ({
       ...resumeData,
       skills: list
     });
+  };
+
+  // Certifications Handlers
+  const handleCertificationChange = (index, field, val) => {
+    const list = [...(resumeData.certifications || [])];
+    if (!list[index]) list[index] = { name: "", issuer: "", year: "" };
+    list[index][field] = val;
+    setResumeData({ ...resumeData, certifications: list });
+  };
+
+  const addCertification = () => {
+    setResumeData({
+      ...resumeData,
+      certifications: [...(resumeData.certifications || []), { name: "", issuer: "", year: "" }]
+    });
+  };
+
+  const removeCertification = (index) => {
+    const list = (resumeData.certifications || []).filter((_, i) => i !== index);
+    setResumeData({ ...resumeData, certifications: list });
+  };
+
+  // Achievements Handlers
+  const handleAchievementChange = (index, field, val) => {
+    const list = [...(resumeData.achievements || [])];
+    if (!list[index]) list[index] = { title: "", description: "" };
+    list[index][field] = val;
+    setResumeData({ ...resumeData, achievements: list });
+  };
+
+  const addAchievement = () => {
+    setResumeData({
+      ...resumeData,
+      achievements: [...(resumeData.achievements || []), { title: "", description: "" }]
+    });
+  };
+
+  const removeAchievement = (index) => {
+    const list = (resumeData.achievements || []).filter((_, i) => i !== index);
+    setResumeData({ ...resumeData, achievements: list });
+  };
+
+  // Languages Handler
+  const handleLanguagesChange = (val) => {
+    const list = val.split(",").map((s) => s.trim());
+    setResumeData({ ...resumeData, languages: list });
   };
 
   const copyToClipboard = (text) => {
@@ -312,18 +359,11 @@ const CreateNewWorkspace = ({
       <div className="workspace-toolbar">
         <div className="toolbar-left">
           <button className="exit-workspace-btn" onClick={onBack}>
-            <span className="arrow">←</span> Dashboard
+            <svg width="18" height="14" viewBox="0 0 18 14" fill="none" xmlns="http://www.w3.org/2000/svg" className="arrow-icon">
+              <path d="M17 7H1M1 7L7 1M1 7L7 13" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            <span>Back</span>
           </button>
-          
-          <select
-            className="workspace-template-select"
-            value={selectedTemplate}
-            onChange={(e) => setSelectedTemplate && setSelectedTemplate(e.target.value)}
-          >
-            {TEMPLATE_OPTIONS.map((t) => (
-              <option key={t.id} value={t.id}>{t.name}</option>
-            ))}
-          </select>
 
           <div className="editor-tab-switcher">
             <button
@@ -372,22 +412,9 @@ const CreateNewWorkspace = ({
           <div className="workspace-pane left-form-pane">
             <div className="pane-scroll-area">
               
-              {/* ATS Ring Header */}
-              <div className="workspace-ats-header">
-                <div className="ats-mini-ring">
-                  <strong>{atsScore}%</strong>
-                </div>
-                <div>
-                  <h4 style={{ margin: 0 }}>ATS Match Completeness</h4>
-                  <p style={{ margin: 0, fontSize: "0.85rem", color: "#94a3b8" }}>
-                    {atsScore >= 85 ? "Excellent ATS Score!" : "Follow recommendations to hit 90%+"}
-                  </p>
-                </div>
-              </div>
-
-              {/* Personal Info */}
+              {/* 1. Personal Information */}
               <div className="field-group-box">
-                <h5>👤 Personal Details</h5>
+                <h5>👤 1. Personal Details</h5>
                 <div className="flex-fields">
                   <input
                     type="text"
@@ -397,9 +424,15 @@ const CreateNewWorkspace = ({
                   />
                   <input
                     type="text"
-                    placeholder="Target Role"
-                    value={resumeData.personal?.role || ""}
-                    onChange={(e) => handlePersonalChange("role", e.target.value)}
+                    placeholder="Address / City, Country"
+                    value={resumeData.personal?.address || ""}
+                    onChange={(e) => handlePersonalChange("address", e.target.value)}
+                  />
+                  <input
+                    type="text"
+                    placeholder="Mobile / Phone Number"
+                    value={resumeData.personal?.phone || ""}
+                    onChange={(e) => handlePersonalChange("phone", e.target.value)}
                   />
                   <input
                     type="email"
@@ -409,37 +442,42 @@ const CreateNewWorkspace = ({
                   />
                   <input
                     type="text"
-                    placeholder="Phone Number"
-                    value={resumeData.personal?.phone || ""}
-                    onChange={(e) => handlePersonalChange("phone", e.target.value)}
+                    placeholder="LinkedIn URL"
+                    value={resumeData.personal?.linkedin || ""}
+                    onChange={(e) => handlePersonalChange("linkedin", e.target.value)}
                   />
                   <input
                     type="text"
-                    placeholder="LinkedIn / Portfolio URL"
-                    className="full-width-field"
-                    value={resumeData.personal?.linkedin || ""}
-                    onChange={(e) => handlePersonalChange("linkedin", e.target.value)}
+                    placeholder="GitHub URL"
+                    value={resumeData.personal?.github || ""}
+                    onChange={(e) => handlePersonalChange("github", e.target.value)}
+                  />
+                  <input
+                    type="text"
+                    placeholder="Portfolio URL"
+                    value={resumeData.personal?.portfolio || ""}
+                    onChange={(e) => handlePersonalChange("portfolio", e.target.value)}
                   />
                 </div>
               </div>
 
-              {/* Summary */}
+              {/* 2. Professional Summary */}
               <div className="field-group-box">
                 <div className="section-inline-title">
-                  <h5>✍️ Professional Summary</h5>
+                  <h5>✍️ 2. Professional Summary</h5>
                   <button className="small-ai-btn" onClick={handleAIPolishSummary}>✨ Rephrase</button>
                 </div>
                 <textarea
-                  rows={4}
-                  placeholder="Describe your core strengths, experience, and achievements..."
+                  rows={3}
+                  placeholder="Describe your core strengths, experience, and achievements in concise 20–30 words..."
                   value={resumeData.summary || ""}
                   onChange={(e) => handleSummaryChange(e.target.value)}
                 />
               </div>
 
-              {/* Skills */}
+              {/* 3. Technical Skills */}
               <div className="field-group-box">
-                <h5>🛠️ Core Skills & Technologies</h5>
+                <h5>🛠️ 3. Technical Skills</h5>
                 <input
                   type="text"
                   className="full-width-field"
@@ -449,7 +487,7 @@ const CreateNewWorkspace = ({
                 />
               </div>
 
-              {/* Action Verbs Reference */}
+              {/* Action Verbs Reference Helper */}
               <div className="guide-card action-verbs-card" style={{ marginBottom: "1.5rem" }}>
                 <h5 style={{ margin: "0 0 0.5rem" }}>⚡ Action Verbs Helper</h5>
                 <div className="verb-tabs">
@@ -477,10 +515,10 @@ const CreateNewWorkspace = ({
                 {copiedVerb && <div className="toast-verb">Copied "{copiedVerb}"!</div>}
               </div>
 
-              {/* Experience */}
+              {/* 4. Work Experience */}
               <div className="field-group-box">
                 <div className="section-inline-title">
-                  <h5>💼 Work Experience</h5>
+                  <h5>💼 4. Work Experience</h5>
                   <button className="small-add-btn" onClick={addExperience}>+ Add Position</button>
                 </div>
                 {resumeData.experience?.map((exp, idx) => (
@@ -521,46 +559,10 @@ const CreateNewWorkspace = ({
                 ))}
               </div>
 
-              {/* Education */}
+              {/* 5. Projects */}
               <div className="field-group-box">
                 <div className="section-inline-title">
-                  <h5>🎓 Education</h5>
-                  <button className="small-add-btn" onClick={addEducation}>+ Add Education</button>
-                </div>
-                {resumeData.education?.map((edu, idx) => (
-                  <div key={idx} className="nested-field-card">
-                    <div className="nested-header">
-                      <span>Education #{idx + 1}</span>
-                      {resumeData.education.length > 1 && (
-                        <button className="small-del-btn" onClick={() => removeEducation(idx)}>Remove</button>
-                      )}
-                    </div>
-                    <input
-                      type="text"
-                      placeholder="Institution / University"
-                      value={edu.institution || ""}
-                      onChange={(e) => handleEducationChange(idx, "institution", e.target.value)}
-                    />
-                    <input
-                      type="text"
-                      placeholder="Degree / Major"
-                      value={edu.degree || ""}
-                      onChange={(e) => handleEducationChange(idx, "degree", e.target.value)}
-                    />
-                    <input
-                      type="text"
-                      placeholder="Duration (e.g. 2018 - 2022)"
-                      value={edu.duration || ""}
-                      onChange={(e) => handleEducationChange(idx, "duration", e.target.value)}
-                    />
-                  </div>
-                ))}
-              </div>
-
-              {/* Projects */}
-              <div className="field-group-box">
-                <div className="section-inline-title">
-                  <h5>🚀 Projects</h5>
+                  <h5>🚀 5. Projects</h5>
                   <button className="small-add-btn" onClick={addProject}>+ Add Project</button>
                 </div>
                 {resumeData.projects?.map((proj, idx) => (
@@ -573,18 +575,160 @@ const CreateNewWorkspace = ({
                     </div>
                     <input
                       type="text"
-                      placeholder="Project Name"
+                      placeholder="Project Title"
                       value={proj.name || ""}
                       onChange={(e) => handleProjectChange(idx, "name", e.target.value)}
                     />
+                    <div className="input-row-half">
+                      <input
+                        type="text"
+                        placeholder="Skills / Tech Used (e.g. React, Node.js)"
+                        value={proj.skillsUsed || ""}
+                        onChange={(e) => handleProjectChange(idx, "skillsUsed", e.target.value)}
+                      />
+                      <input
+                        type="text"
+                        placeholder="Project Link (e.g. https://github.com/...)"
+                        value={proj.link || ""}
+                        onChange={(e) => handleProjectChange(idx, "link", e.target.value)}
+                      />
+                    </div>
                     <textarea
                       rows={3}
-                      placeholder="Project description, tools used, and results..."
+                      placeholder="Project description and key results..."
                       value={proj.description || ""}
                       onChange={(e) => handleProjectChange(idx, "description", e.target.value)}
                     />
                   </div>
                 ))}
+              </div>
+
+              {/* 6. Education */}
+              <div className="field-group-box">
+                <div className="section-inline-title">
+                  <h5>🎓 6. Education</h5>
+                  <button className="small-add-btn" onClick={addEducation}>+ Add Education</button>
+                </div>
+                {resumeData.education?.map((edu, idx) => (
+                  <div key={idx} className="nested-field-card">
+                    <div className="nested-header">
+                      <span>Education #{idx + 1} (Graduation / Inter / Schooling)</span>
+                      {resumeData.education.length > 1 && (
+                        <button className="small-del-btn" onClick={() => removeEducation(idx)}>Remove</button>
+                      )}
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Institution / College / School Name"
+                      value={edu.institution || ""}
+                      onChange={(e) => handleEducationChange(idx, "institution", e.target.value)}
+                    />
+                    <div className="input-row-half">
+                      <input
+                        type="text"
+                        placeholder="Degree (e.g. B.Tech / Intermediate / 10th)"
+                        value={edu.degree || ""}
+                        onChange={(e) => handleEducationChange(idx, "degree", e.target.value)}
+                      />
+                      <input
+                        type="text"
+                        placeholder="Branch / Stream (e.g. CSE / MPC / State Board)"
+                        value={edu.branch || ""}
+                        onChange={(e) => handleEducationChange(idx, "branch", e.target.value)}
+                      />
+                    </div>
+                    <div className="input-row-half">
+                      <input
+                        type="text"
+                        placeholder="CGPA / Percentage (e.g. 8.9 CGPA / 92%)"
+                        value={edu.cgpa || ""}
+                        onChange={(e) => handleEducationChange(idx, "cgpa", e.target.value)}
+                      />
+                      <input
+                        type="text"
+                        placeholder="Duration / Years (e.g. 2020 - 2024)"
+                        value={edu.duration || ""}
+                        onChange={(e) => handleEducationChange(idx, "duration", e.target.value)}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* 7. Certifications */}
+              <div className="field-group-box">
+                <div className="section-inline-title">
+                  <h5>📜 7. Certifications</h5>
+                  <button className="small-add-btn" onClick={addCertification}>+ Add Certification</button>
+                </div>
+                {(resumeData.certifications || []).map((cert, idx) => (
+                  <div key={idx} className="nested-field-card">
+                    <div className="nested-header">
+                      <span>Certification #{idx + 1}</span>
+                      <button className="small-del-btn" onClick={() => removeCertification(idx)}>Remove</button>
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Certification Name (e.g. AWS Certified Solutions Architect)"
+                      value={cert.name || ""}
+                      onChange={(e) => handleCertificationChange(idx, "name", e.target.value)}
+                    />
+                    <div className="input-row-half">
+                      <input
+                        type="text"
+                        placeholder="Issuing Organization (e.g. Amazon Web Services)"
+                        value={cert.issuer || ""}
+                        onChange={(e) => handleCertificationChange(idx, "issuer", e.target.value)}
+                      />
+                      <input
+                        type="text"
+                        placeholder="Year (e.g. 2024)"
+                        value={cert.year || ""}
+                        onChange={(e) => handleCertificationChange(idx, "year", e.target.value)}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* 8. Achievements */}
+              <div className="field-group-box">
+                <div className="section-inline-title">
+                  <h5>🏆 8. Key Achievements</h5>
+                  <button className="small-add-btn" onClick={addAchievement}>+ Add Achievement</button>
+                </div>
+                {(resumeData.achievements || []).map((ach, idx) => (
+                  <div key={idx} className="nested-field-card">
+                    <div className="nested-header">
+                      <span>Achievement #{idx + 1}</span>
+                      <button className="small-del-btn" onClick={() => removeAchievement(idx)}>Remove</button>
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Achievement Title (e.g. 1st Place Global Hackathon)"
+                      value={ach.title || ""}
+                      onChange={(e) => handleAchievementChange(idx, "title", e.target.value)}
+                    />
+                    <textarea
+                      rows={2}
+                      placeholder="Details of your accomplishment..."
+                      value={ach.description || ""}
+                      onChange={(e) => handleAchievementChange(idx, "description", e.target.value)}
+                    />
+                  </div>
+                ))}
+              </div>
+
+              {/* 9. Languages */}
+              <div className="field-group-box">
+                <h5>🌐 9. Languages</h5>
+                <input
+                  type="text"
+                  className="full-width-field"
+                  placeholder="English (Native), Spanish (Fluent), German (Intermediate)"
+                  value={resumeData.languages ? resumeData.languages.join(", ") : ""}
+                  onChange={(e) => handleLanguagesChange(e.target.value)}
+                />
               </div>
 
             </div>
