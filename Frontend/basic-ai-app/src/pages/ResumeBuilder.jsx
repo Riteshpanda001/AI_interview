@@ -17,9 +17,12 @@ import ResumeFAQ from "../components/resumeBuilder/ResumeFAQ";
 
 import "./ResumeBuilder.css";
 
+import { useAuth } from "../context/AuthContext";
+
 const API_BASE_URL = "http://localhost:8000/api";
 
 const ResumeBuilder = () => {
+  const { authFetch } = useAuth();
   const [isWorkspaceActive, setIsWorkspaceActive] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState("london");
   const [currentResumeId, setCurrentResumeId] = useState(null);
@@ -48,19 +51,19 @@ const ResumeBuilder = () => {
         duration: "2020 - 2024"
       }
     ],
-    skills: ["React", "JavaScript", "HTML/CSS", "Node.js", "Git", "REST APIs", "TypeScript", "AWS"],
+    skills: ["React", "JavaScript", "Node.js", "Python", "Git", "REST APIs"],
     projects: [
       {
-        name: "AI Resume Platform",
-        description: "Built an AI-powered mock interview and resume app with real-time feedback using OpenAI API and React."
+        name: "PrepNova AI Platform",
+        description: "Built an AI-powered mock interview simulator with real-time feedback."
       }
     ]
   });
 
+  const [pendingTemplate, setPendingTemplate] = useState(null);
   const [showStartModal, setShowStartModal] = useState(false);
   const [showAIGeneratorModal, setShowAIGeneratorModal] = useState(false);
   const [modalStep, setModalStep] = useState("options"); // "options" | "upload"
-  const [pendingTemplate, setPendingTemplate] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [fileName, setFileName] = useState("");
@@ -72,8 +75,33 @@ const ResumeBuilder = () => {
     }
   };
 
+  const handleSelectTemplate = (templateId) => {
+    setSelectedTemplate(templateId);
+  };
+
+  const handleStartBuildingClick = () => {
+    setPendingTemplate(selectedTemplate);
+    setShowStartModal(true);
+  };
+
+  const handleSelectRoleTemplate = (roleData) => {
+    setResumeData((prev) => ({
+      ...prev,
+      personal: {
+        ...prev.personal,
+        role: roleData.title
+      },
+      skills: roleData.skills,
+      summary: roleData.summary
+    }));
+    setIsWorkspaceActive(true);
+    const section = document.getElementById("resume-builder-workspace");
+    if (section) {
+      section.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   const handleSaveResume = async (updatedData, template) => {
-    const token = localStorage.getItem("token");
     const payload = {
       id: currentResumeId,
       title: updatedData.personal?.name ? `${updatedData.personal.name}'s Resume` : "Untitled Resume",
@@ -83,11 +111,10 @@ const ResumeBuilder = () => {
     };
 
     try {
-      const res = await fetch(`${API_BASE_URL}/resume/save`, {
+      const res = await authFetch(`${API_BASE_URL}/resume/save`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify(payload)
       });
@@ -118,13 +145,11 @@ const ResumeBuilder = () => {
   };
 
   const handleAIGeneratedSubmit = async (params) => {
-    const token = localStorage.getItem("token");
     try {
-      const res = await fetch(`${API_BASE_URL}/resume/generate`, {
+      const res = await authFetch(`${API_BASE_URL}/resume/generate`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify(params)
       });
@@ -191,14 +216,12 @@ const ResumeBuilder = () => {
       });
     }, 80);
 
-    const token = localStorage.getItem("token");
     const formData = new FormData();
     formData.append("file", file);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/resume/upload`, {
+      const response = await authFetch(`${API_BASE_URL}/resume/upload`, {
         method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
         body: formData
       });
 

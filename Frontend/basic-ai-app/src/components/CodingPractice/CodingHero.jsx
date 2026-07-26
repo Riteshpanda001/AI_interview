@@ -1,7 +1,10 @@
 import React from "react";
 import "./CodingHero.css";
+import useRequireAuth from "../../hooks/useRequireAuth";
 
 const CodingHero = ({ onStartCoding, onExploreRoadmap }) => {
+  const { requireAuth } = useRequireAuth();
+
   return (
     <section className="coding-hero">
       <div className="coding-hero-container">
@@ -40,7 +43,7 @@ const CodingHero = ({ onStartCoding, onExploreRoadmap }) => {
           <div className="coding-buttons">
             <button
               className="primary-btn"
-              onClick={onStartCoding}
+              onClick={() => requireAuth(onStartCoding, "/coding-practice")}
             >
               Start Coding
             </button>

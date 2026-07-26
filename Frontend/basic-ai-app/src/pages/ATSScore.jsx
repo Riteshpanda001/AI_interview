@@ -15,8 +15,10 @@ import ATSStatistics from "../components/ATS Score/ATSStatistics";
 import ATSFAQ from "../components/ATS Score/ATSFAQ";
 
 import Footer from "../components/Footer";
+import { useAuth } from "../context/AuthContext";
 
 const ATSScore = () => {
+  const { authFetch } = useAuth();
   const [resumeData, setResumeData] = useState(null);
   const [jobDescription, setJobDescription] = useState("");
   const [analyzing, setAnalyzing] = useState(false);
@@ -47,14 +49,11 @@ const ATSScore = () => {
     setAnalyzing(true);
     setError("");
 
-    const token = localStorage.getItem("access_token");
-
     try {
-      const response = await fetch("http://localhost:8000/api/ats/analyze", {
+      const response = await authFetch("http://localhost:8000/api/ats/analyze", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify({
           resume_id: resumeData.id,

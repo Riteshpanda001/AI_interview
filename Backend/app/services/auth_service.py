@@ -95,6 +95,8 @@ class AuthService:
             full_name=clean_name,
             password_hash=hashed_password,
             provider="email",
+            phone=request.phone,
+            gender=request.gender,
             is_verified=False,
             db=db
         )

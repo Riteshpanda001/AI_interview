@@ -14,6 +14,7 @@ export const AuthProvider = ({ children }) => {
   const saveTokens = (accessToken, newRefreshToken) => {
     if (accessToken) {
       localStorage.setItem("access_token", accessToken);
+      localStorage.setItem("token", accessToken);
       setToken(accessToken);
     }
     if (newRefreshToken) {
@@ -25,6 +26,7 @@ export const AuthProvider = ({ children }) => {
   // Helper: Clear tokens from state & localStorage
   const clearTokens = () => {
     localStorage.removeItem("access_token");
+    localStorage.removeItem("token");
     localStorage.removeItem("refresh_token");
     setToken(null);
     setRefreshTokenStr(null);
@@ -63,7 +65,7 @@ export const AuthProvider = ({ children }) => {
 
   // Authenticated Fetch Wrapper with Automatic Token Renewal on 401
   const authFetch = async (url, options = {}) => {
-    let currentToken = localStorage.getItem("access_token");
+    let currentToken = localStorage.getItem("access_token") || localStorage.getItem("token");
 
     const headers = {
       ...(options.headers || {}),
@@ -159,7 +161,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Register a new user
-  const register = async (fullName, email, password, confirmPassword) => {
+  const register = async (fullName, email, password, confirmPassword, phone, gender) => {
     try {
       const response = await fetch(`${API_BASE_URL}/auth/register`, {
         method: "POST",
@@ -169,6 +171,8 @@ export const AuthProvider = ({ children }) => {
           password,
           confirm_password: confirmPassword,
           full_name: fullName,
+          phone,
+          gender,
         }),
       });
 

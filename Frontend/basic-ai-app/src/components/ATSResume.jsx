@@ -1,9 +1,11 @@
 import React from "react";
 import "./ATSResume.css";
 import { useNavigate } from "react-router-dom";
+import useRequireAuth from "../hooks/useRequireAuth";
 
 const ATSResume = () => {
   const navigate = useNavigate();
+  const { requireAuth } = useRequireAuth();
 
   return (
     <section className="ats-section">
@@ -49,7 +51,7 @@ const ATSResume = () => {
 
         </div>
 
-        <button className="upload-btn" onClick={() => navigate("/ats-score")}>
+        <button className="upload-btn" onClick={() => requireAuth(null, "/ats-score")}>
           Upload Resume
         </button>
 

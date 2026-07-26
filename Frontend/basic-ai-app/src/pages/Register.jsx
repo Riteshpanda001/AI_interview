@@ -12,6 +12,8 @@ const Register = () => {
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [gender, setGender] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -171,7 +173,7 @@ const Register = () => {
     setInfoMsg("");
 
     try {
-      await register(fullName.trim(), email.trim(), password, confirmPassword);
+      await register(fullName.trim(), email.trim(), password, confirmPassword, phone.trim(), gender);
       // Redirect to dedicated OTP Verification Page
       navigate(`/verify-otp?email=${encodeURIComponent(email.trim())}`);
     } catch (err) {
@@ -243,16 +245,22 @@ const Register = () => {
     <div className="register-page">
       <div className="register-container">
         <div className="register-left">
-          <img src={logo} alt="PrepNova AI" />
+          <img src={logo} alt="PrepNova AI" className="logo" />
           <h1>🚀 Join <span>PreNova</span> AI</h1>
           <p>
             Create your account and start preparing for your dream job with AI-powered interviews.
           </p>
-          <img src="/images/register-ai.png" alt="AI Career" className="register-image"/>
+          
+          <div className="register-image-wrapper">
+            <img src="/images/register-ai.png" alt="AI Career" className="register-image"/>
+          </div>
         </div>
 
         <div className="register-right">
-          <h2>Create Account</h2>
+          <div className="register-header">
+            <h2>Create Account</h2>
+            <p className="register-subtitle">Get started with your free PreNova AI account</p>
+          </div>
 
           {errorMsg && <div className="alert-message error">{errorMsg}</div>}
           {infoMsg && <div className="alert-message info">{infoMsg}</div>}
@@ -278,6 +286,31 @@ const Register = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 required
               />
+            </div>
+
+            <div className="input-row">
+              <div className="input-group">
+                <label>Mobile Number</label>
+                <input
+                  type="tel"
+                  placeholder="Enter mobile number"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                />
+              </div>
+
+              <div className="input-group">
+                <label>Gender</label>
+                <select
+                  value={gender}
+                  onChange={(e) => setGender(e.target.value)}
+                  className="gender-select"
+                >
+                  <option value="">Select Gender</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                </select>
+              </div>
             </div>
 
             <div className="input-group">
@@ -316,6 +349,10 @@ const Register = () => {
             <button type="submit" className="register-btn" disabled={isLoading}>
               {isLoading ? "Creating Account..." : "Create Account"}
             </button>
+
+            <div className="auth-divider">
+              <span>or sign up with</span>
+            </div>
 
             <button
               type="button"

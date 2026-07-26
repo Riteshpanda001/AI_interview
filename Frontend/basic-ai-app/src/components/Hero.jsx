@@ -1,10 +1,12 @@
 import React from "react";
 import "./Hero.css";
 import { useNavigate } from "react-router-dom";
+import useRequireAuth from "../hooks/useRequireAuth";
 
 const Hero = () => {
 
   const navigate = useNavigate();
+  const { requireAuth } = useRequireAuth();
 
   return (
 
@@ -56,14 +58,14 @@ const Hero = () => {
 
           <button
             className="primary-btn"
-            onClick={() => navigate("/mock-interview")}
+            onClick={() => requireAuth(null, "/mock-interview")}
           >
             Start Interview
           </button>
 
           <button
             className="secondary-btn"
-            onClick={() => navigate("/resume-builder")}
+            onClick={() => requireAuth(null, "/resume-builder")}
           >
             Upload Resume
           </button>

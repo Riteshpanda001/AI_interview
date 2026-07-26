@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import "./ResumePreview.css";
+import { useAuth } from "../../context/AuthContext";
 
 const API_BASE_URL = "http://localhost:8000/api";
 
 const ResumePreview = ({ resumeData, selectedTemplate, setResumeData }) => {
+  const { authFetch } = useAuth();
   const { personal, summary, experience, education, skills, projects } = resumeData;
   const [loading, setLoading] = useState(false);
 
@@ -91,13 +93,11 @@ const ResumePreview = ({ resumeData, selectedTemplate, setResumeData }) => {
 
   const handleAIImprove = async () => {
     setLoading(true);
-    const token = localStorage.getItem("token");
     try {
-      const response = await fetch(`${API_BASE_URL}/resume/optimize`, {
+      const response = await authFetch(`${API_BASE_URL}/resume/optimize`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify(resumeData)
       });

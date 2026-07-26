@@ -5,8 +5,8 @@ import "./InterviewHistory.css";
 
 const API_BASE_URL = "http://localhost:8000/api";
 
-const InterviewHistory = () => {
-  const { token } = useAuth();
+const InterviewHistory = ({ onStartNewSession }) => {
+  const { token, authFetch } = useAuth();
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -14,11 +14,7 @@ const InterviewHistory = () => {
     const fetchHistory = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`${API_BASE_URL}/history/interviews`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await authFetch(`${API_BASE_URL}/history/interviews`);
 
         if (response.ok) {
           const data = await response.json();

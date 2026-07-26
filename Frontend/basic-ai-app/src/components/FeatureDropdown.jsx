@@ -1,6 +1,7 @@
 import React from "react";
 import "./Navbar.css";
 import { useNavigate } from "react-router-dom";
+import useRequireAuth from "../hooks/useRequireAuth";
 
 const features = [
   {
@@ -27,6 +28,7 @@ const features = [
 
 const FeatureDropdown = () => {
   const navigate = useNavigate();
+  const { requireAuth } = useRequireAuth();
 
   return (
     <div className="feature-dropdown">
@@ -35,15 +37,17 @@ const FeatureDropdown = () => {
           className="dropdown-item" 
           key={index}
           onClick={() => {
+            let path = "/";
             if (item.title === "Coding Practice") {
-              navigate("/coding-practice");
+              path = "/coding-practice";
             } else if (item.title === "Company Preparation") {
-              navigate("/company-preparation");
+              path = "/company-preparation";
             } else if (item.title === "Mock Interviews") {
-              navigate("/mock-interview");
+              path = "/mock-interview";
             } else if (item.title === "AI Resume Builder") {
-              navigate("/resume-builder");
+              path = "/resume-builder";
             }
+            navigate(path);
           }}
           style={{ cursor: "pointer" }}
         >

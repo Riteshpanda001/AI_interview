@@ -1,11 +1,13 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import "./MockHero.css";
+import useRequireAuth from "../../hooks/useRequireAuth";
 
 import heroImage from "../../assets/hero.png";
 
 const MockHero = () => {
   const navigate = useNavigate();
+  const { requireAuth } = useRequireAuth();
 
   return (
     <section className="mock-hero">
@@ -31,7 +33,7 @@ const MockHero = () => {
 
           <button 
             className="practice-btn"
-            onClick={() => navigate("/mock-interviews")}
+            onClick={() => requireAuth(() => navigate("/mock-interviews"), "/mock-interviews")}
           >
             Practice Now
           </button>

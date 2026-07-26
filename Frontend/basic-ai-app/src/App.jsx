@@ -18,6 +18,7 @@ import ATSScore from "./pages/ATSScore";
 import Pricing from "./pages/Pricing";
 import Contact from "./pages/Contact";
 import Profile from "./pages/Profile";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -45,19 +46,36 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/verify-otp" element={<VerifyOTP />} />
-        <Route path="/dashboard" element={<DashboardPage />} />
-        <Route path="/profile" element={<Profile />} />
+        <Route path="/share/resume/:shareToken" element={<SharedResumePage />} />
+        <Route path="/pricing" element={<Pricing />} />
+        <Route path="/contact" element={<Contact />} />
 
+        {/* Feature Pages (Viewable by all users, feature actions are guarded by auth) */}
         <Route path="/mock-interview" element={<MockInterview />} />
         <Route path="/mock-interviews" element={<MockInterviews />} />
         <Route path="/resume-builder" element={<ResumeBuilder />} />
-        <Route path="/share/resume/:shareToken" element={<SharedResumePage />} />
         <Route path="/coding-practice" element={<CodingPractice />} />
         <Route path="/company-preparation" element={<CompanyPreparation />} />
         <Route path="/ats-score" element={<ATSScore />} />
         <Route path="/resume-upload" element={<ATSScore />} />
-        <Route path="/pricing" element={<Pricing />} />
-        <Route path="/contact" element={<Contact />} />
+
+        {/* User Account & Dashboard Routes (Protected) */}
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <DashboardPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </>
   );

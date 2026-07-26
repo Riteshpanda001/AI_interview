@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "./ResumeUpload.css";
+import { useAuth } from "../../context/AuthContext";
 
 const ResumeUpload = ({ 
   resumeData, 
@@ -11,6 +12,7 @@ const ResumeUpload = ({
   error, 
   setError 
 }) => {
+  const { authFetch } = useAuth();
   const [file, setFile] = useState(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -56,16 +58,12 @@ const ResumeUpload = ({
       });
     }, 100);
 
-    const token = localStorage.getItem("access_token");
     const formData = new FormData();
     formData.append("file", selectedFile);
 
     try {
-      const response = await fetch("http://localhost:8000/api/resume/upload", {
+      const response = await authFetch("http://localhost:8000/api/resume/upload", {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`
-        },
         body: formData
       });
 

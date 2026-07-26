@@ -1,9 +1,11 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import "./Features.css";
+import useRequireAuth from "../hooks/useRequireAuth";
 
 const Features = () => {
   const navigate = useNavigate();
+  const { requireAuth } = useRequireAuth();
 
   const features = [
     {

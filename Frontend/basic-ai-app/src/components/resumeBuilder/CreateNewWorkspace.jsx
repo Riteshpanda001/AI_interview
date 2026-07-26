@@ -179,13 +179,11 @@ const CreateNewWorkspace = ({
   // AI 1-Click Polish Summary
   const handleAIPolishSummary = async () => {
     setSaveStatus("saving");
-    const token = localStorage.getItem("token");
     try {
-      const res = await fetch("http://localhost:8000/api/resume/optimize", {
+      const res = await authFetch("http://localhost:8000/api/resume/optimize", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify(resumeData)
       });
@@ -210,13 +208,11 @@ const CreateNewWorkspace = ({
   const handleAnalyzeJD = async () => {
     if (!jobDescription.trim()) return;
     setJdAnalyzing(true);
-    const token = localStorage.getItem("token");
     try {
-      const res = await fetch("http://localhost:8000/api/ats/analyze", {
+      const res = await authFetch("http://localhost:8000/api/ats/analyze", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify({
           resume_id: currentResumeId || "",
@@ -248,13 +244,11 @@ const CreateNewWorkspace = ({
   const handleAutoTailorResume = async () => {
     if (!jobDescription.trim()) return;
     setJdAnalyzing(true);
-    const token = localStorage.getItem("token");
     try {
-      const res = await fetch("http://localhost:8000/api/ats/tailor", {
+      const res = await authFetch("http://localhost:8000/api/ats/tailor", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify({
           resume_data: resumeData,
@@ -281,12 +275,10 @@ const CreateNewWorkspace = ({
   // Generate Share Link Modal
   const handleGenerateShare = async () => {
     setShowShareModal(true);
-    const token = localStorage.getItem("token");
     if (currentResumeId) {
       try {
-        const res = await fetch(`http://localhost:8000/api/resume/${currentResumeId}/share`, {
+        const res = await authFetch(`http://localhost:8000/api/resume/${currentResumeId}/share`, {
           method: "POST",
-          headers: { Authorization: `Bearer ${token}` }
         });
         if (res.ok) {
           const data = await res.json();

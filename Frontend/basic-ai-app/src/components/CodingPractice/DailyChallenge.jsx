@@ -1,7 +1,10 @@
 import React from "react";
 import "./DailyChallenge.css";
+import useRequireAuth from "../../hooks/useRequireAuth";
 
 const DailyChallenge = ({ onSolve }) => {
+  const { requireAuth } = useRequireAuth();
+
   return (
     <section className="daily-challenge-section">
       <div className="daily-challenge-container">
@@ -47,7 +50,7 @@ const DailyChallenge = ({ onSolve }) => {
             <div className="challenge-action-row">
               <button 
                 className="challenge-solve-btn" 
-                onClick={onSolve || (() => alert("Launching compiler workspace for Daily Challenge: 'Binary Search'"))}
+                onClick={() => requireAuth(() => { if (onSolve) onSolve(); }, "/coding-practice")}
               >
                 Start Solving Now →
               </button>

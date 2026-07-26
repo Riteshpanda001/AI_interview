@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "./CodingProblems.css";
+import useRequireAuth from "../../hooks/useRequireAuth";
 
 // Sample Problems Database
 const PROBLEMS = [
@@ -1217,6 +1218,7 @@ const PROBLEMS = [
 ];
 
 const CodingProblems = ({ selectedCategory, onSelectCategory, selectedCompany, onSelectCompany, onSelectProblem }) => {
+  const { requireAuth } = useRequireAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [difficultyFilter, setDifficultyFilter] = useState("All");
   const [statusFilter, setStatusFilter] = useState("All");
@@ -1368,7 +1370,7 @@ const CodingProblems = ({ selectedCategory, onSelectCategory, selectedCompany, o
                     <td>
                       <button 
                         className="problem-solve-cta"
-                        onClick={() => onSelectProblem(problem)}
+                        onClick={() => requireAuth(() => onSelectProblem(problem), "/coding-practice")}
                       >
                         Solve ⚙️
                       </button>

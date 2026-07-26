@@ -1,9 +1,11 @@
 import React from "react";
 import "./CompanyPreparation.css";
 import { useNavigate } from "react-router-dom";
+import useRequireAuth from "../hooks/useRequireAuth";
 
 const CompanyPreparation = () => {
   const navigate = useNavigate();
+  const { requireAuth } = useRequireAuth();
   const companies = [
     {
       name: "Google",
@@ -74,7 +76,7 @@ const CompanyPreparation = () => {
 
             <button 
               className="company-btn"
-              onClick={() => navigate("/company-preparation")}
+              onClick={() => requireAuth(null, "/company-preparation")}
             >
               Start Preparation
             </button>

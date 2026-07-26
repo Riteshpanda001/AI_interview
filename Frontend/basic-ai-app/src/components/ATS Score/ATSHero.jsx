@@ -1,11 +1,13 @@
 import React from "react";
 import "./ATSHero.css";
 import { useNavigate } from "react-router-dom";
+import useRequireAuth from "../../hooks/useRequireAuth";
 import heroImage from "../../assets/resume/ats-hero-image.jpg";
 
 const ATSHero = () => {
 
   const navigate = useNavigate();
+  const { requireAuth } = useRequireAuth();
 
   const features = [
     "AI Resume Analysis",
@@ -89,14 +91,14 @@ const ATSHero = () => {
 
           <button
             className="ats-primary-btn"
-            onClick={() => navigate("/resume-upload")}
+            onClick={() => requireAuth(() => navigate("/resume-upload"), "/resume-upload")}
           >
             Upload Resume
           </button>
 
           <button
             className="ats-secondary-btn"
-            onClick={() => navigate("/resume-builder")}
+            onClick={() => requireAuth(() => navigate("/resume-builder"), "/resume-builder")}
           >
             Build Resume
           </button>

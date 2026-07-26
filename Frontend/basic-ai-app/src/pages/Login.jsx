@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import "./Login.css";
 import logo from "../assets/prenova_ai_logo.png";
@@ -7,7 +7,10 @@ import googleLogo from "../assets/google.png";
 
 const Login = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login, checkEmail, verifyOtp, resendOtp, googleLogin } = useAuth();
+
+  const redirectTarget = location.state?.from || "/dashboard";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -145,7 +148,7 @@ const Login = () => {
         setOtpDigits(["", "", "", "", "", ""]);
         setResendTimer(60);
       } else {
-        navigate("/dashboard");
+        navigate(redirectTarget);
       }
     } catch (err) {
       if (err.status === 403) {
@@ -168,7 +171,7 @@ const Login = () => {
         callback: async (response) => {
           try {
             await googleLogin(response.credential);
-            navigate("/dashboard");
+            navigate(redirectTarget);
           } catch (err) {
             setErrorMsg(err.message || "Google Sign-In failed.");
           } finally {
@@ -182,7 +185,7 @@ const Login = () => {
         try {
           const fakeToken = "mock_google_jwt_token_for_dev_testing";
           await googleLogin(fakeToken);
-          navigate("/dashboard");
+          navigate(redirectTarget);
         } catch (err) {
           setErrorMsg("Google Sign-In error: " + (err.message || err));
         } finally {
@@ -205,9 +208,9 @@ const Login = () => {
 
     try {
       await verifyOtp(email, fullOtp, "email_verification");
-      setInfoMsg("Account successfully verified! Redirecting to dashboard...");
+      setInfoMsg("Account successfully verified! Redirecting...");
       setTimeout(() => {
-        navigate("/dashboard");
+        navigate(redirectTarget);
       }, 1500);
       setShowOtpModal(false);
     } catch (err) {
@@ -227,12 +230,18 @@ const Login = () => {
           <p>
             Sign in to continue your interview preparation journey with PrepNova AI.
           </p>
-          <img src="/images/login-ai.png" alt="AI Interview" className="login-image" />
+
+          <div className="login-image-wrapper">
+            <img src="/images/login-ai.png" alt="AI Interview" className="login-image" />
+          </div>
         </div>
 
         {/* Right Side */}
         <div className="login-right">
-          <h2>Login</h2>
+          <div className="login-header">
+            <h2>Welcome Back</h2>
+            <p className="login-subtitle">Please enter your details to sign in</p>
+          </div>
 
           {errorMsg && (
             <div className="alert-message error">
@@ -292,15 +301,19 @@ const Login = () => {
             </div>
 
             <div className="login-options">
-              <label>
+              <label className="remember-me">
                 <input type="checkbox" /> Remember Me
               </label>
-              <a href="/forgot-password">Forgot Password?</a>
+              <a href="/forgot-password" className="forgot-password-link">Forgot Password?</a>
             </div>
 
             <button type="submit" className="login-btn-main" disabled={isLoading}>
               {isLoading ? "Verifying Credentials..." : "Login"}
             </button>
+
+            <div className="auth-divider">
+              <span>or sign in with</span>
+            </div>
 
             <button
               type="button"

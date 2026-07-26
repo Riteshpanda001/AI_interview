@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
+import useRequireAuth from "../../hooks/useRequireAuth";
 import { FaLaptopCode, FaCommentDots, FaAward, FaCalendarAlt } from "react-icons/fa";
 import "./Dashboard.css";
 
 const API_BASE_URL = "http://localhost:8000/api";
 
 const Dashboard = ({ onPracticeNow }) => {
-  const { user, token } = useAuth();
+  const { user, token, authFetch } = useAuth();
+  const { requireAuth } = useRequireAuth();
   const [metrics, setMetrics] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -15,11 +17,7 @@ const Dashboard = ({ onPracticeNow }) => {
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`${API_BASE_URL}/dashboard/`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await authFetch(`${API_BASE_URL}/dashboard/`);
 
         if (response.ok) {
           const data = await response.json();
@@ -86,7 +84,7 @@ const Dashboard = ({ onPracticeNow }) => {
         <p>
           Ready to level up your interview game? Start a customized interactive mock interview simulation with our AI. Choose between Technical, HR, and Behavioral rounds and get instant expert feedback.
         </p>
-        <button className="practiceBtn" onClick={onPracticeNow}>
+        <button className="practiceBtn" onClick={() => requireAuth(onPracticeNow, "/mock-interview")}>
           Practice Now
         </button>
       </div>

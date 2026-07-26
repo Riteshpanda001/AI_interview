@@ -1,5 +1,6 @@
 import React from "react";
 import "./CompanyCoding.css";
+import useRequireAuth from "../../hooks/useRequireAuth";
 
 const COMPANIES = [
   { id: "Google", name: "Google", logoColor: "#4285F4", textColor: "#4285F4", borderGlow: "rgba(66, 133, 244, 0.2)", badgeText: "Google" },
@@ -11,6 +12,8 @@ const COMPANIES = [
 ];
 
 const CompanyCoding = ({ selectedCompany, onSelectCompany }) => {
+  const { requireAuth } = useRequireAuth();
+
   return (
     <section className="company-coding-section">
       <div className="company-coding-container">
@@ -28,7 +31,7 @@ const CompanyCoding = ({ selectedCompany, onSelectCompany }) => {
               <div 
                 className={`company-pill card ${isActive ? "active" : ""}`}
                 key={company.id}
-                onClick={() => onSelectCompany(isActive ? null : company.id)}
+                onClick={() => requireAuth(() => onSelectCompany(isActive ? null : company.id), "/coding-practice")}
                 style={{
                   borderColor: isActive ? company.logoColor : "",
                   boxShadow: isActive ? `0 10px 25px ${company.borderGlow}` : ""

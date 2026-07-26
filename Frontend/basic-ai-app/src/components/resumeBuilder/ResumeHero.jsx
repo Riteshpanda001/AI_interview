@@ -1,9 +1,12 @@
 import React from "react";
 import "./ResumeHero.css";
+import useRequireAuth from "../../hooks/useRequireAuth";
 
 import heroImage from "../../assets/resume/resume-hero.png";
 
 const ResumeHero = ({ onBuildClick }) => {
+  const { requireAuth } = useRequireAuth();
+
   return (
     <section className="resume-hero">
 
@@ -45,7 +48,7 @@ const ResumeHero = ({ onBuildClick }) => {
 
           <div className="resume-buttons">
 
-            <button className="build-btn" onClick={onBuildClick}>
+            <button className="build-btn" onClick={() => requireAuth(onBuildClick, "/resume-builder")}>
               Build Resume
             </button>
 

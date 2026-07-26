@@ -4,10 +4,12 @@ import logo from "../assets/prenova_ai_logo.png";
 import FeatureDropdown from "./FeatureDropdown";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import useRequireAuth from "../hooks/useRequireAuth";
 
 const Navbar = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const { requireAuth } = useRequireAuth();
 
   const [active, setActive] = useState("Home");
   const [profileOpen, setProfileOpen] = useState(false);

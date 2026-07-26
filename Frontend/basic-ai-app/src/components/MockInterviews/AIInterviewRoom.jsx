@@ -161,11 +161,10 @@ const AIInterviewRoom = ({ interviewDetails }) => {
     const startSession = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`${API_BASE_URL}/interview/start`, {
+        const response = await authFetch(`${API_BASE_URL}/interview/start`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
             role_target: interviewDetails.role_target,
@@ -468,11 +467,10 @@ const AIInterviewRoom = ({ interviewDetails }) => {
       }, 1000);
     } else {
       try {
-        const response = await fetch(`${API_BASE_URL}/interview/${sessionRef.current.id}/answer`, {
+        const response = await authFetch(`${API_BASE_URL}/interview/${sessionRef.current.id}/answer`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
             question_id: currentQuestion.question_id,

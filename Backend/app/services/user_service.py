@@ -31,6 +31,8 @@ class UserService:
         provider: str = "email",
         google_id: Optional[str] = None,
         profile_picture: Optional[str] = None,
+        phone: Optional[str] = None,
+        gender: Optional[str] = None,
         is_verified: bool = False,
         db: Any = None
     ) -> Dict[str, Any]:
@@ -45,6 +47,9 @@ class UserService:
             "google_id": google_id,
             "profile_picture": profile_picture,
             "avatar_url": profile_picture,
+            "phone": phone,
+            "mobile_number": phone,
+            "gender": gender,
             "role": ROLE_USER,
             "plan_type": PLAN_FREE,
             "is_verified": is_verified,

@@ -4,7 +4,7 @@ import { useAuth } from "../../context/AuthContext";
 import "./InterviewSetup.css";
 
 const InterviewSetup = ({ onStartInterview }) => {
-  const { token } = useAuth();
+  const { token, authFetch } = useAuth();
   const [role, setRole] = useState("AI-ML Engineer");
   const [customRole, setCustomRole] = useState("");
   const [interviewType, setInterviewType] = useState("technical");
@@ -13,6 +13,7 @@ const InterviewSetup = ({ onStartInterview }) => {
   const [experience, setExperience] = useState("Mid Level");
   const [difficulty, setDifficulty] = useState("Medium");
   const [language, setLanguage] = useState("English");
+  const [targetCompany, setTargetCompany] = useState("Google");
   const [duration, setDuration] = useState(10);
   
   // Resume upload states
@@ -25,13 +26,6 @@ const InterviewSetup = ({ onStartInterview }) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    if (!file.name.endsWith(".pdf") && !file.name.endsWith(".docx")) {
-      setUploadError("Only PDF and DOCX files are allowed.");
-      setSelectedFile(null);
-      setResumeId("");
-      return;
-    }
-
     setSelectedFile(file);
     setUploadError("");
     setUploadingResume(true);
@@ -40,11 +34,8 @@ const InterviewSetup = ({ onStartInterview }) => {
     formData.append("file", file);
 
     try {
-      const response = await fetch("http://localhost:8000/api/resume/upload", {
+      const response = await authFetch("http://localhost:8000/api/resume/upload", {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
         body: formData,
       });
 

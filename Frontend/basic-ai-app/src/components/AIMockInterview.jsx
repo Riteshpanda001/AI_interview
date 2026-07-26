@@ -1,9 +1,11 @@
 import React from "react";
 import "./AIMockInterview.css";
 import { useNavigate } from "react-router-dom";
+import useRequireAuth from "../hooks/useRequireAuth";
 
 const AIMockInterview = () => {
   const navigate = useNavigate();
+  const { requireAuth } = useRequireAuth();
   return (
     <section className="mock-section">
 
@@ -51,11 +53,8 @@ const AIMockInterview = () => {
         <button 
           className="mock-btn" 
           onClick={() => {
-            if (window.location.pathname === "/mock-interview") {
-              navigate("/mock-interviews");
-            } else {
-              navigate("/mock-interview");
-            }
+            const target = window.location.pathname === "/mock-interview" ? "/mock-interviews" : "/mock-interview";
+            requireAuth(() => navigate(target), target);
           }}
         >
           Start Mock Interview

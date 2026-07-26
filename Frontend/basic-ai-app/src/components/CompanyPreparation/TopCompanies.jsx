@@ -1,5 +1,6 @@
 import React from "react";
 import "./TopCompanies.css";
+import useRequireAuth from "../../hooks/useRequireAuth";
 
 const COMPANIES = [
   { name: "Google", logo: "🔍", type: "Product", color: "#4285F4" },
@@ -13,6 +14,8 @@ const COMPANIES = [
 ];
 
 const TopCompanies = ({ selectedCompany, onSelectCompany }) => {
+  const { requireAuth } = useRequireAuth();
+
   return (
     <section className="top-companies-section">
       <div className="top-companies-container">
@@ -29,7 +32,7 @@ const TopCompanies = ({ selectedCompany, onSelectCompany }) => {
               <button
                 key={company.name}
                 className={`company-tab-btn ${isSelected ? "selected" : ""}`}
-                onClick={() => onSelectCompany(company.name)}
+                onClick={() => requireAuth(() => onSelectCompany(company.name), "/company-preparation")}
                 style={{
                   "--brand-color": company.color,
                   "--brand-bg": `${company.color}0c`,
