@@ -1,5 +1,6 @@
 import React from "react";
 import "./ResumeTemplates.css";
+import useRequireAuth from "../../hooks/useRequireAuth";
 
 const templatesList = [
   {
@@ -69,6 +70,16 @@ const templatesList = [
 ];
 
 const ResumeTemplates = ({ selectedTemplate, setSelectedTemplate }) => {
+  const { requireAuth } = useRequireAuth();
+
+  const handleTemplateClick = (tplId) => {
+    requireAuth(() => {
+      if (setSelectedTemplate) {
+        setSelectedTemplate(tplId);
+      }
+    }, "/resume-builder");
+  };
+
   return (
     <section id="resume-templates-section" className="templates-section">
       <div className="section-header">
@@ -87,7 +98,7 @@ const ResumeTemplates = ({ selectedTemplate, setSelectedTemplate }) => {
           <div
             key={tpl.id}
             className={`template-card ${selectedTemplate === tpl.id ? "selected" : ""}`}
-            onClick={() => setSelectedTemplate(tpl.id)}
+            onClick={() => handleTemplateClick(tpl.id)}
           >
             {tpl.tag && <span className="tpl-tag">{tpl.tag}</span>}
             <div className="tpl-preview-box" style={{ background: tpl.previewBg }}>

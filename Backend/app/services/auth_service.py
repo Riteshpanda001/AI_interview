@@ -9,7 +9,7 @@ from app.services.user_service import UserService
 from app.services.google_auth import GoogleAuthService
 from app.constants import ERROR_INVALID_CREDENTIALS, ERROR_USER_NOT_FOUND, ROLE_USER, PLAN_FREE
 from bson import ObjectId
-from datetime import datetime
+from datetime import datetime, timezone
 
 class AuthService:
     @staticmethod
@@ -372,11 +372,16 @@ class AuthService:
             )
 
         hashed_password = AuthService.get_password_hash(request.new_password)
+        try:
+            query = {"_id": ObjectId(user_id)}
+        except Exception:
+            query = {"_id": user_id}
+
         await db["users"].update_one(
-            {"_id": ObjectId(user_id)},
+            query,
             {"$set": {
                 "hashed_password": hashed_password,
-                "updated_at": datetime.utcnow()
+                "updated_at": datetime.now(timezone.utc)
             }}
         )
 
@@ -406,9 +411,14 @@ class AuthService:
                 user["id"] = str(user["_id"])
             return user
             
-        update_data["updated_at"] = datetime.utcnow()
+        update_data["updated_at"] = datetime.now(timezone.utc)
+        try:
+            query = {"_id": ObjectId(user_id)}
+        except Exception:
+            query = {"_id": user_id}
+
         await db["users"].update_one(
-            {"_id": ObjectId(user_id)},
+            query,
             {"$set": update_data}
         )
         

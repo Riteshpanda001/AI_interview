@@ -109,6 +109,13 @@
   background: #f8f7ff;
 }
 
+.dashboard-content:has(.interviewRoom) {
+  overflow: hidden;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
 /* Scrollbar styling */
 .dashboard-content::-webkit-scrollbar {
   width: 6px;

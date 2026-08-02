@@ -1,9 +1,11 @@
 .footer {
-  background: #0f172a;
-
+  background: #0f172a !important;
   color: white;
-
   padding-top: 80px;
+  position: relative;
+  z-index: 10;
+  margin-bottom: 0 !important;
+  width: 100%;
 }
 
 .footer-container {

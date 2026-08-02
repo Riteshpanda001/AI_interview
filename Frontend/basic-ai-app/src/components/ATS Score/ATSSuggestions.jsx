@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import "./ATSSuggestions.css";
 
-const ATSSuggestions = ({ recommendations = [], detailedFeedback = "" }) => {
+const ATSSuggestions = ({ recommendations = [], detailedFeedback = "", tailoredBulletSuggestions = [] }) => {
+  const [copiedIdx, setCopiedIdx] = useState(null);
   const [suggestions, setSuggestions] = useState([]);
 
   useEffect(() => {
@@ -47,6 +48,12 @@ const ATSSuggestions = ({ recommendations = [], detailedFeedback = "" }) => {
     }
   }, [recommendations]);
 
+  const handleCopy = (text, idx) => {
+    navigator.clipboard.writeText(text);
+    setCopiedIdx(idx);
+    setTimeout(() => setCopiedIdx(null), 2000);
+  };
+
   const toggleExpand = (id) => {
     setSuggestions(prev => prev.map(s => s.id === id ? { ...s, expanded: !s.expanded } : s));
   };
@@ -54,17 +61,51 @@ const ATSSuggestions = ({ recommendations = [], detailedFeedback = "" }) => {
   return (
     <div className="ats-suggestions-container">
       <div className="suggestions-header">
-        <h2>AI Optimization Suggestions</h2>
-        <p>Follow these specific, personalized recommendations to improve ATS compatibility and readability.</p>
+        <h2>⚡ AI Resume Rewrites & Recommendations</h2>
+        <p>Intelligent bullet point rewrites tailored directly for target job keyword alignment.</p>
         {detailedFeedback && (
           <div className="feedback-overview-box">
-            <h4>AI Recruiter Summary</h4>
+            <h4>💡 AI Recruiter Fit Diagnosis</h4>
             <p>{detailedFeedback}</p>
           </div>
         )}
       </div>
 
+      {/* Tailored Bullets Section */}
+      {tailoredBulletSuggestions && tailoredBulletSuggestions.length > 0 && (
+        <div className="tailored-bullets-section">
+          <h3>✨ Recommended Bullet Point Rewrites</h3>
+          <div className="bullets-grid">
+            {tailoredBulletSuggestions.map((b, i) => (
+              <div key={i} className="bullet-rewrite-card">
+                <div className="bullet-target-tag">🎯 Keyword: {b.target_keyword}</div>
+                <div className="bullet-comparison">
+                  <div className="bullet-before">
+                    <span className="bullet-label original">Original Bullet</span>
+                    <p>"{b.original}"</p>
+                  </div>
+                  <div className="bullet-after">
+                    <span className="bullet-label AI">AI Tailored Bullet</span>
+                    <p>"{b.tailored}"</p>
+                  </div>
+                </div>
+                <div className="bullet-card-actions">
+                  <button 
+                    className="copy-bullet-btn"
+                    onClick={() => handleCopy(b.tailored, i)}
+                  >
+                    {copiedIdx === i ? "✓ Copied!" : "📋 Copy Tailored Bullet"}
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* General Recommendations */}
       <div className="suggestions-list">
+        <h3>📌 Actionable Recommendations</h3>
         {suggestions.map((s) => (
           <div key={s.id} className={`suggestion-card ${s.expanded ? "expanded" : ""}`}>
             <div className="card-top" onClick={() => toggleExpand(s.id)}>
@@ -83,11 +124,11 @@ const ATSSuggestions = ({ recommendations = [], detailedFeedback = "" }) => {
                 
                 <div className="comparison-box">
                   <div className="comparison-col before">
-                    <span>❌ Original / Bad Example</span>
+                    <span>❌ Original / Standard Example</span>
                     <p>"{s.before}"</p>
                   </div>
                   <div className="comparison-col after">
-                    <span>✨ Suggested / Good Example</span>
+                    <span>✨ Suggested / Optimized Example</span>
                     <p>"{s.after}"</p>
                   </div>
                 </div>
@@ -101,3 +142,4 @@ const ATSSuggestions = ({ recommendations = [], detailedFeedback = "" }) => {
 };
 
 export default ATSSuggestions;
+

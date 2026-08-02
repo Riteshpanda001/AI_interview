@@ -10,7 +10,7 @@
 
 .interview-setup-header {
   text-align: center;
-  margin-bottom: 35px;
+  margin-bottom: 30px;
 }
 
 .interview-setup-header h2 {
@@ -25,10 +25,53 @@
   font-size: 15px;
 }
 
+/* Prep Mode Switcher Tabs */
+.setup-mode-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 22px;
+  background: #f1f5f9;
+  padding: 6px;
+  border-radius: 16px;
+}
+
+.setup-mode-tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 13px 20px;
+  border: none;
+  border-radius: 12px;
+  background: transparent;
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.setup-mode-tab:hover {
+  color: #7c3aed;
+}
+
+.setup-mode-tab.active {
+  background: #ffffff;
+  color: #7c3aed;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.12);
+}
+
+.setup-mode-tab .tab-icon {
+  font-size: 15px;
+}
+
 .interview-setup-form {
   display: flex;
   flex-direction: column;
-  gap: 25px;
+  gap: 24px;
 }
 
 .interview-setup-label {
@@ -110,7 +153,7 @@
 }
 
 .interview-setup-btn {
-  margin-top: 15px;
+  margin-top: 10px;
   padding: 16px;
   border: none;
   border-radius: 12px;
@@ -141,8 +184,23 @@
 @media(max-width: 580px) {
   .interview-setup-row {
     grid-template-columns: 1fr;
-    gap: 25px;
+    gap: 20px;
   }
+}
+
+/* Resume Mode Section Styling */
+.resume-mode-section {
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 18px;
+  padding: 24px;
+}
+
+.resume-mode-desc {
+  font-size: 13px;
+  color: #64748b;
+  line-height: 1.5;
+  margin-bottom: 16px;
 }
 
 .resume-upload-container {
@@ -172,16 +230,29 @@
   text-align: center;
 }
 
+.resume-upload-label-btn.large {
+  padding: 24px 20px;
+  border-width: 2px;
+  border-style: dashed;
+  flex-direction: column;
+  gap: 10px;
+}
+
 .resume-upload-label-btn:hover {
   background: rgba(124, 58, 237, 0.06);
   border-color: #8b5cf6;
 }
 
-.resume-success-msg {
+.resume-success-banner {
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  color: #065f46;
+  padding: 10px 16px;
+  border-radius: 10px;
   font-size: 13px;
-  color: #10b981;
   font-weight: 600;
-  margin-top: 4px;
+  margin-top: 8px;
+  text-align: center;
 }
 
 .resume-error-msg {

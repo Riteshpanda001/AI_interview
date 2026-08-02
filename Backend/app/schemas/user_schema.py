@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, ConfigDict
 from typing import Optional
 from datetime import datetime
 
@@ -19,13 +19,9 @@ class UserBase(BaseModel):
 
 class UserResponse(UserBase):
     id: str
-    created_at: datetime
+    created_at: Optional[datetime] = None
 
-    class Config:
-        populate_by_name = True
-        json_encoders = {
-            datetime: lambda dt: dt.isoformat()
-        }
+    model_config = ConfigDict(populate_by_name=True)
 
 class UserUpdateRequest(BaseModel):
     full_name: Optional[str] = None

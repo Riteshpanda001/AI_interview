@@ -91,7 +91,12 @@ const ATSHero = () => {
 
           <button
             className="ats-primary-btn"
-            onClick={() => requireAuth(() => navigate("/resume-upload"), "/resume-upload")}
+            onClick={() => {
+              const uploadSection = document.getElementById("upload-section");
+              if (uploadSection) {
+                uploadSection.scrollIntoView({ behavior: "smooth" });
+              }
+            }}
           >
             Upload Resume
           </button>

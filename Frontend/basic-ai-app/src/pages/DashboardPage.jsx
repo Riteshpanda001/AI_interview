@@ -120,6 +120,10 @@ const SidebarWithState = ({ section, setSection }) => {
       navigate("/resume-builder");
       return;
     }
+    if (path.includes("ats-score") || path.includes("job-matcher")) {
+      navigate("/ats-score");
+      return;
+    }
     if (path.includes("new-interview")) setSection("new-interview");
     else if (path.includes("history")) setSection("history");
     else if (path.includes("settings")) setSection("settings");
@@ -156,6 +160,11 @@ const SidebarInner = ({ onNav, section, onLogout }) => {
       id: "new-interview",
       label: "New Interview",
       icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" /><line x1="8" y1="12" x2="16" y2="12" /></svg>,
+    },
+    {
+      id: "job-matcher",
+      label: "AI Job Matcher",
+      icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>,
     },
     {
       id: "resume-builder",
@@ -198,7 +207,7 @@ const SidebarInner = ({ onNav, section, onLogout }) => {
             key={item.id}
             id={`sidebar-${item.id}`}
             className={`sidebar-nav-btn${section === item.id ? " active" : ""}`}
-            onClick={() => onNav(item.id === "resume-builder" ? "/resume-builder" : `/dashboard/${item.id}`)}
+            onClick={() => onNav(item.id === "job-matcher" ? "/ats-score" : item.id === "resume-builder" ? "/resume-builder" : `/dashboard/${item.id}`)}
           >
             <span className="sidebar-nav-icon">{item.icon}</span>
             <span className="sidebar-nav-label">{item.label}</span>

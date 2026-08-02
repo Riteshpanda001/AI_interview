@@ -10,7 +10,7 @@ export const useRequireAuth = () => {
 
   const requireAuth = (callbackAction, targetPath) => {
     if (!user && !token) {
-      const destination = targetPath || (location.pathname !== "/login" ? location.pathname : "/dashboard");
+      const destination = targetPath || (location.pathname !== "/login" ? location.pathname : "/");
       navigate("/login", {
         state: {
           from: destination,

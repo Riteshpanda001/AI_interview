@@ -152,9 +152,9 @@ const VerifyOTP = () => {
 
     try {
       await verifyOtp(email, otpCode, "email_verification");
-      setSuccessMsg("Account successfully verified! Redirecting to Dashboard...");
+      setSuccessMsg("Account successfully verified! Redirecting to Home...");
       setTimeout(() => {
-        navigate("/dashboard");
+        navigate("/");
       }, 1200);
     } catch (err) {
       setErrorMsg(err.message || "Invalid or expired OTP code.");

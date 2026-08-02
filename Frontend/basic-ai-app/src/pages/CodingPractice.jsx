@@ -23,11 +23,6 @@ const CodingPractice = () => {
 
   const handleSelectProblem = (problem) => {
     setSelectedProblem(problem);
-    // Smooth scroll to AI coding workspace
-    const workspaceElement = document.getElementById("ai-workspace");
-    if (workspaceElement) {
-      workspaceElement.scrollIntoView({ behavior: "smooth" });
-    }
   };
 
   const handleExploreProblems = () => {

@@ -1,5 +1,5 @@
-from fastapi import APIRouter, Depends
-from app.schemas.ats_schema import ATSAnalysisRequest, ATSAnalysisResponse, TailorResumeRequest
+from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
+from app.schemas.ats_schema import ATSAnalysisRequest, ATSAnalysisResponse, TailorResumeRequest, ParseJobDescriptionResponse
 from app.dependencies import get_current_active_user, get_db
 from app.services.ats_service import ATSService
 
@@ -15,9 +15,24 @@ async def analyze_resume_ats(
         user_id=str(current_user["_id"]),
         resume_id=request.resume_id,
         job_description=request.job_description,
-        db=db
+        db=db,
+        resume_data=request.resume_data,
+        resume_text=request.resume_text,
+        job_title=getattr(request, "job_title", ""),
+        experience_level=getattr(request, "experience_level", "Mid Level"),
+        target_company=getattr(request, "target_company", ""),
+        target_location=getattr(request, "target_location", "")
     )
     return analysis
+
+@router.post("/parse-jd", response_model=ParseJobDescriptionResponse)
+async def parse_job_description_file(
+    file: UploadFile = File(...),
+    current_user = Depends(get_current_active_user)
+):
+    if not file.filename:
+        raise HTTPException(status_code=400, detail="No file provided")
+    return await ATSService.parse_jd_file(file)
 
 @router.post("/tailor")
 async def tailor_resume(
@@ -28,3 +43,4 @@ async def tailor_resume(
         resume_data=request.resume_data,
         job_description=request.job_description
     )
+

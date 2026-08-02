@@ -23,6 +23,8 @@ class Settings(BaseSettings):
     # API Keys
     GEMINI_API_KEY: Optional[str] = None
     GROQ_API_KEY: Optional[str] = None
+    HUGGINGFACE_API_KEY: Optional[str] = None
+    HUGGINGFACE_MODEL: str = "meta-llama/Llama-3.2-3B-Instruct"
 
     # Google OAuth Settings
     GOOGLE_CLIENT_ID: Optional[str] = None

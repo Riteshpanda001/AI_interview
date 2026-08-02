@@ -10,7 +10,7 @@ const Login = () => {
   const location = useLocation();
   const { login, checkEmail, verifyOtp, resendOtp, googleLogin } = useAuth();
 
-  const redirectTarget = location.state?.from || "/dashboard";
+  const redirectTarget = location.state?.from || "/";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

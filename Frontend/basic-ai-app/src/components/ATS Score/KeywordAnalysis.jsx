@@ -1,75 +1,75 @@
 import React, { useState } from "react";
 import "./KeywordAnalysis.css";
 
-const KeywordAnalysis = ({ matchedSkills = [], missingSkills = [] }) => {
-  const keywords = [
-    ...matchedSkills.map((skill, idx) => ({
-      word: skill,
-      status: "match",
-      count: (idx % 3) + 1,
-      density: `${(((idx % 3) + 1) * 0.8).toFixed(1)}%`
-    })),
-    ...missingSkills.map(skill => ({
-      word: skill,
-      status: "missing",
-      count: 0,
-      density: "0%"
-    }))
-  ];
+const KeywordAnalysis = ({ matchedSkills = [], missingSkills = [], hardSkills, onInjectSkill }) => {
+  const [injectedSet, setInjectedSet] = useState(new Set());
 
-  const matches = keywords.filter(k => k.status === "match");
-  const missing = keywords.filter(k => k.status === "missing");
+  const criticalMissing = hardSkills?.missing_critical || missingSkills.slice(0, Math.ceil(missingSkills.length / 2));
+  const optionalMissing = hardSkills?.missing_optional || missingSkills.slice(Math.ceil(missingSkills.length / 2));
+
+  const handleInject = (skillName) => {
+    setInjectedSet(prev => new Set(prev).add(skillName));
+    if (onInjectSkill) {
+      onInjectSkill(skillName);
+    }
+  };
 
   return (
     <div className="keyword-analysis-container">
       <div className="section-title">
-        <h2>Keyword Matching Analysis</h2>
-        <p>Optimize your resume with key terms from the job description.</p>
+        <h2>🔍 Skill & Keyword Alignment Matrix</h2>
+        <p>Real-time breakdown of matched terms and 1-click keyword injection into your resume.</p>
       </div>
 
       <div className="keywords-grid">
         <div className="keyword-card matches">
-          <h3>Matched Keywords ({matches.length})</h3>
+          <h3>✅ Matched Technical & Soft Skills ({matchedSkills.length})</h3>
           <div className="keyword-tags">
-            {matches.map((k, i) => (
+            {matchedSkills.map((skill, i) => (
               <div key={i} className="keyword-tag match">
-                <span className="word">{k.word}</span>
-                <span className="count">{k.count}x</span>
+                <span className="word">{skill}</span>
+                <span className="count">Found</span>
               </div>
             ))}
           </div>
         </div>
 
         <div className="keyword-card missing">
-          <h3>Missing Keywords ({missing.length})</h3>
+          <h3>⚠️ Missing Critical Skills ({criticalMissing.length})</h3>
           <div className="keyword-tags">
-            {missing.map((k, i) => (
-              <div key={i} className="keyword-tag miss">
-                <span className="word">{k.word}</span>
-                <span className="plus">+ Add</span>
+            {criticalMissing.map((skill, i) => (
+              <div key={i} className={`keyword-tag miss critical ${injectedSet.has(skill) ? 'injected' : ''}`}>
+                <span className="word">{skill}</span>
+                <button 
+                  className="inject-btn" 
+                  onClick={() => handleInject(skill)}
+                  disabled={injectedSet.has(skill)}
+                >
+                  {injectedSet.has(skill) ? "✓ Added" : "+ Inject Skill"}
+                </button>
               </div>
             ))}
           </div>
-        </div>
-      </div>
 
-      <div className="density-section">
-        <h3>Keyword Density Breakdown</h3>
-        <div className="density-table">
-          <div className="table-header">
-            <span>Keyword</span>
-            <span>Status</span>
-            <span>Count</span>
-            <span>Density</span>
-          </div>
-          {keywords.map((k, i) => (
-            <div key={i} className={`table-row ${k.status}`}>
-              <span className="cell-word">{k.word}</span>
-              <span className="cell-status">{k.status === "match" ? "Matched" : "Missing"}</span>
-              <span>{k.count}</span>
-              <span>{k.density}</span>
-            </div>
-          ))}
+          {optionalMissing.length > 0 && (
+            <>
+              <h4 className="optional-title">💡 Secondary / Bonus Keywords ({optionalMissing.length})</h4>
+              <div className="keyword-tags">
+                {optionalMissing.map((skill, i) => (
+                  <div key={i} className={`keyword-tag miss optional ${injectedSet.has(skill) ? 'injected' : ''}`}>
+                    <span className="word">{skill}</span>
+                    <button 
+                      className="inject-btn" 
+                      onClick={() => handleInject(skill)}
+                      disabled={injectedSet.has(skill)}
+                    >
+                      {injectedSet.has(skill) ? "✓ Added" : "+ Inject"}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>
@@ -77,3 +77,4 @@ const KeywordAnalysis = ({ matchedSkills = [], missingSkills = [] }) => {
 };
 
 export default KeywordAnalysis;
+

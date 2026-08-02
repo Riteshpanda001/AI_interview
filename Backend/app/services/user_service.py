@@ -1,5 +1,5 @@
 from typing import Optional, Dict, Any
-from datetime import datetime
+from datetime import datetime, timezone
 from bson import ObjectId
 from app.constants import ROLE_USER, PLAN_FREE
 
@@ -36,7 +36,7 @@ class UserService:
         is_verified: bool = False,
         db: Any = None
     ) -> Dict[str, Any]:
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         new_user = {
             "email": email.lower().strip(),
             "full_name": full_name,
@@ -67,7 +67,7 @@ class UserService:
 
     @staticmethod
     async def mark_user_verified(email: str, db) -> bool:
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         result = await db["users"].update_one(
             {"email": email.lower().strip()},
             {"$set": {

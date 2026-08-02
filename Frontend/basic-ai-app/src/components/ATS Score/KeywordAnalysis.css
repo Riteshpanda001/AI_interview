@@ -126,67 +126,53 @@
   border-radius: 4px;
 }
 
-.keyword-tag.miss {
-  background: rgba(239, 68, 68, 0.08);
-  border: 1px solid rgba(239, 68, 68, 0.15);
-  color: #fca5a5;
+.inject-btn {
+  background: rgba(99, 102, 241, 0.2);
+  color: #a5b4fc;
+  border: 1px solid rgba(99, 102, 241, 0.4);
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  margin-left: 6px;
+  transition: all 0.2s ease;
 }
 
-.keyword-tag.miss:hover {
+.inject-btn:hover:not(:disabled) {
+  background: #6366f1;
+  color: #ffffff;
+}
+
+.inject-btn:disabled {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  border-color: rgba(16, 185, 129, 0.4);
+  cursor: default;
+}
+
+.keyword-tag.miss.critical {
   background: rgba(239, 68, 68, 0.15);
-  border-color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #f87171;
 }
 
-.density-section h3 {
-  font-size: 1.1rem;
-  color: #374151;
-  margin-bottom: 16px;
+.keyword-tag.miss.optional {
+  background: rgba(234, 179, 8, 0.15);
+  border: 1px solid rgba(234, 179, 8, 0.3);
+  color: #facc15;
+}
+
+.keyword-tag.injected {
+  background: rgba(16, 185, 129, 0.15) !important;
+  border-color: rgba(16, 185, 129, 0.4) !important;
+  color: #34d399 !important;
+}
+
+.optional-title {
+  font-size: 0.9rem;
+  color: #e2e8f0;
+  margin: 16px 0 8px 0;
   font-weight: 600;
 }
 
-.density-table {
-  border: 1px solid #ece8ff;
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.table-header, .table-row {
-  display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr;
-  padding: 12px 16px;
-  font-size: 0.85rem;
-}
-
-.table-header {
-  background: #ffffff;
-  color: #9ca3af;
-  font-weight: 600;
-}
-
-.table-row {
-  border-top: 1px solid #ece8ff;
-  color: #4b5563;
-}
-
-.table-row.match {
-  background: rgba(16, 185, 129, 0.01);
-}
-
-.table-row.missing {
-  background: rgba(239, 68, 68, 0.01);
-}
-
-.cell-word {
-  font-weight: 600;
-  color: #111827;
-}
-
-.table-row.match .cell-status {
-  color: #10b981;
-}
-
-.table-row.missing .cell-status {
-  color: #ef4444;
-}

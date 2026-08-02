@@ -1,20 +1,20 @@
 import React, { useState } from "react";
-import { FaPlay, FaGraduationCap, FaNetworkWired, FaBriefcase, FaUpload, FaSpinner } from "react-icons/fa";
+import { FaPlay, FaGraduationCap, FaNetworkWired, FaBriefcase, FaUpload, FaSpinner, FaFileAlt, FaBullseye } from "react-icons/fa";
 import { useAuth } from "../../context/AuthContext";
 import "./InterviewSetup.css";
 
 const InterviewSetup = ({ onStartInterview }) => {
-  const { token, authFetch } = useAuth();
+  const { authFetch } = useAuth();
+  const [prepMode, setPrepMode] = useState("role"); // "role" | "resume"
   const [role, setRole] = useState("AI-ML Engineer");
   const [customRole, setCustomRole] = useState("");
   const [interviewType, setInterviewType] = useState("technical");
   
-  // New configuration states
+  // Configuration states
   const [experience, setExperience] = useState("Mid Level");
   const [difficulty, setDifficulty] = useState("Medium");
   const [language, setLanguage] = useState("English");
-  const [targetCompany, setTargetCompany] = useState("Google");
-  const [duration, setDuration] = useState(10);
+  const [duration, setDuration] = useState(45);
   
   // Resume upload states
   const [selectedFile, setSelectedFile] = useState(null);
@@ -59,8 +59,20 @@ const InterviewSetup = ({ onStartInterview }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const finalRole = role === "Other" ? customRole : role;
-    if (!finalRole) return;
+
+    if (prepMode === "resume") {
+      if (!selectedFile && !resumeId) {
+        setUploadError("Please choose or upload a resume file to proceed with Resume-Based Interview.");
+        return;
+      }
+    }
+
+    const finalRole = prepMode === "role" 
+      ? (role === "Other" ? customRole : role) 
+      : (selectedFile ? `${selectedFile.name.replace(/\.[^/.]+$/, "")} Profile` : "Resume Based Candidate");
+
+    if (!finalRole && prepMode === "role") return;
+
     onStartInterview({
       role_target: finalRole,
       interview_type: interviewType,
@@ -69,6 +81,7 @@ const InterviewSetup = ({ onStartInterview }) => {
       duration: duration,
       difficulty: difficulty,
       resume_id: resumeId || null,
+      prep_mode: prepMode
     });
   };
 
@@ -77,52 +90,123 @@ const InterviewSetup = ({ onStartInterview }) => {
       <div className="interview-setup-header">
         <h2>Configure Your Mock Interview</h2>
         <p>
-          Customize your AI session details below to generate specialized, real-time interview questions.
+          Select how you want to prepare: by entering a Target Job Role or uploading your Resume profile.
         </p>
+
+        {/* Prep Mode Tabs */}
+        <div className="setup-mode-tabs">
+          <button
+            type="button"
+            className={`setup-mode-tab ${prepMode === "role" ? "active" : ""}`}
+            onClick={() => { setPrepMode("role"); setUploadError(""); }}
+          >
+            <FaBullseye className="tab-icon" />
+            <span>1. By Target Job Role</span>
+          </button>
+          <button
+            type="button"
+            className={`setup-mode-tab ${prepMode === "resume" ? "active" : ""}`}
+            onClick={() => { setPrepMode("resume"); setUploadError(""); }}
+          >
+            <FaFileAlt className="tab-icon" />
+            <span>2. By Resume Upload</span>
+          </button>
+        </div>
       </div>
 
       <form onSubmit={handleSubmit} className="interview-setup-form">
-        {/* Role Selection */}
-        <div>
-          <label className="interview-setup-label">
-            Target Job Role
-          </label>
-          <div style={{ position: "relative" }}>
-            <select
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              className="interview-setup-select"
-            >
-              <option value="AI-ML Engineer">AI-ML Engineer</option>
-              <option value="Backend Developer">Backend Developer</option>
-              <option value="Frontend Developer">Frontend Developer</option>
-              <option value="Fullstack Developer">Fullstack Developer</option>
-              <option value="Data Scientist">Data Scientist</option>
-              <option value="Product Manager">Product Manager</option>
-              <option value="DevOps Engineer">DevOps Engineer</option>
-              <option value="Other">Other (Type custom role...)</option>
-            </select>
-          </div>
-        </div>
+        {/* MODE 1: Target Job Role Selection */}
+        {prepMode === "role" && (
+          <>
+            <div>
+              <label className="interview-setup-label">
+                Target Job Role
+              </label>
+              <div style={{ position: "relative" }}>
+                <select
+                  value={role}
+                  onChange={(e) => setRole(e.target.value)}
+                  className="interview-setup-select"
+                >
+                  <option value="AI-ML Engineer">AI-ML Engineer</option>
+                  <option value="Backend Developer">Backend Developer</option>
+                  <option value="Frontend Developer">Frontend Developer</option>
+                  <option value="Fullstack Developer">Fullstack Developer</option>
+                  <option value="Data Scientist">Data Scientist</option>
+                  <option value="Product Manager">Product Manager</option>
+                  <option value="DevOps Engineer">DevOps Engineer</option>
+                  <option value="Other">Other (Type custom role...)</option>
+                </select>
+              </div>
+            </div>
 
-        {/* Custom Role Input */}
-        {role === "Other" && (
-          <div>
+            {/* Custom Role Input */}
+            {role === "Other" && (
+              <div>
+                <label className="interview-setup-label">
+                  Custom Role Name
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. iOS Developer, Cybersecurity Engineer"
+                  value={customRole}
+                  onChange={(e) => setCustomRole(e.target.value)}
+                  required
+                  className="interview-setup-input"
+                />
+              </div>
+            )}
+          </>
+        )}
+
+        {/* MODE 2: Resume Upload Selection */}
+        {prepMode === "resume" && (
+          <div className="resume-mode-section">
             <label className="interview-setup-label">
-              Custom Role Name
+              Upload Your Resume (PDF / DOCX / TXT)
             </label>
-            <input
-              type="text"
-              placeholder="e.g. iOS Developer, Cybersecurity Engineer"
-              value={customRole}
-              onChange={(e) => setCustomRole(e.target.value)}
-              required
-              className="interview-setup-input"
-            />
+            <p className="resume-mode-desc">
+              Upload your latest resume. Our AI parser will extract your skills, experience, and projects to generate custom, highly-tailored interview questions.
+            </p>
+
+            <div className="resume-upload-box">
+              <input
+                type="file"
+                accept=".pdf,.docx,.txt,.json"
+                id="resume-file-mode"
+                onChange={handleFileChange}
+                style={{ display: "none" }}
+              />
+              <label htmlFor="resume-file-mode" className="resume-upload-label-btn large">
+                {uploadingResume ? (
+                  <>
+                    <FaSpinner className="spin" style={{ animation: "spin 1s linear infinite" }} />
+                    <span>Uploading & Parsing Resume Skills...</span>
+                  </>
+                ) : selectedFile ? (
+                  <>
+                    <FaFileAlt style={{ color: "#10b981", fontSize: "20px" }} />
+                    <span>Selected: <strong>{selectedFile.name}</strong></span>
+                  </>
+                ) : (
+                  <>
+                    <FaUpload style={{ fontSize: "20px" }} />
+                    <span>Click to Browse or Drag & Drop Resume File</span>
+                  </>
+                )}
+              </label>
+
+              {resumeId && (
+                <div className="resume-success-banner">
+                  ✓ Resume uploaded & parsed successfully! Questions will be tailored to your experience.
+                </div>
+              )}
+              {uploadError && <div className="resume-error-msg">⚠️ {uploadError}</div>}
+            </div>
           </div>
         )}
 
-        {/* Interview Type Cards */}
+        {/* Interview Category (Common to Both Modes) */}
         <div>
           <label className="interview-setup-label" style={{ marginBottom: "12px" }}>
             Interview Category
@@ -162,21 +246,23 @@ const InterviewSetup = ({ onStartInterview }) => {
 
         {/* Experience Level & Difficulty Level */}
         <div className="interview-setup-row">
-          <div>
-            <label className="interview-setup-label">Experience Level</label>
-            <select
-              value={experience}
-              onChange={(e) => setExperience(e.target.value)}
-              className="interview-setup-select"
-            >
-              <option value="Entry Level">Entry Level (0-2 years)</option>
-              <option value="Mid Level">Mid Level (2-5 years)</option>
-              <option value="Senior Level">Senior Level (5-8 years)</option>
-              <option value="Lead / Architect">Lead / Architect (8+ years)</option>
-            </select>
-          </div>
+          {prepMode === "role" && (
+            <div>
+              <label className="interview-setup-label">Experience Level</label>
+              <select
+                value={experience}
+                onChange={(e) => setExperience(e.target.value)}
+                className="interview-setup-select"
+              >
+                <option value="Entry Level">Entry Level (0-2 years)</option>
+                <option value="Mid Level">Mid Level (2-5 years)</option>
+                <option value="Senior Level">Senior Level (5-8 years)</option>
+                <option value="Lead / Architect">Lead / Architect (8+ years)</option>
+              </select>
+            </div>
+          )}
 
-          <div>
+          <div style={{ gridColumn: prepMode === "resume" ? "span 2" : "span 1" }}>
             <label className="interview-setup-label">Difficulty Level</label>
             <select
               value={difficulty}
@@ -214,50 +300,15 @@ const InterviewSetup = ({ onStartInterview }) => {
               onChange={(e) => setDuration(Number(e.target.value))}
               className="interview-setup-select"
             >
-              <option value="10">10 Minutes (approx. 5 questions)</option>
-              <option value="20">20 Minutes (approx. 10 questions)</option>
-              <option value="30">30 Minutes (approx. 15 questions)</option>
+              <option value="45">45 Minutes</option>
+              <option value="60">60 Minutes</option>
             </select>
-          </div>
-        </div>
-
-        {/* Upload Resume Container */}
-        <div className="resume-upload-container">
-          <label className="interview-setup-label">Upload Resume (PDF/DOCX) - Optional</label>
-          <div className="resume-upload-box">
-            <input
-              type="file"
-              accept=".pdf,.docx"
-              id="resume-file"
-              onChange={handleFileChange}
-              style={{ display: "none" }}
-            />
-            <label htmlFor="resume-file" className="resume-upload-label-btn">
-              {uploadingResume ? (
-                <>
-                  <FaSpinner className="spin" style={{ animation: "spin 1s linear infinite" }} />
-                  <span>Uploading & Parsing Resume...</span>
-                </>
-              ) : selectedFile ? (
-                <>
-                  <FaUpload />
-                  <span>Selected: {selectedFile.name}</span>
-                </>
-              ) : (
-                <>
-                  <FaUpload />
-                  <span>Choose PDF/DOCX Resume</span>
-                </>
-              )}
-            </label>
-            {resumeId && <span className="resume-success-msg">✓ Resume uploaded and parsed successfully!</span>}
-            {uploadError && <span className="resume-error-msg">⚠️ {uploadError}</span>}
           </div>
         </div>
 
         {/* Start Button */}
         <button type="submit" className="interview-setup-btn" disabled={uploadingResume}>
-          <FaPlay /> Start AI Interview Session
+          <FaPlay /> {prepMode === "resume" ? "Start Resume-Based AI Interview" : "Start AI Interview Session"}
         </button>
       </form>
     </div>

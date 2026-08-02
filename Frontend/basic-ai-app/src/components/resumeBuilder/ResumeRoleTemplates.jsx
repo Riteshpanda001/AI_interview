@@ -1,5 +1,6 @@
 import React from "react";
 import "./ResumeRoleTemplates.css";
+import useRequireAuth from "../../hooks/useRequireAuth";
 
 const roleTemplates = [
   {
@@ -225,6 +226,16 @@ const roleTemplates = [
 ];
 
 const ResumeRoleTemplates = ({ onSelectRole }) => {
+  const { requireAuth } = useRequireAuth();
+
+  const handleRoleClick = (roleData) => {
+    requireAuth(() => {
+      if (onSelectRole) {
+        onSelectRole(roleData);
+      }
+    }, "/resume-builder");
+  };
+
   return (
     <section id="role-templates-section" className="role-templates-section">
       <div className="section-header">
@@ -242,7 +253,7 @@ const ResumeRoleTemplates = ({ onSelectRole }) => {
           <div
             key={role.id}
             className="role-card"
-            onClick={() => onSelectRole(role.data)}
+            onClick={() => handleRoleClick(role.data)}
           >
             <div className="role-card-icon">{role.icon}</div>
             <h3>{role.title}</h3>

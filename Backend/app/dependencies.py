@@ -9,9 +9,13 @@ from bson import ObjectId
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/auth/login")
 
 async def get_db():
+    if db_manager.db is None:
+        await db_manager.connect_to_databases()
     return db_manager.db
 
 async def get_redis():
+    if db_manager.redis_client is None:
+        await db_manager.connect_to_databases()
     return db_manager.redis_client
 
 async def get_current_user(
@@ -43,7 +47,11 @@ async def get_current_user(
     except jwt.PyJWTError:
         raise credentials_exception
         
-    user = await db["users"].find_one({"_id": ObjectId(user_id)})
+    try:
+        user = await db["users"].find_one({"_id": ObjectId(user_id)})
+    except Exception:
+        user = await db["users"].find_one({"_id": user_id})
+
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, 

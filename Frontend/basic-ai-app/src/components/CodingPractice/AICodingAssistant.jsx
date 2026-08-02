@@ -3,20 +3,27 @@ import "./AICodingAssistant.css";
 
 const AICodingAssistant = ({ selectedProblem }) => {
   const [code, setCode] = useState(
-    `// Solve: Two Sum\n// Find two indices that sum up to target\nfunction twoSum(nums, target) {\n  const map = new Map();\n  for (let i = 0; i < nums.length; i++) {\n    const complement = target - nums[i];\n    if (map.has(complement)) {\n      return [map.get(complement), i];\n    }\n    map.set(nums[i], i);\n  }\n  return [];\n}`
+    `function twoSum(nums, target) {\n  // Write your solution here\n  \n}`
   );
   const [feedback, setFeedback] = useState("");
   const [loading, setLoading] = useState(false);
+  const [copyWarning, setCopyWarning] = useState("");
 
   // Hook to watch for when a problem is selected externally
   useEffect(() => {
     if (selectedProblem) {
-      setCode(selectedProblem.codeTemplate);
+      setCode(selectedProblem.codeTemplate || `function solve() {\n  // Write your solution here\n  \n}`);
       setFeedback(
         `📝 Loaded challenge: ${selectedProblem.title}\nDifficulty: ${selectedProblem.difficulty}\nCategory: ${selectedProblem.category}\nAcceptance: ${selectedProblem.acceptance}\n\nProblem Description:\n${selectedProblem.instructions}`
       );
     }
   }, [selectedProblem]);
+
+  const handlePastePrevented = (e) => {
+    e.preventDefault();
+    setCopyWarning("🚫 Copy-pasting code is disabled. Please type your solution manually!");
+    setTimeout(() => setCopyWarning(""), 3500);
+  };
 
   const getAIFeedback = () => {
     setLoading(true);
@@ -33,9 +40,9 @@ const AICodingAssistant = ({ selectedProblem }) => {
 
   const handleClear = () => {
     if (selectedProblem) {
-      setCode(selectedProblem.codeTemplate);
+      setCode(selectedProblem.codeTemplate || `function solve() {\n  // Write your solution here\n  \n}`);
     } else {
-      setCode("");
+      setCode(`function twoSum(nums, target) {\n  // Write your solution here\n  \n}`);
     }
   };
 
@@ -53,10 +60,29 @@ const AICodingAssistant = ({ selectedProblem }) => {
             <span>💻 JavaScript Compiler Workspace {selectedProblem ? `- ${selectedProblem.title}` : ""}</span>
             <button className="editor-reset-btn" onClick={handleClear}>Reset Template</button>
           </div>
+          
+          {copyWarning && (
+            <div className="copy-paste-warning-banner" style={{
+              background: "#fef2f2",
+              border: "1px solid #fecaca",
+              color: "#991b1b",
+              padding: "8px 14px",
+              fontSize: "13px",
+              fontWeight: "700",
+              textAlign: "center"
+            }}>
+              {copyWarning}
+            </div>
+          )}
+
           <textarea
             className="code-textarea"
             value={code}
             onChange={(e) => setCode(e.target.value)}
+            onPaste={handlePastePrevented}
+            onCopy={(e) => e.preventDefault()}
+            onCut={(e) => e.preventDefault()}
+            onDrop={(e) => e.preventDefault()}
           />
           <div className="editor-footer">
             <button className="run-code-btn" onClick={() => alert(`Running unit test suites for current workspace... Success!`)}>

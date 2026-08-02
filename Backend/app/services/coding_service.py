@@ -1,5 +1,5 @@
 from bson import ObjectId
-from datetime import datetime
+from datetime import datetime, timezone
 from fastapi import HTTPException
 from app.ai.coding_evaluator import CodingEvaluator
 
@@ -14,7 +14,11 @@ class CodingService:
 
     @staticmethod
     async def evaluate_submission(user_id: str, problem_id: str, language: str, submitted_code: str, db) -> dict:
-        problem = await db["coding_problems"].find_one({"_id": ObjectId(problem_id)})
+        try:
+            problem = await db["coding_problems"].find_one({"_id": ObjectId(problem_id)})
+        except Exception:
+            problem = await db["coding_problems"].find_one({"_id": problem_id})
+
         if not problem:
             raise HTTPException(status_code=404, detail="Coding problem not found.")
             
@@ -33,7 +37,7 @@ class CodingService:
             "status": "accepted" if evaluation.get("is_correct", True) else "wrong_answer",
             "run_time_ms": evaluation.get("runtime_ms", 120),
             "evaluation_result": evaluation,
-            "created_at": datetime.utcnow()
+            "created_at": datetime.now(timezone.utc)
         }
         
         result = await db["coding_submissions"].insert_one(submission_record)

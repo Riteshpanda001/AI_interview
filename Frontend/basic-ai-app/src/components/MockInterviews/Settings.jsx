@@ -1,15 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
-import { FaSave, FaUserShield, FaKey, FaLock } from "react-icons/fa";
+import { FaUserShield, FaLock } from "react-icons/fa";
 import "./Settings.css";
 
 const Settings = () => {
   const { user, updateProfile, changePassword } = useAuth();
-  
-  // Custom API keys state
-  const [geminiKey, setGeminiKey] = useState(localStorage.getItem("custom_gemini_key") || "");
-  const [groqKey, setGroqKey] = useState(localStorage.getItem("custom_groq_key") || "");
-  const [keysSaved, setKeysSaved] = useState(false);
 
   // Profile update state
   const [fullName, setFullName] = useState("");
@@ -30,14 +25,6 @@ const Settings = () => {
       setFullName(user.full_name || "");
     }
   }, [user]);
-
-  const handleSaveKeys = (e) => {
-    e.preventDefault();
-    localStorage.setItem("custom_gemini_key", geminiKey);
-    localStorage.setItem("custom_groq_key", groqKey);
-    setKeysSaved(true);
-    setTimeout(() => setKeysSaved(false), 3000);
-  };
 
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
@@ -99,7 +86,7 @@ const Settings = () => {
       <div className="settings-header">
         <h2>Dashboard Settings</h2>
         <p>
-          Manage your account preferences, system parameters, and LLM integrations.
+          Manage your profile information and account security.
         </p>
       </div>
 
@@ -192,52 +179,6 @@ const Settings = () => {
 
             <button type="submit" className="settings-submit-btn" disabled={isChangingPwd}>
               {isChangingPwd ? "Updating..." : "Change Password"}
-            </button>
-          </form>
-        </div>
-
-        {/* LLM Integration Card */}
-        <div className="settings-card span-full">
-          <h3 className="settings-section-title">
-            <FaKey /> LLM Service Integration (Optional)
-          </h3>
-          <p className="settings-card-desc">
-            You can specify your custom LLM API Keys to bypass default simulated evaluation modules and use real-time Google Gemini or Groq model instances for mock interview reviews.
-          </p>
-
-          {keysSaved && (
-            <div className="settings-feedback success">
-              API Credentials configuration saved successfully!
-            </div>
-          )}
-
-          <form onSubmit={handleSaveKeys} className="settings-llm-form">
-            <div className="settings-input-group">
-              <label htmlFor="gemini-key">Google Gemini API Key</label>
-              <input
-                id="gemini-key"
-                type="password"
-                placeholder="AIzaSy..."
-                value={geminiKey}
-                onChange={(e) => setGeminiKey(e.target.value)}
-                className="settings-input"
-              />
-            </div>
-
-            <div className="settings-input-group">
-              <label htmlFor="groq-key">Groq API Key</label>
-              <input
-                id="groq-key"
-                type="password"
-                placeholder="gsk_..."
-                value={groqKey}
-                onChange={(e) => setGroqKey(e.target.value)}
-                className="settings-input"
-              />
-            </div>
-
-            <button type="submit" className="settings-submit-btn keys-btn">
-              <FaSave /> Save Keys Configuration
             </button>
           </form>
         </div>

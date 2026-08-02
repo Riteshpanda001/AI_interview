@@ -13,3 +13,10 @@ async def list_companies(
 ):
     companies = await CompanyService.get_companies(db)
     return companies
+
+@router.get("/{company_name}/dsa-questions")
+async def get_company_dsa_questions(
+    company_name: str,
+    db = Depends(get_db)
+):
+    return await CompanyService.get_company_dsa_questions(company_name, db)

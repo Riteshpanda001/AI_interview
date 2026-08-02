@@ -36,10 +36,10 @@ const CompanyPreparation = () => {
 
         {/* Dynamic Details Sections based on selectedCompany */}
         <div className="company-dynamic-content">
+          <CompanyQuestions companyName={selectedCompany} />
           <CompanyDetails companyName={selectedCompany} />
           <HiringProcess companyName={selectedCompany} />
           <InterviewRounds companyName={selectedCompany} />
-          <CompanyQuestions companyName={selectedCompany} />
           <PreparationRoadmap companyName={selectedCompany} />
           <CompanyFAQ companyName={selectedCompany} />
         </div>

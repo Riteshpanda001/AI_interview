@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from bson import ObjectId
 
 class DashboardService:
@@ -30,11 +30,16 @@ class DashboardService:
         # Compile recent logs
         recent_activity = []
         for res in results[:5]:
+            created_at = res.get("created_at")
+            if created_at:
+                date_str = created_at.isoformat() if hasattr(created_at, "isoformat") else str(created_at)
+            else:
+                date_str = datetime.now(timezone.utc).isoformat()
             recent_activity.append({
                 "activity_type": "interview",
-                "score": res["overall_score"],
-                "verdict": res["verdict"],
-                "date": res["created_at"].isoformat()
+                "score": res.get("overall_score", 0),
+                "verdict": res.get("verdict", "N/A"),
+                "date": date_str
             })
             
         return {
@@ -42,5 +47,5 @@ class DashboardService:
             "average_score": avg_score,
             "skills_progress": skills_progress,
             "recent_activity": recent_activity,
-            "last_updated": datetime.utcnow()
+            "last_updated": datetime.now(timezone.utc)
         }

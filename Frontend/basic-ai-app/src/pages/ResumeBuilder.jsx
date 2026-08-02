@@ -18,11 +18,13 @@ import ResumeFAQ from "../components/resumeBuilder/ResumeFAQ";
 import "./ResumeBuilder.css";
 
 import { useAuth } from "../context/AuthContext";
+import useRequireAuth from "../hooks/useRequireAuth";
 
 const API_BASE_URL = "http://localhost:8000/api";
 
 const ResumeBuilder = () => {
   const { authFetch } = useAuth();
+  const { requireAuth } = useRequireAuth();
   const [isWorkspaceActive, setIsWorkspaceActive] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState("london");
   const [currentResumeId, setCurrentResumeId] = useState(null);
@@ -76,29 +78,38 @@ const ResumeBuilder = () => {
   };
 
   const handleSelectTemplate = (templateId) => {
-    setSelectedTemplate(templateId);
+    requireAuth(() => {
+      setSelectedTemplate(templateId);
+    }, "/resume-builder");
   };
 
   const handleStartBuildingClick = () => {
-    setPendingTemplate(selectedTemplate);
-    setShowStartModal(true);
+    requireAuth(() => {
+      setPendingTemplate(selectedTemplate);
+      setShowStartModal(true);
+    }, "/resume-builder");
   };
 
   const handleSelectRoleTemplate = (roleData) => {
-    setResumeData((prev) => ({
-      ...prev,
-      personal: {
-        ...prev.personal,
-        role: roleData.title
-      },
-      skills: roleData.skills,
-      summary: roleData.summary
-    }));
-    setIsWorkspaceActive(true);
-    const section = document.getElementById("resume-builder-workspace");
-    if (section) {
-      section.scrollIntoView({ behavior: "smooth" });
-    }
+    requireAuth(() => {
+      setResumeData((prev) => ({
+        ...prev,
+        personal: {
+          ...prev.personal,
+          role: roleData.title || prev.personal.role
+        },
+        skills: roleData.skills || prev.skills,
+        summary: roleData.summary || prev.summary,
+        experience: roleData.experience || prev.experience,
+        education: roleData.education || prev.education,
+        projects: roleData.projects || prev.projects
+      }));
+      setIsWorkspaceActive(true);
+      const section = document.getElementById("resume-builder-workspace");
+      if (section) {
+        section.scrollIntoView({ behavior: "smooth" });
+      }
+    }, "/resume-builder");
   };
 
   const handleSaveResume = async (updatedData, template) => {
@@ -166,14 +177,14 @@ const ResumeBuilder = () => {
       console.warn("AI generator server offline, running fallback generator:", err);
       setResumeData({
         personal: {
-          name: "Jordan Lee",
-          email: "jordan.lee@example.com",
-          phone: "+1 (555) 789-0123",
-          linkedin: "linkedin.com/in/jordanlee",
+          name: params.full_name || "Jordan Lee",
+          email: params.email || "jordan.lee@example.com",
+          phone: params.phone || "+1 (555) 789-0123",
+          linkedin: params.linkedin || "linkedin.com/in/jordanlee",
           role: params.role || "Software Specialist"
         },
-        summary: `Accomplished ${params.experience_level || "Mid-Level"} ${params.role} in ${params.industry || "Technology"} with hands-on experience building scalable applications and optimizing workflows.`,
-        experience: [
+        summary: params.summary || `Accomplished ${params.experience_level || "Mid-Level"} ${params.role} in ${params.industry || "Technology"} with hands-on experience building scalable applications and optimizing workflows.`,
+        experience: (params.experience && params.experience.length && params.experience[0].company) ? params.experience : [
           {
             company: "Tech Corp",
             role: params.role || "Developer",
@@ -181,20 +192,21 @@ const ResumeBuilder = () => {
             details: `Spearheaded engineering initiatives for high-traffic web apps.\nOptimized API query performance by 35% and introduced automated CI/CD.`
           }
         ],
-        education: [
+        education: (params.education && params.education.length && params.education[0].institution) ? params.education : [
           {
             institution: "State University",
             degree: "B.S. in Computer Science",
             duration: "2018 - 2022"
           }
         ],
-        skills: params.key_skills ? params.key_skills.split(",").map(s=>s.trim()) : ["React", "JavaScript", "Python", "Node.js", "AWS", "Git"],
-        projects: [
+        skills: params.key_skills ? params.key_skills.split(",").map(s=>s.trim()).filter(Boolean) : ["React", "JavaScript", "Python", "Node.js", "AWS", "Git"],
+        projects: (params.projects && params.projects.length && params.projects[0].name) ? params.projects : [
           {
-            name: `${params.role} Platform`,
+            name: `${params.role || 'Cloud'} Platform`,
             description: "Designed high performance cloud platform with real-time feedback."
           }
-        ]
+        ],
+        certifications: params.certifications ? params.certifications.split(",").map(c=>c.trim()).filter(Boolean) : []
       });
       setShowAIGeneratorModal(false);
       setIsWorkspaceActive(true);
@@ -315,31 +327,35 @@ const ResumeBuilder = () => {
           <ResumeTemplates
             selectedTemplate={selectedTemplate}
             setSelectedTemplate={(tplId) => {
-              setPendingTemplate(tplId);
-              setModalStep("options");
-              setShowStartModal(true);
+              requireAuth(() => {
+                setPendingTemplate(tplId);
+                setModalStep("options");
+                setShowStartModal(true);
+              }, "/resume-builder");
             }}
           />
 
           {/* Role Templates Pre-fill */}
           <ResumeRoleTemplates
             onSelectRole={(roleData) => {
-              setResumeData(roleData);
-              setIsWorkspaceActive(true);
+              handleSelectRoleTemplate(roleData);
             }}
           />
 
-          {/* Resume Form */}
+          {/* Resume Form (Interactive Demo Mode) */}
           <ResumeForm
             resumeData={resumeData}
             setResumeData={setResumeData}
+            isDemoMode={true}
           />
 
-          {/* Live Resume Preview */}
+          {/* Live Resume Preview (Interactive Demo Mode) */}
           <ResumePreview
             resumeData={resumeData}
             selectedTemplate={selectedTemplate}
             setResumeData={setResumeData}
+            isDemoMode={true}
+            onOpenWorkspace={handleStartBuildingClick}
           />
 
           {/* AI Suggestions */}

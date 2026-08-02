@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import "./ResumePreview.css";
 import { useAuth } from "../../context/AuthContext";
+import useRequireAuth from "../../hooks/useRequireAuth";
 
 const API_BASE_URL = "http://localhost:8000/api";
 
-const ResumePreview = ({ resumeData, selectedTemplate, setResumeData }) => {
+const ResumePreview = ({ resumeData, selectedTemplate, setResumeData, isDemoMode = false, onOpenWorkspace }) => {
   const { authFetch } = useAuth();
+  const { requireAuth } = useRequireAuth();
   const { personal, summary, experience, education, skills, projects, certifications, achievements, languages } = resumeData || {};
   const [loading, setLoading] = useState(false);
 
@@ -38,36 +40,62 @@ const ResumePreview = ({ resumeData, selectedTemplate, setResumeData }) => {
       }
     }
 
-    // Write content
+    // Write content formatted strictly for single-page A4 print
     printWindow.document.write(`
+      <!DOCTYPE html>
       <html>
         <head>
           <title>${(personal && personal.name) || "Resume"}_Resume</title>
           ${stylesHtml}
           <style>
-            body {
-              background: white !important;
-              color: black !important;
-              padding: 0 !important;
+            @page {
+              size: A4 portrait;
               margin: 0 !important;
             }
+            html, body {
+              width: 210mm !important;
+              height: 297mm !important;
+              max-height: 297mm !important;
+              margin: 0 !important;
+              padding: 0 !important;
+              background: #ffffff !important;
+              color: #000000 !important;
+              overflow: hidden !important;
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+              box-sizing: border-box !important;
+            }
             .resume-paper {
+              width: 210mm !important;
+              height: 297mm !important;
+              max-height: 297mm !important;
+              padding: 10mm 12mm !important;
+              box-sizing: border-box !important;
               border: none !important;
               box-shadow: none !important;
-              padding: 40px !important;
-              min-height: auto !important;
-              width: 100% !important;
-              max-width: 100% !important;
+              border-radius: 0 !important;
+              overflow: hidden !important;
+              page-break-after: avoid !important;
+              page-break-inside: avoid !important;
+              page-break-before: avoid !important;
+              margin: 0 !important;
             }
-            /* Extra print styling to avoid headers/footers in pdf */
-            @page {
-              size: A4;
-              margin: 15mm;
+            .resume-paper * {
+              page-break-inside: avoid !important;
+              page-break-after: avoid !important;
             }
             @media print {
-              body {
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
+              html, body {
+                width: 210mm !important;
+                height: 297mm !important;
+                max-height: 297mm !important;
+                overflow: hidden !important;
+              }
+              .resume-paper {
+                width: 210mm !important;
+                height: 297mm !important;
+                max-height: 297mm !important;
+                overflow: hidden !important;
               }
             }
           </style>
@@ -77,7 +105,6 @@ const ResumePreview = ({ resumeData, selectedTemplate, setResumeData }) => {
             ${paper.innerHTML}
           </div>
           <script>
-            // Wait for resources/fonts to load, then print and close
             window.addEventListener('load', () => {
               setTimeout(() => {
                 window.print();
@@ -132,21 +159,44 @@ const ResumePreview = ({ resumeData, selectedTemplate, setResumeData }) => {
         optimized.projects = updatedProj;
       }
       setResumeData(optimized);
-      alert("✨ Success! Local AI Optimizer has enriched your resume metrics.");
     } finally {
       setLoading(false);
     }
   };
 
+  const handleDownloadClick = () => {
+    if (isDemoMode) {
+      requireAuth(() => {
+        alert("🔒 Demo Preview Mode: This interactive section is for testing live formatting. Log in and open the full workspace to download your ATS resume!");
+        if (onOpenWorkspace) onOpenWorkspace();
+      }, "/resume-builder");
+      return;
+    }
+    handleDownload();
+  };
+
+  const handleAIImproveClick = () => {
+    if (isDemoMode) {
+      requireAuth(() => {
+        alert("🔒 Demo Preview Mode: AI Resume Optimization is available in the full workspace. Log in now to run AI Optimization on your resume!");
+        if (onOpenWorkspace) onOpenWorkspace();
+      }, "/resume-builder");
+      return;
+    }
+    handleAIImprove();
+  };
+
   return (
     <section className="preview-section">
       <div className="section-header">
-        <span className="preview-badge">👁️ LIVE LOOK</span>
+        <span className="preview-badge">{isDemoMode ? "💡 INTERACTIVE DEMO" : "👁️ LIVE LOOK"}</span>
         <h2 className="section-title">
           Live <span>Resume Preview</span>
         </h2>
         <p className="section-subtitle">
-          Observe edits update dynamically. Toggle templates above to change presentation formats instantly.
+          {isDemoMode
+            ? "Interactive Demo: Type details in 'Build Your Resume Details' above to see how your information formats and achieves a 90-100 ATS score."
+            : "Observe edits update dynamically. Toggle templates above to change presentation formats instantly."}
         </p>
       </div>
 
@@ -156,14 +206,26 @@ const ResumePreview = ({ resumeData, selectedTemplate, setResumeData }) => {
           <div className="active-tpl-indicator">
             Active Format: <span>{selectedTemplate.toUpperCase()} Layout</span>
           </div>
-          <div className="action-buttons">
-            <button className="preview-action-btn primary" onClick={handleDownload} disabled={loading}>
-              📥 Download PDF
-            </button>
-            <button className="preview-action-btn secondary" onClick={handleAIImprove} disabled={loading}>
-              {loading ? "🤖 Optimizing..." : "🤖 AI Optimize"}
-            </button>
-          </div>
+          {!isDemoMode && (
+            <div className="action-buttons">
+              <button
+                className="preview-action-btn primary"
+                onClick={handleDownload}
+                disabled={loading}
+                title="Download Resume PDF"
+              >
+                📥 Download PDF
+              </button>
+              <button
+                className="preview-action-btn secondary"
+                onClick={handleAIImprove}
+                disabled={loading}
+                title="Optimize Resume with AI"
+              >
+                {loading ? "🤖 Optimizing..." : "🤖 AI Optimize"}
+              </button>
+            </div>
+          )}
         </div>
 
 

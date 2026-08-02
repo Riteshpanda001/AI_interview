@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import "./ResumeForm.css";
 
-const ResumeForm = ({ resumeData, setResumeData }) => {
+const ResumeForm = ({ resumeData, setResumeData, isDemoMode = false }) => {
   const [activeTab, setActiveTab] = useState("personal");
 
   const handlePersonalChange = (field, val) => {
@@ -102,6 +102,31 @@ const ResumeForm = ({ resumeData, setResumeData }) => {
     });
   };
 
+  const handleCertChange = (index, field, val) => {
+    const newCerts = [...(resumeData.certifications || [])];
+    if (!newCerts[index]) newCerts[index] = { title: "", issuer: "", year: "" };
+    newCerts[index][field] = val;
+    setResumeData({
+      ...resumeData,
+      certifications: newCerts
+    });
+  };
+
+  const addCert = () => {
+    setResumeData({
+      ...resumeData,
+      certifications: [...(resumeData.certifications || []), { title: "", issuer: "", year: "" }]
+    });
+  };
+
+  const removeCert = (index) => {
+    const newCerts = (resumeData.certifications || []).filter((_, i) => i !== index);
+    setResumeData({
+      ...resumeData,
+      certifications: newCerts
+    });
+  };
+
   const handleSkillsChange = (val) => {
     const list = val.split(",").map((s) => s.trim());
     setResumeData({
@@ -113,13 +138,14 @@ const ResumeForm = ({ resumeData, setResumeData }) => {
   return (
     <section id="resume-form-section" className="form-section">
       <div className="section-header">
-        <span className="form-badge">✏️ DATA INPUT</span>
+        <span className="form-badge">{isDemoMode ? "💡 INTERACTIVE DEMO INPUT" : "✏️ DATA INPUT"}</span>
         <h2 className="section-title">
           Build Your <span>Resume Details</span>
         </h2>
         <p className="section-subtitle">
-          Fill out the sections below. Our AI suggestions engine and ATS checker 
-          will analyze your inputs in real time.
+          {isDemoMode
+            ? "Test entering your information below to see how your ATS score (90-100) and Live Preview update in real time. Log in & launch full workspace to save and download."
+            : "Fill out the sections below. Our AI suggestions engine and ATS checker will analyze your inputs in real time."}
         </p>
       </div>
 
@@ -155,6 +181,12 @@ const ResumeForm = ({ resumeData, setResumeData }) => {
             onClick={() => setActiveTab("skills")}
           >
             🛠️ Skills
+          </button>
+          <button
+            className={`tab-btn ${activeTab === "certifications" ? "active" : ""}`}
+            onClick={() => setActiveTab("certifications")}
+          >
+            📜 Certifications
           </button>
         </div>
 
@@ -398,6 +430,61 @@ const ResumeForm = ({ resumeData, setResumeData }) => {
                   </small>
                 </div>
               </div>
+            </div>
+          )}
+
+          {activeTab === "certifications" && (
+            <div className="form-pane fade-in">
+              <div className="pane-header">
+                <h3>Certifications & Credentials</h3>
+                <button type="button" className="add-btn" onClick={addCert}>
+                  + Add Certification
+                </button>
+              </div>
+
+              {(resumeData.certifications || []).length === 0 ? (
+                <p style={{ color: "#94a3b8", fontSize: "0.9rem" }}>No certifications added yet. Click above to add your certifications.</p>
+              ) : (
+                (resumeData.certifications || []).map((cert, index) => (
+                  <div key={index} className="form-card">
+                    <div className="card-header">
+                      <h4>Certification #{index + 1}</h4>
+                      <button type="button" className="remove-btn" onClick={() => removeCert(index)}>
+                        Remove
+                      </button>
+                    </div>
+                    <div className="input-grid">
+                      <div className="input-group">
+                        <label>Certification Name / Title</label>
+                        <input
+                          type="text"
+                          value={cert.title || ""}
+                          onChange={(e) => handleCertChange(index, "title", e.target.value)}
+                          placeholder="e.g. AWS Certified Solutions Architect"
+                        />
+                      </div>
+                      <div className="input-group">
+                        <label>Issuing Organization</label>
+                        <input
+                          type="text"
+                          value={cert.issuer || ""}
+                          onChange={(e) => handleCertChange(index, "issuer", e.target.value)}
+                          placeholder="e.g. Amazon Web Services"
+                        />
+                      </div>
+                      <div className="input-group">
+                        <label>Year / Date</label>
+                        <input
+                          type="text"
+                          value={cert.year || ""}
+                          onChange={(e) => handleCertChange(index, "year", e.target.value)}
+                          placeholder="e.g. 2024"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           )}
         </div>

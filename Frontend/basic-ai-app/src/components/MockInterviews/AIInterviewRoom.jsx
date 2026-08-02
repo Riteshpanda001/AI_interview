@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useAuth } from "../../context/AuthContext";
-import { FaMicrophone, FaChevronRight, FaTrophy, FaRobot, FaPlay, FaSpinner, FaComments } from "react-icons/fa";
+import { FaMicrophone, FaChevronRight, FaTrophy, FaRobot, FaPlay, FaPause, FaSpinner, FaComments, FaHistory, FaRedo, FaClock, FaVideo, FaExclamationTriangle, FaCheckCircle } from "react-icons/fa";
+import InterviewHistory from "./InterviewHistory";
 import "./AIInterviewRoom.css";
 
 const API_BASE_URL = "http://localhost:8000/api";
 
-const AIInterviewRoom = ({ interviewDetails }) => {
+const AIInterviewRoom = ({ interviewDetails, onViewHistory, onStartNewSession }) => {
   const { user, token } = useAuth();
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -15,12 +16,92 @@ const AIInterviewRoom = ({ interviewDetails }) => {
   const [feedbackReport, setFeedbackReport] = useState(null);
   const [offlineMode, setOfflineMode] = useState(false);
 
+  // Device check states
+  const [deviceCheckDone, setDeviceCheckDone] = useState(false);
+  const [hasCamera, setHasCamera] = useState(false);
+  const [hasMic, setHasMic] = useState(false);
+  const [mediaStream, setMediaStream] = useState(null);
+  const [deviceError, setDeviceError] = useState("");
+  const videoPreviewRef = useRef(null);
+  const pipVideoRef = useRef(null);
+  const mediaStreamRef = useRef(null);
+
+  useEffect(() => {
+    mediaStreamRef.current = mediaStream;
+  }, [mediaStream]);
+
+  // Timer state and pause/play toggle
+  const [timeLeft, setTimeLeft] = useState(() => (interviewDetails.duration || 45) * 60);
+  const [isTimerRunning, setIsTimerRunning] = useState(false);
+
+  // Request camera and microphone access
+  useEffect(() => {
+    const requestMediaAccess = async () => {
+      try {
+        setDeviceError("");
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        setMediaStream(stream);
+        mediaStreamRef.current = stream;
+        setHasCamera(true);
+        setHasMic(true);
+      } catch (err) {
+        console.warn("Camera/Mic access error or denied:", err);
+        try {
+          const audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          setMediaStream(audioStream);
+          mediaStreamRef.current = audioStream;
+          setHasCamera(false);
+          setHasMic(true);
+          setDeviceError("Camera access unavailable. Proceeding with Microphone only.");
+        } catch (err2) {
+          setHasCamera(false);
+          setHasMic(false);
+          setDeviceError("Camera & Microphone access unavailable. Proceeding with simulated device stream.");
+        }
+      }
+    };
+
+    requestMediaAccess();
+  }, []);
+
+  useEffect(() => {
+    if (mediaStream && videoPreviewRef.current) {
+      videoPreviewRef.current.srcObject = mediaStream;
+    }
+    if (mediaStream && pipVideoRef.current) {
+      pipVideoRef.current.srcObject = mediaStream;
+    }
+  }, [mediaStream, deviceCheckDone]);
+
   // Speech states
   const [startedSpeech, setStartedSpeech] = useState(false);
   const [aiSpeaking, setAiSpeaking] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [recognitionInstance, setRecognitionInstance] = useState(null);
   const [showReport, setShowReport] = useState(false);
+
+  // Countdown timer effect (runs when device check is complete and timer is not paused)
+  useEffect(() => {
+    if (loading || showReport || !session || !deviceCheckDone || !isTimerRunning) return;
+
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [loading, showReport, session, deviceCheckDone, isTimerRunning]);
+
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+  };
 
   // New chatbot-oriented states
   const [interimText, setInterimText] = useState("");
@@ -47,31 +128,66 @@ const AIInterviewRoom = ({ interviewDetails }) => {
   useEffect(() => { interviewPhaseRef.current = interviewPhase; }, [interviewPhase]);
 
   // Fallback offline mock questions
-  const getOfflineQuestions = (type) => {
+  const getOfflineQuestions = (type, roleTarget) => {
+    const roleKey = (roleTarget || "").toLowerCase();
+    const isAIML = roleKey.includes("ai") || roleKey.includes("ml") || roleKey.includes("machine learning");
+    const isBackend = roleKey.includes("backend");
+    const isFrontend = roleKey.includes("frontend");
+
+    let techQuestions = [
+      { question_id: "q1", text: "Can you explain the difference between a process and a thread?", type: "technical" },
+      { question_id: "q2", text: "What are the core pillars of Object-Oriented Programming (OOP)?", type: "technical" },
+      { question_id: "q3", text: "How does indexing work in database management systems to speed up queries?", type: "technical" },
+      { question_id: "q4", text: "Explain the concept of a RESTful API and the common HTTP methods used.", type: "technical" },
+      { question_id: "q5", text: "What is time complexity, and how would you optimize an O(N^2) algorithm?", type: "technical" }
+    ];
+
+    if (isAIML) {
+      techQuestions = [
+        { question_id: "q1", text: "How do you diagnose and resolve overfitting versus underfitting in deep learning models?", type: "technical" },
+        { question_id: "q2", text: "Explain the core architectural components of Transformers and how self-attention operates.", type: "technical" },
+        { question_id: "q3", text: "How do you evaluate Machine Learning models in production beyond standard offline accuracy?", type: "technical" },
+        { question_id: "q4", text: "How would you design a Retrieval-Augmented Generation (RAG) architecture for document search?", type: "technical" },
+        { question_id: "q5", text: "Explain hyperparameter tuning strategies like Bayesian Optimization versus Random Search.", type: "technical" }
+      ];
+    } else if (isBackend) {
+      techQuestions = [
+        { question_id: "q1", text: "What are the key trade-offs between REST, gRPC, and GraphQL for microservices?", type: "technical" },
+        { question_id: "q2", text: "Explain database indexing mechanisms (B-Trees, Hash indexes) and SQL query optimization.", type: "technical" },
+        { question_id: "q3", text: "How do you implement distributed locking or transaction management across multiple services?", type: "technical" },
+        { question_id: "q4", text: "Explain how caching strategies (Write-Through, Cache-Aside, Redis) improve throughput.", type: "technical" },
+        { question_id: "q5", text: "How do you handle concurrency, race conditions, and thread safety in backend APIs?", type: "technical" }
+      ];
+    } else if (isFrontend) {
+      techQuestions = [
+        { question_id: "q1", text: "Explain the Virtual DOM and how reconciliation algorithms work in modern frontend frameworks.", type: "technical" },
+        { question_id: "q2", text: "How do you optimize initial page load performance, Core Web Vitals, and bundle sizes?", type: "technical" },
+        { question_id: "q3", text: "Explain different state management patterns (Redux, Context API, Zustand) and when to use each.", type: "technical" },
+        { question_id: "q4", text: "How do you handle asynchronous data fetching, race conditions, and optimistic UI updates?", type: "technical" },
+        { question_id: "q5", text: "Explain CSS layout engines (Flexbox, Grid), responsive design principles, and web accessibility (a11y).", type: "technical" }
+      ];
+    }
+
     const questionsList = {
-      technical: [
-        { question_id: "q1", text: "Can you explain the difference between a process and a thread?", type: "technical" },
-        { question_id: "q2", text: "What are the core pillars of Object-Oriented Programming (OOP)?", type: "technical" },
-        { question_id: "q3", text: "How does indexing work in database management systems to speed up queries?", type: "technical" },
-        { question_id: "q4", text: "Explain the concept of a RESTful API and the common HTTP methods used.", type: "technical" },
-        { question_id: "q5", text: "What is time complexity, and how would you optimize an O(N^2) algorithm?", type: "technical" }
-      ],
+      technical: techQuestions,
       behavioral: [
-        { question_id: "q1", text: "Describe a challenging project you worked on. How did you handle the difficulties?", type: "behavioral" },
-        { question_id: "q2", text: "Tell me about a time you had a conflict with a team member. How did you resolve it?", type: "behavioral" },
-        { question_id: "q3", text: "Explain how you prioritize your tasks when dealing with multiple tight deadlines.", type: "behavioral" },
-        { question_id: "q4", text: "Describe a time when you made a mistake at work. How did you handle the situation?", type: "behavioral" },
+        { question_id: "q1", text: `Describe a challenging ${roleTarget || "engineering"} project you worked on. How did you handle the difficulties?`, type: "behavioral" },
+        { question_id: "q2", text: "Tell me about a time you had a technical disagreement with a team member. How did you resolve it?", type: "behavioral" },
+        { question_id: "q3", text: "Explain how you prioritize your tasks when dealing with tight project deadlines.", type: "behavioral" },
+        { question_id: "q4", text: "Describe a time when a system bug or failure occurred. How did you handle the situation?", type: "behavioral" },
         { question_id: "q5", text: "Tell me about a project where you had to learn a new technology quickly. What was your approach?", type: "behavioral" }
       ],
       hr: [
-        { question_id: "q1", text: "Tell me about yourself and why you are interested in this position.", type: "hr" },
-        { question_id: "q2", text: "What do you consider to be your greatest professional strengths and weaknesses?", type: "hr" },
-        { question_id: "q3", text: "Where do you see yourself in five years, and how does this role align with your goals?", type: "hr" },
-        { question_id: "q4", text: "Why should we hire you over other candidates for this specific role?", type: "hr" },
-        { question_id: "q5", text: "Do you have any questions for us regarding the company or the team culture?", type: "hr" }
+        { question_id: "q1", text: `Tell me about yourself and why you are interested in working as a ${roleTarget || "professional"} at our company.`, type: "hr" },
+        { question_id: "q2", text: "What do you consider to be your greatest professional strengths and key growth areas?", type: "hr" },
+        { question_id: "q3", text: `Where do you see yourself in 3 to 5 years in your ${roleTarget || "career"} path?`, type: "hr" },
+        { question_id: "q4", text: "Why should we hire you over other candidates for this specific position?", type: "hr" },
+        { question_id: "q5", text: "What type of team environment and leadership culture allows you to do your best work?", type: "hr" }
       ]
     };
-    return questionsList[type] || questionsList["technical"];
+    const cat = (type || "technical").toLowerCase();
+    const matchedKey = cat.includes("behavior") ? "behavioral" : (cat.includes("hr") || cat.includes("fit")) ? "hr" : "technical";
+    return questionsList[matchedKey] || questionsList["technical"];
   };
 
   // Initialize speech recognition
@@ -144,15 +260,37 @@ const AIInterviewRoom = ({ interviewDetails }) => {
     }
   }, [interviewDetails.language]);
 
-  // Clean up speech and timers on unmount
+  // Helper function to turn off camera & microphone hardware tracks
+  const stopAllMediaTracks = () => {
+    if (mediaStreamRef.current) {
+      mediaStreamRef.current.getTracks().forEach((track) => {
+        try {
+          track.stop();
+        } catch (e) {
+          console.warn("Error stopping media track:", e);
+        }
+      });
+      mediaStreamRef.current = null;
+    }
+  };
+
+  // Clean up camera, microphone, speech recognition/synthesis and timers on unmount or page leave
   useEffect(() => {
+    const handleBeforeUnload = () => {
+      stopAllMediaTracks();
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
     return () => {
+      stopAllMediaTracks();
       if (silenceTimerRef.current) {
         clearTimeout(silenceTimerRef.current);
       }
       if (window.speechSynthesis) {
         window.speechSynthesis.cancel();
       }
+      window.removeEventListener("beforeunload", handleBeforeUnload);
     };
   }, []);
 
@@ -186,12 +324,12 @@ const AIInterviewRoom = ({ interviewDetails }) => {
       } catch (err) {
         console.warn("Using offline simulated interview session:", err);
         setOfflineMode(true);
-        const count = Math.max(3, Math.min(10, Math.round((interviewDetails.duration || 10) / 2)));
+        const count = (interviewDetails.duration >= 60) ? 10 : (interviewDetails.duration >= 45) ? 8 : 5;
         setSession({
           id: "offline-session-123",
           role_target: interviewDetails.role_target,
           interview_type: interviewDetails.interview_type,
-          questions: getOfflineQuestions(interviewDetails.interview_type).slice(0, count),
+          questions: getOfflineQuestions(interviewDetails.interview_type, interviewDetails.role_target).slice(0, count),
         });
       } finally {
         setLoading(false);
@@ -593,23 +731,96 @@ const AIInterviewRoom = ({ interviewDetails }) => {
           <p>{feedbackReport.overall_summary}</p>
         </div>
 
-        <div className="room-center-wrapper">
-          <button className="room-reset-btn" onClick={() => window.location.reload()}>
-            Start Another Session
+        <div className="room-center-wrapper" style={{ display: "flex", gap: "16px", justifyContent: "center", marginTop: "24px", flexWrap: "wrap" }}>
+          <button 
+            className="room-reset-btn" 
+            style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)", color: "#ffffff", border: "none", display: "inline-flex", alignItems: "center", gap: "8px" }}
+            onClick={() => {
+              stopAllMediaTracks();
+              if (onViewHistory) onViewHistory();
+              else window.location.reload();
+            }}
+          >
+            <FaHistory /> View Interview History
           </button>
+
+          <button 
+            className="room-reset-btn" 
+            style={{ background: "rgba(255, 255, 255, 0.08)", border: "1px solid rgba(255, 255, 255, 0.2)", display: "inline-flex", alignItems: "center", gap: "8px" }}
+            onClick={() => {
+              stopAllMediaTracks();
+              if (onStartNewSession) onStartNewSession();
+              else window.location.reload();
+            }}
+          >
+            <FaRedo /> Start Another Session
+          </button>
+        </div>
+
+        {/* Embedded Interview History List */}
+        <div style={{ marginTop: "48px", paddingTop: "32px", borderTop: "1px solid rgba(255, 255, 255, 0.12)" }}>
+          <InterviewHistory />
         </div>
       </div>
     );
   }
 
 
-  const currentQuestion = session.questions[currentIdx];
+  if (!deviceCheckDone) {
+    return (
+      <div className="device-check-container">
+        <div className="device-check-card">
+          <div className="device-check-header">
+            <h2>Pre-Interview Device Check</h2>
+            <p>
+              Please verify your <strong>Camera</strong> and <strong>Microphone</strong> access before beginning your AI Mock Interview.
+            </p>
+          </div>
 
-  const getProgressClass = (index) => {
-    if (index === currentIdx) return "current";
-    if (index < currentIdx) return "completed";
-    return "pending";
-  };
+          <div className="device-preview-box">
+            {mediaStream && hasCamera ? (
+              <video ref={videoPreviewRef} autoPlay playsInline muted className="device-video-preview" />
+            ) : (
+              <div className="device-video-placeholder">
+                <FaVideo className="placeholder-icon" />
+                <p>{deviceError || "Requesting Camera & Microphone Access..."}</p>
+              </div>
+            )}
+
+            <div className="device-status-chips">
+              <span className={`status-chip ${hasCamera ? "active" : "inactive"}`}>
+                <FaVideo /> {hasCamera ? "Camera Connected" : "Camera Off"}
+              </span>
+              <span className={`status-chip ${hasMic ? "active" : "inactive"}`}>
+                <FaMicrophone /> {hasMic ? "Microphone Connected" : "Mic Off"}
+              </span>
+            </div>
+          </div>
+
+          {deviceError && (
+            <div className="device-warning-banner">
+              <FaExclamationTriangle /> <span>{deviceError}</span>
+            </div>
+          )}
+
+          <div className="device-check-actions">
+            <button
+              type="button"
+              className="device-start-btn"
+              onClick={() => {
+                setDeviceCheckDone(true);
+                setIsTimerRunning(true);
+              }}
+            >
+              <FaPlay /> Start AI Interview Session ({formatTime(timeLeft)})
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const currentQuestion = session.questions[currentIdx];
 
   return (
     <div className="interviewRoom voice-chatbot-room">
@@ -617,6 +828,14 @@ const AIInterviewRoom = ({ interviewDetails }) => {
       {/* Background ambient light decorations */}
       <div className="ambient-glow glow-purple"></div>
       <div className="ambient-glow glow-blue"></div>
+
+      {/* Candidate Live PIP Video Stream */}
+      {hasCamera && mediaStream && (
+        <div className="candidate-pip-box">
+          <video ref={pipVideoRef} autoPlay playsInline muted className="candidate-pip-video" />
+          <div className="pip-badge">Live Feed</div>
+        </div>
+      )}
 
       {/* Header Info */}
       <div className="interviewHeader">
@@ -626,12 +845,20 @@ const AIInterviewRoom = ({ interviewDetails }) => {
             Target: <strong>{session.role_target}</strong> ({session.interview_type} round)
           </p>
         </div>
-        
-        {/* Progress Indicators */}
-        <div className="room-progress-container">
-          {session.questions.map((_, index) => (
-            <div key={index} className={`room-progress-step ${getProgressClass(index)}`} />
-          ))}
+
+        <div className="header-right">
+          <div 
+            className={`interview-timer-badge ${timeLeft < 300 ? "timer-warning" : ""} ${isTimerRunning ? "running" : "paused"}`}
+            onClick={() => setIsTimerRunning(!isTimerRunning)}
+            title={isTimerRunning ? "Click to Pause Timer" : "Click to Resume Timer"}
+            style={{ cursor: "pointer" }}
+          >
+            {isTimerRunning ? <FaPause className="timer-icon" /> : <FaPlay className="timer-icon" />}
+            <div className="timer-info">
+              <span className="timer-label">{isTimerRunning ? "Time Remaining" : "Timer Paused (Click to Start)"}</span>
+              <span className="timer-digits">{formatTime(timeLeft)}</span>
+            </div>
+          </div>
         </div>
       </div>
 

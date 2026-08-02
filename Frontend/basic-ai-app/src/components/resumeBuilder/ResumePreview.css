@@ -21,6 +21,48 @@
   margin: auto;
 }
 
+.demo-preview-notice {
+  background: linear-gradient(135deg, #fef3c7 0%, #fff7ed 100%);
+  border: 1.5px solid #fde68a;
+  border-radius: 14px;
+  padding: 14px 20px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  color: #92400e;
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: 0 4px 15px rgba(217, 119, 6, 0.08);
+}
+
+.demo-notice-text {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  line-height: 1.45;
+}
+
+.demo-notice-btn {
+  background: linear-gradient(135deg, #7c3aed 0%, #9333ea 100%);
+  color: #ffffff;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25);
+  transition: all 0.25s ease;
+}
+
+.demo-notice-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(124, 58, 237, 0.35);
+}
+
 .preview-actions {
   display: flex;
   justify-content: space-between;
@@ -113,12 +155,16 @@
 }
 
 .resume-header.centered-header .name {
-  font-size: 22px;
-  font-weight: 800;
+  font-size: 24px;
+  font-weight: 600 !important;
   color: #0f172a;
   margin-bottom: 2px;
-  letter-spacing: 0.3px;
+  letter-spacing: 0.5px;
   text-transform: uppercase;
+}
+
+.resume-header .name {
+  font-weight: 600 !important;
 }
 
 .header-address-line {
@@ -886,45 +932,73 @@
 @media print {
   @page {
     size: A4 portrait;
-    margin: 0;
+    margin: 0 !important;
   }
-  body {
+  html, body {
+    width: 210mm !important;
+    height: 297mm !important;
+    max-height: 297mm !important;
     background: #ffffff !important;
     margin: 0 !important;
     padding: 0 !important;
+    overflow: hidden !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
+    box-sizing: border-box !important;
   }
+  header:not(.resume-header),
+  footer, nav,
+  .workspace-toolbar,
   .workspace-header,
   .left-form-pane,
+  .editor-tab-switcher,
+  .autosave-status,
+  .ai-modal-overlay,
+  .jd-matcher-tab-container,
   .preview-actions,
   .section-header,
-  .exit-workspace-btn {
+  .preview-badge,
+  .exit-workspace-btn,
+  .preview-section .section-header,
+  .preview-section .preview-badge {
     display: none !important;
   }
   .workspace-editor-body {
     display: block !important;
     height: auto !important;
+    padding: 0 !important;
+    margin: 0 !important;
   }
   .right-preview-pane,
-  .preview-sheet-area {
+  .preview-sheet-area,
+  .preview-container,
+  .preview-section {
     background: #ffffff !important;
     padding: 0 !important;
     margin: 0 !important;
     width: 100% !important;
+    max-width: 100% !important;
+    box-shadow: none !important;
+    border: none !important;
   }
   .resume-paper {
     width: 210mm !important;
     height: 297mm !important;
     max-height: 297mm !important;
-    padding: 10mm 14mm !important;
+    padding: 10mm 12mm !important;
+    box-sizing: border-box !important;
     border: none !important;
     box-shadow: none !important;
     border-radius: 0 !important;
     overflow: hidden !important;
     page-break-after: avoid !important;
     page-break-inside: avoid !important;
+    page-break-before: avoid !important;
     margin: 0 auto !important;
+  }
+  .resume-paper * {
+    page-break-inside: avoid !important;
+    page-break-after: avoid !important;
   }
 }
 

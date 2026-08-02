@@ -72,7 +72,7 @@ const ResumeDashboard = ({
         </div>
       </div>
 
-      {/* Analytics Overview Bar */}
+      {/* Analytics & Metrics Overview Bar */}
       <div className="stats-overview-grid">
         <div className="stat-card">
           <div className="stat-icon-wrapper purple">📄</div>
@@ -91,18 +91,18 @@ const ResumeDashboard = ({
         </div>
 
         <div className="stat-card">
-          <div className="stat-icon-wrapper blue">🎨</div>
+          <div className="stat-icon-wrapper blue">💼</div>
           <div className="stat-info">
-            <h3>5</h3>
-            <p>Modern Templates</p>
+            <h3>89%</h3>
+            <p>Job Match Rating</p>
           </div>
         </div>
 
         <div className="stat-card">
           <div className="stat-icon-wrapper pink">⚡</div>
           <div className="stat-info">
-            <h3>100%</h3>
-            <p>AI Enhancement Ready</p>
+            <h3>88%</h3>
+            <p>Interview Readiness</p>
           </div>
         </div>
       </div>

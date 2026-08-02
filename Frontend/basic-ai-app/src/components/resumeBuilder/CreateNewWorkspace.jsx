@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from "react";
 import ResumePreview from "./ResumePreview";
+import AIPolishModal from "./AIPolishModal";
+import AIResumeAssistantModal from "./AIResumeAssistantModal";
+import BeforeAfterComparisonModal from "./BeforeAfterComparisonModal";
+import { useAuth } from "../../context/AuthContext";
 import "./CreateNewWorkspace.css";
 
 const ACTION_VERBS = {
@@ -29,19 +33,20 @@ const CreateNewWorkspace = ({
   onSaveResume,
   currentResumeId
 }) => {
+  const { authFetch } = useAuth();
   const [activeVerbTab, setActiveVerbTab] = useState("technical");
   const [copiedVerb, setCopiedVerb] = useState("");
-  const [activeTab, setActiveTab] = useState("editor"); // "editor" | "jd-match"
-  const [jobDescription, setJobDescription] = useState("");
-  const [jdAnalyzing, setJdAnalyzing] = useState(false);
-  const [jdAnalysisResult, setJdAnalysisResult] = useState(null);
-  
+  const [selectedResumeId, setSelectedResumeId] = useState("active");
   const [saveStatus, setSaveStatus] = useState("saved"); // "saving" | "saved" | "error"
   const [showVersionModal, setShowVersionModal] = useState(false);
   const [versions, setVersions] = useState([]);
   const [showShareModal, setShowShareModal] = useState(false);
   const [shareUrl, setShareUrl] = useState("");
   const [copySuccess, setCopySuccess] = useState(false);
+  const [showPolishModal, setShowPolishModal] = useState(false);
+  const [showAssistantModal, setShowAssistantModal] = useState(false);
+  const [showDiffModal, setShowDiffModal] = useState(false);
+  const [polishedDataToCompare, setPolishedDataToCompare] = useState(null);
 
   // Auto-save logic (debounced)
   useEffect(() => {
@@ -251,74 +256,6 @@ const CreateNewWorkspace = ({
     }
   };
 
-  // JD Analysis & Auto-Tailor
-  const handleAnalyzeJD = async () => {
-    if (!jobDescription.trim()) return;
-    setJdAnalyzing(true);
-    try {
-      const res = await authFetch("http://localhost:8000/api/ats/analyze", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          resume_id: currentResumeId || "",
-          job_description: jobDescription
-        })
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setJdAnalysisResult(data);
-      } else {
-        throw new Error("Fallback JD Analysis");
-      }
-    } catch (e) {
-      setJdAnalysisResult({
-        score: 82,
-        matched_skills: ["React", "JavaScript", "REST APIs", "Node.js"],
-        missing_skills: ["Docker", "CI/CD Pipelines", "GraphQL"],
-        recommendations: [
-          "Include containerization experience like Docker in experience details.",
-          "Add quantifiable impacts to your project descriptions."
-        ],
-        detailed_feedback: "High match for core frontend responsibilities with slight cloud operations gaps."
-      });
-    } finally {
-      setJdAnalyzing(false);
-    }
-  };
-
-  const handleAutoTailorResume = async () => {
-    if (!jobDescription.trim()) return;
-    setJdAnalyzing(true);
-    try {
-      const res = await authFetch("http://localhost:8000/api/ats/tailor", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          resume_data: resumeData,
-          job_description: jobDescription
-        })
-      });
-      if (res.ok) {
-        const tailored = await res.json();
-        setResumeData(tailored);
-        alert("✨ Success! Resume has been tailored to match target Job Description!");
-      }
-    } catch (e) {
-      // Local fallback
-      const copyData = { ...resumeData };
-      if (!copyData.skills.includes("Docker")) copyData.skills.push("Docker");
-      if (!copyData.skills.includes("CI/CD")) copyData.skills.push("CI/CD");
-      setResumeData(copyData);
-      alert("✨ Success! Local AI Tailoring added missing keywords to skills.");
-    } finally {
-      setJdAnalyzing(false);
-    }
-  };
-
   // Generate Share Link Modal
   const handleGenerateShare = async () => {
     setShowShareModal(true);
@@ -337,6 +274,99 @@ const CreateNewWorkspace = ({
       }
     }
     setShareUrl(`${window.location.origin}/share/resume/demo-share-token-123`);
+  };
+
+  // Isolated Resume Paper PDF Download/Print Handler
+  const handleDownloadPdfOnly = () => {
+    const paper = document.querySelector(".resume-paper");
+    if (!paper) {
+      window.print();
+      return;
+    }
+
+    const printWindow = window.open("", "_blank", "width=850,height=1100");
+    if (!printWindow) {
+      window.print();
+      return;
+    }
+
+    let stylesHtml = "";
+    for (const styleSheet of document.styleSheets) {
+      try {
+        let rulesHtml = "";
+        for (const rule of styleSheet.cssRules) {
+          rulesHtml += rule.cssText;
+        }
+        stylesHtml += `<style>${rulesHtml}</style>`;
+      } catch (e) {
+        if (styleSheet.href) {
+          stylesHtml += `<link rel="stylesheet" href="${styleSheet.href}">`;
+        }
+      }
+    }
+
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>${(resumeData.personal && resumeData.personal.name) || "Resume"}_Resume</title>
+          ${stylesHtml}
+          <style>
+            @page {
+              size: A4 portrait;
+              margin: 0 !important;
+            }
+            html, body {
+              width: 210mm !important;
+              height: 297mm !important;
+              max-height: 297mm !important;
+              margin: 0 !important;
+              padding: 0 !important;
+              background: #ffffff !important;
+              color: #000000 !important;
+              overflow: hidden !important;
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+              box-sizing: border-box !important;
+            }
+            .resume-paper {
+              width: 210mm !important;
+              height: 297mm !important;
+              max-height: 297mm !important;
+              padding: 10mm 12mm !important;
+              box-sizing: border-box !important;
+              border: none !important;
+              box-shadow: none !important;
+              border-radius: 0 !important;
+              overflow: hidden !important;
+              margin: 0 !important;
+            }
+            @media print {
+              html, body, .resume-paper {
+                width: 210mm !important;
+                height: 297mm !important;
+                max-height: 297mm !important;
+                overflow: hidden !important;
+              }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="${paper.className}">
+            ${paper.innerHTML}
+          </div>
+          <script>
+            window.addEventListener('load', () => {
+              setTimeout(() => {
+                window.print();
+                window.close();
+              }, 250);
+            });
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
   };
 
   // Real-time ATS checklists & scoring logic
@@ -364,21 +394,6 @@ const CreateNewWorkspace = ({
             </svg>
             <span>Back</span>
           </button>
-
-          <div className="editor-tab-switcher">
-            <button
-              className={`tab-btn ${activeTab === "editor" ? "active" : ""}`}
-              onClick={() => setActiveTab("editor")}
-            >
-              ✏️ Editor
-            </button>
-            <button
-              className={`tab-btn ${activeTab === "jd-match" ? "active" : ""}`}
-              onClick={() => setActiveTab("jd-match")}
-            >
-              🎯 Job Matcher
-            </button>
-          </div>
         </div>
 
         <div className="toolbar-right">
@@ -386,7 +401,7 @@ const CreateNewWorkspace = ({
             {saveStatus === "saving" ? "⏳ Saving..." : "✓ Auto-saved"}
           </span>
 
-          <button className="toolbar-btn secondary-btn" onClick={handleAIPolishSummary}>
+          <button className="toolbar-btn secondary-btn" onClick={() => setShowPolishModal(true)}>
             ✨ AI Polish
           </button>
 
@@ -396,9 +411,7 @@ const CreateNewWorkspace = ({
 
           <button
             className="toolbar-btn primary-download"
-            onClick={() => {
-              window.print();
-            }}
+            onClick={handleDownloadPdfOnly}
           >
             📥 Download PDF
           </button>
@@ -406,8 +419,7 @@ const CreateNewWorkspace = ({
       </div>
 
       {/* Main Workspace Body */}
-      {activeTab === "editor" ? (
-        <div className="workspace-editor-body two-pane">
+      <div className="workspace-editor-body two-pane">
           {/* Left Pane: Controls & Inputs */}
           <div className="workspace-pane left-form-pane">
             <div className="pane-scroll-area">
@@ -463,10 +475,7 @@ const CreateNewWorkspace = ({
 
               {/* 2. Professional Summary */}
               <div className="field-group-box">
-                <div className="section-inline-title">
-                  <h5>✍️ 2. Professional Summary</h5>
-                  <button className="small-ai-btn" onClick={handleAIPolishSummary}>✨ Rephrase</button>
-                </div>
+                <h5>✍️ 2. Professional Summary</h5>
                 <textarea
                   rows={3}
                   placeholder="Describe your core strengths, experience, and achievements in concise 20–30 words..."
@@ -745,70 +754,6 @@ const CreateNewWorkspace = ({
             </div>
           </div>
         </div>
-      ) : (
-        /* Job Description Matcher Tab */
-        <div className="jd-matcher-tab-container">
-          <div className="jd-matcher-box">
-            <h2>🎯 Job Description Matcher & Auto-Tailor</h2>
-            <p>Paste the target job description to run an instant ATS gap analysis and tailor your resume in 1-click.</p>
-
-            <textarea
-              className="jd-input-textarea"
-              rows={8}
-              placeholder="Paste Job Description here..."
-              value={jobDescription}
-              onChange={(e) => setJobDescription(e.target.value)}
-            />
-
-            <div style={{ display: "flex", gap: "1rem", marginTop: "1rem" }}>
-              <button className="btn-ai-submit" onClick={handleAnalyzeJD} disabled={jdAnalyzing}>
-                {jdAnalyzing ? "Analyzing Job Match..." : "🔍 Analyze Match Score"}
-              </button>
-              <button className="btn-ai-submit" style={{ background: "linear-gradient(135deg, #10b981, #059669)" }} onClick={handleAutoTailorResume} disabled={jdAnalyzing}>
-                ✨ Auto-Tailor Resume to JD
-              </button>
-            </div>
-
-            {jdAnalysisResult && (
-              <div className="jd-result-card">
-                <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1rem" }}>
-                  <div className="ats-mini-ring" style={{ width: "64px", height: "64px", fontSize: "1.25rem" }}>
-                    <strong>{jdAnalysisResult.score}%</strong>
-                  </div>
-                  <div>
-                    <h3 style={{ margin: 0, color: "#f8fafc" }}>Match Compatibility</h3>
-                    <p style={{ margin: 0, color: "#94a3b8" }}>{jdAnalysisResult.detailed_feedback}</p>
-                  </div>
-                </div>
-
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem" }}>
-                  <div>
-                    <h4 style={{ color: "#4ade80" }}>✓ Matched Skills</h4>
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
-                      {jdAnalysisResult.matched_skills.map((s, i) => (
-                        <span key={i} className="preview-skill-tag" style={{ background: "rgba(34, 197, 94, 0.15)", color: "#4ade80" }}>
-                          {s}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <h4 style={{ color: "#f87171" }}>⚠️ Missing Skills / Gaps</h4>
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
-                      {jdAnalysisResult.missing_skills.map((s, i) => (
-                        <span key={i} className="preview-skill-tag" style={{ background: "rgba(239, 68, 68, 0.15)", color: "#f87171" }}>
-                          {s}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
 
       {/* Share Link Modal */}
       {showShareModal && (
@@ -850,6 +795,48 @@ const CreateNewWorkspace = ({
           </div>
         </div>
       )}
+
+      {/* AI Polish Modal */}
+      <AIPolishModal
+        isOpen={showPolishModal}
+        onClose={() => setShowPolishModal(false)}
+        resumeData={resumeData}
+        setResumeData={(polished) => {
+          setPolishedDataToCompare(polished);
+          setShowPolishModal(false);
+          setShowDiffModal(true);
+        }}
+        onSaveResume={(data) => onSaveResume && onSaveResume(data, selectedTemplate)}
+      />
+
+      {/* AI Assistant Modal */}
+      <AIResumeAssistantModal
+        isOpen={showAssistantModal}
+        onClose={() => setShowAssistantModal(false)}
+        resumeData={resumeData}
+        authFetch={authFetch}
+        onApplyAssistantResult={(type, val) => {
+          if (type === "summary") {
+            setResumeData({ ...resumeData, summary: val });
+          } else if (type === "skills") {
+            setResumeData({ ...resumeData, skills: val });
+          } else if (type === "certifications") {
+            setResumeData({ ...resumeData, certifications: val });
+          }
+        }}
+      />
+
+      {/* Before / After Comparison Modal */}
+      <BeforeAfterComparisonModal
+        isOpen={showDiffModal}
+        onClose={() => setShowDiffModal(false)}
+        originalData={resumeData}
+        polishedData={polishedDataToCompare}
+        onAcceptPolished={(updated) => {
+          setResumeData(updated);
+          if (onSaveResume) onSaveResume(updated, selectedTemplate);
+        }}
+      />
     </div>
   );
 };

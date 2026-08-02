@@ -1,8 +1,22 @@
 import secrets
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from fastapi import HTTPException, status
 from app.database import db_manager
 from app.services.email_service import EmailService
+
+def _ensure_utc(dt):
+    if not dt:
+        return None
+    if isinstance(dt, str):
+        try:
+            dt = datetime.fromisoformat(dt.replace("Z", "+00:00"))
+        except Exception:
+            return None
+    if isinstance(dt, datetime):
+        if dt.tzinfo is None or dt.tzinfo.utcoffset(dt) is None:
+            return dt.replace(tzinfo=timezone.utc)
+        return dt
+    return None
 
 class OTPService:
     MAX_ATTEMPTS = 5
@@ -16,7 +30,7 @@ class OTPService:
     @staticmethod
     async def send_otp(email: str, purpose: str = "email_verification", user_name: str = "") -> str:
         clean_email = email.lower().strip()
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         db = db_manager.db
 
         # 1. Enforce 60-second resend cooldown check
@@ -26,7 +40,7 @@ class OTPService:
                 "purpose": purpose
             })
             if last_otp:
-                created_at = last_otp.get("created_at")
+                created_at = _ensure_utc(last_otp.get("created_at"))
                 if created_at and (now - created_at).total_seconds() < OTPService.RESEND_COOLDOWN_SECONDS:
                     wait_seconds = int(OTPService.RESEND_COOLDOWN_SECONDS - (now - created_at).total_seconds())
                     raise HTTPException(
@@ -77,7 +91,7 @@ class OTPService:
     async def verify_otp(email: str, otp: str, purpose: str = "email_verification") -> bool:
         clean_email = email.lower().strip()
         clean_otp = otp.strip()
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         db = db_manager.db
 
         # 2. Check in MongoDB 'otps' collection
@@ -113,7 +127,7 @@ class OTPService:
             )
 
             # Check expiration (5 minutes)
-            expires_at = record.get("expires_at")
+            expires_at = _ensure_utc(record.get("expires_at"))
             if expires_at and now > expires_at:
                 await db["otps"].delete_many({"email": clean_email, "purpose": purpose})
                 raise HTTPException(

@@ -183,11 +183,19 @@ const MockInterviews = () => {
         {activePage === "room" && interviewStarted && (
           <AIInterviewRoom
             interviewDetails={interviewDetails}
+            onViewHistory={() => {
+              setInterviewStarted(false);
+              setActivePage("history");
+            }}
+            onStartNewSession={() => {
+              setInterviewStarted(false);
+              setActivePage("setup");
+            }}
           />
         )}
 
         {activePage === "history" && (
-          <InterviewHistory />
+          <InterviewHistory onStartNewSession={() => { setInterviewStarted(false); setActivePage("setup"); }} />
         )}
 
         {activePage === "settings" && (

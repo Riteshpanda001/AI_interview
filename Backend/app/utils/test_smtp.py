@@ -9,7 +9,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..",
 
 from app.config import settings
 
-def test_gmail_smtp_connection():
+def check_gmail_smtp_connection() -> bool:
     print("\n" + "=" * 60)
     print("[DIAGNOSTIC] PRENOVA AI - GMAIL SMTP DIAGNOSTIC TOOL")
     print("=" * 60)
@@ -56,5 +56,9 @@ def test_gmail_smtp_connection():
         print("=" * 60 + "\n")
         return False
 
+def test_gmail_smtp_connection():
+    res = check_gmail_smtp_connection()
+    assert isinstance(res, bool)
+
 if __name__ == "__main__":
-    test_gmail_smtp_connection()
+    check_gmail_smtp_connection()

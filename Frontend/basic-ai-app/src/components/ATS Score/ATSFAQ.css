@@ -1,81 +1,82 @@
-.ats-faq-container {
-  background: #ffffff;
-  border: 1px solid #ece8ff;
-  border-radius: 16px;
-  padding: 32px;
-  max-width: 800px;
-  margin: 30px auto;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 15px 40px rgba(124, 58, 237, 0.08);
+.ats-faq-section {
+  width: 100%;
+  padding: 80px 8%;
+  background: transparent;
+  position: relative;
+  z-index: 2;
 }
 
-.faq-header h2 {
-  font-size: 1.6rem;
-  color: #111827;
-  margin-bottom: 8px;
+.ats-faq-badge {
+  display: inline-block;
+  padding: 8px 20px;
+  border-radius: 999px;
+  background: #f3e8ff;
+  color: #7c3aed;
+  font-size: 0.85rem;
   font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
 }
 
-.faq-header p {
-  color: #9ca3af;
-  font-size: 0.95rem;
-  margin-bottom: 24px;
-}
-
-.faq-list {
+.ats-faq-list-container {
+  max-width: 900px;
+  margin: auto;
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
-.faq-card {
-  background: #f9fafb;
-  border: 1px solid #ece8ff;
-  border-radius: 12px;
+.ats-faq-item-card {
+  background: #ffffff;
+  border: 1px solid rgba(124, 58, 237, 0.12);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(124, 58, 237, 0.04);
+  cursor: pointer;
   overflow: hidden;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-align: left;
 }
 
-.faq-card:hover {
-  background: #f9fafb;
+.ats-faq-item-card:hover {
+  border-color: #a855f7;
+  box-shadow: 0 15px 35px rgba(168, 85, 247, 0.1);
+  transform: translateY(-2px);
 }
 
-.faq-question {
-  padding: 20px;
+.ats-faq-question-box {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  cursor: pointer;
-  user-select: none;
+  padding: 22px 28px;
 }
 
-.faq-question h3 {
-  font-size: 1.05rem;
+.ats-faq-question-box h4 {
+  font-size: 1.08rem;
   color: #111827;
-  font-weight: 600;
-  padding-right: 20px;
+  font-weight: 700;
   margin: 0;
+  padding-right: 16px;
 }
 
-.faq-toggle-icon {
-  font-size: 1.2rem;
+.ats-faq-toggle-icon {
+  font-size: 1.3rem;
   color: #a855f7;
   font-weight: 700;
-  transition: transform 0.2s ease;
+  transition: transform 0.3s ease;
 }
 
-.faq-card.open .faq-toggle-icon {
-  transform: rotate(180deg);
+.ats-faq-item-card.active .ats-faq-toggle-icon {
+  color: #7c3aed;
 }
 
-.faq-answer {
-  padding: 0 20px 20px;
-  border-top: 1px solid #ece8ff;
+.ats-faq-answer-box {
+  padding: 0 28px 22px 28px;
+  border-top: 1px solid rgba(124, 58, 237, 0.08);
 }
 
-.faq-answer p {
-  font-size: 0.9rem;
-  color: #9ca3af;
-  line-height: 1.5;
-  margin: 16px 0 0;
+.ats-faq-answer-box p {
+  font-size: 0.95rem;
+  color: #4b5563;
+  line-height: 1.65;
+  margin: 16px 0 0 0;
 }

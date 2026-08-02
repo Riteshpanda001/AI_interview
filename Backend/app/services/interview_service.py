@@ -1,5 +1,5 @@
 from bson import ObjectId
-from datetime import datetime
+from datetime import datetime, timezone
 from fastapi import HTTPException
 from app.ai.interview_generator import InterviewGenerator
 from app.ai.interview_evaluator import InterviewEvaluator
@@ -28,10 +28,15 @@ class InterviewService:
             except Exception as e:
                 print(f"Error fetching resume details: {e}")
 
-        # Let's count questions based on duration (e.g. 5 questions per 10 mins, min 3, max 10)
-        num_questions = 5
+        # Count questions based on duration (45 mins -> 8 questions, 60 mins -> 10 questions)
+        num_questions = 8
         if duration:
-            num_questions = max(3, min(10, int(duration // 2)))
+            if duration >= 60:
+                num_questions = 10
+            elif duration >= 45:
+                num_questions = 8
+            else:
+                num_questions = max(3, min(10, int(duration // 5)))
 
         # Generate interview questions using AI engine
         generated_questions = await InterviewGenerator.generate_questions(
@@ -57,17 +62,25 @@ class InterviewService:
             "status": "pending",
             "questions": generated_questions,
             "responses": [],
-            "created_at": datetime.utcnow()
+            "created_at": datetime.now(timezone.utc)
         }
         
         result = await db["interview_sessions"].insert_one(session_record)
+        session_record["_id"] = str(result.inserted_id)
         session_record["id"] = str(result.inserted_id)
         
         return session_record
 
     @staticmethod
     async def evaluate_answer(user_id: str, session_id: str, submit_req: SubmitAnswerRequest, db) -> dict:
-        session = await db["interview_sessions"].find_one({"_id": ObjectId(session_id), "user_id": user_id})
+        try:
+            session_query = {"_id": ObjectId(session_id), "user_id": user_id}
+            id_query = {"_id": ObjectId(session_id)}
+        except Exception:
+            session_query = {"_id": session_id, "user_id": user_id}
+            id_query = {"_id": session_id}
+
+        session = await db["interview_sessions"].find_one(session_query)
         if not session:
             raise HTTPException(status_code=404, detail="Interview session not found.")
             
@@ -97,17 +110,17 @@ class InterviewService:
         }
         
         await db["interview_sessions"].update_one(
-            {"_id": ObjectId(session_id)},
+            id_query,
             {"$push": {"responses": response_log}}
         )
         
         # Check if all questions are answered, update session to completed
-        updated_session = await db["interview_sessions"].find_one({"_id": ObjectId(session_id)})
+        updated_session = await db["interview_sessions"].find_one(id_query)
         if len(updated_session.get("responses", [])) >= len(updated_session.get("questions", [])):
             # Mark complete
             await db["interview_sessions"].update_one(
-                {"_id": ObjectId(session_id)},
-                {"$set": {"status": "completed", "completed_at": datetime.utcnow()}}
+                id_query,
+                {"$set": {"status": "completed", "completed_at": datetime.now(timezone.utc)}}
             )
             
             # Generate overall result summary
@@ -124,7 +137,7 @@ class InterviewService:
                     "confidence": avg_score + 5 if avg_score < 95 else avg_score
                 },
                 "verdict": "Hire" if avg_score >= 70 else "No Hire",
-                "created_at": datetime.utcnow()
+                "created_at": datetime.now(timezone.utc)
             }
             await db["interview_results"].insert_one(result_record)
             
@@ -152,7 +165,7 @@ class InterviewService:
             "interview_session_id": session_id,
             "answers_feedback": answers_feedback,
             "overall_summary": "Good overall effort. Focus on technical delivery structure.",
-            "created_at": datetime.utcnow()
+            "created_at": datetime.now(timezone.utc)
         }
         
         return feedback_record

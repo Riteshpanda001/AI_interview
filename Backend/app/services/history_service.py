@@ -6,5 +6,7 @@ class HistoryService:
         cursor = db["interview_results"].find({"user_id": user_id})
         results = await cursor.to_list(length=100)
         for res in results:
-            res["id"] = str(res["_id"])
+            if "_id" in res:
+                res["_id"] = str(res["_id"])
+            res["id"] = str(res.get("_id", ""))
         return results

@@ -3,6 +3,15 @@ import redis.asyncio as aioredis
 from app.config import settings
 from bson import ObjectId
 
+class UpdateResult:
+    def __init__(self, matched_count=0, modified_count=0):
+        self.matched_count = matched_count
+        self.modified_count = modified_count
+
+class DeleteResult:
+    def __init__(self, deleted_count=0):
+        self.deleted_count = deleted_count
+
 class MockCursor:
     def __init__(self, data):
         self.data = data
@@ -18,16 +27,16 @@ class MockCollection:
     async def find_one(self, filter_dict):
         clean_filter = {}
         for k, v in filter_dict.items():
-            if k == "_id" and isinstance(v, ObjectId):
-                clean_filter["_id"] = str(v)
+            if (k == "_id" or k.endswith("_id")) and isinstance(v, ObjectId):
+                clean_filter[k] = str(v)
             else:
-                clean_filter[k] = v
+                clean_filter[k] = str(v) if isinstance(v, ObjectId) else v
 
         for doc in self.data.values():
             match = True
             for k, v in clean_filter.items():
                 val = doc.get(k)
-                if k == "_id":
+                if isinstance(val, ObjectId):
                     val = str(val)
                 if val != v:
                     match = False
@@ -35,7 +44,10 @@ class MockCollection:
             if match:
                 doc_copy = doc.copy()
                 if isinstance(doc_copy.get("_id"), str):
-                    doc_copy["_id"] = ObjectId(doc_copy["_id"])
+                    try:
+                        doc_copy["_id"] = ObjectId(doc_copy["_id"])
+                    except Exception:
+                        pass
                 return doc_copy
         return None
 
@@ -50,37 +62,61 @@ class MockCollection:
         class InsertResult:
             def __init__(self, inserted_id):
                 self.inserted_id = inserted_id
-        return InsertResult(ObjectId(_id_str))
+        try:
+            return InsertResult(ObjectId(_id_str))
+        except Exception:
+            return InsertResult(_id_str)
 
     async def insert_many(self, docs):
         for doc in docs:
             await self.insert_one(doc)
         return True
 
+    async def delete_one(self, filter_dict):
+        doc = await self.find_one(filter_dict)
+        if doc:
+            key = str(doc["_id"])
+            if key in self.data:
+                del self.data[key]
+                return DeleteResult(deleted_count=1)
+        return DeleteResult(deleted_count=0)
+
     async def delete_many(self, filter_dict):
         if not filter_dict:
+            count = len(self.data)
             self.data.clear()
+            return DeleteResult(deleted_count=count)
         else:
             keys_to_delete = []
             for k, v in self.data.items():
                 match = True
                 for fk, fv in filter_dict.items():
-                    if v.get(fk) != fv:
+                    val = v.get(fk)
+                    target = str(fv) if isinstance(fv, ObjectId) else fv
+                    val_str = str(val) if isinstance(val, ObjectId) else val
+                    if val_str != target:
                         match = False
                         break
                 if match:
                     keys_to_delete.append(k)
             for k in keys_to_delete:
                 del self.data[k]
-        return True
+            return DeleteResult(deleted_count=len(keys_to_delete))
 
     def find(self, filter_dict):
         results = []
+        clean_filter = {}
+        for k, v in filter_dict.items():
+            if isinstance(v, ObjectId):
+                clean_filter[k] = str(v)
+            else:
+                clean_filter[k] = v
+
         for doc in self.data.values():
             match = True
-            for k, v in filter_dict.items():
+            for k, v in clean_filter.items():
                 val = doc.get(k)
-                if k == "_id":
+                if isinstance(val, ObjectId):
                     val = str(val)
                 if val != v:
                     match = False
@@ -88,7 +124,10 @@ class MockCollection:
             if match:
                 doc_copy = doc.copy()
                 if isinstance(doc_copy.get("_id"), str):
-                    doc_copy["_id"] = ObjectId(doc_copy["_id"])
+                    try:
+                        doc_copy["_id"] = ObjectId(doc_copy["_id"])
+                    except Exception:
+                        pass
                 results.append(doc_copy)
         return MockCursor(results)
 
@@ -109,8 +148,8 @@ class MockCollection:
                     if k not in self.data[key]:
                         self.data[key][k] = []
                     self.data[key][k].append(v)
-            return True
-        return False
+            return UpdateResult(matched_count=1, modified_count=1)
+        return UpdateResult(matched_count=0, modified_count=0)
 
     async def create_index(self, key_name, unique=False):
         pass

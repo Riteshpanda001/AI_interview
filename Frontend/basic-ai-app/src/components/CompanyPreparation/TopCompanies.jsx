@@ -9,8 +9,17 @@ const COMPANIES = [
   { name: "Meta", logo: "🌐", type: "Product", color: "#0668E1" },
   { name: "Netflix", logo: "🍿", type: "Product", color: "#E50914" },
   { name: "Apple", logo: "🍎", type: "Product", color: "#555555" },
+  { name: "Uber", logo: "🚗", type: "Product", color: "#000000" },
+  { name: "Flipkart", logo: "🛒", type: "Product", color: "#2874F0" },
+  { name: "Zomato", logo: "🍕", type: "Product", color: "#CB202D" },
+  { name: "Atlassian", logo: "🔹", type: "Product", color: "#0052CC" },
+  { name: "Adobe", logo: "🎨", type: "Product", color: "#FF0000" },
+  { name: "Oracle", logo: "🔴", type: "Product", color: "#F80000" },
+  { name: "Goldman Sachs", logo: "🏦", type: "FinTech", color: "#7399C6" },
   { name: "TCS", logo: "🏢", type: "Service", color: "#1E2A38" },
-  { name: "Infosys", logo: "📈", type: "Service", color: "#007CC3" }
+  { name: "Infosys", logo: "📈", type: "Service", color: "#007CC3" },
+  { name: "Wipro", logo: "⚡", type: "Service", color: "#7C3AED" },
+  { name: "Accenture", logo: "🚀", type: "Service", color: "#A855F7" }
 ];
 
 const TopCompanies = ({ selectedCompany, onSelectCompany }) => {
@@ -32,7 +41,7 @@ const TopCompanies = ({ selectedCompany, onSelectCompany }) => {
               <button
                 key={company.name}
                 className={`company-tab-btn ${isSelected ? "selected" : ""}`}
-                onClick={() => requireAuth(() => onSelectCompany(company.name), "/company-preparation")}
+                onClick={() => onSelectCompany(company.name)}
                 style={{
                   "--brand-color": company.color,
                   "--brand-bg": `${company.color}0c`,

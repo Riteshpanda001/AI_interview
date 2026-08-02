@@ -192,7 +192,7 @@ const Register = () => {
         callback: async (response) => {
           try {
             await googleLogin(response.credential);
-            navigate("/dashboard");
+            navigate("/");
           } catch (err) {
             setErrorMsg(err.message || "Google Sign-In failed.");
           } finally {
@@ -206,7 +206,7 @@ const Register = () => {
         try {
           const fakeToken = "mock_google_jwt_token_for_dev_testing";
           await googleLogin(fakeToken);
-          navigate("/dashboard");
+          navigate("/");
         } catch (err) {
           setErrorMsg("Google Sign-In error: " + (err.message || err));
         } finally {
@@ -231,7 +231,7 @@ const Register = () => {
       await verifyOtp(email, fullOtp, "email_verification");
       setInfoMsg("Account successfully created and verified! Redirecting...");
       setTimeout(() => {
-        navigate("/dashboard");
+        navigate("/");
       }, 1500);
       setShowOtpModal(false);
     } catch (err) {

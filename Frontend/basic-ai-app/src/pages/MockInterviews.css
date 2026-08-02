@@ -284,6 +284,13 @@
 
 }
 
+.mockContent:has(.interviewRoom) {
+    overflow: hidden;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
 /* ==========================================================
    DASHBOARD
 ========================================================== */
