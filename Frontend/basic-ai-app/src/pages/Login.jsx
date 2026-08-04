@@ -12,9 +12,10 @@ const Login = () => {
 
   const redirectTarget = location.state?.from || "/";
 
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(() => localStorage.getItem("remembered_email") || "");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
   
   // UI States
   const [isLoading, setIsLoading] = useState(false);
@@ -141,7 +142,13 @@ const Login = () => {
         return;
       }
 
-      const loginRes = await login(email, password);
+      if (rememberMe) {
+        localStorage.setItem("remembered_email", email);
+      } else {
+        localStorage.removeItem("remembered_email");
+      }
+
+      const loginRes = await login(email, password, rememberMe);
       if (loginRes?.require_otp) {
         setInfoMsg(loginRes.message || "A 6-digit OTP code has been sent to your email for verification.");
         setShowOtpModal(true);
@@ -302,7 +309,11 @@ const Login = () => {
 
             <div className="login-options">
               <label className="remember-me">
-                <input type="checkbox" /> Remember Me
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                /> Remember Me
               </label>
               <a href="/forgot-password" className="forgot-password-link">Forgot Password?</a>
             </div>

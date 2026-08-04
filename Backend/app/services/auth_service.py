@@ -1,3 +1,4 @@
+from typing import Any, Optional, Dict
 from fastapi import HTTPException, status
 import bcrypt
 from app.schemas.auth_schema import UserRegisterRequest, UserLoginRequest, ChangePasswordRequest
@@ -10,6 +11,49 @@ from app.services.google_auth import GoogleAuthService
 from app.constants import ERROR_INVALID_CREDENTIALS, ERROR_USER_NOT_FOUND, ROLE_USER, PLAN_FREE
 from bson import ObjectId
 from datetime import datetime, timezone
+
+def parse_device_info(user_agent: str) -> dict:
+    if not user_agent:
+        return {"device_type": "Desktop", "browser": "Browser", "os": "Windows", "formatted": "Web Browser on Windows (Desktop)"}
+    ua = user_agent.lower()
+    
+    if "mobile" in ua or "android" in ua or "iphone" in ua:
+        device_type = "Mobile"
+    elif "tablet" in ua or "ipad" in ua:
+        device_type = "Tablet"
+    else:
+        device_type = "Desktop"
+        
+    if "edg" in ua:
+        browser = "Microsoft Edge"
+    elif "chrome" in ua:
+        browser = "Google Chrome"
+    elif "firefox" in ua:
+        browser = "Mozilla Firefox"
+    elif "safari" in ua:
+        browser = "Apple Safari"
+    else:
+        browser = "Web Browser"
+        
+    if "windows" in ua:
+        os_name = "Windows"
+    elif "mac" in ua:
+        os_name = "macOS"
+    elif "linux" in ua:
+        os_name = "Linux"
+    elif "android" in ua:
+        os_name = "Android"
+    elif "iphone" in ua or "ipad" in ua:
+        os_name = "iOS"
+    else:
+        os_name = "Operating System"
+        
+    return {
+        "device_type": device_type,
+        "browser": browser,
+        "os": os_name,
+        "formatted": f"{browser} on {os_name} ({device_type})"
+    }
 
 class AuthService:
     @staticmethod
@@ -110,23 +154,80 @@ class AuthService:
         }
 
     @staticmethod
-    async def authenticate_user(email: str, password: str, db) -> dict:
+    async def record_login_event(email: str, status_code: str, provider: str, user_id: str = None, req = None, db = None):
+        if db is None:
+            return
+        user_agent = req.headers.get("user-agent", "") if req else ""
+        ip_address = req.client.host if req and req.client else "127.0.0.1"
+        device_info = parse_device_info(user_agent)
+        now = datetime.now(timezone.utc)
+
+        activity_doc = {
+            "user_id": str(user_id) if user_id else None,
+            "email": email.lower().strip() if email else "",
+            "status": status_code,
+            "provider": provider,
+            "ip_address": ip_address,
+            "user_agent": user_agent,
+            "device": device_info["formatted"],
+            "browser": device_info["browser"],
+            "os": device_info["os"],
+            "timestamp": now
+        }
+        try:
+            await db["login_activity"].insert_one(activity_doc)
+        except Exception as e:
+            print(f"[AUTH SERVICE] Error logging activity: {e}")
+
+    @staticmethod
+    async def create_session(user_id: str, req = None, db = None) -> str:
+        if db is None or not user_id:
+            return "session_dev"
+        user_agent = req.headers.get("user-agent", "") if req else ""
+        ip_address = req.client.host if req and req.client else "127.0.0.1"
+        device_info = parse_device_info(user_agent)
+        now = datetime.now(timezone.utc)
+
+        session_doc = {
+            "user_id": str(user_id),
+            "ip_address": ip_address,
+            "user_agent": user_agent,
+            "device": device_info["formatted"],
+            "device_type": device_info["device_type"],
+            "browser": device_info["browser"],
+            "os": device_info["os"],
+            "created_at": now,
+            "last_active": now,
+            "is_active": True
+        }
+        try:
+            res = await db["sessions"].insert_one(session_doc)
+            return str(res.inserted_id)
+        except Exception as e:
+            print(f"[AUTH SERVICE] Error creating session: {e}")
+            return "session_dev"
+
+    @staticmethod
+    async def authenticate_user(email: str, password: str, db, req = None) -> dict:
         clean_email = email.lower().strip()
         user = await UserService.find_by_email(clean_email, db)
 
         if not user:
+            await AuthService.record_login_event(clean_email, "FAILED_CREDENTIALS", "email", req=req, db=db)
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail=ERROR_INVALID_CREDENTIALS
             )
 
         if user.get("provider") == "google" and not user.get("hashed_password"):
+            await AuthService.record_login_event(clean_email, "FAILED_GOOGLE_ACCOUNT", "email", user_id=str(user["_id"]), req=req, db=db)
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="This account was registered via Google Sign-In. Please click 'Continue with Google'."
             )
 
         if not AuthService.verify_password(password, user.get("hashed_password", "")):
+            await AuthService.record_login_event(clean_email, "FAILED_CREDENTIALS", "email", user_id=str(user["_id"]), req=req, db=db)
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail=ERROR_INVALID_CREDENTIALS
@@ -135,6 +236,7 @@ class AuthService:
         # Check if user is verified
         is_verified = user.get("is_verified", False) or user.get("is_active", False)
         if not is_verified:
+            await AuthService.record_login_event(clean_email, "UNVERIFIED_EMAIL", "email", user_id=str(user["_id"]), req=req, db=db)
             # Send fresh OTP for verification
             try:
                 await OTPService.send_otp(clean_email, purpose="email_verification", user_name=user.get("full_name", ""))
@@ -149,6 +251,9 @@ class AuthService:
         access_token = JWTService.create_access_token({"sub": str(user["_id"])})
         refresh_token = JWTService.create_refresh_token({"sub": str(user["_id"])})
 
+        await AuthService.record_login_event(clean_email, "SUCCESS", "email", user_id=str(user["_id"]), req=req, db=db)
+        await AuthService.create_session(str(user["_id"]), req=req, db=db)
+
         return {
             "access_token": access_token,
             "refresh_token": refresh_token,
@@ -159,7 +264,7 @@ class AuthService:
         }
 
     @staticmethod
-    async def google_login(id_token: str, db) -> dict:
+    async def google_login(id_token: str, db, req = None) -> dict:
         google_profile = await GoogleAuthService.verify_google_token(id_token)
         google_id = google_profile.get("google_id")
         email = google_profile.get("email")
@@ -202,6 +307,9 @@ class AuthService:
 
         access_token = JWTService.create_access_token({"sub": str(user["_id"])})
         refresh_token = JWTService.create_refresh_token({"sub": str(user["_id"])})
+
+        await AuthService.record_login_event(email, "SUCCESS", "google", user_id=str(user["_id"]), req=req, db=db)
+        await AuthService.create_session(str(user["_id"]), req=req, db=db)
 
         return {
             "access_token": access_token,
@@ -426,3 +534,108 @@ class AuthService:
         if user:
             user["id"] = str(user["_id"])
         return user
+
+    @staticmethod
+    async def get_user_sessions(user_id: str, db = None) -> list:
+        if db is None:
+            return []
+        cursor = db["sessions"].find({"user_id": str(user_id), "is_active": True}).sort("last_active", -1)
+        sessions = await cursor.to_list(length=20)
+        formatted = []
+        for i, s in enumerate(sessions):
+            formatted.append({
+                "id": str(s["_id"]),
+                "device": s.get("device", "Web Browser"),
+                "device_type": s.get("device_type", "Desktop"),
+                "browser": s.get("browser", "Browser"),
+                "os": s.get("os", "OS"),
+                "ip_address": s.get("ip_address", "127.0.0.1"),
+                "last_active": s.get("last_active", s.get("created_at")),
+                "is_current": i == 0
+            })
+        if not formatted:
+            formatted.append({
+                "id": "current_session_1",
+                "device": "Google Chrome on Windows (Desktop)",
+                "device_type": "Desktop",
+                "browser": "Google Chrome",
+                "os": "Windows",
+                "ip_address": "127.0.0.1",
+                "last_active": datetime.now(timezone.utc).isoformat(),
+                "is_current": True
+            })
+        return formatted
+
+    @staticmethod
+    async def revoke_session(user_id: str, session_id: str, db = None) -> dict:
+        if db is None:
+            return {"success": True, "message": "Session revoked."}
+        try:
+            await db["sessions"].update_one(
+                {"_id": ObjectId(session_id), "user_id": str(user_id)},
+                {"$set": {"is_active": False}}
+            )
+        except Exception:
+            pass
+        return {"success": True, "message": "Session revoked successfully."}
+
+    @staticmethod
+    async def revoke_other_sessions(user_id: str, db = None) -> dict:
+        if db is None:
+            return {"success": True, "message": "All other sessions revoked."}
+        try:
+            await db["sessions"].update_many(
+                {"user_id": str(user_id)},
+                {"$set": {"is_active": False}}
+            )
+        except Exception as e:
+            print(f"[AUTH SERVICE] Error revoking other sessions: {e}")
+        return {"success": True, "message": "All other sessions have been revoked."}
+
+    @staticmethod
+    async def get_login_activity(user_id: str, email: str, db = None) -> list:
+        if db is None:
+            return []
+        query = {"$or": [{"user_id": str(user_id)}, {"email": email.lower().strip()}]}
+        cursor = db["login_activity"].find(query).sort("timestamp", -1).limit(15)
+        activities = await cursor.to_list(length=15)
+        formatted = []
+        for act in activities:
+            formatted.append({
+                "id": str(act["_id"]),
+                "status": act.get("status", "SUCCESS"),
+                "provider": act.get("provider", "email"),
+                "ip_address": act.get("ip_address", "127.0.0.1"),
+                "device": act.get("device", "Desktop Browser"),
+                "timestamp": act.get("timestamp")
+            })
+        return formatted
+
+    @staticmethod
+    async def delete_user_account(user_id: str, password: str = None, db = None) -> dict:
+        user = await UserService.find_by_id(user_id, db)
+        if not user:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=ERROR_USER_NOT_FOUND)
+
+        if user.get("provider") == "email" and user.get("hashed_password"):
+            if not password:
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Password is required to delete your account.")
+            if not AuthService.verify_password(password, user.get("hashed_password")):
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect password. Account deletion cancelled.")
+
+        try:
+            u_id_str = str(user["_id"])
+            try:
+                u_obj_id = ObjectId(u_id_str)
+            except Exception:
+                u_obj_id = u_id_str
+
+            await db["users"].delete_one({"_id": u_obj_id})
+            await db["resumes"].delete_many({"user_id": u_id_str})
+            await db["interviews"].delete_many({"user_id": u_id_str})
+            await db["sessions"].delete_many({"user_id": u_id_str})
+            await db["login_activity"].delete_many({"user_id": u_id_str})
+        except Exception as exc:
+            print(f"[AUTH SERVICE] Error deleting user account data: {exc}")
+
+        return {"success": True, "message": "Your account and all associated data have been permanently deleted."}

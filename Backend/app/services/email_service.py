@@ -220,6 +220,68 @@ class EmailService:
 </html>"""
 
     @staticmethod
+    def build_contact_ticket_confirmation_html(user_name: str, ticket_number: str, subject: str, message: str) -> str:
+        safe_name = user_name or "Valued User"
+        return f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Support Ticket Confirmed – PrepNova AI</title>
+</head>
+<body style="margin:0;padding:0;background-color:#05020c;font-family:'Segoe UI',Roboto,sans-serif;color:#ffffff;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#05020c;padding:40px 20px;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0"
+          style="background:linear-gradient(145deg, #0d081b 0%, #12062a 100%);
+                 border:1px solid rgba(168,85,247,0.3);
+                 border-radius:18px;
+                 overflow:hidden;
+                 box-shadow:0 12px 50px rgba(124,58,237,0.35);">
+          <tr>
+            <td align="center" style="background:linear-gradient(135deg,#4c1d95 0%,#7c3aed 100%);padding:30px;">
+              <h1 style="margin:0;color:#ffffff;font-size:28px;font-weight:800;">PrepNova AI</h1>
+              <p style="margin:4px 0 0 0;color:rgba(255,255,255,0.85);font-size:12px;text-transform:uppercase;font-weight:600;">
+                Support Ticket Confirmed
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:36px 40px;">
+              <h2 style="margin:0 0 16px 0;color:#ffffff;font-size:20px;font-weight:700;">
+                We Received Your Message! 📩
+              </h2>
+              <p style="margin:0 0 16px 0;color:#c4c4e0;font-size:15px;line-height:1.6;">
+                Hello <strong>{safe_name}</strong>,
+              </p>
+              <p style="margin:0 0 24px 0;color:#a3a3c2;font-size:15px;line-height:1.6;">
+                Your support request has been logged under Ticket Number <strong style="color:#c084fc;">#{ticket_number}</strong>. Our support team will review your query and respond within 24 hours.
+              </p>
+              <div style="background:rgba(124,58,237,0.1);border:1px solid rgba(168,85,247,0.3);border-radius:12px;padding:20px;margin-bottom:24px;">
+                <p style="margin:0 0 8px 0;color:#e9d5ff;font-size:14px;font-weight:700;">Ticket Information:</p>
+                <p style="margin:0 0 6px 0;color:#a3a3c2;font-size:13px;"><strong>Ticket Number:</strong> #{ticket_number}</p>
+                <p style="margin:0 0 6px 0;color:#a3a3c2;font-size:13px;"><strong>Subject:</strong> {subject}</p>
+                <p style="margin:0;color:#a3a3c2;font-size:13px;"><strong>Message:</strong> {message}</p>
+              </div>
+              <p style="margin:0;color:#6b6b8a;font-size:13px;">
+                Thank you for reaching out to PrepNova AI. Have a great day!
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:24px;background:rgba(7,4,15,0.8);border-top:1px solid rgba(168,85,247,0.15);text-align:center;">
+              <p style="margin:0;color:#64648c;font-size:12px;">© PrepNova AI · AI Interview Preparation System</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>"""
+
+    @staticmethod
     def _send_email_sync(to_email: str, subject: str, html_content: str) -> bool:
         """Synchronous SMTP send — runs in a thread to avoid blocking the event loop."""
         from_email = settings.effective_emails_from

@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
@@ -20,6 +21,18 @@ const CodingPractice = () => {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedCompany, setSelectedCompany] = useState(null);
   const [selectedProblem, setSelectedProblem] = useState(null);
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.hash === "#coding-roadmap" || location.hash === "#roadmap") {
+      setTimeout(() => {
+        const roadmapElement = document.getElementById("coding-roadmap") || document.querySelector(".coding-roadmap-section");
+        if (roadmapElement) {
+          roadmapElement.scrollIntoView({ behavior: "smooth" });
+        }
+      }, 150);
+    }
+  }, [location]);
 
   const handleSelectProblem = (problem) => {
     setSelectedProblem(problem);

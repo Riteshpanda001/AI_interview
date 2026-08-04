@@ -340,9 +340,13 @@
 
 .send-btn{
 
-    width:220px;
+    display: inline-block;
 
-    padding:16px 25px;
+    width: auto;
+
+    min-width: 160px;
+
+    padding:16px 28px;
 
     border:none;
 
@@ -360,6 +364,8 @@
     font-size:17px;
 
     font-weight:700;
+
+    white-space: nowrap;
 
     transition:.35s ease;
 
@@ -553,3 +559,324 @@ margin-bottom:10px;
 }
 
 }
+
+/* ==========================================
+   CAPTCHA & ERRORS
+========================================== */
+.contact-alert-error {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+
+.captcha-group {
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  padding: 16px;
+  border-radius: 14px;
+}
+
+.captcha-label {
+  font-size: 14px !important;
+  color: #334155 !important;
+  margin-bottom: 8px !important;
+}
+
+.captcha-input-row {
+  display: flex;
+  gap: 12px;
+}
+
+.captcha-input-row input {
+  max-width: 140px !important;
+}
+
+.btn-refresh-captcha {
+  background: #e2e8f0;
+  color: #475569;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-refresh-captcha:hover {
+  background: #cbd5e1;
+}
+
+/* ==========================================
+   TICKET SUCCESS CARD
+========================================== */
+.ticket-success-card {
+  text-align: center;
+  padding: 30px 10px;
+}
+
+.success-icon-circle {
+  width: 65px;
+  height: 65px;
+  border-radius: 50%;
+  background: #dcfce7;
+  color: #16a34a;
+  font-size: 32px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px auto;
+  border: 2px solid #86efac;
+}
+
+.ticket-success-card h2 {
+  font-size: 24px;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 10px;
+}
+
+.ticket-number-display {
+  font-size: 18px;
+  color: #7c3aed;
+  margin-bottom: 20px;
+}
+
+.ticket-number-display strong {
+  background: #f3e8ff;
+  padding: 4px 14px;
+  border-radius: 20px;
+  border: 1px solid #d8b4fe;
+}
+
+.success-details-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 18px;
+  text-align: left;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.success-details-box p {
+  margin: 6px 0;
+  color: #334155;
+}
+
+.email-sent-note {
+  color: #64748b;
+  font-size: 14px;
+  margin-bottom: 24px;
+}
+
+.btn-new-ticket {
+  background: linear-gradient(135deg, #7c3aed, #9333ea);
+  color: #ffffff;
+  border: none;
+  padding: 14px 28px;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(124, 58, 237, 0.25);
+}
+
+/* ==========================================
+   TICKET TRACKER WIDGET
+========================================== */
+.ticket-tracker-card {
+  background: #ffffff;
+  border: 1px solid #ece8ff;
+  border-radius: 22px;
+  padding: 24px;
+  box-shadow: 0 15px 35px rgba(124, 58, 237, 0.08);
+}
+
+.ticket-tracker-card h4 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 4px 0;
+}
+
+.ticket-tracker-card p {
+  font-size: 13px;
+  color: #6b7280;
+  margin: 0 0 16px 0;
+}
+
+.ticket-lookup-form {
+  display: flex;
+  gap: 10px;
+}
+
+.ticket-lookup-form input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 10px;
+  font-size: 14px;
+  outline: none;
+}
+
+.ticket-lookup-form button {
+  background: #7c3aed;
+  color: #ffffff;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.tracker-error {
+  color: #ef4444;
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 10px;
+}
+
+.tracker-result-box {
+  margin-top: 14px;
+  background: #faf5ff;
+  border: 1px solid #e9d5ff;
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.tracker-status-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 700;
+  font-size: 13px;
+  color: #1f2937;
+  margin-bottom: 6px;
+}
+
+.status-pill {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  text-transform: uppercase;
+}
+
+.status-pill.open {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.status-pill.in_progress {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.status-pill.resolved {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.tracker-subject {
+  font-size: 13px;
+  color: #4b5563;
+  margin: 0 0 6px 0;
+}
+
+.tracker-time {
+  font-size: 11px;
+  color: #7c3aed;
+  font-weight: 700;
+}
+
+/* ==========================================
+   FAQ SECTION
+========================================== */
+.contact-faq-section {
+  margin-top: 80px;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.faq-header {
+  text-align: center;
+  margin-bottom: 36px;
+}
+
+.faq-header h3 {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #111827;
+  margin-bottom: 10px;
+}
+
+.faq-header h3 span {
+  color: #7c3aed;
+}
+
+.faq-header p {
+  color: #6b7280;
+  font-size: 16px;
+}
+
+.faq-accordion-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.faq-item {
+  background: #ffffff;
+  border: 1px solid #ece8ff;
+  border-radius: 18px;
+  padding: 20px 24px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.04);
+}
+
+.faq-item:hover {
+  border-color: #c084fc;
+  box-shadow: 0 10px 30px rgba(124, 58, 237, 0.1);
+}
+
+.faq-item.open {
+  border-color: #7c3aed;
+  background: #fdfcff;
+}
+
+.faq-question-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.faq-question-bar h4 {
+  font-size: 17px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+}
+
+.faq-toggle-icon {
+  font-size: 22px;
+  font-weight: 700;
+  color: #7c3aed;
+}
+
+.faq-answer-content {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid #f3e8ff;
+  color: #4b5563;
+  font-size: 15px;
+  line-height: 1.7;
+}

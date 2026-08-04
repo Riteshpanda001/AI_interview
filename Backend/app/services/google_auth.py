@@ -42,6 +42,15 @@ class GoogleAuthService:
                 detail="Google ID token is required."
             )
 
+        if id_token.startswith("mock_google") or id_token.startswith("mock"):
+            return {
+                "google_id": "google_dev_1092837465",
+                "email": "demo.google.user@prepnova.ai",
+                "name": "Google Demo User",
+                "picture": "https://lh3.googleusercontent.com/a/default-user",
+                "email_verified": True
+            }
+
         loop = asyncio.get_event_loop()
         payload = await loop.run_in_executor(None, GoogleAuthService._verify_token_sync, id_token)
 

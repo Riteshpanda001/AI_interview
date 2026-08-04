@@ -2,16 +2,42 @@ import React, { useState, useRef, useEffect } from "react";
 import "./Navbar.css";
 import logo from "../assets/prenova_ai_logo.png";
 import FeatureDropdown from "./FeatureDropdown";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import useRequireAuth from "../hooks/useRequireAuth";
 
 const Navbar = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, logout } = useAuth();
   const { requireAuth } = useRequireAuth();
 
-  const [active, setActive] = useState("Home");
+  const getActiveTabFromLocation = (pathname, hash) => {
+    if (pathname === "/ats-score" || pathname === "/resume-upload") return "ATS Score";
+    if (pathname === "/pricing") return "Pricing";
+    if (pathname === "/contact") return "Contact";
+    if (
+      pathname === "/mock-interview" ||
+      pathname === "/mock-interviews" ||
+      pathname === "/resume-builder" ||
+      pathname === "/coding-practice" ||
+      pathname === "/company-preparation" ||
+      hash === "#features"
+    ) {
+      return "Features";
+    }
+    if (pathname === "/") return "Home";
+    return "Home";
+  };
+
+  const [active, setActive] = useState(() =>
+    getActiveTabFromLocation(location.pathname, location.hash)
+  );
+
+  useEffect(() => {
+    setActive(getActiveTabFromLocation(location.pathname, location.hash));
+  }, [location.pathname, location.hash]);
+
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef(null);
 
@@ -63,23 +89,24 @@ const Navbar = () => {
           <a
             href="/"
             className={active === "Home" ? "active" : ""}
-            onClick={() => setActive("Home")}
+            onClick={(e) => {
+              e.preventDefault();
+              setActive("Home");
+              navigate("/");
+            }}
           >
             Home
           </a>
         </li>
 
-        <li
-          className="features-menu"
-          onMouseEnter={() => setActive("Features")}
-          onMouseLeave={() => setActive("")}
-        >
+        <li className="features-menu">
           <a
             href="/#features"
             className={active === "Features" ? "active" : ""}
+            onClick={() => setActive("Features")}
           >
             Features
-            <span className={active === "Features" ? "arrow rotate" : "arrow"}>
+            <span className="arrow">
               ▼
             </span>
           </a>

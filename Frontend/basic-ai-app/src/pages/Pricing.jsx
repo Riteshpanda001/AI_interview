@@ -8,13 +8,13 @@ import Footer from "../components/Footer";
 const Pricing = () => {
   return (
     <div className="pricing-page">
-
       <Navbar />
 
-      <PricingPlans />
+      <main className="pricing-container-wrapper">
+        <PricingPlans />
+      </main>
 
       <Footer />
-
     </div>
   );
 };

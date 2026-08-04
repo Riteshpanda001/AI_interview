@@ -390,6 +390,78 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Session Management
+  const getSessions = async () => {
+    try {
+      const response = await authFetch(`${API_BASE_URL}/users/sessions`);
+      if (!response.ok) throw new Error("Failed to fetch sessions");
+      return await response.json();
+    } catch (error) {
+      console.error("Fetch sessions error:", error);
+      return [];
+    }
+  };
+
+  const revokeSession = async (sessionId) => {
+    try {
+      const response = await authFetch(`${API_BASE_URL}/users/sessions/${sessionId}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) throw new Error("Failed to revoke session");
+      return await response.json();
+    } catch (error) {
+      console.error("Revoke session error:", error);
+      throw error;
+    }
+  };
+
+  const revokeOtherSessions = async () => {
+    try {
+      const response = await authFetch(`${API_BASE_URL}/users/sessions/revoke-others`, {
+        method: "POST",
+      });
+      if (!response.ok) throw new Error("Failed to revoke other sessions");
+      return await response.json();
+    } catch (error) {
+      console.error("Revoke other sessions error:", error);
+      throw error;
+    }
+  };
+
+  // Login Activity
+  const getLoginActivity = async () => {
+    try {
+      const response = await authFetch(`${API_BASE_URL}/users/login-activity`);
+      if (!response.ok) throw new Error("Failed to fetch login activity");
+      return await response.json();
+    } catch (error) {
+      console.error("Fetch login activity error:", error);
+      return [];
+    }
+  };
+
+  // Account Deletion
+  const deleteAccount = async (password) => {
+    try {
+      const response = await authFetch(`${API_BASE_URL}/users/me`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.detail || "Account deletion failed");
+      }
+
+      clearTokens();
+      return data;
+    } catch (error) {
+      console.error("Delete account error:", error);
+      throw error;
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -410,6 +482,11 @@ export const AuthProvider = ({ children }) => {
         changePassword,
         logout,
         authFetch,
+        getSessions,
+        revokeSession,
+        revokeOtherSessions,
+        getLoginActivity,
+        deleteAccount,
       }}
     >
       {children}

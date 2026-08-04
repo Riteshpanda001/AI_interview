@@ -48,7 +48,7 @@ const Features = () => {
       title: "Personalized Roadmap",
       description:
         "Get a customized preparation plan based on your goals.",
-      path: "/company-preparation",
+      path: "/coding-practice#coding-roadmap",
     },
   ];
 

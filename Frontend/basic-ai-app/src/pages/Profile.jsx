@@ -6,7 +6,17 @@ import "./Profile.css";
 
 const Profile = () => {
   const navigate = useNavigate();
-  const { user, updateProfile, changePassword, logout } = useAuth();
+  const {
+    user,
+    updateProfile,
+    changePassword,
+    logout,
+    getSessions,
+    revokeSession,
+    revokeOtherSessions,
+    getLoginActivity,
+    deleteAccount,
+  } = useAuth();
 
   const [activeTab, setActiveTab] = useState("info");
 
@@ -25,6 +35,17 @@ const Profile = () => {
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [securityMessage, setSecurityMessage] = useState({ type: "", text: "" });
 
+  // Sessions & Activity States
+  const [sessionsList, setSessionsList] = useState([]);
+  const [activityLogs, setActivityLogs] = useState([]);
+  const [sessionMsg, setSessionMsg] = useState("");
+
+  // Account Deletion Modal States
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletePassword, setDeletePassword] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
+
   useEffect(() => {
     if (user) {
       setFullName(user.full_name || "");
@@ -33,6 +54,66 @@ const Profile = () => {
       setBio(user.bio || "");
     }
   }, [user]);
+
+  useEffect(() => {
+    if (activeTab === "account" || activeTab === "security") {
+      fetchSessions();
+      fetchActivity();
+    }
+  }, [activeTab]);
+
+  const fetchSessions = async () => {
+    try {
+      const data = await getSessions();
+      setSessionsList(data || []);
+    } catch (e) {
+      console.error("Failed to load sessions:", e);
+    }
+  };
+
+  const fetchActivity = async () => {
+    try {
+      const data = await getLoginActivity();
+      setActivityLogs(data || []);
+    } catch (e) {
+      console.error("Failed to load activity:", e);
+    }
+  };
+
+  const handleRevokeSingle = async (sessionId) => {
+    try {
+      await revokeSession(sessionId);
+      setSessionMsg("Session revoked successfully.");
+      fetchSessions();
+    } catch (err) {
+      setSessionMsg(err.message || "Failed to revoke session.");
+    }
+  };
+
+  const handleRevokeOthers = async () => {
+    try {
+      await revokeOtherSessions();
+      setSessionMsg("All other active sessions have been revoked.");
+      fetchSessions();
+    } catch (err) {
+      setSessionMsg(err.message || "Failed to revoke other sessions.");
+    }
+  };
+
+  const handleDeleteAccount = async (e) => {
+    e.preventDefault();
+    setIsDeleting(true);
+    setDeleteError("");
+    try {
+      await deleteAccount(deletePassword);
+      setShowDeleteModal(false);
+      navigate("/register");
+    } catch (err) {
+      setDeleteError(err.message || "Failed to delete account.");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   if (!user) {
     return (
@@ -145,13 +226,13 @@ const Profile = () => {
             className={`tab-btn ${activeTab === "security" ? "active" : ""}`}
             onClick={() => setActiveTab("security")}
           >
-            🔒 Security & Password
+            🔒 Security & Activity
           </button>
           <button
             className={`tab-btn ${activeTab === "account" ? "active" : ""}`}
             onClick={() => setActiveTab("account")}
           >
-            ⚡ Membership & Session
+            ⚡ Sessions & Devices
           </button>
         </div>
 
@@ -240,68 +321,124 @@ const Profile = () => {
             </form>
           )}
 
-          {/* TAB 2: SECURITY & PASSWORD */}
+          {/* TAB 2: SECURITY & ACTIVITY */}
           {activeTab === "security" && (
-            <form className="profile-form" onSubmit={handlePasswordSubmit}>
-              <h2>Security & Authentication</h2>
-              <p className="form-subheading">Change your account password to maintain maximum account security.</p>
+            <div>
+              <form className="profile-form" onSubmit={handlePasswordSubmit}>
+                <h2>Security & Password</h2>
+                <p className="form-subheading">Change your account password to maintain maximum account security.</p>
 
-              {securityMessage.text && (
-                <div className={`alert-box ${securityMessage.type}`}>
-                  {securityMessage.text}
+                {securityMessage.text && (
+                  <div className={`alert-box ${securityMessage.type}`}>
+                    {securityMessage.text}
+                  </div>
+                )}
+
+                {user.provider === "email" && (
+                  <div className="form-group">
+                    <label>Current Password</label>
+                    <input
+                      type="password"
+                      value={oldPassword}
+                      onChange={(e) => setOldPassword(e.target.value)}
+                      placeholder="Enter current password"
+                      required
+                    />
+                  </div>
+                )}
+
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>New Password</label>
+                    <input
+                      type="password"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      placeholder="Minimum 6 characters"
+                      required
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Confirm New Password</label>
+                    <input
+                      type="password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      placeholder="Re-enter new password"
+                      required
+                    />
+                  </div>
                 </div>
-              )}
 
-              <div className="form-group">
-                <label>Current Password</label>
-                <input
-                  type="password"
-                  value={oldPassword}
-                  onChange={(e) => setOldPassword(e.target.value)}
-                  placeholder="Enter current password"
-                  required
-                />
+                <button
+                  type="submit"
+                  className="btn-save-security"
+                  disabled={isChangingPassword}
+                >
+                  {isChangingPassword ? "Updating Password..." : "Change Password"}
+                </button>
+              </form>
+
+              {/* Login Activity Log */}
+              <div className="activity-section">
+                <h2>Recent Login Activity</h2>
+                <p className="form-subheading">Track recent sign-in history across your devices and locations.</p>
+
+                <div className="activity-table-wrapper">
+                  <table className="activity-table">
+                    <thead>
+                      <tr>
+                        <th>Status</th>
+                        <th>Device & Browser</th>
+                        <th>IP Address</th>
+                        <th>Auth Method</th>
+                        <th>Timestamp</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {activityLogs.length > 0 ? (
+                        activityLogs.map((log) => (
+                          <tr key={log.id}>
+                            <td>
+                              <span className={`status-tag ${log.status === "SUCCESS" ? "success" : "failed"}`}>
+                                {log.status === "SUCCESS" ? "✓ Success" : "✕ Failed"}
+                              </span>
+                            </td>
+                            <td>{log.device || "Web Browser"}</td>
+                            <td>{log.ip_address || "127.0.0.1"}</td>
+                            <td>{log.provider === "google" ? "Google OAuth" : "Email & Password"}</td>
+                            <td>
+                              {log.timestamp
+                                ? new Date(log.timestamp).toLocaleString("en-US", {
+                                    month: "short",
+                                    day: "numeric",
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  })
+                                : "Just now"}
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan="5" style={{ textAlign: "center", opacity: 0.6, padding: "20px" }}>
+                            No login activity recorded yet.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
               </div>
-
-              <div className="form-row">
-                <div className="form-group">
-                  <label>New Password</label>
-                  <input
-                    type="password"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="Minimum 6 characters"
-                    required
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label>Confirm New Password</label>
-                  <input
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Re-enter new password"
-                    required
-                  />
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                className="btn-save-security"
-                disabled={isChangingPassword}
-              >
-                {isChangingPassword ? "Updating Password..." : "Change Password"}
-              </button>
-            </form>
+            </div>
           )}
 
-          {/* TAB 3: MEMBERSHIP & SESSION */}
+          {/* TAB 3: SESSIONS & DEVICES */}
           {activeTab === "account" && (
             <div className="account-overview">
-              <h2>Membership & Active Session</h2>
-              <p className="form-subheading">Overview of your PreNovaAi subscription and session control.</p>
+              <h2>Membership & Active Sessions</h2>
+              <p className="form-subheading">Overview of your PreNovaAi subscription and connected devices.</p>
 
               <div className="overview-cards">
                 <div className="overview-card">
@@ -313,35 +450,162 @@ const Profile = () => {
                 <div className="overview-card">
                   <span className="card-label">Verification Status</span>
                   <span className="card-val success">Verified Account</span>
-                  <p className="card-desc">Email and OTP identity verified.</p>
+                  <p className="card-desc">Email & OTP identity verified.</p>
                 </div>
 
                 <div className="overview-card">
-                  <span className="card-label">Joined On</span>
+                  <span className="card-label">Account Method</span>
                   <span className="card-val">
-                    {user.created_at
-                      ? new Date(user.created_at).toLocaleDateString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric",
-                        })
-                      : "Recently"}
+                    {user.provider === "google" ? "Google Account" : "Email Login"}
                   </span>
-                  <p className="card-desc">PreNovaAi member.</p>
+                  <p className="card-desc">Connected identity provider.</p>
                 </div>
               </div>
 
-              <div className="signout-section">
-                <h3>Session Management</h3>
-                <p>Logging out will end your current session and revoke your authentication tokens.</p>
+              {/* Connected Devices & Sessions */}
+              <div className="sessions-section">
+                <div className="sessions-header">
+                  <div>
+                    <h3>Connected Devices & Active Sessions</h3>
+                    <p style={{ margin: "4px 0 0 0", color: "#a3a3c2", fontSize: "14px" }}>
+                      Manage sessions currently logged in to your PrepNova AI account.
+                    </p>
+                  </div>
+                  {sessionsList.length > 1 && (
+                    <button type="button" className="btn-revoke-all" onClick={handleRevokeOthers}>
+                      Revoke All Other Sessions
+                    </button>
+                  )}
+                </div>
+
+                {sessionMsg && (
+                  <div className="alert-box success" style={{ marginBottom: "16px" }}>
+                    {sessionMsg}
+                  </div>
+                )}
+
+                <div className="sessions-list">
+                  {sessionsList.length > 0 ? (
+                    sessionsList.map((session) => (
+                      <div key={session.id} className="session-item">
+                        <div className="session-device-info">
+                          <span className="device-icon">
+                            {session.device_type === "Mobile" ? "📱" : "🖥️"}
+                          </span>
+                          <div>
+                            <div className="device-name">
+                              {session.device}
+                              {session.is_current && (
+                                <span className="current-badge">Current Device</span>
+                              )}
+                            </div>
+                            <div className="device-meta">
+                              IP: {session.ip_address} • Last Active:{" "}
+                              {session.last_active
+                                ? new Date(session.last_active).toLocaleString("en-US", {
+                                    month: "short",
+                                    day: "numeric",
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  })
+                                : "Active now"}
+                            </div>
+                          </div>
+                        </div>
+
+                        {!session.is_current && (
+                          <button
+                            type="button"
+                            className="btn-revoke-single"
+                            onClick={() => handleRevokeSingle(session.id)}
+                          >
+                            Revoke
+                          </button>
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    <p style={{ opacity: 0.6 }}>No external sessions registered.</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Sign out section */}
+              <div className="signout-section" style={{ marginTop: "32px" }}>
+                <h3>Session Controls</h3>
+                <p>Logging out will end your current session and require logging in again.</p>
                 <button type="button" className="btn-signout" onClick={handleSignOut}>
                   Sign Out of PreNovaAi
+                </button>
+              </div>
+
+              {/* Danger Zone: Delete Account */}
+              <div className="danger-zone">
+                <h3>Danger Zone</h3>
+                <p>Permanently delete your account and remove all stored resumes, interview history, and data.</p>
+                <button
+                  type="button"
+                  className="btn-delete-account"
+                  onClick={() => setShowDeleteModal(true)}
+                >
+                  Delete Account Permanently
                 </button>
               </div>
             </div>
           )}
         </div>
       </main>
+
+      {/* Account Deletion Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="delete-modal-overlay">
+          <div className="delete-modal">
+            <h3>⚠️ Delete Your Account?</h3>
+            <p>
+              This action is permanent and cannot be undone. All your saved resumes, AI interview records, practice scores, and account data will be erased forever.
+            </p>
+
+            {deleteError && (
+              <div className="alert-box error" style={{ marginBottom: "16px" }}>
+                {deleteError}
+              </div>
+            )}
+
+            <form onSubmit={handleDeleteAccount}>
+              {user.provider === "email" && (
+                <div className="form-group" style={{ marginBottom: "16px" }}>
+                  <label>Enter Account Password to Confirm</label>
+                  <input
+                    type="password"
+                    placeholder="Your password"
+                    value={deletePassword}
+                    onChange={(e) => setDeletePassword(e.target.value)}
+                    required
+                  />
+                </div>
+              )}
+
+              <div className="modal-actions">
+                <button
+                  type="button"
+                  className="btn-cancel-modal"
+                  onClick={() => setShowDeleteModal(false)}
+                  disabled={isDeleting}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="btn-confirm-delete"
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? "Deleting Account..." : "Confirm & Delete"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

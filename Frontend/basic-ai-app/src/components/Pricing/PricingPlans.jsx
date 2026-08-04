@@ -1,8 +1,16 @@
 import React, { useState } from "react";
 import "./PricingPlans.css";
+import CheckoutModal from "./CheckoutModal";
+import { useAuth } from "../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
-const PricingPlans = () => {
+const PricingPlans = ({ onPaymentCompleted }) => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
   const [billingCycle, setBillingCycle] = useState("monthly"); // 'monthly' or 'yearly'
+  const [selectedPlanForCheckout, setSelectedPlanForCheckout] = useState(null);
+  const [showCheckoutModal, setShowCheckoutModal] = useState(false);
 
   const plans = [
     {
@@ -18,7 +26,7 @@ const PricingPlans = () => {
         "Basic Performance Analytics",
         "Limited Company Questions",
       ],
-      button: "Get Started",
+      button: "Get Started Free",
       popular: false,
     },
     {
@@ -57,6 +65,25 @@ const PricingPlans = () => {
     },
   ];
 
+  const handleChoosePlan = (plan) => {
+    if (plan.name === "Free") {
+      if (!user) {
+        navigate("/register");
+      }
+      return;
+    }
+
+    if (!user) {
+      navigate("/login?redirect=/pricing");
+      return;
+    }
+
+    setSelectedPlanForCheckout(plan);
+    setShowCheckoutModal(true);
+  };
+
+  const currentPlan = (user?.plan_type || "free").toLowerCase();
+
   return (
     <section className="pricing-plans-section">
       <div className="pricing-plans-header">
@@ -92,6 +119,7 @@ const PricingPlans = () => {
           const isYearly = billingCycle === "yearly";
           const currentPrice = isYearly ? plan.priceYearly : plan.priceMonthly;
           const currentPeriod = isYearly ? plan.yearlyPeriod : plan.period;
+          const isCurrentPlan = currentPlan === plan.name.toLowerCase();
 
           return (
             <div
@@ -121,13 +149,28 @@ const PricingPlans = () => {
                 ))}
               </ul>
 
-              <button className={`plans-action-btn ${plan.popular ? "popular-btn" : ""}`}>
-                {plan.button}
+              <button
+                className={`plans-action-btn ${plan.popular ? "popular-btn" : ""} ${isCurrentPlan ? "current-plan-btn" : ""}`}
+                onClick={() => handleChoosePlan(plan)}
+                disabled={isCurrentPlan}
+              >
+                {isCurrentPlan ? "Current Active Plan" : plan.button}
               </button>
             </div>
           );
         })}
       </div>
+
+      {/* Checkout Modal */}
+      <CheckoutModal
+        isOpen={showCheckoutModal}
+        onClose={() => setShowCheckoutModal(false)}
+        selectedPlan={selectedPlanForCheckout}
+        billingCycle={billingCycle}
+        onPaymentSuccess={(data) => {
+          if (onPaymentCompleted) onPaymentCompleted(data);
+        }}
+      />
     </section>
   );
 };

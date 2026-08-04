@@ -87,8 +87,14 @@
         box-shadow .4s ease;
 }
 
-.nav-links a.active,
 .nav-links a:hover {
+  color: #7c3aed;
+  background: transparent;
+  box-shadow: none;
+  transform: none;
+}
+
+.nav-links a.active {
   background: linear-gradient(
     135deg,
     #7c3aed,
@@ -103,6 +109,10 @@
     0 10px 30px rgba(124,58,237,0.35);
 
   transform: translateY(-2px);
+}
+
+.nav-links a.active:hover {
+  color: white;
 }
 /* =====================
    Buttons
@@ -286,6 +296,8 @@
     font-size:12px;
 
 }
+.features-menu:hover .arrow,
+.nav-links a.active .arrow,
 .arrow.rotate{
 
     transform:rotate(180deg);

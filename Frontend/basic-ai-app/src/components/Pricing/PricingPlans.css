@@ -3,7 +3,9 @@
 ========================================== */
 
 .pricing-plans-section {
-  padding: 100px 8%;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 80px 8%;
   background: radial-gradient(circle at top right, #ede9fe 0%, transparent 40%),
               radial-gradient(circle at bottom left, #faf5ff 0%, transparent 40%),
               linear-gradient(135deg, #ffffff, #faf8ff, #f5f2ff);
@@ -21,7 +23,8 @@
 .pricing-plans-header {
   text-align: center;
   margin-bottom: 60px;
-  max-width: 800px;
+  max-width: 1050px;
+  width: 100%;
 }
 
 .pricing-plans-tag {
@@ -37,11 +40,12 @@
 }
 
 .pricing-plans-header h2 {
-  font-size: 3.5rem;
-  font-weight: 700;
+  font-size: clamp(2.2rem, 4.2vw, 3.2rem);
+  font-weight: 600;
   color: #111827;
-  line-height: 1.15;
+  line-height: 1.2;
   margin-bottom: 20px;
+  white-space: nowrap;
 }
 
 .pricing-plans-header h2 span {
@@ -299,6 +303,7 @@
 
   .pricing-plans-header h2 {
     font-size: 2.2rem;
+    white-space: normal;
   }
 
   .plans-price {
