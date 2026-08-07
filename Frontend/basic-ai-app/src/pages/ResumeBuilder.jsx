@@ -26,6 +26,7 @@ const ResumeBuilder = () => {
   const { authFetch } = useAuth();
   const { requireAuth } = useRequireAuth();
   const [isWorkspaceActive, setIsWorkspaceActive] = useState(false);
+  const [workspaceMode, setWorkspaceMode] = useState("new"); // "new" | "uploaded"
   const [selectedTemplate, setSelectedTemplate] = useState("london");
   const [currentResumeId, setCurrentResumeId] = useState(null);
   
@@ -104,6 +105,7 @@ const ResumeBuilder = () => {
         education: roleData.education || prev.education,
         projects: roleData.projects || prev.projects
       }));
+      setWorkspaceMode("new");
       setIsWorkspaceActive(true);
       const section = document.getElementById("resume-builder-workspace");
       if (section) {
@@ -152,6 +154,7 @@ const ResumeBuilder = () => {
       projects: [{ name: "", description: "" }]
     });
     setShowStartModal(false);
+    setWorkspaceMode("new");
     setIsWorkspaceActive(true);
   };
 
@@ -168,6 +171,7 @@ const ResumeBuilder = () => {
         const generated = await res.json();
         setResumeData(generated);
         setShowAIGeneratorModal(false);
+        setWorkspaceMode("new");
         setIsWorkspaceActive(true);
         alert("✨ AI Resume generated successfully!");
       } else {
@@ -209,6 +213,7 @@ const ResumeBuilder = () => {
         certifications: params.certifications ? params.certifications.split(",").map(c=>c.trim()).filter(Boolean) : []
       });
       setShowAIGeneratorModal(false);
+      setWorkspaceMode("new");
       setIsWorkspaceActive(true);
     }
   };
@@ -248,6 +253,7 @@ const ResumeBuilder = () => {
         if (data.id) setCurrentResumeId(data.id);
         setUploading(false);
         setShowStartModal(false);
+        setWorkspaceMode("uploaded");
         setIsWorkspaceActive(true);
         alert("✨ Success! Resume uploaded & parsed successfully.");
       } else {
@@ -293,6 +299,7 @@ const ResumeBuilder = () => {
         });
         setUploading(false);
         setShowStartModal(false);
+        setWorkspaceMode("uploaded");
         setIsWorkspaceActive(true);
       }, 800);
     }
@@ -309,6 +316,7 @@ const ResumeBuilder = () => {
           resumeData={resumeData}
           setResumeData={setResumeData}
           currentResumeId={currentResumeId}
+          workspaceMode={workspaceMode}
           onSaveResume={handleSaveResume}
           onBack={() => setIsWorkspaceActive(false)}
         />
@@ -318,7 +326,20 @@ const ResumeBuilder = () => {
           <ResumeHero onBuildClick={handleScrollToTemplates} />
           
           {/* Features */}
-          <ResumeFeatures />
+          <ResumeFeatures
+            onOpenAIGenerator={() => {
+              requireAuth(() => {
+                setShowAIGeneratorModal(true);
+              }, "/resume-builder");
+            }}
+            onScrollToTemplates={handleScrollToTemplates}
+            onOpenWorkspace={() => {
+              requireAuth(() => {
+                setWorkspaceMode("new");
+                setIsWorkspaceActive(true);
+              }, "/resume-builder");
+            }}
+          />
 
           {/* How It Works */}
           <ResumeHowItWorks />

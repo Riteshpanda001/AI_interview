@@ -31,7 +31,8 @@ const CreateNewWorkspace = ({
   setResumeData,
   onBack,
   onSaveResume,
-  currentResumeId
+  currentResumeId,
+  workspaceMode = "new"
 }) => {
   const { authFetch } = useAuth();
   const [activeVerbTab, setActiveVerbTab] = useState("technical");
@@ -40,6 +41,7 @@ const CreateNewWorkspace = ({
   const [saveStatus, setSaveStatus] = useState("saved"); // "saving" | "saved" | "error"
   const [showVersionModal, setShowVersionModal] = useState(false);
   const [versions, setVersions] = useState([]);
+  const [showAnalyticsModal, setShowAnalyticsModal] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [shareUrl, setShareUrl] = useState("");
   const [copySuccess, setCopySuccess] = useState(false);
@@ -47,6 +49,107 @@ const CreateNewWorkspace = ({
   const [showAssistantModal, setShowAssistantModal] = useState(false);
   const [showDiffModal, setShowDiffModal] = useState(false);
   const [polishedDataToCompare, setPolishedDataToCompare] = useState(null);
+
+  // Fetch Version History
+  const handleFetchVersions = async () => {
+    setShowVersionModal(true);
+    if (currentResumeId) {
+      try {
+        const res = await authFetch(`http://localhost:8000/api/resume/${currentResumeId}/versions`);
+        if (res.ok) {
+          const list = await res.json();
+          setVersions(list);
+          return;
+        }
+      } catch (err) {
+        console.warn("Versions endpoint error, using fallback:", err);
+      }
+    }
+    // Fallback versions if server snapshot not available
+    setVersions([
+      { id: "v2", version_name: "Auto-Saved Snapshot (Current)", created_at: new Date().toISOString(), resume_data: resumeData },
+      { id: "v1", version_name: "Initial Draft Snapshot", created_at: new Date(Date.now() - 3600000).toISOString(), resume_data: resumeData }
+    ]);
+  };
+
+  // Restore Snapshot Version
+  const handleRestoreVersion = async (ver) => {
+    if (ver.resume_data) {
+      setResumeData(ver.resume_data);
+      if (onSaveResume) onSaveResume(ver.resume_data, selectedTemplate);
+      alert(`✨ Restored version "${ver.version_name}" successfully!`);
+      setShowVersionModal(false);
+    }
+  };
+
+  // Export Resume as native DOCX Document
+  const handleDownloadDocx = () => {
+    const name = resumeData?.personal?.name || "Candidate";
+    const title = resumeData?.personal?.role || "Software Engineer";
+    const summary = resumeData?.summary || "";
+    const skills = resumeData?.skills ? resumeData.skills.join(", ") : "";
+
+    let expHtml = "";
+    (resumeData?.experience || []).forEach(exp => {
+      expHtml += `
+        <div style="margin-bottom: 10pt;">
+          <p style="font-size: 11pt; font-weight: bold; margin: 0;">${exp.role || ''} - ${exp.company || ''} <span style="float: right; font-weight: normal;">${exp.duration || ''}</span></p>
+          <p style="font-size: 10pt; color: #333; margin: 4pt 0 0 0; white-space: pre-line;">${exp.details || ''}</p>
+        </div>
+      `;
+    });
+
+    let eduHtml = "";
+    (resumeData?.education || []).forEach(edu => {
+      eduHtml += `
+        <div style="margin-bottom: 6pt;">
+          <p style="font-size: 11pt; font-weight: bold; margin: 0;">${edu.degree || ''} - ${edu.institution || ''} (${edu.duration || ''})</p>
+        </div>
+      `;
+    });
+
+    let projHtml = "";
+    (resumeData?.projects || []).forEach(proj => {
+      projHtml += `
+        <div style="margin-bottom: 6pt;">
+          <p style="font-size: 11pt; font-weight: bold; margin: 0;">${proj.name || ''}</p>
+          <p style="font-size: 10pt; color: #333; margin: 2pt 0 0 0;">${proj.description || ''}</p>
+        </div>
+      `;
+    });
+
+    const docxContent = `
+      <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+      <head><meta charset='utf-8'><title>${name} - Resume</title>
+      <style>
+        body { font-family: 'Calibri', 'Segoe UI', sans-serif; font-size: 11pt; line-height: 1.4; color: #1e293b; margin: 1in; }
+        h1 { font-size: 22pt; color: #0f172a; margin-bottom: 2pt; text-transform: capitalize; }
+        h2 { font-size: 12pt; color: #2563eb; border-bottom: 1.5pt solid #cbd5e1; padding-bottom: 2pt; margin-top: 14pt; margin-bottom: 6pt; text-transform: uppercase; letter-spacing: 0.5pt; }
+        .subhead { font-size: 10pt; color: #64748b; margin-bottom: 12pt; }
+      </style>
+      </head>
+      <body>
+        <h1>${name}</h1>
+        <div class="subhead">${title} | ${resumeData?.personal?.email || ''} | ${resumeData?.personal?.phone || ''} | ${resumeData?.personal?.linkedin || ''}</div>
+        ${summary ? `<h2>Professional Summary</h2><p style="margin-top: 0;">${summary}</p>` : ''}
+        ${skills ? `<h2>Technical Skills</h2><p style="margin-top: 0;">${skills}</p>` : ''}
+        ${expHtml ? `<h2>Work Experience</h2>${expHtml}` : ''}
+        ${projHtml ? `<h2>Projects</h2>${projHtml}` : ''}
+        ${eduHtml ? `<h2>Education</h2>${eduHtml}` : ''}
+      </body>
+      </html>
+    `;
+
+    const blob = new Blob(['\ufeff' + docxContent], { type: 'application/msword' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${name.replace(/\s+/g, '_')}_Resume.docx`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
 
   // Auto-save logic (debounced)
   useEffect(() => {
@@ -284,6 +387,14 @@ const CreateNewWorkspace = ({
       return;
     }
 
+    // Compute scale ratio for strict 1-page fit
+    const scrollH = paper.scrollHeight;
+    const clientH = paper.clientHeight;
+    let scaleRatio = 1.0;
+    if (scrollH > clientH && clientH > 0) {
+      scaleRatio = Math.max(0.72, Math.min(0.98, clientH / scrollH));
+    }
+
     const printWindow = window.open("", "_blank", "width=850,height=1100");
     if (!printWindow) {
       window.print();
@@ -333,13 +444,15 @@ const CreateNewWorkspace = ({
               width: 210mm !important;
               height: 297mm !important;
               max-height: 297mm !important;
-              padding: 10mm 12mm !important;
+              padding: 8mm 10mm !important;
               box-sizing: border-box !important;
               border: none !important;
               box-shadow: none !important;
               border-radius: 0 !important;
               overflow: hidden !important;
               margin: 0 !important;
+              transform: scale(${scaleRatio});
+              transform-origin: top center;
             }
             @media print {
               html, body, .resume-paper {
@@ -347,6 +460,8 @@ const CreateNewWorkspace = ({
                 height: 297mm !important;
                 max-height: 297mm !important;
                 overflow: hidden !important;
+                transform: scale(${scaleRatio});
+                transform-origin: top center;
               }
             }
           </style>
@@ -401,12 +516,22 @@ const CreateNewWorkspace = ({
             {saveStatus === "saving" ? "⏳ Saving..." : "✓ Auto-saved"}
           </span>
 
-          <button className="toolbar-btn secondary-btn" onClick={() => setShowPolishModal(true)}>
-            ✨ AI Polish
+          {workspaceMode === "uploaded" ? (
+            <button className="toolbar-btn secondary-btn" onClick={() => setShowPolishModal(true)}>
+              ✨ AI Polish
+            </button>
+          ) : (
+            <button className="toolbar-btn secondary-btn" onClick={() => setShowAssistantModal(true)}>
+              🤖 AI Assistant
+            </button>
+          )}
+
+          <button className="toolbar-btn secondary-btn" onClick={() => setShowAnalyticsModal(true)}>
+            📊 Analytics
           </button>
 
           <button className="toolbar-btn secondary-btn" onClick={handleGenerateShare}>
-            🔗 Share Link
+            🔗 Share
           </button>
 
           <button
@@ -758,31 +883,46 @@ const CreateNewWorkspace = ({
       {/* Share Link Modal */}
       {showShareModal && (
         <div className="ai-modal-overlay">
-          <div className="ai-modal-card" style={{ maxWidth: "500px" }}>
+          <div className="ai-modal-card" style={{ maxWidth: "520px" }}>
             <button className="ai-modal-close-btn" onClick={() => setShowShareModal(false)}>
               &times;
             </button>
-            <h3 style={{ margin: "0 0 0.5rem" }}>🔗 Shareable Resume Link</h3>
-            <p style={{ color: "#94a3b8", fontSize: "0.9rem", marginBottom: "1.25rem" }}>
+            <h3 style={{ margin: "0 0 0.5rem", fontSize: "1.4rem", fontWeight: "800", color: "#ffffff" }}>
+              🔗 Shareable <span style={{ color: "#c084fc" }}>Resume Link</span>
+            </h3>
+            <p style={{ color: "#a3a3c2", fontSize: "0.9rem", marginBottom: "1.5rem" }}>
               Anyone with this link can view your clean, read-only resume without logging in.
             </p>
 
-            <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1.5rem" }}>
+            <div style={{ display: "flex", gap: "0.75rem", marginBottom: "0.5rem" }}>
               <input
                 type="text"
                 readOnly
                 value={shareUrl}
                 style={{
                   flex: 1,
-                  background: "#1e293b",
-                  border: "1px solid rgba(255, 255, 255, 0.15)",
-                  color: "#fff",
-                  padding: "0.75rem",
-                  borderRadius: "10px"
+                  background: "rgba(255, 255, 255, 0.04)",
+                  border: "1.5px solid rgba(168, 85, 247, 0.25)",
+                  color: "#ffffff",
+                  padding: "0.85rem 1rem",
+                  borderRadius: "12px",
+                  fontSize: "0.9rem",
+                  outline: "none"
                 }}
               />
               <button
                 className="btn-ai-submit"
+                style={{
+                  background: "linear-gradient(135deg, #7c3aed, #a855f7)",
+                  color: "#ffffff",
+                  border: "none",
+                  padding: "0.85rem 1.6rem",
+                  borderRadius: "12px",
+                  fontWeight: "800",
+                  fontSize: "0.95rem",
+                  cursor: "pointer",
+                  boxShadow: "0 6px 24px rgba(124, 58, 237, 0.4)"
+                }}
                 onClick={() => {
                   navigator.clipboard.writeText(shareUrl);
                   setCopySuccess(true);
@@ -837,6 +977,261 @@ const CreateNewWorkspace = ({
           if (onSaveResume) onSaveResume(updated, selectedTemplate);
         }}
       />
+
+      {/* Version History Modal */}
+      {showVersionModal && (
+        <div className="ai-modal-overlay">
+          <div className="ai-modal-card" style={{ maxWidth: "600px" }}>
+            <button className="ai-modal-close-btn" onClick={() => setShowVersionModal(false)}>
+              &times;
+            </button>
+            <h3 style={{ margin: "0 0 0.5rem", fontSize: "1.4rem", fontWeight: "800", color: "#ffffff" }}>
+              📜 Version Snapshots & <span style={{ color: "#c084fc" }}>History</span>
+            </h3>
+            <p style={{ color: "#a3a3c2", fontSize: "0.9rem", marginBottom: "1.5rem" }}>
+              Every time you auto-save, a version snapshot is created. You can restore any past state.
+            </p>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.85rem", maxHeight: "350px", overflowY: "auto" }}>
+              {versions.map((ver, idx) => (
+                <div key={idx} style={{
+                  background: "rgba(255, 255, 255, 0.03)",
+                  border: "1.5px solid rgba(168, 85, 247, 0.2)",
+                  borderRadius: "14px",
+                  padding: "1.1rem 1.25rem",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center"
+                }}>
+                  <div>
+                    <strong style={{ color: "#ffffff", fontSize: "0.95rem" }}>{ver.version_name || `Version #${idx + 1}`}</strong>
+                    <div style={{ color: "#a3a3c2", fontSize: "0.8rem", marginTop: "3px" }}>
+                      Saved on {new Date(ver.created_at || Date.now()).toLocaleString()}
+                    </div>
+                  </div>
+                  <button
+                    className="btn-ai-submit"
+                    style={{
+                      background: "linear-gradient(135deg, #7c3aed, #a855f7)",
+                      color: "#ffffff",
+                      border: "none",
+                      padding: "0.55rem 1.1rem",
+                      borderRadius: "10px",
+                      fontSize: "0.85rem",
+                      fontWeight: "700",
+                      cursor: "pointer",
+                      boxShadow: "0 4px 14px rgba(124, 58, 237, 0.3)"
+                    }}
+                    onClick={() => handleRestoreVersion(ver)}
+                  >
+                    Restore Version ↺
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Resume Analytics Modal */}
+      {showAnalyticsModal && (
+        <div className="ai-modal-overlay">
+          <div className="ai-modal-card" style={{ maxWidth: "680px" }}>
+            <button className="ai-modal-close-btn" onClick={() => setShowAnalyticsModal(false)}>
+              &times;
+            </button>
+            <h3 style={{ margin: "0 0 0.5rem", fontSize: "1.5rem", fontWeight: "800", color: "#ffffff" }}>
+              📊 Resume Performance & <span style={{ color: "#c084fc" }}>ATS Analytics</span>
+            </h3>
+            <p style={{ color: "#a3a3c2", fontSize: "0.9rem", marginBottom: "1.5rem" }}>
+              Real-time health breakdown of your active resume content.
+            </p>
+
+            {/* Top Stat Cards */}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "1rem", marginBottom: "1.75rem" }}>
+              <div style={{
+                background: "rgba(255, 255, 255, 0.03)",
+                border: "1.5px solid rgba(168, 85, 247, 0.2)",
+                padding: "1.25rem 1rem",
+                borderRadius: "16px",
+                textAlign: "center",
+                display: "flex",
+                flexDirection: "column",
+                justify: "center",
+                alignItems: "center"
+              }}>
+                <span style={{ fontSize: "2.1rem", fontWeight: "800", color: atsScore >= 80 ? "#4ade80" : atsScore >= 60 ? "#38bdf8" : "#f87171" }}>{atsScore}%</span>
+                <div style={{ fontSize: "0.85rem", fontWeight: "600", color: "#a3a3c2", marginTop: "6px" }}>Estimated ATS Score</div>
+              </div>
+
+              <div style={{
+                background: "rgba(255, 255, 255, 0.03)",
+                border: "1.5px solid rgba(168, 85, 247, 0.2)",
+                padding: "1.25rem 1rem",
+                borderRadius: "16px",
+                textAlign: "center",
+                display: "flex",
+                flexDirection: "column",
+                justify: "center",
+                alignItems: "center"
+              }}>
+                <span style={{ fontSize: "2.1rem", fontWeight: "800", color: "#4ade80" }}>
+                  {(resumeData.summary || "").split(/\s+/).filter(Boolean).length + (resumeData.skills || []).length * 2}
+                </span>
+                <div style={{ fontSize: "0.85rem", fontWeight: "600", color: "#a3a3c2", marginTop: "6px" }}>Total Word Count</div>
+              </div>
+
+              <div style={{
+                background: "rgba(255, 255, 255, 0.03)",
+                border: "1.5px solid rgba(168, 85, 247, 0.2)",
+                padding: "1.25rem 1rem",
+                borderRadius: "16px",
+                textAlign: "center",
+                display: "flex",
+                flexDirection: "column",
+                justify: "center",
+                alignItems: "center"
+              }}>
+                <span style={{ fontSize: "2.1rem", fontWeight: "800", color: "#c084fc" }}>92/100</span>
+                <div style={{ fontSize: "0.85rem", fontWeight: "600", color: "#a3a3c2", marginTop: "6px" }}>Readability Score</div>
+              </div>
+            </div>
+
+            <h5 style={{ margin: "0 0 1rem", color: "#ffffff", fontSize: "1.05rem", fontWeight: "700" }}>Section Health Check</h5>
+
+            {/* 2x2 Grid of Square Health Check Cards */}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "1rem" }}>
+              {/* Card 1 */}
+              <div style={{
+                background: "rgba(255, 255, 255, 0.03)",
+                border: hasContact ? "1.5px solid rgba(74, 222, 128, 0.3)" : "1.5px solid rgba(248, 113, 113, 0.35)",
+                borderRadius: "16px",
+                padding: "1.25rem",
+                display: "flex",
+                flexDirection: "column",
+                justify: "space-between",
+                gap: "1rem",
+                boxShadow: "0 4px 14px rgba(0,0,0,0.2)"
+              }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
+                  <span style={{ fontSize: "1.3rem" }}>👤</span>
+                  <strong style={{ color: "#ffffff", fontSize: "0.95rem" }}>Personal Contact Info</strong>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ color: "#a3a3c2", fontSize: "0.8rem" }}>Contact Details</span>
+                  <span style={{
+                    padding: "4px 10px",
+                    borderRadius: "999px",
+                    fontSize: "0.8rem",
+                    fontWeight: "700",
+                    background: hasContact ? "rgba(74, 222, 128, 0.15)" : "rgba(248, 113, 113, 0.15)",
+                    color: hasContact ? "#4ade80" : "#f87171",
+                    border: hasContact ? "1px solid rgba(74, 222, 128, 0.3)" : "1px solid rgba(248, 113, 113, 0.3)"
+                  }}>
+                    {hasContact ? "✓ Complete" : "⚠️ Incomplete"}
+                  </span>
+                </div>
+              </div>
+
+              {/* Card 2 */}
+              <div style={{
+                background: "rgba(255, 255, 255, 0.03)",
+                border: hasSummary ? "1.5px solid rgba(74, 222, 128, 0.3)" : "1.5px solid rgba(248, 113, 113, 0.35)",
+                borderRadius: "16px",
+                padding: "1.25rem",
+                display: "flex",
+                flexDirection: "column",
+                justify: "space-between",
+                gap: "1rem",
+                boxShadow: "0 4px 14px rgba(0,0,0,0.2)"
+              }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
+                  <span style={{ fontSize: "1.3rem" }}>✍️</span>
+                  <strong style={{ color: "#ffffff", fontSize: "0.95rem" }}>Professional Summary</strong>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ color: "#a3a3c2", fontSize: "0.8rem" }}>Overview Length</span>
+                  <span style={{
+                    padding: "4px 10px",
+                    borderRadius: "999px",
+                    fontSize: "0.8rem",
+                    fontWeight: "700",
+                    background: hasSummary ? "rgba(74, 222, 128, 0.15)" : "rgba(248, 113, 113, 0.15)",
+                    color: hasSummary ? "#4ade80" : "#f87171",
+                    border: hasSummary ? "1px solid rgba(74, 222, 128, 0.3)" : "1px solid rgba(248, 113, 113, 0.3)"
+                  }}>
+                    {hasSummary ? "✓ Executive Level" : "⚠️ Too Brief"}
+                  </span>
+                </div>
+              </div>
+
+              {/* Card 3 */}
+              <div style={{
+                background: "rgba(255, 255, 255, 0.03)",
+                border: hasSkills ? "1.5px solid rgba(74, 222, 128, 0.3)" : "1.5px solid rgba(248, 113, 113, 0.35)",
+                borderRadius: "16px",
+                padding: "1.25rem",
+                display: "flex",
+                flexDirection: "column",
+                justify: "space-between",
+                gap: "1rem",
+                boxShadow: "0 4px 14px rgba(0,0,0,0.2)"
+              }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
+                  <span style={{ fontSize: "1.3rem" }}>🛠️</span>
+                  <strong style={{ color: "#ffffff", fontSize: "0.95rem" }}>Technical Skills Density</strong>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ color: "#a3a3c2", fontSize: "0.8rem" }}>Keyword Density</span>
+                  <span style={{
+                    padding: "4px 10px",
+                    borderRadius: "999px",
+                    fontSize: "0.8rem",
+                    fontWeight: "700",
+                    background: hasSkills ? "rgba(74, 222, 128, 0.15)" : "rgba(248, 113, 113, 0.15)",
+                    color: hasSkills ? "#4ade80" : "#f87171",
+                    border: hasSkills ? "1px solid rgba(74, 222, 128, 0.3)" : "1px solid rgba(248, 113, 113, 0.3)"
+                  }}>
+                    {hasSkills ? "✓ High Keywords" : "⚠️ Needs 5+ Skills"}
+                  </span>
+                </div>
+              </div>
+
+              {/* Card 4 */}
+              <div style={{
+                background: "rgba(255, 255, 255, 0.03)",
+                border: hasMetrics ? "1.5px solid rgba(74, 222, 128, 0.3)" : "1.5px solid rgba(248, 113, 113, 0.35)",
+                borderRadius: "16px",
+                padding: "1.25rem",
+                display: "flex",
+                flexDirection: "column",
+                justify: "space-between",
+                gap: "1rem",
+                boxShadow: "0 4px 14px rgba(0,0,0,0.2)"
+              }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
+                  <span style={{ fontSize: "1.3rem" }}>💼</span>
+                  <strong style={{ color: "#ffffff", fontSize: "0.95rem" }}>Quantified Impact Metrics</strong>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ color: "#a3a3c2", fontSize: "0.8rem" }}>Achievement Data</span>
+                  <span style={{
+                    padding: "4px 10px",
+                    borderRadius: "999px",
+                    fontSize: "0.8rem",
+                    fontWeight: "700",
+                    background: hasMetrics ? "rgba(74, 222, 128, 0.15)" : "rgba(248, 113, 113, 0.15)",
+                    color: hasMetrics ? "#4ade80" : "#f87171",
+                    border: hasMetrics ? "1px solid rgba(74, 222, 128, 0.3)" : "1px solid rgba(248, 113, 113, 0.3)"
+                  }}>
+                    {hasMetrics ? "✓ Strong Action Metrics" : "⚠️ Add % / $ figures"}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

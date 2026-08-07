@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "./ResumePreview.css";
 import { useAuth } from "../../context/AuthContext";
 import useRequireAuth from "../../hooks/useRequireAuth";
@@ -11,19 +11,43 @@ const ResumePreview = ({ resumeData, selectedTemplate, setResumeData, isDemoMode
   const { personal, summary, experience, education, skills, projects, certifications, achievements, languages } = resumeData || {};
   const [loading, setLoading] = useState(false);
 
+  // Single-Page Layout & Fitting State
+  const [pageDensity, setPageDensity] = useState("compact"); // "compact" | "normal" | "spacious"
+  const [fontSize, setFontSize] = useState("small"); // "small" | "medium" | "large"
+  const [isOverflowing, setIsOverflowing] = useState(false);
+  const paperRef = useRef(null);
+
+  // Check if content height overflows the A4 page container
+  useEffect(() => {
+    if (paperRef.current) {
+      const isOver = paperRef.current.scrollHeight > paperRef.current.clientHeight + 8;
+      setIsOverflowing(isOver);
+    }
+  }, [resumeData, selectedTemplate, pageDensity, fontSize]);
+
+  const handleAutoFit = () => {
+    setPageDensity("compact");
+    setFontSize("small");
+  };
+
   const handleDownload = () => {
-    // Select the resume paper element
-    const paper = document.querySelector(".resume-paper");
+    const paper = paperRef.current || document.querySelector(".resume-paper");
     if (!paper) return;
 
-    // Create a new temporary window
+    // Measure scroll overflow to compute print scale factor
+    const scrollH = paper.scrollHeight;
+    const clientH = paper.clientHeight;
+    let scaleRatio = 1.0;
+    if (scrollH > clientH && clientH > 0) {
+      scaleRatio = Math.max(0.72, Math.min(0.98, clientH / scrollH));
+    }
+
     const printWindow = window.open("", "_blank", "width=850,height=1100");
     if (!printWindow) {
       alert("Please allow popups to download or print your PDF.");
       return;
     }
 
-    // Collect all stylesheets from current document to preserve styling
     let stylesHtml = "";
     for (const styleSheet of document.styleSheets) {
       try {
@@ -33,14 +57,12 @@ const ResumePreview = ({ resumeData, selectedTemplate, setResumeData, isDemoMode
         }
         stylesHtml += `<style>${rulesHtml}</style>`;
       } catch (e) {
-        // Fallback for cross-origin stylesheets if any
         if (styleSheet.href) {
           stylesHtml += `<link rel="stylesheet" href="${styleSheet.href}">`;
         }
       }
     }
 
-    // Write content formatted strictly for single-page A4 print
     printWindow.document.write(`
       <!DOCTYPE html>
       <html>
@@ -69,7 +91,7 @@ const ResumePreview = ({ resumeData, selectedTemplate, setResumeData, isDemoMode
               width: 210mm !important;
               height: 297mm !important;
               max-height: 297mm !important;
-              padding: 10mm 12mm !important;
+              padding: 8mm 10mm !important;
               box-sizing: border-box !important;
               border: none !important;
               box-shadow: none !important;
@@ -79,6 +101,8 @@ const ResumePreview = ({ resumeData, selectedTemplate, setResumeData, isDemoMode
               page-break-inside: avoid !important;
               page-break-before: avoid !important;
               margin: 0 !important;
+              transform: scale(${scaleRatio});
+              transform-origin: top center;
             }
             .resume-paper * {
               page-break-inside: avoid !important;
@@ -96,6 +120,8 @@ const ResumePreview = ({ resumeData, selectedTemplate, setResumeData, isDemoMode
                 height: 297mm !important;
                 max-height: 297mm !important;
                 overflow: hidden !important;
+                transform: scale(${scaleRatio});
+                transform-origin: top center;
               }
             }
           </style>
@@ -137,7 +163,6 @@ const ResumePreview = ({ resumeData, selectedTemplate, setResumeData, isDemoMode
       }
     } catch (err) {
       console.warn("Backend optimization failed or offline. Running local simulator:", err);
-      // Fallback local simulation:
       const optimized = { ...resumeData };
       if (optimized.summary && !optimized.summary.includes("Optimized:")) {
         optimized.summary += " (Optimized: Achieved 25% increase in operational efficiency through modern UI patterns.)";
@@ -195,8 +220,8 @@ const ResumePreview = ({ resumeData, selectedTemplate, setResumeData, isDemoMode
         </h2>
         <p className="section-subtitle">
           {isDemoMode
-            ? "Interactive Demo: Type details in 'Build Your Resume Details' above to see how your information formats and achieves a 90-100 ATS score."
-            : "Observe edits update dynamically. Toggle templates above to change presentation formats instantly."}
+            ? "Interactive Demo: Type details in 'Build Your Resume Details' above to see how your information formats into 1 page and achieves a 90-100 ATS score."
+            : "Observe edits update dynamically on 1 single page. Toggle density & font settings to auto-fit your content perfectly."}
         </p>
       </div>
 
@@ -204,44 +229,115 @@ const ResumePreview = ({ resumeData, selectedTemplate, setResumeData, isDemoMode
         {/* Actions Bar */}
         <div className="preview-actions">
           <div className="active-tpl-indicator">
-            Active Format: <span>{selectedTemplate.toUpperCase()} Layout</span>
+            Active Format: <span>{(selectedTemplate || "london").toUpperCase()} Layout</span>
           </div>
-          {!isDemoMode && (
-            <div className="action-buttons">
-              <button
-                className="preview-action-btn primary"
-                onClick={handleDownload}
-                disabled={loading}
-                title="Download Resume PDF"
-              >
-                📥 Download PDF
-              </button>
-              <button
-                className="preview-action-btn secondary"
-                onClick={handleAIImprove}
-                disabled={loading}
-                title="Optimize Resume with AI"
-              >
-                {loading ? "🤖 Optimizing..." : "🤖 AI Optimize"}
-              </button>
-            </div>
-          )}
+
+          <div className="action-buttons">
+            {!isDemoMode && (
+              <>
+                <button
+                  className="preview-action-btn primary"
+                  onClick={handleDownload}
+                  disabled={loading}
+                  title="Download Single-Page PDF"
+                >
+                  📥 Download PDF
+                </button>
+                <button
+                  className="preview-action-btn secondary"
+                  onClick={handleAIImprove}
+                  disabled={loading}
+                  title="Optimize Resume with AI"
+                >
+                  {loading ? "🤖 Optimizing..." : "🤖 AI Optimize"}
+                </button>
+              </>
+            )}
+          </div>
         </div>
 
+        {/* 1-Page Layout Optimizer Toolbar */}
+        <div className="one-page-toolbar">
+          <div className="one-page-controls-wrapper">
+            <div className="controls-row top-row">
+              <button 
+                className="autofit-btn" 
+                onClick={handleAutoFit}
+                title="Click to automatically adjust font size and line spacing to fit everything on 1 page"
+              >
+                ✨ Auto-Fit 1 Page
+              </button>
+
+              <div className="control-group">
+                <label className="control-label">Spacing:</label>
+                <div className="chip-group">
+                  <button 
+                    className={`ctrl-chip ${pageDensity === "compact" ? "active" : ""}`}
+                    onClick={() => setPageDensity("compact")}
+                  >
+                    Compact
+                  </button>
+                  <button 
+                    className={`ctrl-chip ${pageDensity === "normal" ? "active" : ""}`}
+                    onClick={() => setPageDensity("normal")}
+                  >
+                    Normal
+                  </button>
+                  <button 
+                    className={`ctrl-chip ${pageDensity === "spacious" ? "active" : ""}`}
+                    onClick={() => setPageDensity("spacious")}
+                  >
+                    Relaxed
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="controls-row bottom-row">
+              <div className="control-group">
+                <label className="control-label">Font Size:</label>
+                <div className="chip-group">
+                  <button 
+                    className={`ctrl-chip ${fontSize === "small" ? "active" : ""}`}
+                    onClick={() => setFontSize("small")}
+                  >
+                    Small
+                  </button>
+                  <button 
+                    className={`ctrl-chip ${fontSize === "medium" ? "active" : ""}`}
+                    onClick={() => setFontSize("medium")}
+                  >
+                    Medium
+                  </button>
+                  <button 
+                    className={`ctrl-chip ${fontSize === "large" ? "active" : ""}`}
+                    onClick={() => setFontSize("large")}
+                  >
+                    Large
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* Paper Sheet Simulator */}
-        <div className={`resume-paper ${selectedTemplate}`}>
+        <div 
+          ref={paperRef}
+          className={`resume-paper ${selectedTemplate || "london"} density-${pageDensity} font-${fontSize}`}
+        >
           {/* Header */}
           <header className="resume-header centered-header">
-            <h1 className="name">{personal.name || "Your Full Name"}</h1>
-            {personal.address && <div className="header-address-line">{personal.address}</div>}
+            <h1 className="name">{personal?.name || "Your Full Name"}</h1>
+            {personal?.role && <div className="header-job-title">{personal.role}</div>}
+            {personal?.address && <div className="header-address-line">{personal.address}</div>}
             <div className="contact-info centered-contact">
               {[
-                personal.phone,
-                personal.email,
-                personal.linkedin ? `LinkedIn: ${personal.linkedin}` : null,
-                personal.github ? `GitHub: ${personal.github}` : null,
-                personal.portfolio ? `Portfolio: ${personal.portfolio}` : null
+                personal?.phone,
+                personal?.email,
+                personal?.linkedin ? `LinkedIn: ${personal.linkedin}` : null,
+                personal?.github ? `GitHub: ${personal.github}` : null,
+                personal?.portfolio ? `Portfolio: ${personal.portfolio}` : null
               ]
                 .filter(Boolean)
                 .join("  |  ")}

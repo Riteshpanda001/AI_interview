@@ -300,25 +300,31 @@ font-size:16px;
 
 }
 
-@media(max-width:480px){
-
-.resume-features-header h2{
-
-font-size:1.8rem;
-
+.interactive-card {
+  cursor: pointer;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
 }
 
-.resume-feature-card{
-
-text-align:center;
-
+.interactive-card:hover {
+  transform: translateY(-8px);
+  border-color: rgba(124, 58, 237, 0.3);
+  box-shadow: 0 20px 40px rgba(124, 58, 237, 0.15);
 }
 
-.feature-icon{
-
-margin:auto;
-margin-bottom:25px;
-
+.card-action-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 18px;
+  color: #7c3aed;
+  font-size: 14px;
+  font-weight: 700;
+  transition: gap 0.2s ease;
 }
 
+.interactive-card:hover .card-action-link {
+  color: #9333ea;
+  gap: 10px;
 }
