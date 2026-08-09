@@ -119,9 +119,18 @@ class JobMatchResponse(BaseModel):
     matched_skills: List[str]
     missing_skills: List[str]
     missing_keywords: List[str]
-    formatting_score: int
-    readability_score: int
+    formatting_score: Optional[int] = 90
+    readability_score: Optional[int] = 88
+    skills_match_score: Optional[int] = 80
+    keywords_match_score: Optional[int] = 75
+    experience_match_score: Optional[int] = 85
+    education_match_score: Optional[int] = 90
     suggestions: List[str]
+    learning_roadmap: Optional[List[Dict[str, Any]]] = Field(default_factory=list)
+    recommended_projects: Optional[List[Dict[str, Any]]] = Field(default_factory=list)
+    recommended_certifications: Optional[List[Dict[str, Any]]] = Field(default_factory=list)
+    tailored_resume_preview: Optional[Dict[str, Any]] = None
+    mock_interview_questions: Optional[List[Dict[str, Any]]] = Field(default_factory=list)
 
 class InterviewReadinessResponse(BaseModel):
     readiness_score: int

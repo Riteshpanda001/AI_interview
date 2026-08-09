@@ -23,7 +23,7 @@ def test_forgot_password_success():
     async def run():
         mock_db = MagicMock()
         mock_db["users"] = MagicMock()
-        mock_db["users"].find_one = AsyncMock(return_value={"email": "user@example.com", "is_active": True})
+        mock_db["users"].find_one = AsyncMock(return_value={"_id": "60d5ec49f83a2c2b3c4d5e6f", "email": "user@example.com", "is_active": True})
 
         result = await AuthService.forgot_password("user@example.com", mock_db)
         assert result["success"] is True

@@ -162,27 +162,18 @@ const Navbar = () => {
         {user ? (
           <div className="navbar-profile-wrapper" ref={profileRef}>
 
-            {/* Clickable Avatar Pill */}
+            {/* Clickable Avatar Circle */}
             <button
               id="navbar-profile-pill"
-              className={`navbar-profile-pill${profileOpen ? " open" : ""}`}
+              className={`navbar-profile-pill icon-only${profileOpen ? " open" : ""}`}
               onClick={() => setProfileOpen((prev) => !prev)}
               aria-expanded={profileOpen}
               aria-haspopup="true"
+              title={user.full_name || "Profile"}
             >
               <div className="navbar-avatar">
                 {getInitials(user.full_name)}
               </div>
-              <div className="navbar-profile-details">
-                <span className="navbar-username">{user.full_name || "User"}</span>
-                <span className="navbar-tier">{(user.plan_type || "free").toUpperCase()}</span>
-              </div>
-              <span
-                className="navbar-chevron"
-                style={{ transform: profileOpen ? "rotate(180deg)" : "rotate(0deg)" }}
-              >
-                ▼
-              </span>
             </button>
 
             {/* Profile Dropdown */}

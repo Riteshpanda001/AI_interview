@@ -16,12 +16,19 @@ def test_register_and_verify_otp_flow():
 
     async def run_test():
         # Mock DB
-        mock_db = {}
         users_collection = MagicMock()
         users_collection.find_one = AsyncMock(return_value=None)
         users_collection.insert_one = AsyncMock(return_value=MagicMock(inserted_id="507f1f77bcf86cd799439011"))
         users_collection.update_one = AsyncMock(return_value=None)
-        mock_db["users"] = users_collection
+
+        mock_db = {
+            "users": users_collection,
+            "otps": MagicMock(find_one=AsyncMock(return_value=None), insert_one=AsyncMock(), delete_many=AsyncMock()),
+            "sessions": MagicMock(insert_one=AsyncMock(return_value=MagicMock(inserted_id="sess_123"))),
+            "refresh_tokens": MagicMock(insert_one=AsyncMock(), find_one=AsyncMock(return_value=None)),
+            "audit_logs": MagicMock(insert_one=AsyncMock()),
+            "login_activity": MagicMock(insert_one=AsyncMock())
+        }
 
         # Patch OTPService and EmailService
         with patch("app.services.otp_service.OTPService.send_otp", new_callable=AsyncMock) as mock_send_otp, \
@@ -41,7 +48,7 @@ def test_register_and_verify_otp_flow():
             reg_res = await AuthService.register_user(request, mock_db)
             assert reg_res["success"] is True
             assert "Registration successful" in reg_res["message"]
-            mock_send_otp.assert_called_once_with("newuser@example.com", purpose="email_verification", user_name="New User")
+            mock_send_otp.assert_called_once_with("newuser@example.com", purpose="email_verification", user_name="New User", req=None)
 
             # 2. Verify OTP
             users_collection.find_one = AsyncMock(return_value={
@@ -55,7 +62,7 @@ def test_register_and_verify_otp_flow():
             token_res = await AuthService.verify_user_otp("newuser@example.com", "123456", db=mock_db)
             assert "access_token" in token_res
             assert "refresh_token" in token_res
-            mock_verify_otp.assert_called_once_with("newuser@example.com", "123456", purpose="email_verification")
+            mock_verify_otp.assert_called_once_with("newuser@example.com", "123456", purpose="email_verification", req=None)
 
     asyncio.run(run_test())
 

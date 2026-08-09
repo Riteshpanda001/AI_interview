@@ -282,10 +282,66 @@ class EmailService:
 </html>"""
 
     @staticmethod
+    def build_ticket_reply_html(user_name: str, ticket_number: str, reply_message: str, status: str) -> str:
+        safe_name = user_name or "Valued User"
+        return f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Update on Support Ticket #{ticket_number} – PrepNova AI</title>
+</head>
+<body style="margin:0;padding:0;background-color:#05020c;font-family:'Segoe UI',Roboto,sans-serif;color:#ffffff;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#05020c;padding:40px 20px;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0"
+          style="background:linear-gradient(145deg, #0d081b 0%, #12062a 100%);
+                 border:1px solid rgba(168,85,247,0.3);
+                 border-radius:18px;
+                 overflow:hidden;">
+          <tr>
+            <td align="center" style="background:linear-gradient(135deg,#7c3aed 0%,#a855f7 100%);padding:30px;">
+              <h1 style="margin:0;color:#ffffff;font-size:28px;font-weight:800;">PrepNova AI Support</h1>
+              <p style="margin:4px 0 0 0;color:rgba(255,255,255,0.85);font-size:12px;text-transform:uppercase;font-weight:600;">
+                Ticket #{ticket_number} Updated ({status})
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:36px 40px;">
+              <h2 style="margin:0 0 16px 0;color:#ffffff;font-size:20px;font-weight:700;">
+                Response from Support Specialist
+              </h2>
+              <p style="margin:0 0 16px 0;color:#c4c4e0;font-size:15px;line-height:1.6;">
+                Hello <strong>{safe_name}</strong>,
+              </p>
+              <div style="background:rgba(124,58,237,0.12);border-left:4px solid #a855f7;border-radius:8px;padding:18px;margin:20px 0;">
+                <p style="margin:0;color:#f8fafc;font-size:14px;line-height:1.7;">{reply_message}</p>
+              </div>
+              <p style="margin:20px 0 0 0;color:#94a3b8;font-size:13px;">
+                Ticket Status: <strong style="color:#34d399;">{status}</strong>
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:20px;background:rgba(7,4,15,0.8);text-align:center;">
+              <p style="margin:0;color:#64648c;font-size:12px;">© PrepNova AI · Customer Experience Team</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>"""
+
+
+    @staticmethod
     def _send_email_sync(to_email: str, subject: str, html_content: str) -> bool:
         """Synchronous SMTP send — runs in a thread to avoid blocking the event loop."""
         from_email = settings.effective_emails_from
         smtp_user = settings.effective_smtp_user
+        smtp_password = (settings.SMTP_PASSWORD or "").replace(" ", "").strip()
 
         msg = MIMEMultipart("alternative")
         msg["From"] = f"{settings.EMAILS_FROM_NAME} <{from_email}>"
@@ -294,12 +350,17 @@ class EmailService:
 
         msg.attach(MIMEText(html_content, "html", "utf-8"))
 
-        with smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT) as server:
-            server.ehlo()
-            server.starttls()
-            server.ehlo()
-            server.login(smtp_user, settings.SMTP_PASSWORD)
-            server.sendmail(from_email, to_email, msg.as_string())
+        if settings.SMTP_PORT == 465:
+            with smtplib.SMTP_SSL(settings.SMTP_HOST, settings.SMTP_PORT, timeout=15) as server:
+                server.login(smtp_user, smtp_password)
+                server.sendmail(from_email, to_email, msg.as_string())
+        else:
+            with smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT, timeout=15) as server:
+                server.ehlo()
+                server.starttls()
+                server.ehlo()
+                server.login(smtp_user, smtp_password)
+                server.sendmail(from_email, to_email, msg.as_string())
 
         return True
 
@@ -323,10 +384,15 @@ class EmailService:
         print(f"{'='*60}\n")
 
         smtp_user = settings.effective_smtp_user
+        raw_password = (settings.SMTP_PASSWORD or "").strip()
+        clean_password = raw_password.replace(" ", "")
+
         placeholder_emails = {"user@example.com", "noreply@example.com", "your-gmail@gmail.com", ""}
         placeholder_passwords = {"password", "your-16-char-app-password", "YOUR_GOOGLE_APP_PASSWORD", ""}
-        if smtp_user in placeholder_emails or settings.SMTP_PASSWORD in placeholder_passwords:
-            print(f"[EMAIL SERVICE] ⚠️  SMTP Credentials not configured in .env. Console mode active.\n")
+
+        if smtp_user in placeholder_emails or raw_password in placeholder_passwords or not clean_password:
+            print("[EMAIL SERVICE] ⚠️  SMTP credentials not configured (placeholder detected in Backend/.env).")
+            print("[EMAIL SERVICE] 💡 To receive OTP on user's real email, set your Google App Password in Backend/.env\n")
             return True
 
         try:
@@ -338,13 +404,13 @@ class EmailService:
                 subject,
                 html_content,
             )
-            print(f"[EMAIL SERVICE] ✅ Email sent successfully via Gmail SMTP to {to_email}")
+            print(f"[EMAIL SERVICE] ✅ Email successfully sent via SMTP to: {to_email}")
             return True
         except smtplib.SMTPAuthenticationError:
             print(
                 "[EMAIL SERVICE] ❌ SMTP Authentication failed. "
-                "Make sure SMTP_EMAIL/SMTP_USER and SMTP_PASSWORD are correct in .env. "
-                "For Gmail, use a 16-character App Password (not your account password)."
+                "Make sure SMTP_EMAIL/SMTP_USER and SMTP_PASSWORD are correct in Backend/.env. "
+                "For Gmail, generate a 16-character App Password (not your account password)."
             )
             return False
         except smtplib.SMTPException as exc:

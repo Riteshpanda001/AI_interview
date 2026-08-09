@@ -18,6 +18,7 @@ import ATSScore from "./pages/ATSScore";
 import Pricing from "./pages/Pricing";
 import Contact from "./pages/Contact";
 import Profile from "./pages/Profile";
+import AdminDashboard from "./pages/AdminDashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function ScrollToTop() {
@@ -75,6 +76,14 @@ function App() {
           element={
             <ProtectedRoute>
               <DashboardPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute>
+              <AdminDashboard />
             </ProtectedRoute>
           }
         />

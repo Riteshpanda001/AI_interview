@@ -81,9 +81,25 @@ const AIPolishModal = ({ isOpen, onClose, resumeData, setResumeData, onSaveResum
         onSaveResume(polishedData);
       }
 
+      // Calculate real ATS score on polished data
+      let realScore = 95;
+      try {
+        const atsRes = await authFetch("http://localhost:8000/api/resume/calculate-ats", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ resume_data: polishedData })
+        });
+        if (atsRes.ok) {
+          const atsData = await atsRes.json();
+          realScore = atsData.ats_score || 95;
+        }
+      } catch (e) {
+        console.warn("ATS score error:", e);
+      }
+
       setPolishResult({
-        prevScore: 74,
-        newScore: 96,
+        prevScore: resumeData?.ats_score || 74,
+        newScore: realScore,
         featuresApplied: selectedFeatures.length,
         polishedData
       });

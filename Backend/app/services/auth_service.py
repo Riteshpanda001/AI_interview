@@ -1,16 +1,32 @@
+import uuid
 from typing import Any, Optional, Dict
 from fastapi import HTTPException, status
 import bcrypt
-from app.schemas.auth_schema import UserRegisterRequest, UserLoginRequest, ChangePasswordRequest
+from app.schemas.auth_schema import UserRegisterRequest, UserLoginRequest, ChangePasswordRequest, RequestEmailChangeRequest, VerifyEmailChangeRequest
 from app.schemas.user_schema import UserUpdateRequest
 from app.services.jwt_service import JWTService
 from app.services.otp_service import OTPService
 from app.services.email_service import EmailService
 from app.services.user_service import UserService
 from app.services.google_auth import GoogleAuthService
+from app.services.audit_service import AuditLogService
 from app.constants import ERROR_INVALID_CREDENTIALS, ERROR_USER_NOT_FOUND, ROLE_USER, PLAN_FREE
 from bson import ObjectId
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
+
+def _ensure_utc(dt):
+    if not dt:
+        return None
+    if isinstance(dt, str):
+        try:
+            dt = datetime.fromisoformat(dt.replace("Z", "+00:00"))
+        except Exception:
+            return None
+    if isinstance(dt, datetime):
+        if dt.tzinfo is None or dt.tzinfo.utcoffset(dt) is None:
+            return dt.replace(tzinfo=timezone.utc)
+        return dt
+    return None
 
 def parse_device_info(user_agent: str) -> dict:
     if not user_agent:
@@ -56,6 +72,9 @@ def parse_device_info(user_agent: str) -> dict:
     }
 
 class AuthService:
+    MAX_FAILED_LOGIN_ATTEMPTS = 5
+    LOCKOUT_DURATION_MINUTES = 15
+
     @staticmethod
     def get_password_hash(password: str) -> str:
         pwd_bytes = password.encode('utf-8')
@@ -104,7 +123,7 @@ class AuthService:
             )
 
     @staticmethod
-    async def register_user(request: UserRegisterRequest, db) -> dict:
+    async def register_user(request: UserRegisterRequest, db, req=None) -> dict:
         clean_email = request.email.lower().strip()
         clean_name = request.full_name.strip()
 
@@ -114,7 +133,6 @@ class AuthService:
                 detail="Full name must be at least 3 characters long."
             )
 
-        # Check confirm password if provided
         if request.confirm_password and request.password != request.confirm_password:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -123,7 +141,6 @@ class AuthService:
 
         AuthService.validate_password_complexity(request.password)
 
-        # Check if user already exists
         existing_user = await UserService.find_by_email(clean_email, db)
         if existing_user:
             raise HTTPException(
@@ -133,8 +150,7 @@ class AuthService:
 
         hashed_password = AuthService.get_password_hash(request.password)
         
-        # Create unverified user
-        await UserService.create_user(
+        user_doc = await UserService.create_user(
             email=clean_email,
             full_name=clean_name,
             password_hash=hashed_password,
@@ -145,8 +161,8 @@ class AuthService:
             db=db
         )
         
-        # Send 6-digit OTP to user's email
-        await OTPService.send_otp(clean_email, purpose="email_verification", user_name=clean_name)
+        await OTPService.send_otp(clean_email, purpose="email_verification", user_name=clean_name, req=req)
+        await AuditLogService.log_event("EVENT_USER_REGISTERED", email=clean_email, user_id=str(user_doc.get("_id", "")), req=req, db=db)
         
         return {
             "success": True,
@@ -208,55 +224,113 @@ class AuthService:
             return "session_dev"
 
     @staticmethod
+    async def _issue_token_pair(user_id: str, session_id: str = None, db = None) -> dict:
+        jti = str(uuid.uuid4())
+        now = datetime.now(timezone.utc)
+        expires_at = now + timedelta(days=7)
+
+        access_token = JWTService.create_access_token({"sub": str(user_id)}, session_id=session_id)
+        refresh_token = JWTService.create_refresh_token({"sub": str(user_id)}, session_id=session_id, jti=jti)
+
+        if db is not None:
+            await db["refresh_tokens"].insert_one({
+                "jti": jti,
+                "user_id": str(user_id),
+                "session_id": str(session_id) if session_id else None,
+                "created_at": now,
+                "expires_at": expires_at,
+                "is_revoked": False
+            })
+
+        return {
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+            "jti": jti
+        }
+
+    @staticmethod
     async def authenticate_user(email: str, password: str, db, req = None) -> dict:
         clean_email = email.lower().strip()
         user = await UserService.find_by_email(clean_email, db)
+        now = datetime.now(timezone.utc)
 
         if not user:
             await AuthService.record_login_event(clean_email, "FAILED_CREDENTIALS", "email", req=req, db=db)
+            await AuditLogService.log_event("EVENT_LOGIN_FAILED", email=clean_email, status="FAILED", details={"reason": "User not found"}, req=req, db=db)
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail=ERROR_INVALID_CREDENTIALS
             )
 
+        user_id_str = str(user["_id"])
+
+        # 1. Account Lockout Check
+        lockout_until = _ensure_utc(user.get("lockout_until"))
+        if lockout_until and now < lockout_until:
+            remaining_seconds = int((lockout_until - now).total_seconds())
+            remaining_mins = max(1, remaining_seconds // 60)
+            await AuditLogService.log_event("EVENT_LOGIN_BLOCKED_LOCKED", email=clean_email, user_id=user_id_str, status="BLOCKED", req=req, db=db)
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail=f"Account is temporarily locked due to multiple failed login attempts. Please try again in {remaining_mins} minutes."
+            )
+
         if user.get("provider") == "google" and not user.get("hashed_password"):
-            await AuthService.record_login_event(clean_email, "FAILED_GOOGLE_ACCOUNT", "email", user_id=str(user["_id"]), req=req, db=db)
+            await AuthService.record_login_event(clean_email, "FAILED_GOOGLE_ACCOUNT", "email", user_id=user_id_str, req=req, db=db)
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="This account was registered via Google Sign-In. Please click 'Continue with Google'."
             )
 
+        # 2. Password Verification
         if not AuthService.verify_password(password, user.get("hashed_password", "")):
-            await AuthService.record_login_event(clean_email, "FAILED_CREDENTIALS", "email", user_id=str(user["_id"]), req=req, db=db)
+            failed_attempts = user.get("failed_login_attempts", 0) + 1
+            update_fields = {"failed_login_attempts": failed_attempts}
+
+            if failed_attempts >= AuthService.MAX_FAILED_LOGIN_ATTEMPTS:
+                new_lockout = now + timedelta(minutes=AuthService.LOCKOUT_DURATION_MINUTES)
+                update_fields["lockout_until"] = new_lockout
+                await AuditLogService.log_event("EVENT_ACCOUNT_LOCKED", email=clean_email, user_id=user_id_str, status="LOCKED", details={"failed_attempts": failed_attempts}, req=req, db=db)
+            else:
+                await AuditLogService.log_event("EVENT_LOGIN_FAILED", email=clean_email, user_id=user_id_str, status="FAILED", details={"failed_attempts": failed_attempts}, req=req, db=db)
+
+            if db is not None:
+                await db["users"].update_one({"_id": user["_id"]}, {"$set": update_fields})
+
+            await AuthService.record_login_event(clean_email, "FAILED_CREDENTIALS", "email", user_id=user_id_str, req=req, db=db)
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail=ERROR_INVALID_CREDENTIALS
             )
 
+        # Reset failed attempts counter on successful login
+        if user.get("failed_login_attempts", 0) > 0 or user.get("lockout_until") is not None:
+            if db is not None:
+                await db["users"].update_one({"_id": user["_id"]}, {"$set": {"failed_login_attempts": 0, "lockout_until": None}})
+
         # Check if user is verified
         is_verified = user.get("is_verified", False) or user.get("is_active", False)
         if not is_verified:
-            await AuthService.record_login_event(clean_email, "UNVERIFIED_EMAIL", "email", user_id=str(user["_id"]), req=req, db=db)
-            # Send fresh OTP for verification
+            await AuthService.record_login_event(clean_email, "UNVERIFIED_EMAIL", "email", user_id=user_id_str, req=req, db=db)
             try:
-                await OTPService.send_otp(clean_email, purpose="email_verification", user_name=user.get("full_name", ""))
+                await OTPService.send_otp(clean_email, purpose="email_verification", user_name=user.get("full_name", ""), req=req)
             except HTTPException:
-                pass  # Ignore cooldown error on login trigger
+                pass
 
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Please verify your email before logging in."
             )
 
-        access_token = JWTService.create_access_token({"sub": str(user["_id"])})
-        refresh_token = JWTService.create_refresh_token({"sub": str(user["_id"])})
+        session_id = await AuthService.create_session(user_id_str, req=req, db=db)
+        tokens = await AuthService._issue_token_pair(user_id_str, session_id=session_id, db=db)
 
-        await AuthService.record_login_event(clean_email, "SUCCESS", "email", user_id=str(user["_id"]), req=req, db=db)
-        await AuthService.create_session(str(user["_id"]), req=req, db=db)
+        await AuthService.record_login_event(clean_email, "SUCCESS", "email", user_id=user_id_str, req=req, db=db)
+        await AuditLogService.log_event("EVENT_LOGIN_SUCCESS", email=clean_email, user_id=user_id_str, status="SUCCESS", req=req, db=db)
 
         return {
-            "access_token": access_token,
-            "refresh_token": refresh_token,
+            "access_token": tokens["access_token"],
+            "refresh_token": tokens["refresh_token"],
             "token_type": "bearer",
             "role": user.get("role", ROLE_USER),
             "plan_type": user.get("plan_type", PLAN_FREE),
@@ -276,11 +350,12 @@ class AuthService:
             user = await UserService.find_by_email(email, db)
 
         if user:
-            # Update existing user with google_id and picture if missing
             update_data = {
                 "is_verified": True,
                 "is_active": True,
-                "updated_at": datetime.utcnow()
+                "failed_login_attempts": 0,
+                "lockout_until": None,
+                "updated_at": datetime.now(timezone.utc)
             }
             if not user.get("google_id"):
                 update_data["google_id"] = google_id
@@ -294,7 +369,6 @@ class AuthService:
             )
             user = await db["users"].find_one({"_id": user["_id"]})
         else:
-            # Create new user via Google
             user = await UserService.create_user(
                 email=email,
                 full_name=name,
@@ -305,15 +379,16 @@ class AuthService:
                 db=db
             )
 
-        access_token = JWTService.create_access_token({"sub": str(user["_id"])})
-        refresh_token = JWTService.create_refresh_token({"sub": str(user["_id"])})
+        user_id_str = str(user["_id"])
+        session_id = await AuthService.create_session(user_id_str, req=req, db=db)
+        tokens = await AuthService._issue_token_pair(user_id_str, session_id=session_id, db=db)
 
-        await AuthService.record_login_event(email, "SUCCESS", "google", user_id=str(user["_id"]), req=req, db=db)
-        await AuthService.create_session(str(user["_id"]), req=req, db=db)
+        await AuthService.record_login_event(email, "SUCCESS", "google", user_id=user_id_str, req=req, db=db)
+        await AuditLogService.log_event("EVENT_GOOGLE_LOGIN_SUCCESS", email=email, user_id=user_id_str, status="SUCCESS", req=req, db=db)
 
         return {
-            "access_token": access_token,
-            "refresh_token": refresh_token,
+            "access_token": tokens["access_token"],
+            "refresh_token": tokens["refresh_token"],
             "token_type": "bearer",
             "role": user.get("role", ROLE_USER),
             "plan_type": user.get("plan_type", PLAN_FREE),
@@ -321,18 +396,18 @@ class AuthService:
         }
 
     @staticmethod
-    async def resend_user_otp(email: str, purpose: str = "email_verification", db: Any = None) -> dict:
+    async def resend_user_otp(email: str, purpose: str = "email_verification", db: Any = None, req = None) -> dict:
         clean_email = email.lower().strip()
         user = await UserService.find_by_email(clean_email, db)
         user_name = user.get("full_name", "") if user else ""
 
-        await OTPService.resend_otp(clean_email, purpose=purpose, user_name=user_name)
+        await OTPService.resend_otp(clean_email, purpose=purpose, user_name=user_name, req=req)
         return {"success": True, "message": f"Verification code re-sent to {clean_email}"}
 
     @staticmethod
-    async def verify_user_otp(email: str, otp: str, purpose: str = "email_verification", db: Any = None) -> dict:
+    async def verify_user_otp(email: str, otp: str, purpose: str = "email_verification", db: Any = None, req = None) -> dict:
         clean_email = email.lower().strip()
-        is_valid = await OTPService.verify_otp(clean_email, otp, purpose=purpose)
+        is_valid = await OTPService.verify_otp(clean_email, otp, purpose=purpose, req=req)
         if not is_valid:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -346,15 +421,17 @@ class AuthService:
                 detail=ERROR_USER_NOT_FOUND
             )
             
-        # Mark user verified in database
         await UserService.mark_user_verified(clean_email, db)
         user = await UserService.find_by_email(clean_email, db)
-        
-        access_token = JWTService.create_access_token({"sub": str(user["_id"])})
-        refresh_token = JWTService.create_refresh_token({"sub": str(user["_id"])})
+        user_id_str = str(user["_id"])
+
+        session_id = await AuthService.create_session(user_id_str, req=req, db=db)
+        tokens = await AuthService._issue_token_pair(user_id_str, session_id=session_id, db=db)
+
+        await AuditLogService.log_event("EVENT_USER_VERIFIED", email=clean_email, user_id=user_id_str, status="SUCCESS", req=req, db=db)
         return {
-            "access_token": access_token,
-            "refresh_token": refresh_token,
+            "access_token": tokens["access_token"],
+            "refresh_token": tokens["refresh_token"],
             "token_type": "bearer",
             "role": user.get("role", ROLE_USER),
             "plan_type": user.get("plan_type", PLAN_FREE),
@@ -362,7 +439,7 @@ class AuthService:
         }
 
     @staticmethod
-    async def refresh_token(refresh_token_str: str, db) -> dict:
+    async def refresh_token(refresh_token_str: str, db, req = None) -> dict:
         payload = JWTService.decode_token(refresh_token_str)
         if not payload or payload.get("type") != "refresh":
             raise HTTPException(
@@ -371,6 +448,9 @@ class AuthService:
             )
             
         user_id = payload.get("sub")
+        jti = payload.get("jti")
+        session_id = payload.get("session_id")
+
         user = await UserService.find_by_id(user_id, db)
         if not user or not user.get("is_active", True):
             raise HTTPException(
@@ -378,11 +458,31 @@ class AuthService:
                 detail="User account inactive or not found."
             )
 
-        new_access_token = JWTService.create_access_token({"sub": str(user["_id"])})
-        new_refresh_token = JWTService.create_refresh_token({"sub": str(user["_id"])})
+        now = datetime.now(timezone.utc)
+
+        # Refresh Token Rotation & Theft Reuse Detection
+        if db is not None and jti:
+            token_record = await db["refresh_tokens"].find_one({"jti": jti})
+            if token_record and token_record.get("is_revoked"):
+                # TOKEN REUSE DETECTED! Revoke ALL user refresh tokens and sessions immediately!
+                await db["refresh_tokens"].update_many({"user_id": str(user_id)}, {"$set": {"is_revoked": True, "revoked_at": now}})
+                await db["sessions"].update_many({"user_id": str(user_id)}, {"$set": {"is_active": False}})
+                await AuditLogService.log_event("EVENT_TOKEN_REUSE_DETECTED", user_id=str(user_id), email=user.get("email"), status="ALERT", details={"compromised_jti": jti}, req=req, db=db)
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Security alert: Token reuse detected. All sessions have been revoked for your safety."
+                )
+
+            # Invalidate old refresh token (rotate)
+            if token_record:
+                await db["refresh_tokens"].update_one({"jti": jti}, {"$set": {"is_revoked": True, "revoked_at": now}})
+
+        tokens = await AuthService._issue_token_pair(str(user["_id"]), session_id=session_id, db=db)
+        await AuditLogService.log_event("EVENT_TOKEN_REFRESHED", user_id=str(user["_id"]), email=user.get("email"), status="SUCCESS", req=req, db=db)
+
         return {
-            "access_token": new_access_token,
-            "refresh_token": new_refresh_token,
+            "access_token": tokens["access_token"],
+            "refresh_token": tokens["refresh_token"],
             "token_type": "bearer",
             "role": user.get("role", ROLE_USER),
             "plan_type": user.get("plan_type", PLAN_FREE),
@@ -390,15 +490,24 @@ class AuthService:
         }
 
     @staticmethod
-    async def logout_user(token_str: str, db) -> dict:
+    async def logout_user(token_str: str, db, req = None) -> dict:
         from app.database import db_manager
         redis = db_manager.redis_client
         if redis and token_str:
             await redis.set(f"blacklist:{token_str}", "1", ex=86400)
+
+        # Invalidate refresh token if readable
+        payload = JWTService.decode_token(token_str)
+        user_id = payload.get("sub")
+        jti = payload.get("jti")
+        if db is not None and jti:
+            await db["refresh_tokens"].update_one({"jti": jti}, {"$set": {"is_revoked": True, "revoked_at": datetime.now(timezone.utc)}})
+
+        await AuditLogService.log_event("EVENT_LOGOUT", user_id=user_id, status="SUCCESS", req=req, db=db)
         return {"success": True, "message": "Successfully logged out"}
 
     @staticmethod
-    async def forgot_password(email: str, db) -> dict:
+    async def forgot_password(email: str, db, req = None) -> dict:
         clean_email = email.lower().strip()
         user = await UserService.find_by_email(clean_email, db)
         if not user:
@@ -407,11 +516,12 @@ class AuthService:
                 detail="No account associated with this email address was found."
             )
 
-        await OTPService.send_password_reset_otp(clean_email, user_name=user.get("full_name", ""))
+        await OTPService.send_password_reset_otp(clean_email, user_name=user.get("full_name", ""), req=req)
+        await AuditLogService.log_event("EVENT_FORGOT_PASSWORD_REQUESTED", email=clean_email, user_id=str(user["_id"]), status="SUCCESS", req=req, db=db)
         return {"success": True, "message": "Password recovery code sent to your email."}
 
     @staticmethod
-    async def reset_password(email: str, otp: str, new_password: str, confirm_password: str = None, db: Any = None) -> dict:
+    async def reset_password(email: str, otp: str, new_password: str, confirm_password: str = None, db: Any = None, req = None) -> dict:
         if confirm_password and new_password != confirm_password:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -425,7 +535,7 @@ class AuthService:
             )
 
         clean_email = email.lower().strip()
-        is_valid = await OTPService.verify_password_reset_otp(clean_email, otp)
+        is_valid = await OTPService.verify_password_reset_otp(clean_email, otp, req=req)
         if not is_valid:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -446,14 +556,17 @@ class AuthService:
                 "hashed_password": hashed_password,
                 "is_verified": True,
                 "is_active": True,
-                "updated_at": datetime.utcnow()
+                "failed_login_attempts": 0,
+                "lockout_until": None,
+                "updated_at": datetime.now(timezone.utc)
             }}
         )
 
+        await AuditLogService.log_event("EVENT_PASSWORD_RESET_SUCCESS", email=clean_email, user_id=str(user["_id"]), status="SUCCESS", req=req, db=db)
         return {"success": True, "message": "Password reset successfully. You can now login with your new credentials."}
 
     @staticmethod
-    async def change_password(user_id: str, request: ChangePasswordRequest, db) -> dict:
+    async def change_password(user_id: str, request: ChangePasswordRequest, db, req = None) -> dict:
         if request.confirm_password and request.new_password != request.confirm_password:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -489,11 +602,62 @@ class AuthService:
             query,
             {"$set": {
                 "hashed_password": hashed_password,
+                "failed_login_attempts": 0,
+                "lockout_until": None,
                 "updated_at": datetime.now(timezone.utc)
             }}
         )
 
+        await AuditLogService.log_event("EVENT_PASSWORD_CHANGED", user_id=str(user_id), email=user.get("email"), status="SUCCESS", req=req, db=db)
         return {"success": True, "message": "Password changed successfully."}
+
+    @staticmethod
+    async def request_email_change(user_id: str, request: RequestEmailChangeRequest, db, req = None) -> dict:
+        user = await UserService.find_by_id(user_id, db)
+        if not user:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=ERROR_USER_NOT_FOUND)
+
+        if user.get("provider") == "email" and user.get("hashed_password"):
+            if not AuthService.verify_password(request.password, user.get("hashed_password", "")):
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect password.")
+
+        new_email_clean = request.new_email.lower().strip()
+        existing = await UserService.find_by_email(new_email_clean, db)
+        if existing and str(existing["_id"]) != str(user_id):
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="This email address is already in use.")
+
+        await OTPService.send_otp(new_email_clean, purpose="email_change", user_name=user.get("full_name", ""), req=req)
+        await AuditLogService.log_event("EVENT_EMAIL_CHANGE_REQUESTED", user_id=str(user_id), email=new_email_clean, status="SUCCESS", req=req, db=db)
+
+        return {"success": True, "message": f"Verification code sent to new email: {new_email_clean}"}
+
+    @staticmethod
+    async def verify_email_change(user_id: str, request: VerifyEmailChangeRequest, db, req = None) -> dict:
+        new_email_clean = request.new_email.lower().strip()
+        is_valid = await OTPService.verify_otp(new_email_clean, request.otp, purpose="email_change", req=req)
+        if not is_valid:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid or expired verification code.")
+
+        user = await UserService.find_by_id(user_id, db)
+        if not user:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=ERROR_USER_NOT_FOUND)
+
+        try:
+            query = {"_id": ObjectId(user_id)}
+        except Exception:
+            query = {"_id": user_id}
+
+        await db["users"].update_one(
+            query,
+            {"$set": {
+                "email": new_email_clean,
+                "is_verified": True,
+                "updated_at": datetime.now(timezone.utc)
+            }}
+        )
+
+        await AuditLogService.log_event("EVENT_EMAIL_CHANGED", user_id=str(user_id), email=new_email_clean, status="SUCCESS", req=req, db=db)
+        return {"success": True, "message": "Email address updated successfully."}
 
     @staticmethod
     async def update_user_profile(user_id: str, request: UserUpdateRequest, db) -> dict:
@@ -567,7 +731,7 @@ class AuthService:
         return formatted
 
     @staticmethod
-    async def revoke_session(user_id: str, session_id: str, db = None) -> dict:
+    async def revoke_session(user_id: str, session_id: str, db = None, req = None) -> dict:
         if db is None:
             return {"success": True, "message": "Session revoked."}
         try:
@@ -575,12 +739,17 @@ class AuthService:
                 {"_id": ObjectId(session_id), "user_id": str(user_id)},
                 {"$set": {"is_active": False}}
             )
+            await db["refresh_tokens"].update_many(
+                {"session_id": str(session_id), "user_id": str(user_id)},
+                {"$set": {"is_revoked": True, "revoked_at": datetime.now(timezone.utc)}}
+            )
+            await AuditLogService.log_event("EVENT_SESSION_REVOKED", user_id=str(user_id), status="SUCCESS", details={"session_id": session_id}, req=req, db=db)
         except Exception:
             pass
         return {"success": True, "message": "Session revoked successfully."}
 
     @staticmethod
-    async def revoke_other_sessions(user_id: str, db = None) -> dict:
+    async def revoke_other_sessions(user_id: str, db = None, req = None) -> dict:
         if db is None:
             return {"success": True, "message": "All other sessions revoked."}
         try:
@@ -588,6 +757,11 @@ class AuthService:
                 {"user_id": str(user_id)},
                 {"$set": {"is_active": False}}
             )
+            await db["refresh_tokens"].update_many(
+                {"user_id": str(user_id)},
+                {"$set": {"is_revoked": True, "revoked_at": datetime.now(timezone.utc)}}
+            )
+            await AuditLogService.log_event("EVENT_OTHER_SESSIONS_REVOKED", user_id=str(user_id), status="SUCCESS", req=req, db=db)
         except Exception as e:
             print(f"[AUTH SERVICE] Error revoking other sessions: {e}")
         return {"success": True, "message": "All other sessions have been revoked."}
@@ -612,7 +786,7 @@ class AuthService:
         return formatted
 
     @staticmethod
-    async def delete_user_account(user_id: str, password: str = None, db = None) -> dict:
+    async def delete_user_account(user_id: str, password: str = None, db = None, req = None) -> dict:
         user = await UserService.find_by_id(user_id, db)
         if not user:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=ERROR_USER_NOT_FOUND)
@@ -634,7 +808,9 @@ class AuthService:
             await db["resumes"].delete_many({"user_id": u_id_str})
             await db["interviews"].delete_many({"user_id": u_id_str})
             await db["sessions"].delete_many({"user_id": u_id_str})
+            await db["refresh_tokens"].delete_many({"user_id": u_id_str})
             await db["login_activity"].delete_many({"user_id": u_id_str})
+            await AuditLogService.log_event("EVENT_USER_ACCOUNT_DELETED", user_id=u_id_str, email=user.get("email"), status="SUCCESS", req=req, db=db)
         except Exception as exc:
             print(f"[AUTH SERVICE] Error deleting user account data: {exc}")
 

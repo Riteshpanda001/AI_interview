@@ -66,6 +66,11 @@ const ResumeDashboard = ({
           <button className="btn-upload-resume" onClick={onOpenUploadModal}>
             <span>📤</span> Upload PDF / DOCX
           </button>
+          {onOpenJobMatcher && (
+            <button className="btn-upload-resume" style={{ background: "linear-gradient(135deg, #10b981 0%, #059669 100%)" }} onClick={onOpenJobMatcher}>
+              <span>🎯</span> Job Matcher & Skill Gap
+            </button>
+          )}
           <button className="btn-create-blank" onClick={onCreateNewBlank}>
             <span>➕</span> New Blank Resume
           </button>

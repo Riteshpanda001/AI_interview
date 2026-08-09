@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
 from app.schemas.ats_schema import ATSAnalysisRequest, ATSAnalysisResponse, TailorResumeRequest, ParseJobDescriptionResponse
 from app.dependencies import get_current_active_user, get_db
 from app.services.ats_service import ATSService
+from app.services.payment_service import SubscriptionEnforcer
 
 router = APIRouter()
 
@@ -11,6 +12,8 @@ async def analyze_resume_ats(
     current_user = Depends(get_current_active_user),
     db = Depends(get_db)
 ):
+    await SubscriptionEnforcer.enforce_ats_check_limit(str(current_user["_id"]), db)
+
     analysis = await ATSService.analyze_ats_score(
         user_id=str(current_user["_id"]),
         resume_id=request.resume_id,

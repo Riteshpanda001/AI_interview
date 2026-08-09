@@ -13,6 +13,7 @@ import AIResumeSuggestions from "../components/resumeBuilder/AIResumeSuggestions
 import ATSResumeScore from "../components/resumeBuilder/ATSResumeScore";
 import CreateNewWorkspace from "../components/resumeBuilder/CreateNewWorkspace";
 import AIGeneratorModal from "../components/resumeBuilder/AIGeneratorModal";
+import JobMatcherModal from "../components/resumeBuilder/JobMatcherModal";
 import ResumeFAQ from "../components/resumeBuilder/ResumeFAQ";
 
 import "./ResumeBuilder.css";
@@ -66,6 +67,7 @@ const ResumeBuilder = () => {
   const [pendingTemplate, setPendingTemplate] = useState(null);
   const [showStartModal, setShowStartModal] = useState(false);
   const [showAIGeneratorModal, setShowAIGeneratorModal] = useState(false);
+  const [showJobMatcherModal, setShowJobMatcherModal] = useState(false);
   const [modalStep, setModalStep] = useState("options"); // "options" | "upload"
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -401,6 +403,15 @@ const ResumeBuilder = () => {
         isOpen={showAIGeneratorModal}
         onClose={() => setShowAIGeneratorModal(false)}
         onGenerate={handleAIGeneratedSubmit}
+      />
+
+      {/* Job Matcher Modal */}
+      <JobMatcherModal
+        isOpen={showJobMatcherModal}
+        onClose={() => setShowJobMatcherModal(false)}
+        resumeData={resumeData}
+        setResumeData={setResumeData}
+        onSaveResume={handleSaveResume}
       />
 
       {/* Start Modal Overlay */}

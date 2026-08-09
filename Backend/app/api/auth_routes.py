@@ -3,9 +3,10 @@ from app.schemas.auth_schema import (
     UserRegisterRequest, UserLoginRequest, GoogleAuthRequest, TokenResponse, 
     OTPVerifyRequest, OTPResponse, EmailCheckRequest,
     ForgotPasswordRequest, ResetPasswordRequest,
-    RefreshTokenRequest, ResendOTPRequest
+    RefreshTokenRequest, ResendOTPRequest,
+    RequestEmailChangeRequest, VerifyEmailChangeRequest
 )
-from app.dependencies import get_db, oauth2_scheme
+from app.dependencies import get_db, oauth2_scheme, get_current_user
 from app.services.auth_service import AuthService
 from app.services.jwt_service import JWTService
 
@@ -17,14 +18,14 @@ async def check_email(request: EmailCheckRequest, db = Depends(get_db)):
     return {"exists": user is not None}
 
 @router.post("/register", response_model=OTPResponse, status_code=status.HTTP_201_CREATED)
-async def register(request: UserRegisterRequest, db = Depends(get_db)):
-    result = await AuthService.register_user(request, db)
+async def register(request: UserRegisterRequest, http_request: Request, db = Depends(get_db)):
+    result = await AuthService.register_user(request, db, req=http_request)
     return result
 
 @router.post("/resend-otp", response_model=OTPResponse)
-async def resend_otp(request: ResendOTPRequest, db = Depends(get_db)):
+async def resend_otp(request: ResendOTPRequest, http_request: Request, db = Depends(get_db)):
     purpose = request.purpose or "email_verification"
-    return await AuthService.resend_user_otp(request.email, purpose=purpose, db=db)
+    return await AuthService.resend_user_otp(request.email, purpose=purpose, db=db, req=http_request)
 
 @router.post("/login", response_model=TokenResponse)
 async def login(request: UserLoginRequest, http_request: Request, db = Depends(get_db)):
@@ -48,23 +49,53 @@ async def verify_otp(request: OTPVerifyRequest, http_request: Request, db = Depe
     return token_details
 
 @router.post("/refresh", response_model=TokenResponse)
-async def refresh_token(request: RefreshTokenRequest, db = Depends(get_db)):
-    return await AuthService.refresh_token(request.refresh_token, db)
+async def refresh_token(request: RefreshTokenRequest, http_request: Request, db = Depends(get_db)):
+    return await AuthService.refresh_token(request.refresh_token, db, req=http_request)
 
 @router.post("/logout")
-async def logout(token: str = Depends(oauth2_scheme), db = Depends(get_db)):
-    return await AuthService.logout_user(token, db)
+async def logout(http_request: Request, token: str = Depends(oauth2_scheme), db = Depends(get_db)):
+    return await AuthService.logout_user(token, db, req=http_request)
 
 @router.post("/forgot-password")
-async def forgot_password(request: ForgotPasswordRequest, db = Depends(get_db)):
-    return await AuthService.forgot_password(request.email, db)
+async def forgot_password(request: ForgotPasswordRequest, http_request: Request, db = Depends(get_db)):
+    return await AuthService.forgot_password(request.email, db, req=http_request)
 
 @router.post("/reset-password")
-async def reset_password(request: ResetPasswordRequest, db = Depends(get_db)):
+async def reset_password(request: ResetPasswordRequest, http_request: Request, db = Depends(get_db)):
     return await AuthService.reset_password(
         email=request.email,
         otp=request.otp,
         new_password=request.new_password,
         confirm_password=request.confirm_password,
-        db=db
+        db=db,
+        req=http_request
     )
+
+@router.post("/request-email-change")
+async def request_email_change(
+    request: RequestEmailChangeRequest,
+    http_request: Request,
+    current_user = Depends(get_current_user),
+    db = Depends(get_db)
+):
+    return await AuthService.request_email_change(
+        user_id=str(current_user["_id"]),
+        request=request,
+        db=db,
+        req=http_request
+    )
+
+@router.post("/verify-email-change")
+async def verify_email_change(
+    request: VerifyEmailChangeRequest,
+    http_request: Request,
+    current_user = Depends(get_current_user),
+    db = Depends(get_db)
+):
+    return await AuthService.verify_email_change(
+        user_id=str(current_user["_id"]),
+        request=request,
+        db=db,
+        req=http_request
+    )
+

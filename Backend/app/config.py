@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     # DB Connection URLs
     MONGODB_URL: str = "mongodb://localhost:27017"
     DATABASE_NAME: str = "ai_interview_prep"
-    REDIS_URL: str = "redis://localhost:6379/0"
+    REDIS_URL: str = "redis://127.0.0.1:6379/0"
 
     # API Keys
     GEMINI_API_KEY: Optional[str] = None
@@ -28,6 +28,16 @@ class Settings(BaseSettings):
 
     # Google OAuth Settings
     GOOGLE_CLIENT_ID: Optional[str] = None
+
+    # Payment Gateway Credentials (Razorpay & Stripe)
+    RAZORPAY_KEY_ID: Optional[str] = None
+    RAZORPAY_KEY_SECRET: Optional[str] = None
+    RAZORPAY_WEBHOOK_SECRET: Optional[str] = None
+    STRIPE_SECRET_KEY: Optional[str] = None
+    STRIPE_PUBLISHABLE_KEY: Optional[str] = None
+    STRIPE_WEBHOOK_SECRET: Optional[str] = None
+    FRONTEND_URL: str = "http://localhost:5173"
+
 
     # SMTP Credentials
     SMTP_HOST: str = "smtp.gmail.com"

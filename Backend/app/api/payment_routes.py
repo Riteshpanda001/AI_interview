@@ -1,28 +1,14 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Header, Request, status
 from app.schemas.payment_schema import (
-    PaymentCreateRequest, PaymentResponse,
-    RazorpayOrderRequest, RazorpayOrderResponse,
-    StripeCheckoutRequest, SubscriptionDetailsResponse,
-    InvoiceResponse
+    PaymentResponse, RazorpayOrderRequest, RazorpayOrderResponse,
+    StripeCheckoutRequest, RazorpayVerifyRequest, StripeVerifyRequest,
+    SubscriptionDetailsResponse, InvoiceResponse
 )
 from app.dependencies import get_current_active_user, get_db
 from app.services.payment_service import PaymentService
-from typing import List
+from typing import Optional
 
 router = APIRouter()
-
-@router.post("/checkout", response_model=PaymentResponse)
-async def create_payment_checkout(
-    request: PaymentCreateRequest,
-    current_user = Depends(get_current_active_user),
-    db = Depends(get_db)
-):
-    payment = await PaymentService.process_payment(
-        user_id=str(current_user["_id"]),
-        req=request,
-        db=db
-    )
-    return payment
 
 @router.post("/create-razorpay-order", response_model=RazorpayOrderResponse)
 async def create_razorpay_order(
@@ -30,7 +16,11 @@ async def create_razorpay_order(
     current_user = Depends(get_current_active_user),
     db = Depends(get_db)
 ):
-    return await PaymentService.create_razorpay_order(request, db=db)
+    return await PaymentService.create_razorpay_order(
+        user_id=str(current_user["_id"]),
+        req=request,
+        db=db
+    )
 
 @router.post("/create-stripe-session")
 async def create_stripe_session(
@@ -38,28 +28,91 @@ async def create_stripe_session(
     current_user = Depends(get_current_active_user),
     db = Depends(get_db)
 ):
-    return await PaymentService.create_stripe_session(request, db=db)
+    return await PaymentService.create_stripe_session(
+        user_id=str(current_user["_id"]),
+        req=request,
+        db=db
+    )
+
+@router.post("/verify-razorpay", response_model=PaymentResponse)
+async def verify_razorpay_payment(
+    request: RazorpayVerifyRequest,
+    current_user = Depends(get_current_active_user),
+    db = Depends(get_db)
+):
+    return await PaymentService.verify_razorpay_payment(
+        user_id=str(current_user["_id"]),
+        req=request,
+        db=db
+    )
+
+@router.post("/verify-stripe", response_model=PaymentResponse)
+async def verify_stripe_payment(
+    request: StripeVerifyRequest,
+    current_user = Depends(get_current_active_user),
+    db = Depends(get_db)
+):
+    return await PaymentService.verify_stripe_payment(
+        user_id=str(current_user["_id"]),
+        req=request,
+        db=db
+    )
+
+@router.post("/webhook/razorpay")
+async def razorpay_webhook(
+    request: Request,
+    x_razorpay_signature: Optional[str] = Header(None),
+    db = Depends(get_db)
+):
+    raw_body = await request.body()
+    return await PaymentService.handle_razorpay_webhook(
+        raw_body=raw_body,
+        signature=x_razorpay_signature or "",
+        db=db
+    )
+
+@router.post("/webhook/stripe")
+async def stripe_webhook(
+    request: Request,
+    stripe_signature: Optional[str] = Header(None),
+    db = Depends(get_db)
+):
+    raw_body = await request.body()
+    return await PaymentService.handle_stripe_webhook(
+        raw_body=raw_body,
+        signature=stripe_signature or "",
+        db=db
+    )
 
 @router.get("/subscription", response_model=SubscriptionDetailsResponse)
 async def get_subscription(
     current_user = Depends(get_current_active_user),
     db = Depends(get_db)
 ):
-    return await PaymentService.get_user_subscription(user_id=str(current_user["_id"]), db=db)
+    return await PaymentService.get_user_subscription(
+        user_id=str(current_user["_id"]),
+        db=db
+    )
 
 @router.post("/cancel-subscription")
 async def cancel_subscription(
     current_user = Depends(get_current_active_user),
     db = Depends(get_db)
 ):
-    return await PaymentService.cancel_subscription(user_id=str(current_user["_id"]), db=db)
+    return await PaymentService.cancel_subscription(
+        user_id=str(current_user["_id"]),
+        db=db
+    )
 
 @router.get("/history")
 async def get_payment_history(
     current_user = Depends(get_current_active_user),
     db = Depends(get_db)
 ):
-    return await PaymentService.get_payment_history(user_id=str(current_user["_id"]), db=db)
+    return await PaymentService.get_payment_history(
+        user_id=str(current_user["_id"]),
+        db=db
+    )
 
 @router.get("/invoice/{transaction_id}", response_model=InvoiceResponse)
 async def get_invoice(

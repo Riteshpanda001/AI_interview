@@ -288,18 +288,19 @@ class DatabaseManager:
             self.offline_mode = True
 
         # 2. Redis Connection
+        redis_url = settings.REDIS_URL.replace("localhost", "127.0.0.1")
         try:
             self.redis_client = aioredis.from_url(
-                settings.REDIS_URL, 
+                redis_url, 
                 encoding="utf-8", 
                 decode_responses=True,
-                socket_timeout=2.0
+                socket_timeout=1.0
             )
             # Ping to verify
             await self.redis_client.ping()
             print("Connected to Redis cache successfully.")
-        except Exception as e:
-            print(f"Redis connection failed: {e}. Swapping to In-Memory Mock Cache.")
+        except Exception:
+            print("[REDIS] ⚡ External Redis server not active. Using Embedded In-Memory Cache.")
             self.redis_client = MockRedis()
             self.offline_mode = True
 

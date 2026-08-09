@@ -1,4 +1,5 @@
 import httpx
+from fastapi import HTTPException, status
 from app.config import settings
 
 class LLMService:
@@ -58,6 +59,9 @@ class LLMService:
             except Exception as e:
                 print(f"Error calling Groq: {e}")
                 
-        # Mock responses fallback for local offline execution
-        print("LLM Service: Using offline simulated response.")
-        return "Simulated AI analysis result. The candidate shows clear competency."
+        # If both Gemini and Groq failed or are unconfigured, raise HTTP 503 error
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="AI Analysis Service is currently unavailable. Please configure GEMINI_API_KEY or GROQ_API_KEY in environment or try again shortly."
+        )
+

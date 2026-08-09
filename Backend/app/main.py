@@ -12,7 +12,7 @@ from app.api import (
     auth_routes, user_routes, resume_routes, ats_routes,
     interview_routes, coding_routes, company_routes, pricing_routes,
     payment_routes, contact_routes, dashboard_routes, history_routes,
-    settings_routes
+    settings_routes, ws_routes, admin_routes
 )
 
 @asynccontextmanager
@@ -21,7 +21,7 @@ async def lifespan(app: FastAPI):
     await db_manager.connect_to_databases()
     
     # Create static directories if they don't exist
-    for sub in ["uploads", "resumes", "reports", "avatars"]:
+    for sub in ["uploads", "resumes", "reports", "avatars", "audio"]:
         os.makedirs(os.path.join(settings.STATIC_DIR, sub), exist_ok=True)
         
     yield
@@ -54,6 +54,7 @@ app.include_router(user_routes.router, prefix="/api/users", tags=["Users"])
 app.include_router(resume_routes.router, prefix="/api/resume", tags=["Resume"])
 app.include_router(ats_routes.router, prefix="/api/ats", tags=["ATS"])
 app.include_router(interview_routes.router, prefix="/api/interview", tags=["Interview"])
+app.include_router(ws_routes.router, tags=["WebSockets"])
 app.include_router(coding_routes.router, prefix="/api/coding", tags=["Coding"])
 app.include_router(company_routes.router, prefix="/api/company", tags=["Company Preparation"])
 app.include_router(pricing_routes.router, prefix="/api/pricing", tags=["Pricing"])
@@ -62,6 +63,8 @@ app.include_router(contact_routes.router, prefix="/api/contact", tags=["Contact"
 app.include_router(dashboard_routes.router, prefix="/api/dashboard", tags=["Dashboard"])
 app.include_router(history_routes.router, prefix="/api/history", tags=["History"])
 app.include_router(settings_routes.router, prefix="/api/settings", tags=["Settings"])
+app.include_router(admin_routes.router, prefix="/api/admin", tags=["Admin Dashboard"])
+
 
 @app.get("/")
 async def root():

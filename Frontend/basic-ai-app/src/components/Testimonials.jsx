@@ -4,7 +4,7 @@ import "./Testimonials.css";
 const Testimonials = () => {
   const testimonials = [
     {
-      name: "Ruturaj Biswal",
+      name: "Shaktiswarup Padhi",
       role: "Software Engineer",
       rating: "★★★★★",
       review:

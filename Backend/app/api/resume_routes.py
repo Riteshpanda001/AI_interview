@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
+from fastapi import APIRouter, Depends, UploadFile, File, HTTPException, Response
 from typing import List, Dict, Any
 from app.schemas.resume_schema import (
     ResumeResponse, OptimizeResumeRequest, OptimizeResumeResponse,
@@ -7,6 +7,9 @@ from app.schemas.resume_schema import (
 )
 from app.dependencies import get_current_active_user, get_db
 from app.services.resume_service import ResumeService
+from app.services.ats_service import ATSService
+from app.utils.docx_exporter import DOCXExporter
+
 
 router = APIRouter()
 
@@ -21,9 +24,20 @@ async def list_resumes(
 @router.get("/public/{share_token}")
 async def get_public_resume(
     share_token: str,
+    password: str = "",
     db = Depends(get_db)
 ):
-    return await ResumeService.get_shared_resume(share_token, db)
+    return await ResumeService.get_shared_resume(share_token, password, db)
+
+@router.post("/public/{share_token}/authenticate")
+async def authenticate_shared_resume(
+    share_token: str,
+    payload: Dict[str, Any],
+    db = Depends(get_db)
+):
+    password = payload.get("password", "")
+    return await ResumeService.get_shared_resume(share_token, password, db)
+
 
 @router.get("/{resume_id}")
 async def get_resume(
@@ -197,4 +211,71 @@ async def delete_version(
     user_id = str(current_user["_id"])
     success = await ResumeService.delete_version(resume_id, version_id, user_id, db)
     return {"success": success}
+
+@router.get("/{resume_id}/export/docx")
+async def export_docx(
+    resume_id: str,
+    current_user = Depends(get_current_active_user),
+    db = Depends(get_db)
+):
+    user_id = str(current_user["_id"])
+    doc = await ResumeService.get_resume_by_id(resume_id, user_id, db)
+    resume_data = doc.get("parsed_content", {})
+    title = doc.get("title", "Resume").replace(" ", "_")
+    docx_bytes = DOCXExporter.generate_docx(resume_data, title)
+    
+    # Log download event
+    await ResumeService.log_access_event(resume_id, "download_docx", {}, db)
+    
+    return Response(
+        content=docx_bytes,
+        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        headers={"Content-Disposition": f'attachment; filename="{title}.docx"'}
+    )
+
+@router.get("/{resume_id}/versions/{version_id}/compare")
+async def compare_versions(
+    resume_id: str,
+    version_id: str,
+    current_user = Depends(get_current_active_user),
+    db = Depends(get_db)
+):
+    user_id = str(current_user["_id"])
+    return await ResumeService.compare_versions(resume_id, version_id, user_id, db)
+
+@router.post("/{resume_id}/validate-facts")
+async def validate_facts(
+    resume_id: str,
+    payload: Dict[str, Any] = {},
+    current_user = Depends(get_current_active_user),
+    db = Depends(get_db)
+):
+    user_id = str(current_user["_id"])
+    doc = await ResumeService.get_resume_by_id(resume_id, user_id, db)
+    current_data = payload.get("resume_data") or doc.get("parsed_content", {})
+    base_data = payload.get("base_data") or doc.get("parsed_content", {})
+    return await ResumeService.validate_factual_consistency(current_data, base_data)
+
+@router.post("/{resume_id}/optimize-for-job")
+async def optimize_for_job(
+    resume_id: str,
+    payload: Dict[str, Any],
+    current_user = Depends(get_current_active_user),
+    db = Depends(get_db)
+):
+    user_id = str(current_user["_id"])
+    doc = await ResumeService.get_resume_by_id(resume_id, user_id, db)
+    current_data = payload.get("resume_data") or doc.get("parsed_content", {})
+    job_description = payload.get("job_description", "")
+    return await ATSService.tailor_resume(current_data, job_description)
+
+@router.post("/calculate-ats")
+async def calculate_ats(
+    payload: Dict[str, Any],
+    current_user = Depends(get_current_active_user)
+):
+    resume_data = payload.get("resume_data", payload)
+    resume_text = payload.get("resume_text", "")
+    return ATSService.calculate_real_ats_score(resume_data, resume_text)
+
 

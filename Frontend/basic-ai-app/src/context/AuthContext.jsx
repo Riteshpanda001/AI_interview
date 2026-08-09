@@ -462,6 +462,46 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Request Email Change
+  const requestEmailChange = async (newEmail, password) => {
+    try {
+      const response = await authFetch(`${API_BASE_URL}/auth/request-email-change`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ new_email: newEmail, password }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.detail || "Failed to send email verification code.");
+      }
+      return data;
+    } catch (error) {
+      console.error("Request email change error:", error);
+      throw error;
+    }
+  };
+
+  // Verify Email Change
+  const verifyEmailChange = async (newEmail, otp) => {
+    try {
+      const response = await authFetch(`${API_BASE_URL}/auth/verify-email-change`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ new_email: newEmail, otp }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.detail || "Failed to verify email change.");
+      }
+      const currentToken = localStorage.getItem("access_token") || localStorage.getItem("token");
+      await fetchCurrentUser(currentToken);
+      return data;
+    } catch (error) {
+      console.error("Verify email change error:", error);
+      throw error;
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -480,6 +520,8 @@ export const AuthProvider = ({ children }) => {
         forgotPassword,
         resetPassword,
         changePassword,
+        requestEmailChange,
+        verifyEmailChange,
         logout,
         authFetch,
         getSessions,

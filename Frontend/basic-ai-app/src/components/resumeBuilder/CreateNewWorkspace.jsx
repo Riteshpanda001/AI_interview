@@ -3,6 +3,7 @@ import ResumePreview from "./ResumePreview";
 import AIPolishModal from "./AIPolishModal";
 import AIResumeAssistantModal from "./AIResumeAssistantModal";
 import BeforeAfterComparisonModal from "./BeforeAfterComparisonModal";
+import JobMatcherModal from "./JobMatcherModal";
 import { useAuth } from "../../context/AuthContext";
 import "./CreateNewWorkspace.css";
 
@@ -48,6 +49,7 @@ const CreateNewWorkspace = ({
   const [showPolishModal, setShowPolishModal] = useState(false);
   const [showAssistantModal, setShowAssistantModal] = useState(false);
   const [showDiffModal, setShowDiffModal] = useState(false);
+  const [showJobMatcherModal, setShowJobMatcherModal] = useState(false);
   const [polishedDataToCompare, setPolishedDataToCompare] = useState(null);
 
   // Fetch Version History
@@ -74,6 +76,21 @@ const CreateNewWorkspace = ({
 
   // Restore Snapshot Version
   const handleRestoreVersion = async (ver) => {
+    if (currentResumeId && ver._id) {
+      try {
+        const res = await authFetch(`http://localhost:8000/api/resume/${currentResumeId}/restore-version?version_id=${ver._id}`, { method: "POST" });
+        if (res.ok) {
+          const restored = await res.json();
+          const targetData = restored.parsed_content || restored.resume_data || ver.resume_data;
+          setResumeData(targetData);
+          alert(`✨ Restored snapshot "${ver.version_name || 'Version'}" successfully!`);
+          setShowVersionModal(false);
+          return;
+        }
+      } catch (err) {
+        console.warn("Server version restore error:", err);
+      }
+    }
     if (ver.resume_data) {
       setResumeData(ver.resume_data);
       if (onSaveResume) onSaveResume(ver.resume_data, selectedTemplate);
@@ -83,7 +100,28 @@ const CreateNewWorkspace = ({
   };
 
   // Export Resume as native DOCX Document
-  const handleDownloadDocx = () => {
+  const handleDownloadDocx = async () => {
+    if (currentResumeId) {
+      try {
+        const response = await authFetch(`http://localhost:8000/api/resume/${currentResumeId}/export/docx`);
+        if (response.ok) {
+          const blob = await response.blob();
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          const name = resumeData?.personal?.name || "Resume";
+          link.href = url;
+          link.download = `${name.replace(/\s+/g, '_')}_Resume.docx`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+          return;
+        }
+      } catch (err) {
+        console.warn("Error exporting docx from server, using local fallback:", err);
+      }
+    }
+
     const name = resumeData?.personal?.name || "Candidate";
     const title = resumeData?.personal?.role || "Software Engineer";
     const summary = resumeData?.summary || "";
@@ -99,43 +137,15 @@ const CreateNewWorkspace = ({
       `;
     });
 
-    let eduHtml = "";
-    (resumeData?.education || []).forEach(edu => {
-      eduHtml += `
-        <div style="margin-bottom: 6pt;">
-          <p style="font-size: 11pt; font-weight: bold; margin: 0;">${edu.degree || ''} - ${edu.institution || ''} (${edu.duration || ''})</p>
-        </div>
-      `;
-    });
-
-    let projHtml = "";
-    (resumeData?.projects || []).forEach(proj => {
-      projHtml += `
-        <div style="margin-bottom: 6pt;">
-          <p style="font-size: 11pt; font-weight: bold; margin: 0;">${proj.name || ''}</p>
-          <p style="font-size: 10pt; color: #333; margin: 2pt 0 0 0;">${proj.description || ''}</p>
-        </div>
-      `;
-    });
-
     const docxContent = `
       <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
-      <head><meta charset='utf-8'><title>${name} - Resume</title>
-      <style>
-        body { font-family: 'Calibri', 'Segoe UI', sans-serif; font-size: 11pt; line-height: 1.4; color: #1e293b; margin: 1in; }
-        h1 { font-size: 22pt; color: #0f172a; margin-bottom: 2pt; text-transform: capitalize; }
-        h2 { font-size: 12pt; color: #2563eb; border-bottom: 1.5pt solid #cbd5e1; padding-bottom: 2pt; margin-top: 14pt; margin-bottom: 6pt; text-transform: uppercase; letter-spacing: 0.5pt; }
-        .subhead { font-size: 10pt; color: #64748b; margin-bottom: 12pt; }
-      </style>
-      </head>
+      <head><meta charset='utf-8'><title>${name} - Resume</title></head>
       <body>
         <h1>${name}</h1>
-        <div class="subhead">${title} | ${resumeData?.personal?.email || ''} | ${resumeData?.personal?.phone || ''} | ${resumeData?.personal?.linkedin || ''}</div>
-        ${summary ? `<h2>Professional Summary</h2><p style="margin-top: 0;">${summary}</p>` : ''}
-        ${skills ? `<h2>Technical Skills</h2><p style="margin-top: 0;">${skills}</p>` : ''}
+        <div>${title} | ${resumeData?.personal?.email || ''} | ${resumeData?.personal?.phone || ''}</div>
+        ${summary ? `<h2>Professional Summary</h2><p>${summary}</p>` : ''}
+        ${skills ? `<h2>Technical Skills</h2><p>${skills}</p>` : ''}
         ${expHtml ? `<h2>Work Experience</h2>${expHtml}` : ''}
-        ${projHtml ? `<h2>Projects</h2>${projHtml}` : ''}
-        ${eduHtml ? `<h2>Education</h2>${eduHtml}` : ''}
       </body>
       </html>
     `;
@@ -525,6 +535,10 @@ const CreateNewWorkspace = ({
               🤖 AI Assistant
             </button>
           )}
+
+          <button className="toolbar-btn secondary-btn" style={{ background: "linear-gradient(135deg, #10b981 0%, #059669 100%)", color: "#fff" }} onClick={() => setShowJobMatcherModal(true)}>
+            🎯 Job Matcher
+          </button>
 
           <button className="toolbar-btn secondary-btn" onClick={() => setShowAnalyticsModal(true)}>
             📊 Analytics
@@ -1232,6 +1246,14 @@ const CreateNewWorkspace = ({
           </div>
         </div>
       )}
+
+      <JobMatcherModal
+        isOpen={showJobMatcherModal}
+        onClose={() => setShowJobMatcherModal(false)}
+        resumeData={resumeData}
+        setResumeData={setResumeData}
+        onSaveResume={onSaveResume}
+      />
     </div>
   );
 };

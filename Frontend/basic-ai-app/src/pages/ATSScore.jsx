@@ -244,6 +244,7 @@ const ATSScore = () => {
             <div className="ats-workspace-left-col">
               <ATSScoreCard 
                 score={analysisResult.score} 
+                categoryBreakdown={analysisResult.category_breakdown}
                 matchedSkills={analysisResult.matched_skills}
                 missingSkills={analysisResult.missing_skills}
                 hardSkills={analysisResult.hard_skills}

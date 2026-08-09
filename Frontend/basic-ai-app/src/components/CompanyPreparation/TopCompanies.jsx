@@ -1,8 +1,10 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import "./TopCompanies.css";
 import useRequireAuth from "../../hooks/useRequireAuth";
 
-const COMPANIES = [
+const API_BASE_URL = "http://localhost:8000/api";
+
+const DEFAULT_COMPANIES = [
   { name: "Google", logo: "🔍", type: "Product", color: "#4285F4" },
   { name: "Microsoft", logo: "💻", type: "Product", color: "#F25022" },
   { name: "Amazon", logo: "📦", type: "Product", color: "#FF9900" },
@@ -23,20 +25,56 @@ const COMPANIES = [
 ];
 
 const TopCompanies = ({ selectedCompany, onSelectCompany }) => {
-  const { requireAuth } = useRequireAuth();
+  const [companies, setCompanies] = useState(DEFAULT_COMPANIES);
+
+  useEffect(() => {
+    const loadDbCompanies = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/company/all`);
+        if (res.ok) {
+          const dbList = await res.json();
+          if (Array.isArray(dbList) && dbList.length > 0) {
+            // Merge DB companies with default logos/colors if missing
+            const merged = dbList.map((c) => {
+              const def = DEFAULT_COMPANIES.find(d => d.name.toLowerCase() === c.name.toLowerCase()) || {};
+              return {
+                name: c.name,
+                logo: c.logo || def.logo || "🏢",
+                type: c.industry || def.type || "Tech",
+                color: def.color || "#a855f7"
+              };
+            });
+
+            // Append default companies not in DB list
+            DEFAULT_COMPANIES.forEach((def) => {
+              if (!merged.some(m => m.name.toLowerCase() === def.name.toLowerCase())) {
+                merged.push(def);
+              }
+            });
+
+            setCompanies(merged);
+          }
+        }
+      } catch (err) {
+        console.warn("DB Company fetch fallback to static dataset:", err);
+      }
+    };
+
+    loadDbCompanies();
+  }, []);
 
   return (
     <section className="top-companies-section">
       <div className="top-companies-container">
         <div className="section-header-mini">
-          <span className="section-mini-tag">🏢 Choose Target</span>
-          <h2>Select a Company to Begin</h2>
-          <p>Toggle between top tech giants and service firms to view customized preparation tracks, questions, and guides.</p>
+          <span className="section-mini-tag">🏢 Target Selection</span>
+          <h2>Select Target Company</h2>
+          <p>Choose from top product & service companies to unlock customized multi-step hiring tracks and question banks.</p>
         </div>
 
         <div className="companies-row-selector">
-          {COMPANIES.map((company) => {
-            const isSelected = selectedCompany === company.name;
+          {companies.map((company) => {
+            const isSelected = selectedCompany.toLowerCase() === company.name.toLowerCase();
             return (
               <button
                 key={company.name}
@@ -51,7 +89,7 @@ const TopCompanies = ({ selectedCompany, onSelectCompany }) => {
                 <span className="tab-logo">{company.logo}</span>
                 <div className="tab-text">
                   <strong>{company.name}</strong>
-                  <span>{company.type} Based</span>
+                  <span>{company.type}</span>
                 </div>
                 {isSelected && <span className="active-dot">●</span>}
               </button>

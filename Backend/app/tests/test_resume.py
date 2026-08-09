@@ -39,6 +39,30 @@ def test_resume_optimizer():
 
     asyncio.run(run())
 
+def test_job_matcher_workflow():
+    async def run():
+        resume_data = {
+            "personal": {"name": "Alex Vance", "role": "Senior Developer"},
+            "summary": "Senior Developer with React and Python experience.",
+            "skills": ["React", "JavaScript", "Python", "FastAPI"],
+            "experience": [{"company": "Acme", "role": "Dev", "details": "Built APIs."}]
+        }
+        job_desc = "Looking for Senior Developer with React, Python, Docker, Kubernetes, and AWS experience."
+        
+        match = await ResumeService.calculate_job_match("res_1", resume_data, job_desc, "Senior Developer")
+        
+        assert "match_percentage" in match
+        assert match["match_percentage"] > 50
+        assert "skills_match_score" in match
+        assert "learning_roadmap" in match
+        assert len(match["learning_roadmap"]) == 4
+        assert "recommended_projects" in match
+        assert "recommended_certifications" in match
+        assert "mock_interview_questions" in match
+        assert "tailored_resume_preview" in match
+
+    asyncio.run(run())
+
 def test_save_or_update_resume_serialization():
     from fastapi.encoders import jsonable_encoder
     from unittest.mock import AsyncMock, MagicMock
@@ -54,10 +78,8 @@ def test_save_or_update_resume_serialization():
         }
         result = await ResumeService.save_or_update_resume("test_user_id", save_data, mock_db)
         
-        # Verify jsonable_encoder succeeds without raising TypeError/ValueError for ObjectId
         encoded = jsonable_encoder(result)
         assert encoded["id"] == "65a123456789abcdef012345"
         assert encoded["_id"] == "65a123456789abcdef012345"
 
     asyncio.run(run())
-

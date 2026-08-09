@@ -45,6 +45,21 @@ class StripeCheckoutRequest(BaseModel):
     amount: float
     currency: str = "USD"
 
+class RazorpayVerifyRequest(BaseModel):
+    razorpay_order_id: str
+    razorpay_payment_id: str
+    razorpay_signature: str
+    plan_type: str
+    billing_cycle: Optional[str] = "monthly"
+    amount: Optional[float] = 0.0
+    currency: Optional[str] = "INR"
+
+class StripeVerifyRequest(BaseModel):
+    session_id: str
+    plan_type: Optional[str] = None
+    billing_cycle: Optional[str] = "monthly"
+
+
 class SubscriptionDetailsResponse(BaseModel):
     plan_type: str
     billing_cycle: str
