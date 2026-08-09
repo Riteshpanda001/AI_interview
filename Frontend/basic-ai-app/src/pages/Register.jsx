@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import "./Register.css";
@@ -11,20 +11,12 @@ const Register = () => {
   const { register, verifyOtp, resendOtp, googleLogin } = useAuth();
 
   const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(() => searchParams.get("email") || "");
   const [phone, setPhone] = useState("");
   const [gender, setGender] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-
-  // Prefill email if redirecting from login
-  useEffect(() => {
-    const emailParam = searchParams.get("email");
-    if (emailParam) {
-      setEmail(emailParam);
-    }
-  }, [searchParams]);
 
   // Load Google OAuth script
   useEffect(() => {
@@ -55,7 +47,7 @@ const Register = () => {
   const [resendTimer, setResendTimer] = useState(0);
   const [isResending, setIsResending] = useState(false);
 
-  const inputRefs = Array.from({ length: 6 }, () => React.createRef());
+  const inputRefs = useRef([...Array(6)].map(() => React.createRef()));
 
   useEffect(() => {
     let timer;
@@ -94,7 +86,7 @@ const Register = () => {
       });
       setOtpDigits(newOtp);
       const nextFocus = Math.min(index + digits.length, 5);
-      inputRefs[nextFocus]?.current?.focus();
+      inputRefs.current[nextFocus]?.current?.focus();
       return;
     }
 
@@ -103,13 +95,13 @@ const Register = () => {
     setOtpDigits(newOtp);
 
     if (cleanValue && index < 5) {
-      inputRefs[index + 1]?.current?.focus();
+      inputRefs.current[index + 1]?.current?.focus();
     }
   };
 
   const handleKeyDown = (index, e) => {
     if (e.key === "Backspace" && !otpDigits[index] && index > 0) {
-      inputRefs[index - 1]?.current?.focus();
+      inputRefs.current[index - 1]?.current?.focus();
     }
   };
 
@@ -125,7 +117,7 @@ const Register = () => {
     });
     setOtpDigits(newOtp);
     const focusIdx = Math.min(digits.length, 5);
-    inputRefs[focusIdx]?.current?.focus();
+    inputRefs.current[focusIdx]?.current?.focus();
   };
 
   const validateRegistration = () => {
@@ -389,7 +381,7 @@ const Register = () => {
                 {otpDigits.map((digit, index) => (
                   <input
                     key={index}
-                    ref={inputRefs[index]}
+                    ref={(el) => { inputRefs.current[index] = el; }}
                     type="text"
                     maxLength="1"
                     className="otp-box-digit"

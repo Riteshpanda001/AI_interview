@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from typing import List, Dict, Any, Optional
 from datetime import datetime
 
@@ -24,8 +24,7 @@ class InterviewSessionResponse(BaseModel):
     questions: List[QuestionResponse]
     created_at: datetime
 
-    class Config:
-        populate_by_name = True
+    model_config = ConfigDict(populate_by_name=True)
 
 class SubmitAnswerRequest(BaseModel):
     question_id: str

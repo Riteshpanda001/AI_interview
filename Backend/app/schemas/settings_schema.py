@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import Optional
 
 class SettingsUpdateRequest(BaseModel):
@@ -18,5 +18,4 @@ class SettingsResponse(BaseModel):
     target_role: Optional[str]
     target_experience_years: Optional[int]
 
-    class Config:
-        populate_by_name = True
+    model_config = ConfigDict(populate_by_name=True)

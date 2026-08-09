@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import Navbar from "../components/Navbar";
@@ -46,6 +46,24 @@ const Profile = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState("");
 
+  const fetchSessions = useCallback(async () => {
+    try {
+      const data = await getSessions();
+      setSessionsList(data || []);
+    } catch (e) {
+      console.error("Failed to load sessions:", e);
+    }
+  }, [getSessions]);
+
+  const fetchActivity = useCallback(async () => {
+    try {
+      const data = await getLoginActivity();
+      setActivityLogs(data || []);
+    } catch (e) {
+      console.error("Failed to load activity:", e);
+    }
+  }, [getLoginActivity]);
+
   useEffect(() => {
     if (user) {
       setFullName(user.full_name || "");
@@ -60,25 +78,7 @@ const Profile = () => {
       fetchSessions();
       fetchActivity();
     }
-  }, [activeTab]);
-
-  const fetchSessions = async () => {
-    try {
-      const data = await getSessions();
-      setSessionsList(data || []);
-    } catch (e) {
-      console.error("Failed to load sessions:", e);
-    }
-  };
-
-  const fetchActivity = async () => {
-    try {
-      const data = await getLoginActivity();
-      setActivityLogs(data || []);
-    } catch (e) {
-      console.error("Failed to load activity:", e);
-    }
-  };
+  }, [activeTab, fetchSessions, fetchActivity]);
 
   const handleRevokeSingle = async (sessionId) => {
     try {

@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import List, Dict, Optional
 
 class CompanyResponse(BaseModel):
@@ -11,5 +11,4 @@ class CompanyResponse(BaseModel):
     typical_questions: List[Dict[str, str]]
     logo_url: Optional[str] = None
 
-    class Config:
-        populate_by_name = True
+    model_config = ConfigDict(populate_by_name=True)

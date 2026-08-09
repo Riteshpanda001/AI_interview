@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import Dict, Any, List
 from datetime import datetime
 
@@ -9,5 +9,4 @@ class DashboardMetricsResponse(BaseModel):
     recent_activity: List[Dict[str, Any]]
     last_updated: datetime
 
-    class Config:
-        populate_by_name = True
+    model_config = ConfigDict(populate_by_name=True)

@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import List, Optional
 from datetime import datetime
 
@@ -19,5 +19,4 @@ class InterviewFeedbackResponse(BaseModel):
     overall_summary: str
     created_at: datetime
 
-    class Config:
-        populate_by_name = True
+    model_config = ConfigDict(populate_by_name=True)

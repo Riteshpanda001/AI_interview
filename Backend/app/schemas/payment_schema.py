@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import Optional, List
 from datetime import datetime
 
@@ -23,8 +23,7 @@ class PaymentResponse(BaseModel):
     payment_method: str
     created_at: datetime
 
-    class Config:
-        populate_by_name = True
+    model_config = ConfigDict(populate_by_name=True)
 
 class RazorpayOrderRequest(BaseModel):
     plan_type: str

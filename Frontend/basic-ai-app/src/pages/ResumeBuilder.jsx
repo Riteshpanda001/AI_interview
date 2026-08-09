@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
@@ -78,12 +78,6 @@ const ResumeBuilder = () => {
     if (section) {
       section.scrollIntoView({ behavior: "smooth" });
     }
-  };
-
-  const handleSelectTemplate = (templateId) => {
-    requireAuth(() => {
-      setSelectedTemplate(templateId);
-    }, "/resume-builder");
   };
 
   const handleStartBuildingClick = () => {

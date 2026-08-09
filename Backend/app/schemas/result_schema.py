@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import Dict
 from datetime import datetime
 
@@ -10,5 +10,4 @@ class InterviewResultResponse(BaseModel):
     verdict: str
     created_at: datetime
 
-    class Config:
-        populate_by_name = True
+    model_config = ConfigDict(populate_by_name=True)

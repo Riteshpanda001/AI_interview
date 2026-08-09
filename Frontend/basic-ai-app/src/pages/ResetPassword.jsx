@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import logo from "../assets/prenova_ai_logo.png";
@@ -9,24 +9,15 @@ const ResetPassword = () => {
   const [searchParams] = useSearchParams();
   const { resetPassword } = useAuth();
 
-  const [email, setEmail] = useState("");
+  const [email] = useState(() => searchParams.get("email") || "");
   const [otp, setOtp] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
   const [isLoading, setIsLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState("");
+  const [errorMsg, setErrorMsg] = useState(() => searchParams.get("email") ? "" : "Invalid access link. Missing email parameter.");
   const [successMsg, setSuccessMsg] = useState("");
-
-  useEffect(() => {
-    const emailParam = searchParams.get("email");
-    if (emailParam) {
-      setEmail(emailParam);
-    } else {
-      setErrorMsg("Invalid access link. Missing email parameter.");
-    }
-  }, [searchParams]);
 
   const handleResetPasswordSubmit = async (e) => {
     e.preventDefault();

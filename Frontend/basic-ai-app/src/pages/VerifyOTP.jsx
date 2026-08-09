@@ -8,8 +8,7 @@ const VerifyOTP = () => {
   const [searchParams] = useSearchParams();
   const { verifyOtp, resendOtp } = useAuth();
 
-  const emailParam = searchParams.get("email") || "";
-  const [email, setEmail] = useState(emailParam);
+  const email = searchParams.get("email") || "";
 
   const [otpDigits, setOtpDigits] = useState(["", "", "", "", "", ""]);
   const [timeLeft, setTimeLeft] = useState(60); // 1 minute countdown (60 seconds)
@@ -18,28 +17,14 @@ const VerifyOTP = () => {
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
 
-  const inputRefs = [
-    useRef(null),
-    useRef(null),
-    useRef(null),
-    useRef(null),
-    useRef(null),
-    useRef(null),
-  ];
+  const inputRefs = useRef([...Array(6)].map(() => React.createRef()));
 
   // Auto focus first box on load
   useEffect(() => {
-    if (inputRefs[0]?.current) {
-      inputRefs[0].current.focus();
+    if (inputRefs.current[0]?.current) {
+      inputRefs.current[0].current.focus();
     }
   }, []);
-
-  // Update email if query param changes
-  useEffect(() => {
-    if (emailParam) {
-      setEmail(emailParam);
-    }
-  }, [emailParam]);
 
   // 5-Minute Countdown Timer (300 seconds)
   useEffect(() => {
@@ -81,13 +66,13 @@ const VerifyOTP = () => {
 
     // Auto Focus Next Input Box
     if (cleanValue && index < 5) {
-      inputRefs[index + 1]?.current?.focus();
+      inputRefs.current[index + 1]?.current?.focus();
     }
   };
 
   const handleKeyDown = (index, e) => {
     if (e.key === "Backspace" && !otpDigits[index] && index > 0) {
-      inputRefs[index - 1]?.current?.focus();
+      inputRefs.current[index - 1]?.current?.focus();
     }
   };
 
@@ -103,7 +88,7 @@ const VerifyOTP = () => {
     });
     setOtpDigits(newOtp);
     const focusIdx = Math.min(digits.length, 5);
-    inputRefs[focusIdx]?.current?.focus();
+    inputRefs.current[focusIdx]?.current?.focus();
   };
 
   const handleResendOTP = async () => {
@@ -122,8 +107,8 @@ const VerifyOTP = () => {
       setSuccessMsg("A new 6-digit verification code has been sent to your email.");
       setTimeLeft(60); // Reset timer to 1 minute
       setOtpDigits(["", "", "", "", "", ""]);
-      if (inputRefs[0]?.current) {
-        inputRefs[0].current.focus();
+      if (inputRefs.current[0]?.current) {
+        inputRefs.current[0].current.focus();
       }
     } catch (err) {
       setErrorMsg(err.message || "Failed to resend verification code.");
@@ -185,7 +170,7 @@ const VerifyOTP = () => {
             {otpDigits.map((digit, idx) => (
               <input
                 key={idx}
-                ref={inputRefs[idx]}
+                ref={(el) => { inputRefs.current[idx] = el; }}
                 type="text"
                 maxLength="1"
                 className={`otp-single-box ${digit ? "filled" : ""}`}

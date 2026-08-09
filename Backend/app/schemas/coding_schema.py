@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import List, Dict, Any, Optional
 from datetime import datetime
 
@@ -10,8 +10,7 @@ class CodingProblemResponse(BaseModel):
     description: str
     starter_code: Dict[str, str]
 
-    class Config:
-        populate_by_name = True
+    model_config = ConfigDict(populate_by_name=True)
 
 class CodingSubmitRequest(BaseModel):
     language: str
@@ -27,5 +26,4 @@ class CodingSubmissionResponse(BaseModel):
     evaluation_result: Dict[str, Any]
     created_at: datetime
 
-    class Config:
-        populate_by_name = True
+    model_config = ConfigDict(populate_by_name=True)

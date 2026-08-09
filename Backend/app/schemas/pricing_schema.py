@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import List
 
 class PricingResponse(BaseModel):
@@ -9,5 +9,4 @@ class PricingResponse(BaseModel):
     features: List[str]
     plan_type: str
 
-    class Config:
-        populate_by_name = True
+    model_config = ConfigDict(populate_by_name=True)

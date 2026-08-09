@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import ResumePreview from "../components/resumeBuilder/ResumePreview";
 import "./SharedResumePage.css";
@@ -13,7 +13,7 @@ const SharedResumePage = () => {
   const [passwordInput, setPasswordInput] = useState("");
   const [authError, setAuthError] = useState("");
 
-  const fetchSharedResume = async (pw = "") => {
+  const fetchSharedResume = useCallback(async (pw = "") => {
     setLoading(true);
     setAuthError("");
     try {
@@ -46,11 +46,11 @@ const SharedResumePage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [shareToken]);
 
   useEffect(() => {
     fetchSharedResume();
-  }, [shareToken]);
+  }, [fetchSharedResume]);
 
   const handlePasswordSubmit = (e) => {
     e.preventDefault();

@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from typing import List, Optional, Dict, Any
 from datetime import datetime
 
@@ -72,8 +72,7 @@ class ATSAnalysisResponse(BaseModel):
     ai_engine: Optional[str] = "Hugging Face & Gemini Hybrid Engine"
     created_at: datetime
 
-    class Config:
-        populate_by_name = True
+    model_config = ConfigDict(populate_by_name=True)
 
 class TailorResumeRequest(BaseModel):
     resume_data: Dict[str, Any]
