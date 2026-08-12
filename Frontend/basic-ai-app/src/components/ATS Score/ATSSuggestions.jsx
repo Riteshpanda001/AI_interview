@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import "./ATSSuggestions.css";
 
-const ATSSuggestions = ({ recommendations = [], detailedFeedback = "", tailoredBulletSuggestions = [] }) => {
+const ATSSuggestions = ({ recommendations = [], detailedFeedback = "", tailoredBulletSuggestions = [], optimizedSummary = "", tailoredProjects = [] }) => {
   const [copiedIdx, setCopiedIdx] = useState(null);
+  const [copiedSummary, setCopiedSummary] = useState(false);
+  const [copiedProjectIdx, setCopiedProjectIdx] = useState(null);
   const [suggestions, setSuggestions] = useState([]);
 
   useEffect(() => {
@@ -54,6 +56,18 @@ const ATSSuggestions = ({ recommendations = [], detailedFeedback = "", tailoredB
     setTimeout(() => setCopiedIdx(null), 2000);
   };
 
+  const handleCopySummary = (text) => {
+    navigator.clipboard.writeText(text);
+    setCopiedSummary(true);
+    setTimeout(() => setCopiedSummary(false), 2000);
+  };
+
+  const handleCopyProject = (text, idx) => {
+    navigator.clipboard.writeText(text);
+    setCopiedProjectIdx(idx);
+    setTimeout(() => setCopiedProjectIdx(null), 2000);
+  };
+
   const toggleExpand = (id) => {
     setSuggestions(prev => prev.map(s => s.id === id ? { ...s, expanded: !s.expanded } : s));
   };
@@ -62,7 +76,7 @@ const ATSSuggestions = ({ recommendations = [], detailedFeedback = "", tailoredB
     <div className="ats-suggestions-container">
       <div className="suggestions-header">
         <h2>⚡ AI Resume Rewrites & Recommendations</h2>
-        <p>Intelligent bullet point rewrites tailored directly for target job keyword alignment.</p>
+        <p>Intelligent summary optimization, project rewrites, and keyword alignment suggestions.</p>
         {detailedFeedback && (
           <div className="feedback-overview-box">
             <h4>💡 AI Recruiter Fit Diagnosis</h4>
@@ -70,6 +84,60 @@ const ATSSuggestions = ({ recommendations = [], detailedFeedback = "", tailoredB
           </div>
         )}
       </div>
+
+      {/* AI OPTIMIZED PROFESSIONAL SUMMARY */}
+      {optimizedSummary && (
+        <div className="optimized-summary-card" style={{ background: "linear-gradient(135deg, rgba(124, 58, 237, 0.08) 0%, rgba(168, 85, 247, 0.05) 100%)", border: "1px solid rgba(124, 58, 237, 0.25)", borderRadius: "16px", padding: "1.25rem", marginBottom: "1.5rem" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.75rem" }}>
+            <h3 style={{ color: "#7c3aed", margin: 0, fontSize: "1.1rem" }}>🌟 AI-Optimized Professional Summary</h3>
+            <button
+              onClick={() => handleCopySummary(optimizedSummary)}
+              style={{ padding: "0.4rem 0.85rem", borderRadius: "8px", border: "none", background: "#7c3aed", color: "#fff", fontWeight: "600", fontSize: "0.85rem", cursor: "pointer" }}
+            >
+              {copiedSummary ? "✓ Copied!" : "📋 Copy Optimized Summary"}
+            </button>
+          </div>
+          <p style={{ color: "#334155", fontSize: "0.95rem", lineHeight: "1.6", margin: 0, fontStyle: "italic" }}>
+            "{optimizedSummary}"
+          </p>
+        </div>
+      )}
+
+      {/* AI PERFECTED PROJECT DESCRIPTIONS (STAR FRAMEWORK) */}
+      {tailoredProjects && tailoredProjects.length > 0 && (
+        <div className="tailored-projects-section" style={{ marginBottom: "1.5rem" }}>
+          <h3 style={{ fontSize: "1.1rem", color: "#1e293b", marginBottom: "0.75rem" }}>🚀 AI-Perfected Project Descriptions (STAR Method)</h3>
+          <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+            {tailoredProjects.map((p, idx) => (
+              <div key={idx} style={{ background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: "14px", padding: "1.25rem", boxShadow: "0 4px 12px rgba(0,0,0,0.03)" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
+                  <h4 style={{ color: "#0f172a", margin: 0, fontSize: "1rem" }}>📌 {p.name}</h4>
+                  <button
+                    onClick={() => handleCopyProject(p.optimized_star_description, idx)}
+                    style={{ padding: "0.35rem 0.75rem", borderRadius: "6px", border: "1px solid #cbd5e1", background: "#f8fafc", color: "#475569", fontWeight: "600", fontSize: "0.8rem", cursor: "pointer" }}
+                  >
+                    {copiedProjectIdx === idx ? "✓ Copied!" : "📋 Copy Project Description"}
+                  </button>
+                </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "0.75rem" }}>
+                  {p.original_description && (
+                    <div style={{ background: "#f1f5f9", padding: "0.75rem", borderRadius: "8px", fontSize: "0.85rem" }}>
+                      <span style={{ color: "#64748b", fontWeight: "700", display: "block", marginBottom: "0.25rem" }}>Original Description:</span>
+                      <p style={{ margin: 0, color: "#475569" }}>"{p.original_description}"</p>
+                    </div>
+                  )}
+
+                  <div style={{ background: "#f0fdf4", border: "1px solid #bbf7d0", padding: "0.75rem", borderRadius: "8px", fontSize: "0.88rem" }}>
+                    <span style={{ color: "#16a34a", fontWeight: "700", display: "block", marginBottom: "0.25rem" }}>✨ AI Optimized (STAR & High Impact Metrics):</span>
+                    <p style={{ margin: 0, color: "#166534", fontWeight: "500" }}>"{p.optimized_star_description}"</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Tailored Bullets Section */}
       {tailoredBulletSuggestions && tailoredBulletSuggestions.length > 0 && (

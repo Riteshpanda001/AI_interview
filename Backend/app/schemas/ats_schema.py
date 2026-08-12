@@ -69,6 +69,9 @@ class ATSAnalysisResponse(BaseModel):
     interview_questions: Optional[List[JobInterviewQuestion]] = []
     recommendations: List[str]
     detailed_feedback: str
+    optimized_summary: Optional[str] = ""
+    weak_keywords_audit: Optional[Dict[str, Any]] = None
+    tailored_projects: Optional[List[Dict[str, Any]]] = []
     ai_engine: Optional[str] = "Hugging Face & Gemini Hybrid Engine"
     created_at: datetime
 

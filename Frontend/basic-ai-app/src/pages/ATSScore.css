@@ -567,6 +567,12 @@ margin-bottom:50px;
   background: #ffffff;
   border-bottom: 1px solid #e2e8f0;
   overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.workspace-tab-bar::-webkit-scrollbar {
+  display: none;
 }
 
 .tab-item {

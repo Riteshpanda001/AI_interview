@@ -138,12 +138,13 @@ class AdminService:
         problem_data["slug"] = slug
         problem_data["updated_at"] = datetime.now(timezone.utc)
 
+        update_doc = {k: v for k, v in problem_data.items() if k not in ["_id", "id"]}
         existing = await db["coding_problems"].find_one({"slug": slug})
         if existing:
-            await db["coding_problems"].update_one({"_id": existing["_id"]}, {"$set": problem_data})
+            await db["coding_problems"].update_one({"_id": existing["_id"]}, {"$set": update_doc})
             problem_data["id"] = str(existing["_id"])
         else:
-            result = await db["coding_problems"].insert_one(problem_data)
+            result = await db["coding_problems"].insert_one(update_doc)
             problem_data["id"] = str(result.inserted_id)
 
         return problem_data

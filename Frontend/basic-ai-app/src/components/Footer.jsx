@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import "./Footer.css";
 import logo from "../assets/prenova_ai_logo.png";
 
@@ -25,10 +26,10 @@ const Footer = () => {
 
           <h3>Quick Links</h3>
 
-          <a href="/">Home</a>
-          <a href="/#features">Features</a>
-          <a href="/pricing">Pricing</a>
-          <a href="/#faq">FAQ</a>
+          <Link to="/">Home</Link>
+          <Link to="/#features">Features</Link>
+          <Link to="/pricing">Pricing</Link>
+          <Link to="/#faq">FAQ</Link>
 
         </div>
 
@@ -37,10 +38,10 @@ const Footer = () => {
 
           <h3>Resources</h3>
 
-          <a href="/mock-interview">AI Mock Interview</a>
-          <a href="/ats-score">ATS Resume Analyzer</a>
-          <a href="/coding-practice">Coding Practice</a>
-          <a href="/company-preparation">Company Preparation</a>
+          <Link to="/mock-interview">AI Mock Interview</Link>
+          <Link to="/ats-score">ATS Resume Analyzer</Link>
+          <Link to="/coding-practice">Coding Practice</Link>
+          <Link to="/company-preparation">Company Preparation</Link>
 
         </div>
 

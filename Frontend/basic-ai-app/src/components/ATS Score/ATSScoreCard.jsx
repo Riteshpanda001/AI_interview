@@ -10,9 +10,11 @@ const ATSScoreCard = ({
   hardSkills,
   softSkills,
   experienceLevel,
-  impactQuantification
+  impactQuantification,
+  weakKeywordsAudit
 }) => {
   const breakdownData = categoryBreakdown || category_breakdown;
+  const weakWords = weakKeywordsAudit?.weak_words_found || ["worked on", "responsible for"];
 
   // Use exact 7-component deterministic category breakdown if available
   const categories = breakdownData ? [
@@ -72,18 +74,58 @@ const ATSScoreCard = ({
         </div>
       </div>
 
-      <div className="score-breakdown">
-        <h4>7-Component Deterministic Match Breakdown (100% Total)</h4>
+      {/* QUICK AUDIT HIGHLIGHTS PANEL (ATS SCORE, MISSING SKILLS, ERROR KEYWORDS) */}
+      <div className="quick-audit-highlights" style={{ marginTop: "1.25rem", paddingTop: "1.25rem", borderTop: "1px solid #e2e8f0", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "1rem" }}>
+        {/* ATS Score Card */}
+        <div style={{ background: "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)", padding: "16px 20px", borderRadius: "14px", color: "#ffffff", boxShadow: "0 8px 20px rgba(124, 58, 237, 0.25)" }}>
+          <span style={{ fontSize: "12px", textTransform: "uppercase", letterSpacing: "1px", fontWeight: "700", opacity: 0.9, display: "block", marginBottom: "6px" }}>🎯 Resume ATS Score</span>
+          <strong style={{ fontSize: "1.6rem", fontWeight: "800", display: "block" }}>{score} / 100</strong>
+          <span style={{ fontSize: "13px", fontWeight: "600", opacity: 0.95, marginTop: "4px", display: "block" }}>
+            {score >= 80 ? "✓ High Priority Candidate Fit" : score >= 60 ? "⚡ Moderate Alignment" : "⚠️ Needs Skill Enhancement"}
+          </span>
+        </div>
+
+        {/* Missing Skills Card */}
+        <div style={{ background: "#fffbeb", border: "1px solid #fde68a", padding: "16px 20px", borderRadius: "14px", boxShadow: "0 4px 12px rgba(245, 158, 11, 0.05)" }}>
+          <span style={{ fontSize: "12px", textTransform: "uppercase", letterSpacing: "1px", fontWeight: "700", color: "#b45309", display: "block", marginBottom: "8px" }}>⚠️ Missing Skills ({missingSkills.length})</span>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+            {missingSkills.length > 0 ? (
+              missingSkills.slice(0, 5).map((sk, idx) => (
+                <span key={idx} style={{ background: "#fef3c7", color: "#92400e", border: "1px solid #fcd34d", padding: "3px 10px", borderRadius: "6px", fontSize: "13px", fontWeight: "600" }}>
+                  {sk}
+                </span>
+              ))
+            ) : (
+              <span style={{ color: "#059669", fontSize: "13px", fontWeight: "600" }}>✓ Zero missing critical skills!</span>
+            )}
+          </div>
+        </div>
+
+        {/* Error / Weak Keywords Card */}
+        <div style={{ background: "#fef2f2", border: "1px solid #fca5a5", padding: "16px 20px", borderRadius: "14px", boxShadow: "0 4px 12px rgba(239, 68, 68, 0.05)" }}>
+          <span style={{ fontSize: "12px", textTransform: "uppercase", letterSpacing: "1px", fontWeight: "700", color: "#b91c1c", display: "block", marginBottom: "8px" }}>🚨 Error / Weak Keywords ({weakWords.length})</span>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+            {weakWords.map((word, idx) => (
+              <span key={idx} style={{ background: "#fee2e2", color: "#991b1b", border: "1px solid #fecaca", padding: "3px 10px", borderRadius: "6px", fontSize: "13px", fontWeight: "600" }}>
+                "{word}"
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="score-breakdown" style={{ marginTop: "1.5rem" }}>
+        <h4 style={{ fontSize: "1.1rem", color: "#1e293b", marginBottom: "1rem", fontWeight: "700" }}>7-Component Deterministic Match Breakdown (100% Total)</h4>
         <div className="breakdown-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "12px" }}>
           {categories.map((cat, idx) => {
             const pct = Math.round((cat.value / cat.max) * 100);
             return (
-              <div key={idx} className="breakdown-item" style={{ background: "rgba(15, 23, 42, 0.6)", padding: "10px 14px", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.05)" }}>
-                <div className="breakdown-info" style={{ display: "flex", justifyContent: "space-between", marginBottom: "4px" }}>
-                  <span style={{ fontSize: "13px", fontWeight: "600", color: "#cbd5e1" }}>{cat.name} ({cat.weight})</span>
+              <div key={idx} className="breakdown-item" style={{ background: "#f8fafc", padding: "12px 16px", borderRadius: "10px", border: "1px solid #e2e8f0" }}>
+                <div className="breakdown-info" style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
+                  <span style={{ fontSize: "13px", fontWeight: "600", color: "#334155" }}>{cat.name} ({cat.weight})</span>
                   <strong style={{ fontSize: "13px", color: cat.color }}>{cat.value} / {cat.max}</strong>
                 </div>
-                <div className="breakdown-bar-bg" style={{ height: "6px", background: "rgba(255,255,255,0.1)", borderRadius: "3px", overflow: "hidden" }}>
+                <div className="breakdown-bar-bg" style={{ height: "7px", background: "#e2e8f0", borderRadius: "4px", overflow: "hidden" }}>
                   <div 
                     className="breakdown-bar-fill" 
                     style={{ width: `${pct}%`, backgroundColor: cat.color, height: "100%", transition: "width 0.5s ease" }}

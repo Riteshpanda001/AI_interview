@@ -262,34 +262,9 @@ const ResumeUpload = ({
 
   return (
     <div className="resume-upload-container" id="upload-section">
-      {/* Step Tracker Header */}
-      <div className="matcher-workflow-stepper">
-        <div className="stepper-item active">
-          <span className="step-num">1</span>
-          <span className="step-label">Select / Upload Resume</span>
-        </div>
-        <div className={`stepper-item ${resumeData ? "active" : ""}`}>
-          <span className="step-num">2</span>
-          <span className="step-label">AI Extraction & Audit</span>
-        </div>
-        <div className={`stepper-item ${jobTitle ? "active" : ""}`}>
-          <span className="step-num">3</span>
-          <span className="step-label">Target Role & Criteria</span>
-        </div>
-        <div className={`stepper-item ${jobDescription ? "active" : ""}`}>
-          <span className="step-num">4</span>
-          <span className="step-label">Job Description</span>
-        </div>
-        <div className={`stepper-item ${analyzing ? "active" : ""}`}>
-          <span className="step-num">5</span>
-          <span className="step-label">Matching Engine</span>
-        </div>
-      </div>
-
-      {/* STEP 1: RESUME UPLOAD */}
+      {/* RESUME UPLOAD CARD */}
       <div className="matcher-step-card">
         <div className="step-card-header">
-          <span className="step-badge">Step 1</span>
           <h3>Upload Resume File</h3>
         </div>
 
@@ -324,14 +299,43 @@ const ResumeUpload = ({
               </div>
             </div>
           )}
+
+          {/* Analyze ATS Score Action Button */}
+          <div style={{ marginTop: "1.25rem", textAlign: "center" }}>
+            <button
+              className="analyze-ats-direct-btn"
+              onClick={onStartScan}
+              disabled={analyzing}
+              style={{
+                width: "100%",
+                padding: "0.85rem 1.5rem",
+                borderRadius: "12px",
+                border: "none",
+                background: analyzing 
+                  ? "#94a3b8" 
+                  : "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)",
+                color: "#ffffff",
+                fontSize: "1rem",
+                fontWeight: "700",
+                cursor: analyzing ? "not-allowed" : "pointer",
+                boxShadow: analyzing ? "none" : "0 6px 20px rgba(124, 58, 237, 0.35)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "8px",
+                transition: "all 0.3s ease"
+              }}
+            >
+              {analyzing ? "⚡ Analyzing ATS Score..." : "🎯 Analyze ATS Score"}
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* STEP 2: AI RESUME PARSER & QUALITY AUDIT */}
+      {/* AI RESUME PARSER & QUALITY AUDIT */}
       {resumeData && (
         <div className="matcher-step-card animated-fade-in">
           <div className="step-card-header">
-            <span className="step-badge">Step 2</span>
             <h3>AI Resume Extractor & Quality Audit</h3>
           </div>
 
@@ -364,11 +368,10 @@ const ResumeUpload = ({
         </div>
       )}
 
-      {/* STEP 3: TARGET JOB ROLE & CRITERIA */}
+      {/* TARGET JOB ROLE & CRITERIA */}
       {resumeData && (
         <div className="matcher-step-card animated-fade-in">
           <div className="step-card-header">
-            <span className="step-badge">Step 3</span>
             <h3>Select Target Job Role & Criteria</h3>
           </div>
 
@@ -426,11 +429,10 @@ const ResumeUpload = ({
         </div>
       )}
 
-      {/* STEP 4: CHOOSE ANALYSIS METHOD & JOB DESCRIPTION */}
+      {/* CHOOSE ANALYSIS METHOD & JOB DESCRIPTION */}
       {resumeData && (
         <div className="matcher-step-card animated-fade-in">
           <div className="step-card-header">
-            <span className="step-badge">Step 4</span>
             <h3>Choose Analysis Method & Job Description</h3>
           </div>
 

@@ -17,18 +17,25 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 32px;
-  padding-bottom: 20px;
+  padding-bottom: 16px;
   border-bottom: 1px solid rgba(168, 85, 247, 0.15);
-  gap: 8px;
+  gap: 12px;
   overflow-x: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+
+.matcher-workflow-stepper::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
 }
 
 .stepper-item {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   opacity: 0.45;
   transition: all 0.3s ease;
+  flex-shrink: 0;
 }
 
 .stepper-item.active {
@@ -36,17 +43,18 @@
 }
 
 .step-num {
-  width: 30px;
-  height: 30px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   background: rgba(168, 85, 247, 0.15);
   color: var(--text-color, #7c3aed);
   font-weight: 700;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   display: flex;
   align-items: center;
   justify-content: center;
   border: 1px solid rgba(168, 85, 247, 0.3);
+  flex-shrink: 0;
 }
 
 .stepper-item.active .step-num {
@@ -56,7 +64,7 @@
 }
 
 .step-label {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 600;
   color: var(--text-heading, #1f2937);
   white-space: nowrap;

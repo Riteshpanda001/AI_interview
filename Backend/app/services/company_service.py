@@ -82,12 +82,13 @@ class CompanyService:
         company_data["slug"] = slug
         company_data["updated_at"] = datetime.now(timezone.utc)
 
+        update_doc = {k: v for k, v in company_data.items() if k not in ["_id", "id"]}
         existing = await db["companies"].find_one({"slug": slug})
         if existing:
-            await db["companies"].update_one({"_id": existing["_id"]}, {"$set": company_data})
+            await db["companies"].update_one({"_id": existing["_id"]}, {"$set": update_doc})
             company_data["id"] = str(existing["_id"])
         else:
-            result = await db["companies"].insert_one(company_data)
+            result = await db["companies"].insert_one(update_doc)
             company_data["id"] = str(result.inserted_id)
 
         return company_data

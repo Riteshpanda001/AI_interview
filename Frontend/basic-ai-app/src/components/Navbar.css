@@ -72,9 +72,9 @@
 .nav-links a {
   text-decoration: none;
   color: #111827;
-  font-size: 18px;
-  font-weight: 600;
-  padding: 12px 20px;
+  font-size: 20px;
+  font-weight: 700;
+  padding: 12px 22px;
   border-radius: 999px;
   white-space: nowrap;
   transition: all 0.35s ease;
@@ -294,7 +294,7 @@
 
     transition:transform .3s ease;
 
-    font-size:12px;
+    font-size:14px;
 
 }
 .features-menu:hover .arrow,
@@ -548,6 +548,47 @@
   letter-spacing: 0.3px;
 }
 
+.profile-complete-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: #e0f2fe;
+  color: #0284c7;
+  letter-spacing: 0.3px;
+}
+
+/* Role & Level Tags Row */
+.profile-dropdown-role-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 0 20px 12px;
+}
+
+.profile-role-tag {
+  font-size: 11px;
+  font-weight: 600;
+  color: #4b5563;
+  background: #f3f4f6;
+  padding: 4px 10px;
+  border-radius: 6px;
+  display: inline-block;
+  max-width: fit-content;
+}
+
+.profile-level-tag {
+  font-size: 11px;
+  font-weight: 600;
+  color: #6b21a8;
+  background: #faf5ff;
+  border: 1px solid #f3e8ff;
+  padding: 4px 10px;
+  border-radius: 6px;
+  display: inline-block;
+  max-width: fit-content;
+}
+
 /* Member Since Row */
 .profile-dropdown-meta {
   display: flex;
@@ -567,6 +608,35 @@
   font-size: 12px;
   color: #374151;
   font-weight: 600;
+}
+
+/* Profile Dropdown Items (Dashboard, Profile) */
+.profile-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 20px;
+  background: transparent;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2937;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.25s ease;
+}
+
+.profile-dropdown-item:hover {
+  background: #f5f3ff;
+  color: #7c3aed;
+}
+
+.profile-dropdown-item-icon {
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Sign Out Button */

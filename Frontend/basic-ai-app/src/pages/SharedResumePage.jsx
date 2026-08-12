@@ -3,6 +3,8 @@ import { useParams } from "react-router-dom";
 import ResumePreview from "../components/resumeBuilder/ResumePreview";
 import "./SharedResumePage.css";
 
+const API_BASE_URL = "http://localhost:8000/api";
+
 const SharedResumePage = () => {
   const { shareToken } = useParams();
   const [resumeData, setResumeData] = useState(null);
@@ -17,11 +19,9 @@ const SharedResumePage = () => {
     setLoading(true);
     setAuthError("");
     try {
-      const url = pw 
-        ? `http://localhost:8000/api/resume/public/${shareToken}`
-        : `http://localhost:8000/api/resume/public/${shareToken}`;
+      const url = `${API_BASE_URL}/resume/public/${shareToken}`;
       
-      const res = await fetch(pw ? `http://localhost:8000/api/resume/public/${shareToken}/authenticate` : url, {
+      const res = await fetch(pw ? `${API_BASE_URL}/resume/public/${shareToken}/authenticate` : url, {
         method: pw ? "POST" : "GET",
         headers: { "Content-Type": "application/json" },
         body: pw ? JSON.stringify({ password: pw }) : undefined

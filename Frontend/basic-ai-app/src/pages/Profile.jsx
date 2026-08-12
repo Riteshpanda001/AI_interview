@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import Navbar from "../components/Navbar";
@@ -11,20 +11,18 @@ const Profile = () => {
     updateProfile,
     changePassword,
     logout,
-    getSessions,
-    revokeSession,
-    revokeOtherSessions,
-    getLoginActivity,
     deleteAccount,
   } = useAuth();
 
   const [activeTab, setActiveTab] = useState("info");
 
   // Profile Form States
-  const [fullName, setFullName] = useState("");
-  const [targetRole, setTargetRole] = useState("Software Engineer");
-  const [experienceLevel, setExperienceLevel] = useState("Mid Level");
-  const [bio, setBio] = useState("");
+  const [fullName, setFullName] = useState(() => user?.full_name || "");
+  const [phone, setPhone] = useState(() => user?.phone || "");
+  const [gender, setGender] = useState(() => user?.gender || "Male");
+  const [targetRole, setTargetRole] = useState(() => user?.target_role || "Software Engineer");
+  const [experienceLevel, setExperienceLevel] = useState(() => user?.experience_level || "Mid Level");
+  const [bio, setBio] = useState(() => user?.bio || "");
   const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
   const [profileMessage, setProfileMessage] = useState({ type: "", text: "" });
 
@@ -35,70 +33,22 @@ const Profile = () => {
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [securityMessage, setSecurityMessage] = useState({ type: "", text: "" });
 
-  // Sessions & Activity States
-  const [sessionsList, setSessionsList] = useState([]);
-  const [activityLogs, setActivityLogs] = useState([]);
-  const [sessionMsg, setSessionMsg] = useState("");
-
   // Account Deletion Modal States
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deletePassword, setDeletePassword] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState("");
 
-  const fetchSessions = useCallback(async () => {
-    try {
-      const data = await getSessions();
-      setSessionsList(data || []);
-    } catch (e) {
-      console.error("Failed to load sessions:", e);
-    }
-  }, [getSessions]);
-
-  const fetchActivity = useCallback(async () => {
-    try {
-      const data = await getLoginActivity();
-      setActivityLogs(data || []);
-    } catch (e) {
-      console.error("Failed to load activity:", e);
-    }
-  }, [getLoginActivity]);
-
   useEffect(() => {
     if (user) {
-      setFullName(user.full_name || "");
-      setTargetRole(user.target_role || "Software Engineer");
-      setExperienceLevel(user.experience_level || "Mid Level");
-      setBio(user.bio || "");
+      if (user.full_name) setFullName(user.full_name);
+      if (user.phone) setPhone(user.phone);
+      if (user.gender) setGender(user.gender);
+      if (user.target_role) setTargetRole(user.target_role);
+      if (user.experience_level) setExperienceLevel(user.experience_level);
+      if (user.bio) setBio(user.bio);
     }
-  }, [user]);
-
-  useEffect(() => {
-    if (activeTab === "account" || activeTab === "security") {
-      fetchSessions();
-      fetchActivity();
-    }
-  }, [activeTab, fetchSessions, fetchActivity]);
-
-  const handleRevokeSingle = async (sessionId) => {
-    try {
-      await revokeSession(sessionId);
-      setSessionMsg("Session revoked successfully.");
-      fetchSessions();
-    } catch (err) {
-      setSessionMsg(err.message || "Failed to revoke session.");
-    }
-  };
-
-  const handleRevokeOthers = async () => {
-    try {
-      await revokeOtherSessions();
-      setSessionMsg("All other active sessions have been revoked.");
-      fetchSessions();
-    } catch (err) {
-      setSessionMsg(err.message || "Failed to revoke other sessions.");
-    }
-  };
+  }, [user?.full_name, user?.phone, user?.gender, user?.target_role, user?.experience_level, user?.bio]);
 
   const handleDeleteAccount = async (e) => {
     e.preventDefault();
@@ -135,6 +85,8 @@ const Profile = () => {
     try {
       await updateProfile({
         full_name: fullName,
+        phone,
+        gender,
         target_role: targetRole,
         experience_level: experienceLevel,
         bio,
@@ -232,7 +184,7 @@ const Profile = () => {
             className={`tab-btn ${activeTab === "account" ? "active" : ""}`}
             onClick={() => setActiveTab("account")}
           >
-            ⚡ Sessions & Devices
+            💳 Subscription & Plan
           </button>
         </div>
 
@@ -266,6 +218,29 @@ const Profile = () => {
                   <label>Email Address</label>
                   <input type="email" value={user.email} disabled className="disabled-input" />
                   <span className="input-hint">Email cannot be changed directly</span>
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Phone Number</label>
+                  <input
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="e.g. +1 555-0199"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Gender</label>
+                  <select
+                    value={gender}
+                    onChange={(e) => setGender(e.target.value)}
+                  >
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                  </select>
                 </div>
               </div>
 
@@ -379,156 +354,50 @@ const Profile = () => {
                   {isChangingPassword ? "Updating Password..." : "Change Password"}
                 </button>
               </form>
-
-              {/* Login Activity Log */}
-              <div className="activity-section">
-                <h2>Recent Login Activity</h2>
-                <p className="form-subheading">Track recent sign-in history across your devices and locations.</p>
-
-                <div className="activity-table-wrapper">
-                  <table className="activity-table">
-                    <thead>
-                      <tr>
-                        <th>Status</th>
-                        <th>Device & Browser</th>
-                        <th>IP Address</th>
-                        <th>Auth Method</th>
-                        <th>Timestamp</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {activityLogs.length > 0 ? (
-                        activityLogs.map((log) => (
-                          <tr key={log.id}>
-                            <td>
-                              <span className={`status-tag ${log.status === "SUCCESS" ? "success" : "failed"}`}>
-                                {log.status === "SUCCESS" ? "✓ Success" : "✕ Failed"}
-                              </span>
-                            </td>
-                            <td>{log.device || "Web Browser"}</td>
-                            <td>{log.ip_address || "127.0.0.1"}</td>
-                            <td>{log.provider === "google" ? "Google OAuth" : "Email & Password"}</td>
-                            <td>
-                              {log.timestamp
-                                ? new Date(log.timestamp).toLocaleString("en-US", {
-                                    month: "short",
-                                    day: "numeric",
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                  })
-                                : "Just now"}
-                            </td>
-                          </tr>
-                        ))
-                      ) : (
-                        <tr>
-                          <td colSpan="5" style={{ textAlign: "center", opacity: 0.6, padding: "20px" }}>
-                            No login activity recorded yet.
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
             </div>
           )}
 
-          {/* TAB 3: SESSIONS & DEVICES */}
+          {/* TAB 3: SUBSCRIPTION & PLAN */}
           {activeTab === "account" && (
             <div className="account-overview">
-              <h2>Membership & Active Sessions</h2>
-              <p className="form-subheading">Overview of your PreNovaAi subscription and connected devices.</p>
+              <h2>Subscription & Plan</h2>
+              <p className="form-subheading">Manage your PreNova AI membership, plan features, and pricing options.</p>
 
-              <div className="overview-cards">
-                <div className="overview-card">
-                  <span className="card-label">Current Tier</span>
-                  <span className="card-val highlight">{(user.plan_type || "Free").toUpperCase()}</span>
-                  <p className="card-desc">Includes AI interviews, resume parsing, and coding practice.</p>
+              <div className="subscription-card">
+                <div className="subscription-card-header">
+                  <div className="subscription-plan-details">
+                    <span className="subscription-badge">
+                      {(user.plan_type || "Free").toUpperCase()} PLAN
+                    </span>
+                    <h3>Current Membership: {(user.plan_type || "Free").toUpperCase()}</h3>
+                    <p>Upgrade to unlock unlimited AI mock interviews, detailed ATS analytics, and premium practice tools.</p>
+                  </div>
+                  <button
+                    type="button"
+                    className="btn-upgrade-subscription"
+                    onClick={() => navigate("/pricing")}
+                  >
+                    ⚡ View Plans & Pricing
+                  </button>
                 </div>
 
-                <div className="overview-card">
-                  <span className="card-label">Verification Status</span>
-                  <span className="card-val success">Verified Account</span>
-                  <p className="card-desc">Email & OTP identity verified.</p>
-                </div>
-
-                <div className="overview-card">
-                  <span className="card-label">Account Method</span>
-                  <span className="card-val">
-                    {user.provider === "google" ? "Google Account" : "Email Login"}
-                  </span>
-                  <p className="card-desc">Connected identity provider.</p>
+                <div className="subscription-features-list">
+                  <div className="sub-feature-item">
+                    <span className="check-icon">✓</span> AI Mock Interviews
+                  </div>
+                  <div className="sub-feature-item">
+                    <span className="check-icon">✓</span> ATS Resume Analyzer
+                  </div>
+                  <div className="sub-feature-item">
+                    <span className="check-icon">✓</span> Coding & Technical Practice
+                  </div>
+                  <div className="sub-feature-item">
+                    <span className="check-icon">✓</span> Company Preparation Guides
+                  </div>
                 </div>
               </div>
 
-              {/* Connected Devices & Sessions */}
-              <div className="sessions-section">
-                <div className="sessions-header">
-                  <div>
-                    <h3>Connected Devices & Active Sessions</h3>
-                    <p style={{ margin: "4px 0 0 0", color: "#a3a3c2", fontSize: "14px" }}>
-                      Manage sessions currently logged in to your PrepNova AI account.
-                    </p>
-                  </div>
-                  {sessionsList.length > 1 && (
-                    <button type="button" className="btn-revoke-all" onClick={handleRevokeOthers}>
-                      Revoke All Other Sessions
-                    </button>
-                  )}
-                </div>
-
-                {sessionMsg && (
-                  <div className="alert-box success" style={{ marginBottom: "16px" }}>
-                    {sessionMsg}
-                  </div>
-                )}
-
-                <div className="sessions-list">
-                  {sessionsList.length > 0 ? (
-                    sessionsList.map((session) => (
-                      <div key={session.id} className="session-item">
-                        <div className="session-device-info">
-                          <span className="device-icon">
-                            {session.device_type === "Mobile" ? "📱" : "🖥️"}
-                          </span>
-                          <div>
-                            <div className="device-name">
-                              {session.device}
-                              {session.is_current && (
-                                <span className="current-badge">Current Device</span>
-                              )}
-                            </div>
-                            <div className="device-meta">
-                              IP: {session.ip_address} • Last Active:{" "}
-                              {session.last_active
-                                ? new Date(session.last_active).toLocaleString("en-US", {
-                                    month: "short",
-                                    day: "numeric",
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                  })
-                                : "Active now"}
-                            </div>
-                          </div>
-                        </div>
-
-                        {!session.is_current && (
-                          <button
-                            type="button"
-                            className="btn-revoke-single"
-                            onClick={() => handleRevokeSingle(session.id)}
-                          >
-                            Revoke
-                          </button>
-                        )}
-                      </div>
-                    ))
-                  ) : (
-                    <p style={{ opacity: 0.6 }}>No external sessions registered.</p>
-                  )}
-                </div>
-              </div>
+              {/* Connected Devices & Sessions (Removed) */}
 
               {/* Sign out section */}
               <div className="signout-section" style={{ marginTop: "32px" }}>

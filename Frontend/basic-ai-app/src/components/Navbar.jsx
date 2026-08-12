@@ -103,7 +103,20 @@ const Navbar = () => {
           <a
             href="/#features"
             className={active === "Features" ? "active" : ""}
-            onClick={() => setActive("Features")}
+            onClick={(e) => {
+              e.preventDefault();
+              setActive("Features");
+              if (location.pathname === "/") {
+                const element = document.getElementById("features");
+                if (element) {
+                  element.scrollIntoView({ behavior: "smooth" });
+                } else {
+                  navigate("/#features");
+                }
+              } else {
+                navigate("/#features");
+              }
+            }}
           >
             Features
             <span className="arrow">
@@ -230,23 +243,10 @@ const Navbar = () => {
                     setProfileOpen(false);
                     navigate("/dashboard");
                   }}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    width: "100%",
-                    padding: "10px 14px",
-                    background: "none",
-                    border: "none",
-                    color: "#e4e4e7",
-                    fontSize: "14px",
-                    fontWeight: "600",
-                    cursor: "pointer",
-                    textAlign: "left",
-                    borderRadius: "6px"
-                  }}
+                  role="menuitem"
                 >
-                  <span>📊</span> Dashboard
+                  <span className="profile-dropdown-item-icon">📊</span>
+                  <span>Dashboard</span>
                 </button>
 
                 <button
@@ -255,23 +255,10 @@ const Navbar = () => {
                     setProfileOpen(false);
                     navigate("/profile");
                   }}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    width: "100%",
-                    padding: "10px 14px",
-                    background: "none",
-                    border: "none",
-                    color: "#e4e4e7",
-                    fontSize: "14px",
-                    fontWeight: "600",
-                    cursor: "pointer",
-                    textAlign: "left",
-                    borderRadius: "6px"
-                  }}
+                  role="menuitem"
                 >
-                  <span>👤</span> My Profile & Security
+                  <span className="profile-dropdown-item-icon">👤</span>
+                  <span>My Profile & Security</span>
                 </button>
 
                 {/* Logout */}
