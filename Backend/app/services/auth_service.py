@@ -350,15 +350,20 @@ class AuthService:
             user = await UserService.find_by_email(email, db)
 
         if user:
+            existing_prov = user.get("auth_provider", "local" if user.get("provider") == "email" else "google")
+            new_prov = "local+google" if "local" in existing_prov and existing_prov != "google" else existing_prov
+            
             update_data = {
                 "is_verified": True,
                 "is_active": True,
+                "auth_provider": new_prov,
+                "google_id": google_id,
+                "google_email": email,
+                "google_verified": True,
                 "failed_login_attempts": 0,
                 "lockout_until": None,
                 "updated_at": datetime.now(timezone.utc)
             }
-            if not user.get("google_id"):
-                update_data["google_id"] = google_id
             if picture and not user.get("profile_picture"):
                 update_data["profile_picture"] = picture
                 update_data["avatar_url"] = picture
@@ -477,8 +482,9 @@ class AuthService:
             if token_record:
                 await db["refresh_tokens"].update_one({"jti": jti}, {"$set": {"is_revoked": True, "revoked_at": now}})
 
-        tokens = await AuthService._issue_token_pair(str(user["_id"]), session_id=session_id, db=db)
-        await AuditLogService.log_event("EVENT_TOKEN_REFRESHED", user_id=str(user["_id"]), email=user.get("email"), status="SUCCESS", req=req, db=db)
+        user_id_val = str(user.get("_id") or user.get("id") or user_id)
+        tokens = await AuthService._issue_token_pair(user_id_val, session_id=session_id, db=db)
+        await AuditLogService.log_event("EVENT_TOKEN_REFRESHED", user_id=user_id_val, email=user.get("email"), status="SUCCESS", req=req, db=db)
 
         return {
             "access_token": tokens["access_token"],
@@ -496,10 +502,9 @@ class AuthService:
         if redis and token_str:
             await redis.set(f"blacklist:{token_str}", "1", ex=86400)
 
-        # Invalidate refresh token if readable
         payload = JWTService.decode_token(token_str)
-        user_id = payload.get("sub")
-        jti = payload.get("jti")
+        user_id = payload.get("sub") if payload else None
+        jti = payload.get("jti") if payload else None
         if db is not None and jti:
             await db["refresh_tokens"].update_one({"jti": jti}, {"$set": {"is_revoked": True, "revoked_at": datetime.now(timezone.utc)}})
 
@@ -511,17 +516,23 @@ class AuthService:
         clean_email = email.lower().strip()
         user = await UserService.find_by_email(clean_email, db)
         if not user:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="No account associated with this email address was found."
-            )
+            # Safe generic response to prevent account enumeration
+            return {"success": True, "message": "If an account exists with this email address, a password recovery code has been sent."}
 
         await OTPService.send_password_reset_otp(clean_email, user_name=user.get("full_name", ""), req=req)
         await AuditLogService.log_event("EVENT_FORGOT_PASSWORD_REQUESTED", email=clean_email, user_id=str(user["_id"]), status="SUCCESS", req=req, db=db)
         return {"success": True, "message": "Password recovery code sent to your email."}
 
     @staticmethod
-    async def reset_password(email: str, otp: str, new_password: str, confirm_password: str = None, db: Any = None, req = None) -> dict:
+    async def reset_password(
+        email: str,
+        new_password: str,
+        reset_token: str = None,
+        otp: str = None,
+        confirm_password: str = None,
+        db: Any = None,
+        req = None
+    ) -> dict:
         if confirm_password and new_password != confirm_password:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -535,11 +546,44 @@ class AuthService:
             )
 
         clean_email = email.lower().strip()
-        is_valid = await OTPService.verify_password_reset_otp(clean_email, otp, req=req)
-        if not is_valid:
+        now = datetime.now(timezone.utc)
+
+        # 1. Validate Single-Use Reset Token or Direct OTP Verification
+        if reset_token:
+            if db is not None:
+                token_record = await db["password_reset_tokens"].find_one({
+                    "reset_token": reset_token,
+                    "email": clean_email,
+                    "used": False
+                })
+                if not token_record:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail="Invalid or already used password reset token. Please request a new password reset."
+                    )
+                exp = _ensure_utc(token_record.get("expires_at"))
+                if exp and now > exp:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail="Password reset session expired. Please request a new verification code."
+                    )
+
+                token_filter = {"_id": token_record["_id"]} if "_id" in token_record else {"reset_token": reset_token}
+                await db["password_reset_tokens"].update_one(
+                    token_filter,
+                    {"$set": {"used": True, "used_at": now}}
+                )
+        elif otp:
+            is_valid = await OTPService.verify_otp(clean_email, otp, purpose="password_reset", req=req)
+            if not is_valid:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Invalid or expired password recovery code."
+                )
+        else:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Invalid or expired password recovery code."
+                detail="Verification code or password reset token is required."
             )
 
         user = await UserService.find_by_email(clean_email, db)
@@ -550,19 +594,26 @@ class AuthService:
             )
 
         hashed_password = AuthService.get_password_hash(new_password)
-        await db["users"].update_one(
-            {"_id": user["_id"]},
-            {"$set": {
-                "hashed_password": hashed_password,
-                "is_verified": True,
-                "is_active": True,
-                "failed_login_attempts": 0,
-                "lockout_until": None,
-                "updated_at": datetime.now(timezone.utc)
-            }}
-        )
+        user_filter = {"_id": user["_id"]} if isinstance(user, dict) and "_id" in user else {"email": clean_email}
+        if db is not None:
+            await db["users"].update_one(
+                user_filter,
+                {"$set": {
+                    "hashed_password": hashed_password,
+                    "password": hashed_password,
+                    "is_verified": True,
+                    "is_active": True,
+                    "failed_login_attempts": 0,
+                    "lockout_until": None,
+                    "updated_at": now
+                }}
+            )
+            user_id_str = str(user.get("_id") or user.get("id") or "")
+            await db["sessions"].update_many({"user_id": user_id_str}, {"$set": {"is_active": False}})
+            await db["refresh_tokens"].update_many({"user_id": user_id_str}, {"$set": {"is_revoked": True, "revoked_at": now}})
 
-        await AuditLogService.log_event("EVENT_PASSWORD_RESET_SUCCESS", email=clean_email, user_id=str(user["_id"]), status="SUCCESS", req=req, db=db)
+        user_id_str = str(user.get("_id") or user.get("id") or "")
+        await AuditLogService.log_event("EVENT_PASSWORD_RESET_SUCCESS", email=clean_email, user_id=user_id_str, status="SUCCESS", req=req, db=db)
         return {"success": True, "message": "Password reset successfully. You can now login with your new credentials."}
 
     @staticmethod

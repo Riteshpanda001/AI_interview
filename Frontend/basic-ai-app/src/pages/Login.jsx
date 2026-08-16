@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import "./Login.css";
 import logo from "../assets/prenova_ai_logo.png";
-import googleLogo from "../assets/google.png";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -33,6 +32,7 @@ const Login = () => {
   const [isResending, setIsResending] = useState(false);
   
   const inputRefs = Array.from({ length: 6 }, () => React.createRef());
+  const googleBtnRef = useRef(null);
 
   useEffect(() => {
     let timer;
@@ -44,12 +44,54 @@ const Login = () => {
     return () => clearInterval(timer);
   }, [resendTimer]);
 
-  // Load Google OAuth script
+  // Load Google GSI script and render the official Sign-In button
   useEffect(() => {
+    const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+    if (!googleClientId) return;
+
+    const initGoogle = () => {
+      if (!window.google?.accounts?.id || !googleBtnRef.current) return;
+      window.google.accounts.id.initialize({
+        client_id: googleClientId,
+        callback: async (response) => {
+          if (!response?.credential) {
+            setErrorMsg("Google Sign-In was cancelled or failed. Please try again.");
+            return;
+          }
+          setIsGoogleLoading(true);
+          setErrorMsg("");
+          try {
+            await googleLogin(response.credential);
+            navigate(redirectTarget);
+          } catch (err) {
+            setErrorMsg(err.message || "Google Sign-In failed. Please try again.");
+          } finally {
+            setIsGoogleLoading(false);
+          }
+        },
+      });
+      window.google.accounts.id.renderButton(googleBtnRef.current, {
+        type: "standard",
+        theme: "filled_black",
+        size: "large",
+        text: "signin_with",
+        shape: "rectangular",
+        width: googleBtnRef.current.offsetWidth || 360,
+        logo_alignment: "left",
+      });
+    };
+
+    // If GSI already loaded (e.g. hot-reload), initialise immediately
+    if (window.google?.accounts?.id) {
+      initGoogle();
+      return;
+    }
+
     const script = document.createElement("script");
     script.src = "https://accounts.google.com/gsi/client";
     script.async = true;
     script.defer = true;
+    script.onload = initGoogle;
     document.body.appendChild(script);
 
     return () => {
@@ -169,37 +211,11 @@ const Login = () => {
     }
   };
 
+  // Google Sign-In is handled via the renderButton callback above.
+  // This stub is kept for any programmatic re-trigger needs.
   const handleGoogleSignIn = () => {
-    setIsGoogleLoading(true);
-    setErrorMsg("");
-    if (window.google?.accounts?.id) {
-      window.google.accounts.id.initialize({
-        client_id: "1057492984572-mockclientid.apps.googleusercontent.com",
-        callback: async (response) => {
-          try {
-            await googleLogin(response.credential);
-            navigate(redirectTarget);
-          } catch (err) {
-            setErrorMsg(err.message || "Google Sign-In failed.");
-          } finally {
-            setIsGoogleLoading(false);
-          }
-        },
-      });
-      window.google.accounts.id.prompt();
-    } else {
-      setTimeout(async () => {
-        try {
-          const fakeToken = "mock_google_jwt_token_for_dev_testing";
-          await googleLogin(fakeToken);
-          navigate(redirectTarget);
-        } catch (err) {
-          setErrorMsg("Google Sign-In error: " + (err.message || err));
-        } finally {
-          setIsGoogleLoading(false);
-        }
-      }, 1000);
-    }
+    // The official Google button rendered via renderButton() handles the click;
+    // this function is intentionally left as a no-op.
   };
 
   const handleOtpSubmit = async (e) => {
@@ -326,15 +342,18 @@ const Login = () => {
               <span>or sign in with</span>
             </div>
 
-            <button
-              type="button"
-              className="google-btn"
-              onClick={handleGoogleSignIn}
-              disabled={isGoogleLoading}
-            >
-              <img src={googleLogo} alt="Google" className="google-icon" />
-              {isGoogleLoading ? "Connecting to Google..." : "Continue with Google"}
-            </button>
+            {/* Official Google Sign-In button rendered by the GSI library */}
+            <div
+              id="google-signin-btn-login"
+              ref={googleBtnRef}
+              className="google-signin-btn-container"
+              style={{ minHeight: "44px", display: "flex", justifyContent: "center" }}
+            />
+            {isGoogleLoading && (
+              <p style={{ textAlign: "center", color: "#c084fc", fontSize: "0.9rem", marginTop: "8px" }}>
+                Connecting to Google...
+              </p>
+            )}
 
             <p className="signup-text">
               Don't have an account?

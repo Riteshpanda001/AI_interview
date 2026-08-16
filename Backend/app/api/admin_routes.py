@@ -208,3 +208,19 @@ async def get_system_health(
 ):
     return await AdminService.get_system_health(db)
 
+@router.get("/llm-usage")
+async def get_llm_token_usage(
+    current_user = Depends(get_current_admin_user),
+    db = Depends(get_db)
+):
+    return await AdminService.get_llm_token_usage(db)
+
+@router.get("/audit-logs")
+async def get_audit_logs(
+    limit: int = Query(50),
+    current_user = Depends(get_current_admin_user),
+    db = Depends(get_db)
+):
+    return await AdminService.get_audit_logs(db, limit=limit)
+
+

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import "./TopCompanies.css";
-import useRequireAuth from "../../hooks/useRequireAuth";
 
 const API_BASE_URL = "http://localhost:8000/api";
 

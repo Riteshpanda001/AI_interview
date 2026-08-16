@@ -2,6 +2,8 @@ import json
 import asyncio
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from app.services.speech_service import SpeechService
+from app.ai.interview_evaluator import InterviewEvaluator
+from app.ai.interview_generator import InterviewGenerator
 
 router = APIRouter()
 
@@ -60,24 +62,41 @@ async def interview_websocket_endpoint(websocket: WebSocket, session_id: str):
 
             elif action_type == "submit_answer":
                 candidate_answer = payload.get("answer", "")
-                current_score = payload.get("score", 85)
+                prev_question = payload.get("previous_question", "Can you introduce yourself?")
+                
+                # Evaluate candidate response
+                evaluation = await InterviewEvaluator.evaluate_answer(
+                    question_text=prev_question,
+                    user_answer=candidate_answer
+                )
+                score = evaluation.get("score", 7) * 10
 
                 # Determine adaptive difficulty
                 new_difficulty = "Medium"
-                if current_score >= 80:
+                if score >= 80:
                     new_difficulty = "Hard"
-                elif current_score < 60:
+                elif score < 60:
                     new_difficulty = "Easy"
 
-                # Synthesize AI follow-up voice prompt
-                ai_text = f"Good explanation. Moving to a {new_difficulty} tier question: Can you explain system trade-offs when scaling under high concurrency?"
+                # Generate adaptive next question
+                next_q = await InterviewGenerator.generate_adaptive_question(
+                    role_target=payload.get("role_target", "Software Engineer"),
+                    interview_type=payload.get("interview_type", "technical"),
+                    experience_level=payload.get("experience_level", "Mid Level"),
+                    previous_question=prev_question,
+                    previous_answer=candidate_answer,
+                    difficulty=new_difficulty,
+                    history_questions=payload.get("history", [prev_question])
+                )
+                
+                ai_text = next_q.get("text", "Can you explain system trade-offs when scaling under high concurrency?")
                 ai_voice_url = await SpeechService.text_to_speech(ai_text)
 
                 await websocket.send_json({
                     "type": "ai_response",
                     "evaluation": {
-                        "score": current_score,
-                        "feedback": "Clear explanation of core technical principles.",
+                        "score": score,
+                        "feedback": evaluation.get("strengths", ["Clear delivery"])[0],
                         "next_difficulty": new_difficulty
                     },
                     "next_question": {
@@ -92,3 +111,4 @@ async def interview_websocket_endpoint(websocket: WebSocket, session_id: str):
     except Exception as e:
         print(f"[WebSocket] Session error in {session_id}: {e}")
         manager.disconnect(session_id)
+

@@ -42,3 +42,22 @@ def test_interview_answer_evaluation():
 
     asyncio.run(run())
 
+def test_adaptive_question_generation():
+    async def run():
+        next_q = await InterviewGenerator.generate_adaptive_question(
+            role_target="Backend Engineer",
+            interview_type="technical",
+            experience_level="Mid Level",
+            previous_question="What is database indexing?",
+            previous_answer="It builds b-trees on table columns to accelerate query lookups.",
+            difficulty="Hard",
+            history_questions=["What is database indexing?"]
+        )
+        assert next_q is not None
+        assert "text" in next_q
+        assert len(next_q["text"]) > 10
+        assert "question_id" in next_q
+
+    asyncio.run(run())
+
+

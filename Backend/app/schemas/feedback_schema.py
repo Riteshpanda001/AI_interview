@@ -1,6 +1,7 @@
 from pydantic import BaseModel, ConfigDict
 from typing import List, Optional
 from datetime import datetime
+from app.schemas.interview_schema import QuestionResponse
 
 class AnswerFeedbackResponse(BaseModel):
     question_id: str
@@ -17,6 +18,8 @@ class InterviewFeedbackResponse(BaseModel):
     interview_session_id: str
     answers_feedback: List[AnswerFeedbackResponse]
     overall_summary: str
+    questions: Optional[List[QuestionResponse]] = None
     created_at: datetime
 
     model_config = ConfigDict(populate_by_name=True)
+

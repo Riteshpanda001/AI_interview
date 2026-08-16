@@ -919,4 +919,188 @@ class ResumeService:
             ]
         }
 
+    @staticmethod
+    async def calculate_interview_readiness(resume_id: str, user_id: str, db) -> dict:
+        """
+        Computes a real Interview Readiness score from actual user data across:
+        - Resume completeness & quality (sections, summary, skills, projects, experience)
+        - Latest ATS analysis score
+        - Average interview performance score
+        - Coding submission accuracy
+        Returns a structured breakdown used by the InterviewReadinessCard component.
+        """
+        suggestions = []
 
+        # ── 1. Fetch the Resume ──────────────────────────────────────────────
+        try:
+            try:
+                resume = await db["resumes"].find_one({"_id": ObjectId(resume_id), "user_id": user_id})
+            except Exception:
+                resume = await db["resumes"].find_one({"_id": resume_id, "user_id": user_id})
+        except Exception:
+            resume = None
+
+        parsed = {}
+        if resume:
+            parsed = resume.get("parsed_content") or resume.get("resume_data") or {}
+
+        # ── 2. Score Resume Sections ─────────────────────────────────────────
+        # Personal info completeness (name, email, phone, linkedin, role)
+        personal = parsed.get("personal", {}) or {}
+        personal_fields = [personal.get("name"), personal.get("email"), personal.get("phone"),
+                           personal.get("linkedin"), personal.get("role")]
+        personal_filled = sum(1 for f in personal_fields if f and str(f).strip())
+        personal_score = int((personal_filled / 5) * 100)
+        if personal_score < 100:
+            suggestions.append("Complete all personal info fields (LinkedIn, phone, role title)")
+
+        # Summary quality
+        summary = parsed.get("summary", "") or ""
+        if len(summary) >= 120:
+            summary_score = 100
+        elif len(summary) >= 60:
+            summary_score = 75
+            suggestions.append("Expand your professional summary to at least 120 characters with measurable achievements")
+        elif len(summary) > 0:
+            summary_score = 45
+            suggestions.append("Write a compelling professional summary with quantifiable impact")
+        else:
+            summary_score = 0
+            suggestions.append("Add a professional summary to your resume — it's read first by recruiters")
+
+        # Skills depth
+        skills = parsed.get("skills", []) or []
+        skills_count = len(skills)
+        if skills_count >= 10:
+            skills_score = 100
+        elif skills_count >= 6:
+            skills_score = 75
+        elif skills_count >= 3:
+            skills_score = 50
+            suggestions.append(f"Add more skills — you have {skills_count}, aim for 10+ relevant technical skills")
+        else:
+            skills_score = 20
+            suggestions.append("Add at least 8-10 relevant technical and soft skills to your resume")
+
+        # Experience depth
+        experience = parsed.get("experience", []) or []
+        exp_score = 0
+        for exp in experience:
+            if exp.get("company") and exp.get("role"):
+                exp_score += 40
+            if exp.get("details") and len(str(exp.get("details", ""))) >= 80:
+                exp_score += 20
+        experience_score = min(100, exp_score) if experience else 0
+        if experience_score < 60:
+            suggestions.append("Add quantified bullet points to your experience (e.g., 'Reduced load time by 40%')")
+
+        # Projects impact
+        projects = parsed.get("projects", []) or []
+        projects_score = 0
+        for proj in projects:
+            if proj.get("name"):
+                projects_score += 35
+            if proj.get("description") and len(str(proj.get("description", ""))) >= 60:
+                projects_score += 25
+        projects_score = min(100, projects_score) if projects else 0
+        if projects_score < 60:
+            suggestions.append("Add at least 2 projects with clear impact descriptions and tech stacks")
+
+        # Resume quality = weighted mix of all section scores
+        resume_quality = int(
+            personal_score * 0.15 +
+            summary_score * 0.20 +
+            skills_score * 0.20 +
+            experience_score * 0.30 +
+            projects_score * 0.15
+        )
+
+        # ── 3. ATS Score from latest analysis ───────────────────────────────
+        ats_score = 0
+        if resume:
+            ats_score = resume.get("ats_score", 0) or 0
+        if not ats_score:
+            latest_ats = await db["ats_analyses"].find_one({"user_id": user_id})
+            ats_score = latest_ats.get("score", 0) if latest_ats else 0
+        if not ats_score and parsed:
+            # Fallback: calculate from resume content using ATSService
+            from app.services.ats_service import ATSService
+            calc = ATSService.calculate_real_ats_score(parsed)
+            ats_score = calc.get("ats_score", 70)
+        ats_score = int(ats_score)
+        if ats_score < 70:
+            suggestions.append(f"Improve ATS score (currently {ats_score}%) — add job-specific keywords and action verbs")
+
+        # ── 4. Interview Performance Score ──────────────────────────────────
+        interview_results_cursor = db["interview_results"].find({"user_id": user_id})
+        interview_results = await interview_results_cursor.to_list(length=50)
+        if interview_results:
+            interview_score = int(
+                sum(r.get("overall_score", 75) for r in interview_results) / len(interview_results)
+            )
+        else:
+            interview_score = 0  # No interviews taken yet
+            suggestions.append("Take at least one AI Mock Interview to include your performance in readiness scoring")
+
+        # ── 5. Coding Performance Score ─────────────────────────────────────
+        coding_cursor = db["coding_submissions"].find({"user_id": user_id})
+        coding_submissions = await coding_cursor.to_list(length=100)
+        if coding_submissions:
+            accepted = sum(1 for s in coding_submissions if s.get("status") == "accepted")
+            coding_score = int((accepted / len(coding_submissions)) * 100)
+        else:
+            coding_score = 0
+            suggestions.append("Practice at least 5 coding problems to boost your readiness score")
+
+        # ── 6. Weighted Final Readiness Index ───────────────────────────────
+        # Weights: ATS 25% | Resume Quality 20% | Skills 15% | Interview 25% | Coding 15%
+        # If interview/coding data missing, redistribute weight to resume-based signals
+        has_interview = len(interview_results) > 0
+        has_coding = len(coding_submissions) > 0
+
+        if has_interview and has_coding:
+            readiness_score = int(
+                ats_score * 0.25 +
+                resume_quality * 0.20 +
+                skills_score * 0.15 +
+                interview_score * 0.25 +
+                coding_score * 0.15
+            )
+        elif has_interview:
+            readiness_score = int(
+                ats_score * 0.30 +
+                resume_quality * 0.25 +
+                skills_score * 0.15 +
+                interview_score * 0.30
+            )
+        elif has_coding:
+            readiness_score = int(
+                ats_score * 0.35 +
+                resume_quality * 0.30 +
+                skills_score * 0.15 +
+                coding_score * 0.20
+            )
+        else:
+            # Resume-only mode
+            readiness_score = int(
+                ats_score * 0.40 +
+                resume_quality * 0.35 +
+                skills_score * 0.25
+            )
+
+        readiness_score = min(98, max(10, readiness_score))
+
+        # Cap suggestions to top 3
+        suggestions = list(dict.fromkeys(suggestions))[:3]
+        if not suggestions:
+            suggestions = ["Keep practicing mock interviews weekly to maintain your score"]
+
+        return {
+            "readiness_score": readiness_score,
+            "ats_score": ats_score,
+            "resume_quality": resume_quality,
+            "skills_score": skills_score,
+            "projects_score": projects_score,
+            "experience_score": experience_score,
+            "suggestions": suggestions
+        }

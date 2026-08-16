@@ -14,6 +14,8 @@ import ResumePreview from "../components/ATS Score/ResumePreview";
 import ResumeTemplates from "../components/ATS Score/ResumeTemplates";
 import ATSStatistics from "../components/ATS Score/ATSStatistics";
 import ATSFAQ from "../components/ATS Score/ATSFAQ";
+import ATSTrendChart from "../components/ATS Score/ATSTrendChart";
+
 
 import Footer from "../components/Footer";
 import { useAuth } from "../context/AuthContext";
@@ -30,6 +32,27 @@ const ATSScore = () => {
   const [analysisResult, setAnalysisResult] = useState(null);
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState("breakdown");
+  const [history, setHistory] = useState([]);
+
+  const fetchHistory = React.useCallback(async (rId) => {
+    try {
+      const url = rId 
+        ? `http://localhost:8000/api/ats/history?resume_id=${rId}`
+        : `http://localhost:8000/api/ats/history`;
+      const res = await authFetch(url);
+      if (res.ok) {
+        const data = await res.json();
+        setHistory(data);
+      }
+    } catch (err) {
+      console.warn("Could not load ATS scan history:", err);
+    }
+  }, [authFetch]);
+
+  React.useEffect(() => {
+    fetchHistory(resumeData?.id);
+  }, [resumeData?.id, fetchHistory]);
+
 
   React.useEffect(() => {
     if (analysisResult) {
@@ -128,6 +151,7 @@ const ATSScore = () => {
       if (response.ok) {
         const data = await response.json();
         setAnalysisResult(data);
+        fetchHistory(activeResume.id || data.resume_id);
       } else {
         const errData = await response.json().catch(() => ({}));
         throw new Error(errData.detail || "ATS Analysis failed");
@@ -301,6 +325,15 @@ const ATSScore = () => {
                 softSkills={analysisResult.soft_skills}
                 experienceLevel={analysisResult.experience_level}
                 impactQuantification={analysisResult.impact_quantification}
+              />
+
+              <ATSTrendChart
+                history={history}
+                onSelectHistoricalScan={(scan) => {
+                  setAnalysisResult(scan);
+                  setJobTitle(scan.job_title || "Senior Software Engineer");
+                  if (scan.job_description) setJobDescription(scan.job_description);
+                }}
               />
 
               {activeTab === "breakdown" && (

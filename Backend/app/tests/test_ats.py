@@ -116,3 +116,38 @@ def test_docx_export_generation():
     docx_bytes = DOCXExporter.generate_docx(resume_data, "Test_Resume")
     assert isinstance(docx_bytes, bytes)
     assert len(docx_bytes) > 100
+
+def test_ats_history_tracking():
+    async def run():
+        from app.database import MockDatabase
+        db = MockDatabase()
+        
+        # Insert multiple fake analyses for test user
+        user_id = "test-user-123"
+        await ATSService.analyze_ats_score(
+            user_id=user_id,
+            resume_id="res-1",
+            job_description="Python SDE",
+            db=db,
+            resume_text="Skills: Python, FastAPI",
+            job_title="Software Engineer"
+        )
+        
+        await ATSService.analyze_ats_score(
+            user_id=user_id,
+            resume_id="res-1",
+            job_description="React SDE",
+            db=db,
+            resume_text="Skills: React, JavaScript",
+            job_title="Frontend Engineer"
+        )
+        
+        # Query mock database
+        history = await db["ats_analyses"].find({"user_id": user_id}).to_list(length=100)
+        assert len(history) == 2
+        assert history[0]["score"] > 0
+        assert history[1]["score"] > 0
+        assert history[0]["created_at"] is not None
+
+    asyncio.run(run())
+

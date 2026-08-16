@@ -18,10 +18,13 @@ class GoogleAuthService:
             with urllib.request.urlopen(req, timeout=10) as response:
                 if response.status == 200:
                     payload = json.loads(response.read().decode('utf-8'))
-                    # Check audience if GOOGLE_CLIENT_ID is configured
+                    # Enforce audience check — token must belong to our app's client ID
                     if settings.GOOGLE_CLIENT_ID and payload.get("aud") != settings.GOOGLE_CLIENT_ID:
-                        # Allow dev fallback if client id matches or not enforced strictly
-                        pass
+                        print(
+                            f"[GOOGLE AUTH] Token audience mismatch. "
+                            f"Expected: {settings.GOOGLE_CLIENT_ID} | Got: {payload.get('aud')}"
+                        )
+                        return None
                     return payload
         except urllib.error.HTTPError as exc:
             print(f"[GOOGLE AUTH] Token verification failed with HTTPError: {exc.code} {exc.reason}")
@@ -30,6 +33,7 @@ class GoogleAuthService:
             print(f"[GOOGLE AUTH] Error verifying Google token: {exc}")
             return None
         return None
+
 
     @staticmethod
     async def verify_google_token(id_token: str) -> Dict[str, Any]:

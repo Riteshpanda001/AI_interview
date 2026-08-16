@@ -294,3 +294,63 @@ class InterviewGenerator:
 
         return result_questions
 
+    @staticmethod
+    async def generate_adaptive_question(
+        role_target: str,
+        interview_type: str,
+        experience_level: str,
+        previous_question: str,
+        previous_answer: str,
+        difficulty: str,
+        history_questions: list
+    ) -> dict:
+        """
+        Dynamically generates the next adaptive question based on the previous question,
+        previous answer, and targeted difficulty level.
+        """
+        history_str = "\n".join([f"- {q}" for q in history_questions])
+        prompt = (
+            f"Target Job Role: {role_target}\n"
+            f"Interview Category: {interview_type}\n"
+            f"Required Experience Level: {experience_level or 'Mid Level'}\n"
+            f"Difficulty Level: {difficulty}\n"
+            f"Previous Question: {previous_question}\n"
+            f"Candidate's Answer: {previous_answer}\n"
+            f"Already Asked Questions (DO NOT REPEAT ANY of these):\n{history_str}"
+        )
+        
+        system_instruction = (
+            "You are an Elite Executive AI Interviewer. Based on the previous question and the candidate's answer, "
+            f"decide the next logical follow-up question for the {role_target} role. "
+            f"The target difficulty level is: {difficulty}.\n"
+            "If the answer was weak or incomplete, ask a guiding or clarifying question. "
+            "If the answer was strong, challenge them with a deeper question of the specified difficulty.\n"
+            "Avoid repeating any of the already asked questions.\n"
+            "Output a JSON object containing:\n"
+            "- 'question_id' (a short random unique ID string)\n"
+            "- 'text' (the complete, clear follow-up question text)\n"
+            "- 'type' (the interview category)\n"
+            "Return ONLY the JSON object without markdown formatting."
+        )
+        
+        try:
+            response = await LLMService.generate_response(prompt, system_instruction)
+            start_idx = response.find("{")
+            end_idx = response.rfind("}") + 1
+            if start_idx != -1 and end_idx != -1:
+                q = json.loads(response[start_idx:end_idx])
+                if q.get("text"):
+                    if not q.get("question_id"):
+                        q["question_id"] = str(uuid.uuid4())[:8]
+                    q["type"] = interview_type
+                    return q
+        except Exception as e:
+            print(f"Error generating adaptive question: {e}")
+            
+        return {
+            "question_id": str(uuid.uuid4())[:8],
+            "text": f"Can you explain the key trade-offs and best practices when designing for high availability and concurrency in a {role_target} environment?",
+            "type": interview_type
+        }
+
+

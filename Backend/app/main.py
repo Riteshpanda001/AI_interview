@@ -23,10 +23,56 @@ async def lifespan(app: FastAPI):
     # Create static directories if they don't exist
     for sub in ["uploads", "resumes", "reports", "avatars", "audio"]:
         os.makedirs(os.path.join(settings.STATIC_DIR, sub), exist_ok=True)
-        
+
+    # ── SMTP startup diagnostic ──────────────────────────────────────────────
+    _print_smtp_status()
+    # ────────────────────────────────────────────────────────────────────────
+
     yield
     # Shutdown: Close DBs
     await db_manager.close_database_connections()
+
+
+def _print_smtp_status():
+    """Print a one-time SMTP configuration summary on startup."""
+    import smtplib
+    smtp_user = settings.effective_smtp_user
+    raw_pw = (settings.SMTP_PASSWORD or "").strip()
+    clean_pw = raw_pw.replace(" ", "")
+
+    placeholder_emails = {"user@example.com", "noreply@example.com", "your-gmail@gmail.com", ""}
+    placeholder_passwords = {
+        "password", "your-16-char-app-password",
+        "YOUR_GOOGLE_APP_PASSWORD", "YOUR_16_CHAR_GMAIL_APP_PASSWORD", ""
+    }
+
+    print("\n" + "─" * 60)
+    print("  📧  SMTP CONFIGURATION SUMMARY")
+    print("─" * 60)
+    print(f"  Host     : {settings.SMTP_HOST}:{settings.SMTP_PORT}")
+    print(f"  User     : {smtp_user}")
+    pw_display = f"{clean_pw[:4]}...{clean_pw[-4:]}" if len(clean_pw) >= 8 else "(not set)"
+    print(f"  Password : {pw_display}  ({len(clean_pw)} chars)")
+
+    if smtp_user in placeholder_emails or raw_pw in placeholder_passwords or not clean_pw:
+        print("  Status   : ⚠  PLACEHOLDER — emails will NOT be sent")
+        if settings.DEBUG:
+            print("             OTP codes will be printed to this terminal instead.")
+    else:
+        # Quick TCP connect test (no auth) so we know if the host is reachable
+        try:
+            conn = smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT, timeout=5)
+            conn.quit()
+            print("  Status   : ✅ SMTP host is reachable")
+            print("             Auth will be verified on first email send.")
+        except Exception as e:
+            print(f"  Status   : ❌ SMTP host unreachable — {e}")
+            if settings.DEBUG:
+                print("             OTP codes will be printed to this terminal as fallback.")
+
+    print("─" * 60 + "\n")
+
+
 
 app = FastAPI(
     title=settings.APP_NAME,
@@ -36,9 +82,16 @@ app = FastAPI(
 )
 
 # CORS configuration
+origins = [
+    settings.FRONTEND_URL,
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://localhost:3000",
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Adjust as needed in production
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

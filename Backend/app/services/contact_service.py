@@ -73,7 +73,7 @@ class ContactService:
                 html_content=email_html
             )
         except Exception as e:
-            print(f"[CONTACT SERVICE] ⚠️ Email notification failed: {e}")
+            print(f"[CONTACT SERVICE] Email notification failed: {e}")
 
         return ticket
 

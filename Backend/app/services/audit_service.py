@@ -41,7 +41,10 @@ class AuditLogService:
                 if isinstance(db, dict):
                     coll = db.get("audit_logs")
                 else:
-                    coll = getattr(db, "audit_logs", None) or db["audit_logs"]
+                    try:
+                        coll = db["audit_logs"]
+                    except Exception:
+                        coll = getattr(db, "audit_logs", None)
                 
                 if coll is not None:
                     await coll.insert_one(log_doc)

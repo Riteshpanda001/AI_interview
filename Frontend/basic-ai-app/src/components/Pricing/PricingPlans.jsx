@@ -161,6 +161,27 @@ const PricingPlans = ({ onPaymentCompleted }) => {
         })}
       </div>
 
+      {/* Gateway Webhook Status & Enterprise Upgrade Banner */}
+      <div style={{ marginTop: "30px", background: "#0f172a", border: "1px solid #334155", padding: "16px 24px", borderRadius: "14px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <span style={{ background: "rgba(16, 185, 129, 0.15)", color: "#10b981", border: "1px solid rgba(16, 185, 129, 0.3)", padding: "4px 10px", borderRadius: "6px", fontSize: "12px", fontWeight: "700" }}>
+            🔑 Payment Gateways Active
+          </span>
+          <span style={{ color: "#94a3b8", fontSize: "13px" }}>
+            Razorpay & Stripe webhooks enabled with 18% GST invoice generation.
+          </span>
+        </div>
+        
+        {user && currentPlan !== "enterprise" && (
+          <button
+            onClick={() => handleChoosePlan({ name: "Enterprise", priceMonthly: "₹2499", priceYearly: "₹1999", period: "/month", button: "Upgrade to Enterprise" })}
+            style={{ background: "linear-gradient(135deg, #a855f7, #ec4899)", color: "#fff", border: "none", padding: "8px 16px", borderRadius: "8px", fontSize: "12.5px", fontWeight: "700", cursor: "pointer" }}
+          >
+            🔄 Pro-Rata Upgrade to Enterprise
+          </button>
+        )}
+      </div>
+
       {/* Checkout Modal */}
       <CheckoutModal
         isOpen={showCheckoutModal}
@@ -176,3 +197,4 @@ const PricingPlans = ({ onPaymentCompleted }) => {
 };
 
 export default PricingPlans;
+

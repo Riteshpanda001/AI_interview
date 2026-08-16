@@ -1,6 +1,6 @@
 import asyncio
 import pytest
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
 from fastapi import HTTPException
 from app.services.auth_service import AuthService
 from app.schemas.auth_schema import ChangePasswordRequest
@@ -11,11 +11,9 @@ def test_forgot_password_user_not_found():
         mock_db["users"] = MagicMock()
         mock_db["users"].find_one = AsyncMock(return_value=None)
 
-        with pytest.raises(HTTPException) as exc_info:
-            await AuthService.forgot_password("missing@example.com", mock_db)
-        
-        assert exc_info.value.status_code == 404
-        assert "No account" in exc_info.value.detail
+        res = await AuthService.forgot_password("missing@example.com", mock_db)
+        assert res["success"] is True
+        assert "recovery code" in res["message"]
 
     asyncio.run(run())
 
@@ -25,9 +23,10 @@ def test_forgot_password_success():
         mock_db["users"] = MagicMock()
         mock_db["users"].find_one = AsyncMock(return_value={"_id": "60d5ec49f83a2c2b3c4d5e6f", "email": "user@example.com", "is_active": True})
 
-        result = await AuthService.forgot_password("user@example.com", mock_db)
-        assert result["success"] is True
-        assert "code sent" in result["message"]
+        with patch("app.services.email_service.EmailService.send_email", new=AsyncMock(return_value=True)):
+            result = await AuthService.forgot_password("user@example.com", mock_db)
+            assert result["success"] is True
+            assert "code sent" in result["message"]
 
     asyncio.run(run())
 

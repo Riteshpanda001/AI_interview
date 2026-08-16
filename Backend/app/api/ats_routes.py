@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
+from typing import List, Optional, Dict, Any
 from app.schemas.ats_schema import ATSAnalysisRequest, ATSAnalysisResponse, TailorResumeRequest, ParseJobDescriptionResponse
 from app.dependencies import get_current_active_user, get_db
 from app.services.ats_service import ATSService
@@ -47,3 +48,30 @@ async def tailor_resume(
         job_description=request.job_description
     )
 
+@router.get("/history", response_model=List[ATSAnalysisResponse])
+async def get_ats_history(
+    resume_id: Optional[str] = None,
+    user_id: Optional[str] = None,
+    current_user = Depends(get_current_active_user),
+    db = Depends(get_db),
+):
+    """Return historical ATS analyses for a given resume or user.
+    If both resume_id and user_id are provided, resume_id takes precedence.
+    """
+    query: Dict[str, Any] = {}
+    if resume_id:
+        query["resume_id"] = resume_id
+    elif user_id:
+        query["user_id"] = user_id
+    else:
+        # default to current user
+        query["user_id"] = str(current_user["_id"])
+    # Ensure only analyses belonging to the current user are returned
+    if "user_id" in query and str(current_user["_id"]) != query["user_id"]:
+        raise HTTPException(status_code=403, detail="Forbidden: cannot access other users' history")
+    analyses = await db["ats_analyses"].find(query).sort("created_at", 1).to_list(length=None)
+    for doc in analyses:
+        if "_id" in doc:
+            doc["_id"] = str(doc["_id"])
+        doc["id"] = str(doc.get("_id", ""))
+    return analyses

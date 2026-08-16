@@ -3,12 +3,58 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import "./Register.css";
 import logo from "../assets/prenova_ai_logo.png";
-import googleLogo from "../assets/google.png";
 
 const Register = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { register, verifyOtp, resendOtp, googleLogin } = useAuth();
+  const { register, verifyOtp, resendOtp, googleLogin, sendMobileOtp, verifyMobileOtp } = useAuth();
+  // Mobile Verification States
+  const [phoneVerified, setPhoneVerified] = useState(false);
+  const [isSendingMobileOtp, setIsSendingMobileOtp] = useState(false);
+  const [showMobileOtpModal, setShowMobileOtpModal] = useState(false);
+  const [mobileOtpDigits, setMobileOtpDigits] = useState(["", "", "", "", "", ""]);
+  const [mobileOtpError, setMobileOtpError] = useState("");
+  const [isVerifyingMobileOtp, setIsVerifyingMobileOtp] = useState(false);
+
+  const handleSendMobileOtp = async () => {
+    if (!phone || phone.trim().length < 10) {
+      setErrorMsg("Please enter a valid mobile number first.");
+      return;
+    }
+    setIsSendingMobileOtp(true);
+    setErrorMsg("");
+    try {
+      await sendMobileOtp(phone.trim());
+      setShowMobileOtpModal(true);
+      setMobileOtpDigits(["", "", "", "", "", ""]);
+      setInfoMsg(`SMS verification code sent to +91 ******${phone.trim().slice(-4)}`);
+    } catch (err) {
+      setErrorMsg(err.message || "Failed to send mobile OTP.");
+    } finally {
+      setIsSendingMobileOtp(false);
+    }
+  };
+
+  const handleVerifyMobileOtpSubmit = async (e) => {
+    e.preventDefault();
+    const fullCode = mobileOtpDigits.join("");
+    if (fullCode.length !== 6) {
+      setMobileOtpError("Please enter all 6 digits of your SMS code.");
+      return;
+    }
+    setIsVerifyingMobileOtp(true);
+    setMobileOtpError("");
+    try {
+      await verifyMobileOtp(phone.trim(), fullCode);
+      setPhoneVerified(true);
+      setShowMobileOtpModal(false);
+      setInfoMsg("Mobile number verified successfully! ✓");
+    } catch (err) {
+      setMobileOtpError(err.message || "Invalid SMS verification code.");
+    } finally {
+      setIsVerifyingMobileOtp(false);
+    }
+  };
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState(() => searchParams.get("email") || "");
@@ -18,12 +64,54 @@ const Register = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  // Load Google OAuth script
+  // Load Google GSI script and render the official Sign-In button
   useEffect(() => {
+    const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+    if (!googleClientId) return;
+
+    const initGoogle = () => {
+      if (!window.google?.accounts?.id || !googleBtnRef.current) return;
+      window.google.accounts.id.initialize({
+        client_id: googleClientId,
+        callback: async (response) => {
+          if (!response?.credential) {
+            setErrorMsg("Google Sign-In was cancelled or failed. Please try again.");
+            return;
+          }
+          setIsGoogleLoading(true);
+          setErrorMsg("");
+          try {
+            await googleLogin(response.credential);
+            navigate("/");
+          } catch (err) {
+            setErrorMsg(err.message || "Google Sign-In failed. Please try again.");
+          } finally {
+            setIsGoogleLoading(false);
+          }
+        },
+      });
+      window.google.accounts.id.renderButton(googleBtnRef.current, {
+        type: "standard",
+        theme: "filled_black",
+        size: "large",
+        text: "signup_with",
+        shape: "rectangular",
+        width: googleBtnRef.current.offsetWidth || 360,
+        logo_alignment: "left",
+      });
+    };
+
+    // If GSI already loaded (e.g. hot-reload), initialise immediately
+    if (window.google?.accounts?.id) {
+      initGoogle();
+      return;
+    }
+
     const script = document.createElement("script");
     script.src = "https://accounts.google.com/gsi/client";
     script.async = true;
     script.defer = true;
+    script.onload = initGoogle;
     document.body.appendChild(script);
 
     return () => {
@@ -48,6 +136,7 @@ const Register = () => {
   const [isResending, setIsResending] = useState(false);
 
   const inputRefs = useRef([...Array(6)].map(() => React.createRef()));
+  const googleBtnRef = useRef(null);
 
   useEffect(() => {
     let timer;
@@ -175,37 +264,10 @@ const Register = () => {
     }
   };
 
+  // Google Sign-In is handled via the renderButton callback above.
   const handleGoogleSignIn = () => {
-    setIsGoogleLoading(true);
-    setErrorMsg("");
-    if (window.google?.accounts?.id) {
-      window.google.accounts.id.initialize({
-        client_id: "1057492984572-mockclientid.apps.googleusercontent.com",
-        callback: async (response) => {
-          try {
-            await googleLogin(response.credential);
-            navigate("/");
-          } catch (err) {
-            setErrorMsg(err.message || "Google Sign-In failed.");
-          } finally {
-            setIsGoogleLoading(false);
-          }
-        },
-      });
-      window.google.accounts.id.prompt();
-    } else {
-      setTimeout(async () => {
-        try {
-          const fakeToken = "mock_google_jwt_token_for_dev_testing";
-          await googleLogin(fakeToken);
-          navigate("/");
-        } catch (err) {
-          setErrorMsg("Google Sign-In error: " + (err.message || err));
-        } finally {
-          setIsGoogleLoading(false);
-        }
-      }, 1000);
-    }
+    // The official Google button rendered via renderButton() handles the click;
+    // this function is intentionally left as a no-op.
   };
 
   const handleOtpSubmit = async (e) => {
@@ -282,12 +344,37 @@ const Register = () => {
 
             <div className="input-row">
               <div className="input-group">
-                <label>Mobile Number</label>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+                  <label style={{ margin: 0 }}>Mobile Number</label>
+                  {phoneVerified ? (
+                    <span style={{ fontSize: "0.8rem", color: "#34d399", fontWeight: "700" }}>✓ Mobile Verified</span>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handleSendMobileOtp}
+                      disabled={isSendingMobileOtp || !phone}
+                      style={{
+                        background: "none",
+                        border: "none",
+                        color: "#c084fc",
+                        fontSize: "0.8rem",
+                        fontWeight: "700",
+                        cursor: "pointer",
+                        textDecoration: "underline"
+                      }}
+                    >
+                      {isSendingMobileOtp ? "Sending..." : "[ Verify ]"}
+                    </button>
+                  )}
+                </div>
                 <input
                   type="tel"
-                  placeholder="Enter mobile number"
+                  placeholder="+91 XXXXX XXXXX"
                   value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
+                  onChange={(e) => {
+                    setPhone(e.target.value);
+                    if (phoneVerified) setPhoneVerified(false);
+                  }}
                 />
               </div>
 
@@ -346,15 +433,18 @@ const Register = () => {
               <span>or sign up with</span>
             </div>
 
-            <button
-              type="button"
-              className="google-btn"
-              onClick={handleGoogleSignIn}
-              disabled={isGoogleLoading}
-            >
-              <img src={googleLogo} alt="Google" className="google-icon" />
-              {isGoogleLoading ? "Connecting to Google..." : "Continue with Google"}
-            </button>
+            {/* Official Google Sign-In button rendered by the GSI library */}
+            <div
+              id="google-signin-btn-register"
+              ref={googleBtnRef}
+              className="google-signin-btn-container"
+              style={{ minHeight: "44px", display: "flex", justifyContent: "center" }}
+            />
+            {isGoogleLoading && (
+              <p style={{ textAlign: "center", color: "#c084fc", fontSize: "0.9rem", marginTop: "8px" }}>
+                Connecting to Google...
+              </p>
+            )}
 
             <p className="login-link">
               Already have an account?
@@ -364,7 +454,7 @@ const Register = () => {
         </div>
       </div>
 
-      {/* OTP Verification Modal Overlay */}
+      {/* Email OTP Verification Modal Overlay */}
       {showOtpModal && (
         <div className="otp-modal-overlay">
           <div className="otp-modal">
@@ -437,9 +527,58 @@ const Register = () => {
                 </button>
               </div>
             </form>
-            <p className="otp-helper-text">
-              Check your email inbox & spam folder for your 6-digit verification code.
-            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Mobile SMS OTP Modal Overlay */}
+      {showMobileOtpModal && (
+        <div className="otp-modal-overlay">
+          <div className="otp-modal">
+            <div className="otp-icon-header">
+              <span>📱</span>
+            </div>
+            <h3>Verify Mobile Number</h3>
+            <p>Enter the 6-digit SMS code sent to <strong>+91 ******{phone.slice(-4)}</strong></p>
+            
+            {mobileOtpError && <div className="alert-message error">{mobileOtpError}</div>}
+            
+            <form onSubmit={handleVerifyMobileOtpSubmit}>
+              <div className="otp-boxes-container">
+                {mobileOtpDigits.map((digit, idx) => (
+                  <input
+                    key={idx}
+                    type="text"
+                    maxLength="1"
+                    className="otp-box-digit"
+                    value={digit}
+                    onChange={(e) => {
+                      const cleanVal = e.target.value.replace(/\D/g, "");
+                      const newArr = [...mobileOtpDigits];
+                      newArr[idx] = cleanVal;
+                      setMobileOtpDigits(newArr);
+                    }}
+                  />
+                ))}
+              </div>
+
+              <div className="otp-modal-buttons" style={{ marginTop: "24px" }}>
+                <button
+                  type="button"
+                  className="otp-cancel-btn"
+                  onClick={() => setShowMobileOtpModal(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="otp-submit-btn"
+                  disabled={isVerifyingMobileOtp || mobileOtpDigits.join("").length !== 6}
+                >
+                  {isVerifyingMobileOtp ? "Verifying..." : "Verify Mobile"}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Header, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Header, Request, Response, status
 from app.schemas.payment_schema import (
     PaymentResponse, RazorpayOrderRequest, RazorpayOrderResponse,
     StripeCheckoutRequest, RazorpayVerifyRequest, StripeVerifyRequest,
@@ -7,8 +7,12 @@ from app.schemas.payment_schema import (
 from app.dependencies import get_current_active_user, get_db
 from app.services.payment_service import PaymentService
 from typing import Optional
+from pydantic import BaseModel
 
 router = APIRouter()
+
+class UpgradeRequest(BaseModel):
+    target_plan: str = "enterprise"
 
 @router.post("/create-razorpay-order", response_model=RazorpayOrderResponse)
 async def create_razorpay_order(
@@ -125,3 +129,45 @@ async def get_invoice(
         transaction_id=transaction_id,
         db=db
     )
+
+@router.get("/invoice/{transaction_id}/pdf")
+async def download_invoice_pdf(
+    transaction_id: str,
+    current_user = Depends(get_current_active_user),
+    db = Depends(get_db)
+):
+    user_id = str(current_user["_id"])
+    pdf_bytes = await PaymentService.generate_invoice_pdf(user_id, transaction_id, db)
+    filename = f"PrepNova_Invoice_{transaction_id[:8]}.pdf"
+    
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'}
+    )
+
+@router.post("/calculate-upgrade")
+async def calculate_upgrade(
+    request: UpgradeRequest,
+    current_user = Depends(get_current_active_user),
+    db = Depends(get_db)
+):
+    user_id = str(current_user["_id"])
+    return await PaymentService.calculate_prorated_upgrade(user_id, request.target_plan, db)
+
+@router.post("/upgrade-subscription")
+async def upgrade_subscription(
+    request: UpgradeRequest,
+    current_user = Depends(get_current_active_user),
+    db = Depends(get_db)
+):
+    user_id = str(current_user["_id"])
+    return await PaymentService.execute_prorated_upgrade(user_id, request.target_plan, db)
+
+@router.get("/webhook-status")
+async def get_webhook_status(
+    current_user = Depends(get_current_active_user),
+    db = Depends(get_db)
+):
+    return await PaymentService.get_gateway_webhook_status(db)
+

@@ -19,12 +19,37 @@ class SpeechService:
     async def transcribe_audio(file_path: str) -> str:
         """
         Transcribes candidate audio recorded during interview.
-        Uses OpenAI Whisper model if installed, with robust audio processing fallback.
+        Uses Groq Cloud Whisper API if key is available, or local OpenAI Whisper model fallback.
         """
         print(f"[SpeechService] Transcribing audio file: {file_path}")
         if not os.path.exists(file_path):
             return "Thank you. I have explained my technical experience with system architecture and full-stack development."
 
+        # ── 1. Cloud Whisper (Groq API) ──────────────────────────────────────
+        from app.config import settings
+        import httpx
+        
+        groq_api_key = settings.GROQ_API_KEY
+        if groq_api_key and groq_api_key != "your-groq-api-key-here":
+            try:
+                url = "https://api.groq.com/openai/v1/audio/transcriptions"
+                headers = {"Authorization": f"Bearer {groq_api_key}"}
+                
+                with open(file_path, "rb") as f:
+                    files = {"file": (os.path.basename(file_path), f, "audio/webm")}
+                    data = {"model": "whisper-large-v3"}
+                    
+                    async with httpx.AsyncClient(timeout=30.0) as client:
+                        resp = await client.post(url, headers=headers, files=files, data=data)
+                        if resp.status_code == 200:
+                            transcribed = resp.json().get("text", "").strip()
+                            if transcribed:
+                                print(f"[SpeechService] Cloud Whisper transcription success: {transcribed}")
+                                return transcribed
+            except Exception as ce:
+                print(f"[SpeechService] Groq Cloud Whisper error: {ce}")
+
+        # ── 2. Local Whisper model fallback ──────────────────────────────────
         try:
             import whisper
             loop = asyncio.get_event_loop()
@@ -34,9 +59,11 @@ class SpeechService:
             if transcribed:
                 return transcribed
         except Exception as e:
-            print(f"[SpeechService] Whisper STT fallback: {e}")
+            print(f"[SpeechService] Local Whisper STT fallback unavailable: {e}")
 
+        # Default fallback transcript text
         return "I have extensive experience architecting high-availability cloud microservices and optimizing database query latency."
+
 
     @staticmethod
     async def text_to_speech(text: str, voice_gender: str = "female", language: str = "en") -> str:

@@ -1,4 +1,4 @@
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordBearer
 import jwt
 from app.config import settings
@@ -6,7 +6,7 @@ from app.database import db_manager
 from app.constants import ERROR_TOKEN_INVALID, ERROR_USER_NOT_FOUND
 from bson import ObjectId
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/auth/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/auth/login", auto_error=False)
 
 async def get_db():
     if db_manager.db is None:
@@ -19,6 +19,7 @@ async def get_redis():
     return db_manager.redis_client
 
 async def get_current_user(
+    request: Request,
     token: str = Depends(oauth2_scheme), 
     db = Depends(get_db)
 ):
@@ -27,13 +28,22 @@ async def get_current_user(
         detail=ERROR_TOKEN_INVALID,
         headers={"WWW-Authenticate": "Bearer"},
     )
+    
+    # Check Authorization header or HttpOnly Cookie
+    raw_token = token
+    if not raw_token and request:
+        raw_token = request.cookies.get("access_token")
+        
+    if not raw_token:
+        raise credentials_exception
+
     try:
         redis = db_manager.redis_client
-        if redis and await redis.get(f"blacklist:{token}"):
+        if redis and await redis.get(f"blacklist:{raw_token}"):
             raise credentials_exception
 
         payload = jwt.decode(
-            token, 
+            raw_token, 
             settings.JWT_SECRET, 
             algorithms=[settings.JWT_ALGORITHM]
         )
@@ -46,6 +56,7 @@ async def get_current_user(
             raise credentials_exception
     except jwt.PyJWTError:
         raise credentials_exception
+
         
     try:
         user = await db["users"].find_one({"_id": ObjectId(user_id)})

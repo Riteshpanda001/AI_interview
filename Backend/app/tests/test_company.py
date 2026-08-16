@@ -1,50 +1,54 @@
 import asyncio
 import pytest
-from unittest.mock import AsyncMock, MagicMock
 from app.services.company_service import CompanyService
 
-def test_company_service_default_fallback():
+def test_company_profile_fallback():
     async def run():
         mock_db = MagicMock()
         mock_db["companies"].find_one = AsyncMock(return_value=None)
+        profile = await CompanyService.get_company_by_slug("google", mock_db)
+        assert profile["name"] == "Google"
+        assert "hiring_process" in profile
+        assert len(profile["hiring_process"]) == 4
 
-        comp = await CompanyService.get_company_by_slug("google", mock_db)
-        assert comp is not None
-        assert comp["name"] == "Google"
-        assert "eligibility" in comp
-        assert "hiring_process" in comp
-        assert "personalized_prep_plan" in comp
-
+    from unittest.mock import AsyncMock, MagicMock
     asyncio.run(run())
 
-def test_company_service_questions():
+def test_company_role_filtering():
+    from unittest.mock import AsyncMock, MagicMock
     async def run():
         mock_db = MagicMock()
         mock_cursor = MagicMock()
         mock_cursor.to_list = AsyncMock(return_value=[
-            {"_id": "q1", "company_slug": "google", "category": "dsa", "title": "LRU Cache"}
+            {"_id": "1", "title": "React Render Opt", "role_target": "Frontend Engineer"},
+            {"_id": "2", "title": "SQL Indexing", "role_target": "Backend SDE-1"}
         ])
         mock_db["company_questions"].find = MagicMock(return_value=mock_cursor)
 
-        questions = await CompanyService.get_company_questions("google", "dsa", mock_db)
-        assert len(questions) == 1
-        assert questions[0]["title"] == "LRU Cache"
+        frontend_qs = await CompanyService.get_company_questions("google", "all", mock_db, role="Frontend Engineer")
+        assert len(frontend_qs) == 1
+        assert frontend_qs[0]["title"] == "React Render Opt"
 
     asyncio.run(run())
 
-def test_company_service_admin_crud():
+def test_company_progress_and_tips():
+    from unittest.mock import AsyncMock, MagicMock
     async def run():
         mock_db = MagicMock()
-        mock_db["companies"].find_one = AsyncMock(return_value=None)
-        mock_db["companies"].insert_one = AsyncMock(return_value=MagicMock(inserted_id="comp123"))
+        mock_db["user_company_progress"].find_one = AsyncMock(return_value={
+            "completed_question_ids": ["q1", "q2"]
+        })
+        mock_cursor = MagicMock()
+        mock_cursor.to_list = AsyncMock(return_value=[{"_id": f"q{i}"} for i in range(10)])
+        mock_cursor.sort.return_value = mock_cursor
+        mock_db["company_questions"].find.return_value = mock_cursor
 
-        company = await CompanyService.save_or_update_company({"name": "Tesla", "industry": "Automotive"}, mock_db)
-        assert company["slug"] == "tesla"
-        assert company["id"] == "comp123"
+        progress = await CompanyService.get_user_company_progress("user_1", "google", mock_db)
+        assert progress["completed_count"] == 2
 
-        mock_db["companies"].delete_one = AsyncMock(return_value=MagicMock(deleted_count=1))
-        res = await CompanyService.delete_company("comp123", mock_db)
-        assert res["message"] == "Company deleted successfully"
+        mock_db["company_interview_tips"].find.return_value = mock_cursor
+        tips = await CompanyService.get_company_tips("google", mock_db)
+        assert len(tips) > 0
 
     asyncio.run(run())
 

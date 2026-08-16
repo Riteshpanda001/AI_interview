@@ -82,7 +82,7 @@ class EmailService:
                 <tr>
                   <td style="padding:18px 24px;">
                     <p style="margin:0;color:#e9d5ff;font-size:14px;line-height:1.7;">
-                      ⏳ The code expires in <strong style="color:#c084fc;">1 minute</strong>.
+                      ⏳ The code expires in <strong style="color:#c084fc;">10 minutes</strong>.
                     </p>
                     <p style="margin:8px 0 0 0;color:#a3a3c2;font-size:13px;line-height:1.6;">
                       If you did not request this account, please ignore this email.
@@ -122,7 +122,7 @@ class EmailService:
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Reset Your Password – PreNova AI</title>
+  <title>PrepNova AI - Password Reset Verification Code</title>
 </head>
 <body style="margin:0;padding:0;background-color:#05020c;font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#ffffff;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#05020c;padding:40px 20px;">
@@ -138,11 +138,11 @@ class EmailService:
           <!-- Header -->
           <tr>
             <td align="center"
-              style="background:linear-gradient(135deg,#7c3aed 0%,#a855f7 100%);
+              style="background:linear-gradient(135deg,#4c1d95 0%,#7c3aed 100%);
                      padding:36px 40px;border-bottom:1px solid rgba(168,85,247,0.3);">
               <h1 style="margin:0;color:#ffffff;font-size:32px;font-weight:800;
                          letter-spacing:-0.5px;text-shadow:0 2px 10px rgba(0,0,0,0.4);">
-                PreNova AI
+                PrepNova AI
               </h1>
               <p style="margin:6px 0 0 0;color:rgba(255,255,255,0.85);font-size:13px;
                         letter-spacing:1.5px;text-transform:uppercase;font-weight:600;">
@@ -155,13 +155,13 @@ class EmailService:
           <tr>
             <td style="padding:40px 48px;">
               <h2 style="margin:0 0 16px 0;color:#ffffff;font-size:24px;font-weight:700;letter-spacing:-0.3px;">
-                Reset Your Password 🔑
+                Reset Your Password
               </h2>
               <p style="margin:0 0 20px 0;color:#c4c4e0;font-size:15px;line-height:1.7;">
                 Hello <strong>{safe_name}</strong>,
               </p>
               <p style="margin:0 0 28px 0;color:#a3a3c2;font-size:15px;line-height:1.7;">
-                We received a request to reset your password. Use the 6-digit recovery code below to complete the password reset process.
+                We received a request to reset your PrepNova AI password. Your verification code is:
               </p>
 
               <!-- OTP Box -->
@@ -191,10 +191,10 @@ class EmailService:
                 <tr>
                   <td style="padding:18px 24px;">
                     <p style="margin:0;color:#fca5a5;font-size:14px;line-height:1.7;">
-                      ⏳ The code expires in <strong style="color:#f87171;">1 minute</strong>.
+                      ⏳ This OTP will expire in <strong style="color:#f87171;">10 minutes</strong>.
                     </p>
                     <p style="margin:8px 0 0 0;color:#f87171;font-size:13px;line-height:1.6;">
-                      If you did not request a password reset, your password remains secure and active.
+                      If you did not request a password reset, you can safely ignore this email.
                     </p>
                   </td>
                 </tr>
@@ -335,7 +335,6 @@ class EmailService:
 </body>
 </html>"""
 
-
     @staticmethod
     def _send_email_sync(to_email: str, subject: str, html_content: str) -> bool:
         """Synchronous SMTP send — runs in a thread to avoid blocking the event loop."""
@@ -369,31 +368,37 @@ class EmailService:
         """
         Send an HTML email via Gmail SMTP.
         Runs the blocking SMTP call in a thread executor so FastAPI stays non-blocking.
-        Falls back to console logging if SMTP credentials are not configured.
+        In DEBUG mode the OTP code is ALWAYS printed to the terminal before SMTP is
+        attempted — so developers can grab it even when email delivery fails.
         """
         import re
         otp_match = re.search(r'\b\d{6}\b', html_content)
         otp_code = otp_match.group(0) if otp_match else None
 
-        # Always log prominent OTP notice in terminal console
-        print(f"\n{'='*60}")
-        print(f"[EMAIL SERVICE] 🔐 VERIFICATION OTP FOR: {to_email}")
-        if otp_code:
-            print(f"[EMAIL SERVICE] 🔑 CODE: {otp_code}")
-        print(f"[EMAIL SERVICE] 📧 SUBJECT: {subject}")
-        print(f"{'='*60}\n")
+        # ── Always surface the OTP code in the terminal during development ──
+        if settings.DEBUG:
+            if otp_code:
+                print(f"\n[EMAIL SERVICE] ⚡ OTP CODE for {to_email}: {otp_code}\n")
+            else:
+                print(f"[EMAIL SERVICE] Sending email to {to_email}")
 
         smtp_user = settings.effective_smtp_user
         raw_password = (settings.SMTP_PASSWORD or "").strip()
         clean_password = raw_password.replace(" ", "")
 
         placeholder_emails = {"user@example.com", "noreply@example.com", "your-gmail@gmail.com", ""}
-        placeholder_passwords = {"password", "your-16-char-app-password", "YOUR_GOOGLE_APP_PASSWORD", ""}
+        placeholder_passwords = {
+            "password", "your-16-char-app-password",
+            "YOUR_GOOGLE_APP_PASSWORD", "YOUR_16_CHAR_GMAIL_APP_PASSWORD", ""
+        }
 
         if smtp_user in placeholder_emails or raw_password in placeholder_passwords or not clean_password:
-            print("[EMAIL SERVICE] ⚠️  SMTP credentials not configured (placeholder detected in Backend/.env).")
-            print("[EMAIL SERVICE] 💡 To receive OTP on user's real email, set your Google App Password in Backend/.env\n")
-            return True
+            print(f"[EMAIL SERVICE] ⚠ SMTP credentials are placeholder values — email NOT sent to {to_email}.")
+            if settings.DEBUG:
+                if otp_code:
+                    print(f"[EMAIL SERVICE] ⚡ DEV MODE — Use this OTP to continue: {otp_code}")
+                return True
+            return False
 
         try:
             loop = asyncio.get_event_loop()
@@ -404,18 +409,45 @@ class EmailService:
                 subject,
                 html_content,
             )
-            print(f"[EMAIL SERVICE] ✅ Email successfully sent via SMTP to: {to_email}")
+            print(f"[EMAIL SERVICE] ✅ Email successfully delivered via SMTP to: {to_email}")
             return True
-        except smtplib.SMTPAuthenticationError:
+
+        except smtplib.SMTPAuthenticationError as exc:
             print(
-                "[EMAIL SERVICE] ❌ SMTP Authentication failed. "
-                "Make sure SMTP_EMAIL/SMTP_USER and SMTP_PASSWORD are correct in Backend/.env. "
-                "For Gmail, generate a 16-character App Password (not your account password)."
+                f"[EMAIL SERVICE] ❌ SMTP Auth FAILED for '{smtp_user}': {exc}\n"
+                "       → For Gmail, generate a fresh 16-char App Password at: "
+                "https://myaccount.google.com/apppasswords\n"
+                "         Then update SMTP_PASSWORD in Backend/.env"
             )
+            if settings.DEBUG:
+                if otp_code:
+                    print(f"[EMAIL SERVICE] ⚡ DEV MODE — SMTP failed, use this OTP to continue: {otp_code}")
+                return True
             return False
+
+        except smtplib.SMTPConnectError as exc:
+            print(
+                f"[EMAIL SERVICE] ❌ SMTP connection to {settings.SMTP_HOST}:{settings.SMTP_PORT} failed: {exc}\n"
+                "       → Check SMTP_HOST / SMTP_PORT in Backend/.env and your network/firewall."
+            )
+            if settings.DEBUG:
+                if otp_code:
+                    print(f"[EMAIL SERVICE] ⚡ DEV MODE — SMTP unreachable, use this OTP to continue: {otp_code}")
+                return True
+            return False
+
         except smtplib.SMTPException as exc:
             print(f"[EMAIL SERVICE] ❌ SMTP error sending to {to_email}: {exc}")
+            if settings.DEBUG:
+                if otp_code:
+                    print(f"[EMAIL SERVICE] ⚡ DEV MODE — Use this OTP to continue: {otp_code}")
+                return True
             return False
+
         except Exception as exc:
             print(f"[EMAIL SERVICE] ❌ Unexpected error sending email to {to_email}: {exc}")
+            if settings.DEBUG:
+                if otp_code:
+                    print(f"[EMAIL SERVICE] ⚡ DEV MODE — Use this OTP to continue: {otp_code}")
+                return True
             return False

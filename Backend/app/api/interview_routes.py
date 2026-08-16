@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Depends, UploadFile, File
+from fastapi import APIRouter, Depends, UploadFile, File, Response, HTTPException
 from pydantic import BaseModel
 from app.schemas.interview_schema import InterviewCreateRequest, InterviewSessionResponse, SubmitAnswerRequest
 from app.schemas.feedback_schema import InterviewFeedbackResponse
 from app.dependencies import get_current_active_user, get_db
 from app.services.interview_service import InterviewService
 from app.services.speech_service import SpeechService
+from app.services.storage_service import StorageService
 from app.services.payment_service import SubscriptionEnforcer
 
 router = APIRouter()
@@ -59,3 +60,35 @@ async def generate_tts(request: TTSRequest):
         language=request.language
     )
     return {"voice_url": voice_url, "text": request.text}
+
+@router.get("/{session_id}/pdf")
+async def download_interview_pdf(
+    session_id: str,
+    current_user = Depends(get_current_active_user),
+    db = Depends(get_db)
+):
+    user_id = str(current_user["_id"])
+    pdf_bytes = await InterviewService.generate_interview_pdf(session_id, user_id, db)
+    filename = f"PrepNova_Interview_Report_{session_id[:8]}.pdf"
+    
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'}
+    )
+
+@router.post("/upload-audio")
+async def upload_audio_response(
+    file: UploadFile = File(...),
+    current_user = Depends(get_current_active_user)
+):
+    contents = await file.read()
+    user_id = str(current_user["_id"])
+    storage_meta = await StorageService.upload_file(
+        file_bytes=contents,
+        original_filename=file.filename or "recording.webm",
+        user_id=user_id,
+        mime_type=file.content_type or "audio/webm"
+    )
+    return {"audio_url": storage_meta.get("file_url", ""), "file_path": storage_meta.get("file_path", "")}
+

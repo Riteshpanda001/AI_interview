@@ -19,9 +19,12 @@ class UserService:
     @staticmethod
     async def find_by_id(user_id: str, db) -> Optional[Dict[str, Any]]:
         try:
-            return await db["users"].find_one({"_id": ObjectId(user_id)})
+            user = await db["users"].find_one({"_id": ObjectId(user_id)})
+            if user:
+                return user
         except Exception:
-            return None
+            pass
+        return await db["users"].find_one({"_id": str(user_id)})
 
     @staticmethod
     async def create_user(
@@ -37,6 +40,7 @@ class UserService:
         db: Any = None
     ) -> Dict[str, Any]:
         now = datetime.now(timezone.utc)
+        auth_prov = "google" if provider == "google" else "local"
         new_user = {
             "email": email.lower().strip(),
             "full_name": full_name,
@@ -44,11 +48,16 @@ class UserService:
             "hashed_password": password_hash,
             "password": password_hash,
             "provider": provider,
+            "auth_provider": auth_prov,
             "google_id": google_id,
+            "google_email": email.lower().strip() if provider == "google" else None,
+            "google_verified": True if provider == "google" else False,
             "profile_picture": profile_picture,
             "avatar_url": profile_picture,
             "phone": phone,
             "mobile_number": phone,
+            "phone_verified": False,
+            "phone_verified_at": None,
             "gender": gender,
             "role": ROLE_USER,
             "plan_type": PLAN_FREE,

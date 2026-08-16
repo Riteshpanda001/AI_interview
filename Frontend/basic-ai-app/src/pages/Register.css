@@ -287,6 +287,27 @@
   height: 20px;
 }
 
+/* Container for the GSI renderButton() Google Sign-In widget */
+.google-signin-btn-container {
+  width: 100%;
+  min-height: 44px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 16px;
+  overflow: hidden;
+  border-radius: 12px;
+}
+
+.google-signin-btn-container > div {
+  width: 100% !important;
+}
+
+.google-signin-btn-container iframe {
+  width: 100% !important;
+}
+
+
 .login-link {
   text-align: center;
   font-size: 0.88rem;

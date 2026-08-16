@@ -3,6 +3,7 @@ import "./ResumeDashboard.css";
 
 const ResumeDashboard = ({
   resumes = [],
+  readinessScore = null,
   onOpenWorkspace,
   onCreateNewBlank,
   onOpenAIGenerator,
@@ -98,7 +99,7 @@ const ResumeDashboard = ({
         <div className="stat-card">
           <div className="stat-icon-wrapper blue">💼</div>
           <div className="stat-info">
-            <h3>89%</h3>
+            <h3>{avgATS}%</h3>
             <p>Job Match Rating</p>
           </div>
         </div>
@@ -106,7 +107,7 @@ const ResumeDashboard = ({
         <div className="stat-card">
           <div className="stat-icon-wrapper pink">⚡</div>
           <div className="stat-info">
-            <h3>88%</h3>
+            <h3>{readinessScore !== null ? `${readinessScore}%` : resumes.length ? `${avgATS}%` : "—"}</h3>
             <p>Interview Readiness</p>
           </div>
         </div>

@@ -23,12 +23,12 @@ def _ensure_utc(dt):
 
 class OTPService:
     MAX_ATTEMPTS = 5
-    OTP_EXPIRY_MINUTES = 5
+    OTP_EXPIRY_MINUTES = 10
     RESEND_COOLDOWN_SECONDS = 60
 
     @staticmethod
     def _generate_6digit_otp() -> str:
-        return "".join(secrets.choice("0123456789") for _ in range(6))
+        return str(secrets.randbelow(900000) + 100000)
 
     @staticmethod
     def _hash_otp(otp_code: str, email: str, purpose: str) -> str:
@@ -93,7 +93,16 @@ class OTPService:
             subject = "🔐 Verify Your Email – PreNova AI"
             html_content = EmailService.build_verification_email_html(user_name, otp_code)
 
-        await EmailService.send_email(clean_email, subject, html_content)
+        email_sent = await EmailService.send_email(clean_email, subject, html_content)
+        if not email_sent:
+            # Clean up un-delivered record
+            if db is not None:
+                await db["otps"].delete_many({"email": clean_email, "purpose": purpose})
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Email delivery service is currently unavailable. Please try again in a few moments."
+            )
+
         await AuditLogService.log_event(
             event_type="EVENT_OTP_GENERATED",
             email=clean_email,
@@ -116,7 +125,6 @@ class OTPService:
         now = datetime.now(timezone.utc)
         db = db_manager.db
 
-        # 1. Check in MongoDB 'otps' collection
         if db is not None:
             record = await db["otps"].find_one({
                 "email": clean_email,
@@ -124,7 +132,6 @@ class OTPService:
             })
 
             if not record:
-                # Check Redis fallback
                 redis = db_manager.redis_client
                 if redis:
                     cached_hash = await redis.get(f"otp:{purpose}:{clean_email}")
@@ -135,7 +142,6 @@ class OTPService:
                 await AuditLogService.log_event("EVENT_OTP_VERIFY_FAILED", email=clean_email, status="FAILED", details={"purpose": purpose, "reason": "No record found"}, req=req, db=db)
                 return False
 
-            # Check max attempts limit (5 attempts)
             attempts = record.get("attempts", 0) + 1
             if attempts > OTPService.MAX_ATTEMPTS:
                 await db["otps"].delete_many({"email": clean_email, "purpose": purpose})
@@ -145,13 +151,11 @@ class OTPService:
                     detail="Maximum OTP attempts exceeded. Please request a new verification code."
                 )
 
-            # Update attempt counter
             await db["otps"].update_one(
                 {"_id": record["_id"]},
                 {"$set": {"attempts": attempts}}
             )
 
-            # Check expiration
             expires_at = _ensure_utc(record.get("expires_at"))
             if expires_at and now > expires_at:
                 await db["otps"].delete_many({"email": clean_email, "purpose": purpose})
@@ -161,10 +165,8 @@ class OTPService:
                     detail="Verification code has expired. Please request a new code."
                 )
 
-            # Validate OTP hash (or plain text fallback for existing records/mock tests)
             is_match = (record.get("otp_hash") == computed_hash) or (record.get("otp") == clean_otp)
             if is_match:
-                # Valid OTP! Clean up record
                 await db["otps"].delete_many({"email": clean_email, "purpose": purpose})
                 redis = db_manager.redis_client
                 if redis:
@@ -172,7 +174,6 @@ class OTPService:
                 await AuditLogService.log_event("EVENT_OTP_VERIFIED", email=clean_email, status="SUCCESS", details={"purpose": purpose}, req=req, db=db)
                 return True
 
-        # Fallback to Redis if DB not available
         redis = db_manager.redis_client
         if redis:
             cached_val = await redis.get(f"otp:{purpose}:{clean_email}")
@@ -189,6 +190,125 @@ class OTPService:
         return await OTPService.send_otp(email, purpose="password_reset", user_name=user_name, req=req)
 
     @staticmethod
-    async def verify_password_reset_otp(email: str, otp: str, req=None) -> bool:
-        return await OTPService.verify_otp(email, otp, purpose="password_reset", req=req)
+    async def verify_password_reset_otp(email: str, otp: str, req=None) -> dict:
+        import uuid
+        clean_email = email.lower().strip()
+        is_valid = await OTPService.verify_otp(clean_email, otp, purpose="password_reset", req=req)
+        if not is_valid:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid or expired password recovery code."
+            )
+
+        db = db_manager.db
+        reset_token = str(uuid.uuid4())
+        now = datetime.now(timezone.utc)
+        expires_at = now + timedelta(minutes=10)
+
+        if db is not None:
+            await db["password_reset_tokens"].delete_many({"email": clean_email})
+            await db["password_reset_tokens"].insert_one({
+                "reset_token": reset_token,
+                "email": clean_email,
+                "created_at": now,
+                "expires_at": expires_at,
+                "used": False
+            })
+
+        return {
+            "valid": True,
+            "reset_token": reset_token,
+            "message": "OTP verified successfully. You may now set your new password."
+        }
+
+    @staticmethod
+    async def send_mobile_otp(phone: str, user_id: str = None, req=None) -> str:
+        from app.services.sms_service import SMSService, normalize_phone_number
+        clean_phone = normalize_phone_number(phone)
+        if not clean_phone or len(clean_phone) < 10:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid phone number format. Please specify a valid mobile number."
+            )
+
+        now = datetime.now(timezone.utc)
+        db = db_manager.db
+        purpose = "mobile_verification"
+
+        if db is not None:
+            last_otp = await db["otps"].find_one({"email": clean_phone, "purpose": purpose})
+            if last_otp:
+                created_at = _ensure_utc(last_otp.get("created_at"))
+                if created_at and (now - created_at).total_seconds() < OTPService.RESEND_COOLDOWN_SECONDS:
+                    wait_seconds = int(OTPService.RESEND_COOLDOWN_SECONDS - (now - created_at).total_seconds())
+                    raise HTTPException(
+                        status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                        detail=f"Please wait {wait_seconds} seconds before requesting another SMS code."
+                    )
+                await db["otps"].delete_many({"email": clean_phone, "purpose": purpose})
+
+        otp_code = OTPService._generate_6digit_otp()
+        otp_hash = OTPService._hash_otp(otp_code, clean_phone, purpose)
+        expires_at = now + timedelta(minutes=OTPService.OTP_EXPIRY_MINUTES)
+
+        otp_record = {
+            "email": clean_phone,
+            "user_id": str(user_id) if user_id else None,
+            "otp_hash": otp_hash,
+            "purpose": purpose,
+            "expires_at": expires_at,
+            "created_at": now,
+            "attempts": 0
+        }
+        if db is not None:
+            await db["otps"].insert_one(otp_record)
+
+        sms_sent = await SMSService.send_otp_sms(clean_phone, otp_code)
+        if not sms_sent:
+            if db is not None:
+                await db["otps"].delete_many({"email": clean_phone, "purpose": purpose})
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="SMS gateway delivery failed. Please check the mobile number and try again."
+            )
+
+        return otp_code
+
+    @staticmethod
+    async def verify_mobile_otp(phone: str, otp: str, user_id: str = None, req=None) -> dict:
+        from app.services.sms_service import normalize_phone_number
+        from bson import ObjectId
+        clean_phone = normalize_phone_number(phone)
+        is_valid = await OTPService.verify_otp(clean_phone, otp, purpose="mobile_verification", req=req)
+        if not is_valid:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid or expired SMS verification code."
+            )
+
+        db = db_manager.db
+        now = datetime.now(timezone.utc)
+
+        if db is not None and user_id:
+            try:
+                query = {"_id": ObjectId(user_id)}
+            except Exception:
+                query = {"_id": user_id}
+
+            await db["users"].update_one(
+                query,
+                {"$set": {
+                    "phone": clean_phone,
+                    "phone_verified": True,
+                    "phone_verified_at": now,
+                    "updated_at": now
+                }}
+            )
+
+        return {
+            "success": True,
+            "phone_verified": True,
+            "message": "Mobile number verified successfully!"
+        }
+
 

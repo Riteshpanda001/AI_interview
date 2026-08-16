@@ -69,7 +69,7 @@ export const AuthProvider = ({ children }) => {
 
     const headers = {
       ...(options.headers || {}),
-      Authorization: `Bearer ${currentToken}`,
+      ...(currentToken ? { Authorization: `Bearer ${currentToken}` } : {}),
     };
 
     let response = await fetch(url, { ...options, headers });
@@ -349,17 +349,38 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Reset Password
-  const resetPassword = async (email, otp, newPassword, confirmPassword) => {
+  // Verify Password Reset OTP & Obtain Reset Token
+  const verifyPasswordResetOtp = async (email, otp) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/verify-password-reset-otp`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, otp, purpose: "password_reset" }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.detail || "Invalid or expired recovery code.");
+      }
+      return data;
+    } catch (error) {
+      console.error("Verify password reset OTP error:", error);
+      throw error;
+    }
+  };
+
+  // Reset Password with reset_token or otp
+  const resetPassword = async (email, newPassword, confirmPassword, resetToken = null, otp = null) => {
     try {
       const response = await fetch(`${API_BASE_URL}/auth/reset-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email,
-          otp,
           new_password: newPassword,
           confirm_password: confirmPassword,
+          reset_token: resetToken,
+          otp: otp,
         }),
       });
 
@@ -370,6 +391,50 @@ export const AuthProvider = ({ children }) => {
       return data;
     } catch (error) {
       console.error("Reset password error:", error);
+      throw error;
+    }
+  };
+
+  // Send Mobile SMS OTP
+  const sendMobileOtp = async (phone) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/send-mobile-otp`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.detail || "Failed to send mobile verification SMS");
+      }
+      return data;
+    } catch (error) {
+      console.error("Send mobile OTP error:", error);
+      throw error;
+    }
+  };
+
+  // Verify Mobile SMS OTP
+  const verifyMobileOtp = async (phone, otp) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/verify-mobile-otp`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone, otp }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.detail || "SMS verification code invalid");
+      }
+
+      if (user) {
+        setUser({ ...user, phone, phone_verified: true });
+      }
+      return data;
+    } catch (error) {
+      console.error("Verify mobile OTP error:", error);
       throw error;
     }
   };
@@ -518,7 +583,10 @@ export const AuthProvider = ({ children }) => {
         refreshToken,
         updateProfile,
         forgotPassword,
+        verifyPasswordResetOtp,
         resetPassword,
+        sendMobileOtp,
+        verifyMobileOtp,
         changePassword,
         requestEmailChange,
         verifyEmailChange,

@@ -30,6 +30,7 @@ const ResumeBuilder = () => {
   const [workspaceMode, setWorkspaceMode] = useState("new"); // "new" | "uploaded"
   const [selectedTemplate, setSelectedTemplate] = useState("london");
   const [currentResumeId, setCurrentResumeId] = useState(null);
+  const [localReadinessScore, setLocalReadinessScore] = useState(null);
   
   const [resumeData, setResumeData] = useState({
     personal: {
@@ -387,6 +388,7 @@ const ResumeBuilder = () => {
 
           {/* FAQ */}
           <ResumeFAQ />
+
         </>
       )}
 

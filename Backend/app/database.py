@@ -16,8 +16,30 @@ class MockCursor:
     def __init__(self, data):
         self.data = data
 
+    def sort(self, key_or_list, direction=1):
+        if isinstance(key_or_list, list):
+            for item in reversed(key_or_list):
+                if isinstance(item, (tuple, list)) and len(item) >= 2:
+                    k, d = item[0], item[1]
+                    self.data.sort(key=lambda x: str(x.get(k, "") or ""), reverse=(d == -1))
+        elif isinstance(key_or_list, str):
+            self.data.sort(key=lambda x: str(x.get(key_or_list, "") or ""), reverse=(direction == -1))
+        return self
+
+    def skip(self, n):
+        if isinstance(n, int) and n > 0:
+            self.data = self.data[n:]
+        return self
+
+    def limit(self, n):
+        if isinstance(n, int) and n >= 0:
+            self.data = self.data[:n]
+        return self
+
     async def to_list(self, length=100):
-        return self.data[:length]
+        if length is not None:
+            return self.data[:length]
+        return self.data
 
 class MockCollection:
     def __init__(self, name):
@@ -300,7 +322,7 @@ class DatabaseManager:
             await self.redis_client.ping()
             print("Connected to Redis cache successfully.")
         except Exception:
-            print("[REDIS] ⚡ External Redis server not active. Using Embedded In-Memory Cache.")
+            print("[REDIS] External Redis server not active. Using Embedded In-Memory Cache.")
             self.redis_client = MockRedis()
             self.offline_mode = True
 

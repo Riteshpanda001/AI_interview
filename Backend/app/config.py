@@ -39,6 +39,16 @@ class Settings(BaseSettings):
     FRONTEND_URL: str = "http://localhost:5173"
 
 
+    # SMS Provider Credentials (Twilio, Fast2SMS, MSG91, Console)
+    SMS_PROVIDER: str = "console"
+    TWILIO_ACCOUNT_SID: Optional[str] = None
+    TWILIO_AUTH_TOKEN: Optional[str] = None
+    TWILIO_PHONE_NUMBER: Optional[str] = None
+    FAST2SMS_API_KEY: Optional[str] = None
+    MSG91_AUTH_KEY: Optional[str] = None
+    MSG91_SENDER_ID: Optional[str] = None
+    MSG91_TEMPLATE_ID: Optional[str] = None
+
     # SMTP Credentials
     SMTP_HOST: str = "smtp.gmail.com"
     SMTP_PORT: int = 587
