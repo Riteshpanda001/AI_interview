@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Header, Request, Response
 from app.schemas.payment_schema import (
     PaymentResponse, RazorpayOrderRequest, RazorpayOrderResponse,
     StripeCheckoutRequest, RazorpayVerifyRequest, StripeVerifyRequest,
-    SubscriptionDetailsResponse, InvoiceResponse
+    SubscriptionDetailsResponse, InvoiceResponse, UPIQRVerifyRequest
 )
 from app.dependencies import get_current_active_user, get_db
 from app.services.payment_service import PaymentService
@@ -59,6 +59,26 @@ async def verify_stripe_payment(
     return await PaymentService.verify_stripe_payment(
         user_id=str(current_user["_id"]),
         req=request,
+        db=db
+    )
+
+@router.post("/verify-upi-qr", response_model=PaymentResponse)
+async def verify_upi_qr_payment(
+    request: UPIQRVerifyRequest,
+    current_user = Depends(get_current_active_user),
+    db = Depends(get_db)
+):
+    from datetime import datetime, timezone
+    import random
+    return await PaymentService._activate_user_subscription(
+        user_id=str(current_user["_id"]),
+        plan_type=request.plan_type,
+        billing_cycle=request.billing_cycle or "monthly",
+        amount=request.amount,
+        currency=request.currency or "INR",
+        payment_method="upi_qr",
+        order_id=f"qr_{int(datetime.now(timezone.utc).timestamp())}",
+        payment_id=request.transaction_ref or f"pay_qr_{random.randint(100000, 999999)}",
         db=db
     )
 

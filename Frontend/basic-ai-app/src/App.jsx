@@ -19,6 +19,7 @@ import Pricing from "./pages/Pricing";
 import Contact from "./pages/Contact";
 import Profile from "./pages/Profile";
 import AdminDashboard from "./pages/AdminDashboard";
+import PayUpiQr from "./pages/PayUpiQr";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function ScrollToTop() {
@@ -92,6 +93,14 @@ function App() {
           element={
             <ProtectedRoute>
               <Profile />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/pay-upi-qr"
+          element={
+            <ProtectedRoute>
+              <PayUpiQr />
             </ProtectedRoute>
           }
         />

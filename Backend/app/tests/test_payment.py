@@ -85,3 +85,37 @@ def test_invoice_not_found_raises_404():
         assert "not found" in exc_info.value.detail
 
     asyncio.run(run())
+
+
+def test_verify_upi_qr_payment_success():
+    async def run():
+        mock_db = MagicMock()
+        mock_db["payments"].insert_one = AsyncMock(return_value=MagicMock(inserted_id="p456"))
+        mock_db["users"].update_one = AsyncMock()
+        mock_db["subscriptions"].update_one = AsyncMock()
+
+        from app.api.payment_routes import verify_upi_qr_payment
+        from app.schemas.payment_schema import UPIQRVerifyRequest
+
+        req = UPIQRVerifyRequest(
+            plan_type="pro",
+            billing_cycle="monthly",
+            amount=499.0,
+            currency="INR",
+            transaction_ref="UPI123456789"
+        )
+        current_user = {"_id": "user789"}
+
+        res = await verify_upi_qr_payment(
+            request=req,
+            current_user=current_user,
+            db=mock_db
+        )
+
+        assert res["status"] == "succeeded"
+        assert res["plan_type"] == "pro"
+        assert res["payment_method"] == "upi_qr"
+        assert res["gateway_payment_id"] == "UPI123456789"
+
+    asyncio.run(run())
+

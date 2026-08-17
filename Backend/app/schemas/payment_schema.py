@@ -59,6 +59,15 @@ class StripeVerifyRequest(BaseModel):
     billing_cycle: Optional[str] = "monthly"
 
 
+class UPIQRVerifyRequest(BaseModel):
+    plan_type: str
+    billing_cycle: Optional[str] = "monthly"
+    amount: float
+    currency: Optional[str] = "INR"
+    transaction_ref: Optional[str] = None
+
+
+
 class SubscriptionDetailsResponse(BaseModel):
     plan_type: str
     billing_cycle: str

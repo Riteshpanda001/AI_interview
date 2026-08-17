@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "./CheckoutModal.css";
 import { useAuth } from "../../context/AuthContext";
+import upiQrCode from "../../assets/upi_qr_code.png";
 
 const API_BASE_URL = "http://localhost:8000/api";
 
 const CheckoutModal = ({ isOpen, onClose, selectedPlan, billingCycle, onPaymentSuccess }) => {
   const { user, authFetch, fetchCurrentUser } = useAuth();
+  const navigate = useNavigate();
 
-  const [paymentMethod, setPaymentMethod] = useState("razorpay"); // 'razorpay' or 'stripe'
+  const [paymentMethod, setPaymentMethod] = useState("razorpay"); // default to 'razorpay'
   const [isProcessing, setIsProcessing] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [paymentSuccess, setPaymentSuccess] = useState(false);
@@ -36,7 +39,7 @@ const CheckoutModal = ({ isOpen, onClose, selectedPlan, billingCycle, onPaymentS
 
   const monthlyPrice = isYearly ? Math.round(basePrice * 0.8) : basePrice;
   const rawTotal = isYearly ? monthlyPrice * 12 : monthlyPrice;
-  const currency = paymentMethod === "razorpay" ? "INR" : "USD";
+  const currency = (paymentMethod === "razorpay" || paymentMethod === "upi_qr") ? "INR" : "USD";
   const symbol = currency === "INR" ? "₹" : "$";
   const displayAmount = currency === "INR" ? rawTotal : Math.round(rawTotal / 80);
 
@@ -256,6 +259,20 @@ const CheckoutModal = ({ isOpen, onClose, selectedPlan, billingCycle, onPaymentS
             <div className="payment-gateway-chooser">
               <label className="gateway-label">Choose Payment Gateway</label>
               <div className="gateway-options">
+                <div
+                  className="gateway-card"
+                  onClick={() => {
+                    onClose();
+                    navigate(`/pay-upi-qr?plan=${planName.toLowerCase()}&cycle=${billingCycle}`);
+                  }}
+                >
+                  <span className="gateway-icon">📱</span>
+                  <div>
+                    <span className="gateway-title">UPI QR Code</span>
+                    <span className="gateway-desc">Scan QR to pay directly</span>
+                  </div>
+                </div>
+
                 <div
                   className={`gateway-card ${paymentMethod === "razorpay" ? "active" : ""}`}
                   onClick={() => setPaymentMethod("razorpay")}

@@ -14,19 +14,19 @@ const PricingPlans = ({ onPaymentCompleted }) => {
 
   const plans = [
     {
-      name: "Free",
+      name: "Free Trial",
       priceMonthly: "₹0",
       priceYearly: "₹0",
       period: "/month",
       yearlyPeriod: "/month",
-      note: "Free forever",
+      note: "No card required",
       features: [
-        "5 AI Mock Interviews",
+        "1 AI Mock Interview",
         "Basic ATS Resume Analysis",
         "Basic Performance Analytics",
         "Limited Company Questions",
       ],
-      button: "Get Started Free",
+      button: "Start Free Trial",
       popular: false,
     },
     {
@@ -66,7 +66,7 @@ const PricingPlans = ({ onPaymentCompleted }) => {
   ];
 
   const handleChoosePlan = (plan) => {
-    if (plan.name === "Free") {
+    if (plan.name === "Free" || plan.name === "Free Trial") {
       if (!user) {
         navigate("/register");
       }
@@ -119,7 +119,7 @@ const PricingPlans = ({ onPaymentCompleted }) => {
           const isYearly = billingCycle === "yearly";
           const currentPrice = isYearly ? plan.priceYearly : plan.priceMonthly;
           const currentPeriod = isYearly ? plan.yearlyPeriod : plan.period;
-          const isCurrentPlan = currentPlan === plan.name.toLowerCase();
+          const isCurrentPlan = currentPlan === plan.name.toLowerCase() || (plan.name === "Free Trial" && currentPlan === "free");
 
           return (
             <div
@@ -135,7 +135,7 @@ const PricingPlans = ({ onPaymentCompleted }) => {
                 <span className="period">{currentPeriod}</span>
               </div>
 
-              {isYearly && plan.name !== "Free" ? (
+              {isYearly && plan.name !== "Free" && plan.name !== "Free Trial" ? (
                 <div className="billing-note">{plan.note}</div>
               ) : (
                 <div className="billing-note-placeholder">&nbsp;</div>
@@ -152,35 +152,20 @@ const PricingPlans = ({ onPaymentCompleted }) => {
               <button
                 className={`plans-action-btn ${plan.popular ? "popular-btn" : ""} ${isCurrentPlan ? "current-plan-btn" : ""}`}
                 onClick={() => handleChoosePlan(plan)}
-                disabled={isCurrentPlan}
+                disabled={isCurrentPlan && plan.name === "Free Trial"}
               >
-                {isCurrentPlan ? "Current Active Plan" : plan.button}
+                {isCurrentPlan
+                  ? plan.name === "Free Trial"
+                    ? "Current Active Plan"
+                    : "Pay to Activate / Renew"
+                  : plan.button}
               </button>
             </div>
           );
         })}
       </div>
 
-      {/* Gateway Webhook Status & Enterprise Upgrade Banner */}
-      <div style={{ marginTop: "30px", background: "#0f172a", border: "1px solid #334155", padding: "16px 24px", borderRadius: "14px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <span style={{ background: "rgba(16, 185, 129, 0.15)", color: "#10b981", border: "1px solid rgba(16, 185, 129, 0.3)", padding: "4px 10px", borderRadius: "6px", fontSize: "12px", fontWeight: "700" }}>
-            🔑 Payment Gateways Active
-          </span>
-          <span style={{ color: "#94a3b8", fontSize: "13px" }}>
-            Razorpay & Stripe webhooks enabled with 18% GST invoice generation.
-          </span>
-        </div>
-        
-        {user && currentPlan !== "enterprise" && (
-          <button
-            onClick={() => handleChoosePlan({ name: "Enterprise", priceMonthly: "₹2499", priceYearly: "₹1999", period: "/month", button: "Upgrade to Enterprise" })}
-            style={{ background: "linear-gradient(135deg, #a855f7, #ec4899)", color: "#fff", border: "none", padding: "8px 16px", borderRadius: "8px", fontSize: "12.5px", fontWeight: "700", cursor: "pointer" }}
-          >
-            🔄 Pro-Rata Upgrade to Enterprise
-          </button>
-        )}
-      </div>
+
 
       {/* Checkout Modal */}
       <CheckoutModal
