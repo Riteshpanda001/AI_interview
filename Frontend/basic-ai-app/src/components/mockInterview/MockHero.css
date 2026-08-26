@@ -12,23 +12,7 @@
 
     padding:80px 8%;
 
-    background:
-        radial-gradient(
-            circle at top right,
-            rgba(168, 85, 247, 0.22),
-            transparent 45%
-        ),
-        radial-gradient(
-            circle at bottom left,
-            rgba(124, 58, 237, 0.12),
-            transparent 35%
-        ),
-        linear-gradient(
-            135deg,
-            #F8FAFC 0%,
-            #EEF2FF 50%,
-            #F3E8FF 100%
-        );
+    background: #12183B;
 
     gap:70px;
 }
@@ -45,13 +29,14 @@
 
     padding:10px 22px;
 
-    background:#ede9fe;
+    background:#000000;
+    border:1px solid rgba(168, 85, 247, 0.4);
 
-    color:#7c3aed;
+    color:#c084fc;
 
     border-radius:999px;
 
-    font-weight:600;
+    font-weight:700;
 
     margin-bottom:25px;
 }

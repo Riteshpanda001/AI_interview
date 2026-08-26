@@ -1,12 +1,6 @@
 .faq-section {
   padding: 100px 8%;
-  background:
-    linear-gradient(
-      135deg,
-      #ffffff,
-      #faf7ff,
-      #f5f3ff
-    );
+  background: #12183B;
 }
 
 .faq-header {
@@ -21,9 +15,9 @@
 
   border-radius: 999px;
 
-  background: rgba(124,58,237,0.1);
+  background: rgba(124, 58, 237, 0.2);
 
-  color: #7c3aed;
+  color: #a78bfa;
 
   font-weight: 600;
 
@@ -34,20 +28,22 @@
   font-size: 2.5rem !important;
   font-weight: 700 !important;
 
-  color: #111827;
+  color: #ffffff;
 
   margin-bottom: 20px;
 }
 
 .faq-header h2 span {
-  color: #7c3aed;
+  background: linear-gradient(135deg, #f43f5e, #fb923c);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .faq-header p {
   max-width: 700px;
   margin: auto;
 
-  color: #6b7280;
+  color: #9ca3af;
 
   font-size: 1.1rem;
 
@@ -64,18 +60,18 @@
 }
 
 .faq-card {
-  background: white;
+  background: #1a224a;
 
   padding: 30px;
 
   border-radius: 20px;
 
-  border: 1px solid #ececec;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 
   transition: 0.3s ease;
 
   box-shadow:
-    0 10px 25px rgba(0,0,0,0.05);
+    0 10px 25px rgba(0,0,0,0.2);
 }
 
 .faq-card:hover {
@@ -84,11 +80,11 @@
   border-color: #7c3aed;
 
   box-shadow:
-    0 15px 35px rgba(124,58,237,0.12);
+    0 15px 35px rgba(168, 85, 247, 0.25);
 }
 
 .faq-card h3 {
-  color: #111827;
+  color: #ffffff;
 
   font-size: 1.2rem;
 
@@ -96,7 +92,7 @@
 }
 
 .faq-card p {
-  color: #6b7280;
+  color: #9ca3af;
 
   line-height: 1.8;
 }

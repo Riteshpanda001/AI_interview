@@ -1,13 +1,7 @@
 .company-section {
   padding: 100px 8%;
 
-  background:
-    linear-gradient(
-      135deg,
-      #ffffff,
-      #faf7ff,
-      #f5f3ff
-    );
+  background: #12183B;
 }
 
 .company-header {
@@ -23,9 +17,9 @@
 
   border-radius: 999px;
 
-  background: rgba(124,58,237,0.1);
+  background: rgba(124, 58, 237, 0.2);
 
-  color: #7c3aed;
+  color: #a78bfa;
 
   font-weight: 600;
 
@@ -36,13 +30,15 @@
   font-size: 3rem;
   font-weight: 700;
 
-  color: #111827;
+  color: #ffffff;
 
   margin-bottom: 20px;
 }
 
 .company-header h2 span {
-  color: #0e32e6ca;
+  background: linear-gradient(135deg, #f43f5e, #a855f7);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .company-header p {
@@ -50,7 +46,7 @@
 
   margin: auto;
 
-  color: #6b7280;
+  color: #9ca3af;
 
   line-height: 1.8;
 
@@ -71,7 +67,7 @@
 /* Card */
 
 .company-card {
-  background: white;
+  background: #1a224a;
 
   padding: 35px;
 
@@ -79,12 +75,12 @@
 
   border-radius: 24px;
 
-  border: 1px solid #ececec;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 
   transition: 0.3s ease;
 
   box-shadow:
-    0 10px 30px rgba(0,0,0,0.05);
+    0 10px 30px rgba(0,0,0,0.2);
 }
 
 .company-card:hover {
@@ -93,7 +89,7 @@
   border-color: #a855f7;
 
   box-shadow:
-    0 20px 40px rgba(124,58,237,0.15);
+    0 20px 40px rgba(168, 85, 247, 0.25);
 }
 
 .company-icon {
@@ -108,28 +104,34 @@
   justify-content: center;
   align-items: center;
 
-  font-size: 2rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  padding: 14px;
+  transition: all 0.3s ease;
+}
 
-  background:
-    linear-gradient(
-      135deg,
-      #7c3aed,
-      #a855f7
-    );
+.company-card:hover .company-icon {
+  box-shadow: 0 12px 25px rgba(168, 85, 247, 0.3);
+  border-color: rgba(168, 85, 247, 0.5);
+}
 
-  color: white;
+.company-logo-img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
 }
 
 .company-card h3 {
   font-size: 1.5rem;
 
-  color: #111827;
+  color: #ffffff;
 
   margin-bottom: 15px;
 }
 
 .company-card p {
-  color: #6b7280;
+  color: #9ca3af;
 
   line-height: 1.8;
 

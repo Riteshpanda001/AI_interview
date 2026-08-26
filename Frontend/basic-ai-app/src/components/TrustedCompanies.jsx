@@ -18,21 +18,21 @@ const TrustedCompanies = () => {
       <div className="logo-slider">
           <div className="logo-track">
               {/* First Set */}
-              <img src="/logos/google.png" alt="Google" />
-              <img src="/logos/microsoft.png" alt="Microsoft" />
-              <img src="/logos/openai.png" alt="OpenAI" />
-              <img src="/logos/amazon.png" alt="Amazon" />
-              <img src="/logos/meta.png" alt="Meta" />
-              <img src="/logos/tcs.png" alt="TCS" />
-              <img src="/logos/Infosys.png" alt="Infosys" />
+              <div className="logo-badge"><img src="/logos/google.png" alt="Google" /></div>
+              <div className="logo-badge"><img src="/logos/microsoft.png" alt="Microsoft" /></div>
+              <div className="logo-badge"><img src="/logos/openai.png" alt="OpenAI" /></div>
+              <div className="logo-badge"><img src="/logos/amazon.png" alt="Amazon" /></div>
+              <div className="logo-badge"><img src="/logos/meta.png" alt="Meta" /></div>
+              <div className="logo-badge"><img src="/logos/tcs.png" alt="TCS" /></div>
+              <div className="logo-badge"><img src="/logos/Infosys.png" alt="Infosys" /></div>
               {/* Duplicate Set */}
-              <img src="/logos/google.png" alt="Google" />
-              <img src="/logos/microsoft.png" alt="Microsoft" />
-              <img src="/logos/openai.png" alt="OpenAI" />
-              <img src="/logos/amazon.png" alt="Amazon" />
-              <img src="/logos/meta.png" alt="Meta" />
-              <img src="/logos/tcs.png" alt="TCS" />
-              <img src="/logos/Infosys.png" alt="Infosys" />
+              <div className="logo-badge"><img src="/logos/google.png" alt="Google" /></div>
+              <div className="logo-badge"><img src="/logos/microsoft.png" alt="Microsoft" /></div>
+              <div className="logo-badge"><img src="/logos/openai.png" alt="OpenAI" /></div>
+              <div className="logo-badge"><img src="/logos/amazon.png" alt="Amazon" /></div>
+              <div className="logo-badge"><img src="/logos/meta.png" alt="Meta" /></div>
+              <div className="logo-badge"><img src="/logos/tcs.png" alt="TCS" /></div>
+              <div className="logo-badge"><img src="/logos/Infosys.png" alt="Infosys" /></div>
             </div>
         </div>
 

@@ -9,32 +9,32 @@ const CompanyPreparation = () => {
   const companies = [
     {
       name: "Google",
-      icon: "🔍",
+      logo: "/logos/google.png",
       desc: "DSA, System Design, Behavioral Questions"
     },
     {
       name: "Microsoft",
-      icon: "💻",
+      logo: "/logos/microsoft.png",
       desc: "Coding, OOPs, Problem Solving"
     },
     {
       name: "Amazon",
-      icon: "📦",
+      logo: "/logos/amazon.png",
       desc: "Leadership Principles & Coding"
     },
     {
       name: "Meta",
-      icon: "🌐",
+      logo: "/logos/meta.png",
       desc: "Product Thinking & Algorithms"
     },
     {
       name: "TCS",
-      icon: "🏢",
+      logo: "/logos/tcs.png",
       desc: "Aptitude, HR & Technical Questions"
     },
     {
       name: "Infosys",
-      icon: "📈",
+      logo: "/logos/Infosys.png",
       desc: "Coding, Aptitude & System Design"
     }
   ];
@@ -67,7 +67,7 @@ const CompanyPreparation = () => {
           <div className="company-card" key={index}>
 
             <div className="company-icon">
-              {company.icon}
+              <img src={company.logo} alt={`${company.name} logo`} className="company-logo-img" />
             </div>
 
             <h3>{company.name}</h3>

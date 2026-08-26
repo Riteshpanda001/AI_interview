@@ -41,10 +41,29 @@ class MockCursor:
             return self.data[:length]
         return self.data
 
+import json
+import os
+from pathlib import Path
+from datetime import datetime, date
+
+MOCK_DB_FILE = Path(__file__).parent.parent / ".mock_db.json"
+
+def _json_serializer(obj):
+    if isinstance(obj, (datetime, date)):
+        return obj.isoformat()
+    if isinstance(obj, ObjectId):
+        return str(obj)
+    raise TypeError(f"Type {type(obj)} not serializable")
+
 class MockCollection:
-    def __init__(self, name):
+    def __init__(self, name, parent_db=None):
         self.name = name
         self.data = {}
+        self.parent_db = parent_db
+
+    def _save(self):
+        if self.parent_db:
+            self.parent_db._save_to_disk()
 
     async def find_one(self, filter_dict):
         clean_filter = {}
@@ -80,6 +99,7 @@ class MockCollection:
         _id_str = str(doc_copy["_id"])
         doc_copy["_id"] = _id_str
         self.data[_id_str] = doc_copy
+        self._save()
         
         class InsertResult:
             def __init__(self, inserted_id):
@@ -100,6 +120,7 @@ class MockCollection:
             key = str(doc["_id"])
             if key in self.data:
                 del self.data[key]
+                self._save()
                 return DeleteResult(deleted_count=1)
         return DeleteResult(deleted_count=0)
 
@@ -107,6 +128,7 @@ class MockCollection:
         if not filter_dict:
             count = len(self.data)
             self.data.clear()
+            self._save()
             return DeleteResult(deleted_count=count)
         else:
             keys_to_delete = []
@@ -123,6 +145,8 @@ class MockCollection:
                     keys_to_delete.append(k)
             for k in keys_to_delete:
                 del self.data[k]
+            if keys_to_delete:
+                self._save()
             return DeleteResult(deleted_count=len(keys_to_delete))
 
     def find(self, filter_dict):
@@ -170,6 +194,7 @@ class MockCollection:
                     if k not in self.data[key]:
                         self.data[key][k] = []
                     self.data[key][k].append(v)
+            self._save()
             return UpdateResult(matched_count=1, modified_count=1)
         return UpdateResult(matched_count=0, modified_count=0)
 
@@ -177,12 +202,37 @@ class MockCollection:
         pass
 
 class MockDatabase:
-    def __init__(self):
+    def __init__(self, db_file=MOCK_DB_FILE):
+        self.db_file = db_file
         self.collections = {}
+        self._load_from_disk()
+
+    def _load_from_disk(self):
+        if os.path.exists(self.db_file):
+            try:
+                with open(self.db_file, "r", encoding="utf-8") as f:
+                    raw_data = json.load(f)
+                    for col_name, col_data in raw_data.items():
+                        mock_col = MockCollection(col_name, parent_db=self)
+                        mock_col.data = col_data
+                        self.collections[col_name] = mock_col
+            except Exception as e:
+                print(f"[MOCK DB] Error loading disk store: {e}")
+
+    def _save_to_disk(self):
+        try:
+            raw_data = {}
+            for col_name, col_inst in self.collections.items():
+                raw_data[col_name] = col_inst.data
+            os.makedirs(os.path.dirname(self.db_file), exist_ok=True)
+            with open(self.db_file, "w", encoding="utf-8") as f:
+                json.dump(raw_data, f, default=_json_serializer, indent=2)
+        except Exception as e:
+            print(f"[MOCK DB] Error saving disk store: {e}")
 
     def __getitem__(self, name):
         if name not in self.collections:
-            self.collections[name] = MockCollection(name)
+            self.collections[name] = MockCollection(name, parent_db=self)
         return self.collections[name]
 
 import time

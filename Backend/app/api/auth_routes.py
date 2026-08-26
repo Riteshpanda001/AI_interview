@@ -1,3 +1,4 @@
+import urllib.parse
 from fastapi import APIRouter, Depends, HTTPException, status, Request, Response
 from app.schemas.auth_schema import (
     UserRegisterRequest, UserLoginRequest, GoogleAuthRequest, TokenResponse, 
@@ -5,9 +6,11 @@ from app.schemas.auth_schema import (
     ForgotPasswordRequest, ResetPasswordRequest,
     RefreshTokenRequest, ResendOTPRequest,
     RequestEmailChangeRequest, VerifyEmailChangeRequest,
-    SendMobileOTPRequest, VerifyMobileOTPRequest
+    SendMobileOTPRequest, VerifyMobileOTPRequest,
+    MFAStatusResponse, SetupTOTPResponse, EnableTOTPRequest,
+    DisableTOTPRequest, TogglePhoneMFARequest, VerifyMFALoginRequest
 )
-from app.dependencies import get_db, oauth2_scheme, get_current_user
+from app.dependencies import get_db, oauth2_scheme, get_current_user, get_current_active_user
 from app.services.auth_service import AuthService
 from app.services.jwt_service import JWTService
 
@@ -158,4 +161,124 @@ async def verify_email_change(
         db=db,
         req=http_request
     )
+
+
+@router.get("/mfa/status", response_model=MFAStatusResponse)
+async def get_mfa_status(current_user = Depends(get_current_active_user)):
+    return {
+        "mfa_phone_enabled": current_user.get("mfa_phone_enabled", False),
+        "mfa_totp_enabled": current_user.get("mfa_totp_enabled", False),
+        "phone_verified": current_user.get("phone_verified", False),
+        "phone": current_user.get("phone")
+    }
+
+@router.post("/mfa/setup-totp", response_model=SetupTOTPResponse)
+async def setup_totp(current_user = Depends(get_current_active_user), db = Depends(get_db)):
+    from app.services.totp_service import TOTPService
+    secret = TOTPService.generate_secret()
+    
+    from bson import ObjectId
+    try:
+        query = {"_id": ObjectId(current_user["_id"])}
+    except Exception:
+        query = {"_id": current_user["_id"]}
+        
+    await db["users"].update_one(query, {"$set": {"totp_secret_temp": secret}})
+    
+    qr_uri = TOTPService.get_provisioning_uri(secret, current_user.get("email", "user@prepnova.ai"))
+    qr_code_url = f"https://api.qrserver.com/v1/create-qr-code/?data={urllib.parse.quote(qr_uri)}&size=200x200"
+    
+    return {
+        "secret": secret,
+        "qr_code_url": qr_code_url
+    }
+
+@router.post("/mfa/enable-totp")
+async def enable_totp(request: EnableTOTPRequest, current_user = Depends(get_current_active_user), db = Depends(get_db)):
+    from app.services.totp_service import TOTPService
+    temp_secret = current_user.get("totp_secret_temp")
+    if not temp_secret:
+        raise HTTPException(status_code=400, detail="TOTP setup has not been initiated. Please setup TOTP first.")
+        
+    is_valid = TOTPService.verify_code(temp_secret, request.code)
+    if not is_valid:
+        raise HTTPException(status_code=400, detail="Invalid verification code. TOTP setup failed.")
+        
+    from bson import ObjectId
+    try:
+        query = {"_id": ObjectId(current_user["_id"])}
+    except Exception:
+        query = {"_id": current_user["_id"]}
+        
+    await db["users"].update_one(query, {
+        "$set": {
+            "totp_secret": temp_secret,
+            "mfa_totp_enabled": True
+        },
+        "$unset": {
+            "totp_secret_temp": ""
+        }
+    })
+    
+    return {"success": True, "message": "Authenticator App MFA enabled successfully!"}
+
+@router.post("/mfa/disable-totp")
+async def disable_totp(request: DisableTOTPRequest, current_user = Depends(get_current_active_user), db = Depends(get_db)):
+    from app.services.totp_service import TOTPService
+    secret = current_user.get("totp_secret")
+    if not secret:
+        raise HTTPException(status_code=400, detail="TOTP is not enabled.")
+        
+    is_valid = TOTPService.verify_code(secret, request.code)
+    if not is_valid:
+        raise HTTPException(status_code=400, detail="Invalid verification code. Disabling TOTP failed.")
+        
+    from bson import ObjectId
+    try:
+        query = {"_id": ObjectId(current_user["_id"])}
+    except Exception:
+        query = {"_id": current_user["_id"]}
+        
+    await db["users"].update_one(query, {
+        "$set": {
+            "mfa_totp_enabled": False
+        },
+        "$unset": {
+            "totp_secret": ""
+        }
+    })
+    
+    return {"success": True, "message": "Authenticator App MFA disabled successfully!"}
+
+@router.post("/mfa/toggle-phone")
+async def toggle_phone_mfa(request: TogglePhoneMFARequest, current_user = Depends(get_current_active_user), db = Depends(get_db)):
+    if request.enabled and not current_user.get("phone_verified", False):
+        raise HTTPException(status_code=400, detail="You must link and verify your phone number before enabling Phone OTP MFA.")
+        
+    from bson import ObjectId
+    try:
+        query = {"_id": ObjectId(current_user["_id"])}
+    except Exception:
+        query = {"_id": current_user["_id"]}
+        
+    await db["users"].update_one(query, {
+        "$set": {
+            "mfa_phone_enabled": request.enabled
+        }
+    })
+    
+    status_str = "enabled" if request.enabled else "disabled"
+    return {"success": True, "message": f"Phone OTP MFA {status_str} successfully!"}
+
+@router.post("/verify-mfa-login", response_model=TokenResponse)
+async def verify_mfa_login(request: VerifyMFALoginRequest, http_request: Request, response: Response, db = Depends(get_db)):
+    token_details = await AuthService.verify_mfa_login(
+        email=request.email,
+        otp=request.otp,
+        mfa_type=request.mfa_type,
+        db=db,
+        req=http_request
+    )
+    _set_auth_cookies(response, token_details)
+    return token_details
 

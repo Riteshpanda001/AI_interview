@@ -2,7 +2,7 @@
 
     padding:120px 8%;
 
-    background:#faf9ff;
+    background:#12183B !important;
 }
 
 .testimonial-heading{
@@ -18,9 +18,10 @@
 
     padding:10px 22px;
 
-    background:#ede9fe;
+    background:#000000;
+    border:1px solid rgba(168, 85, 247, 0.4);
 
-    color:#ed763a;
+    color:#c084fc;
 
     border-radius:999px;
 
@@ -33,7 +34,7 @@
 
     font-size:50px;
 
-    color:#111827;
+    color:#ffffff !important;
 
     margin-bottom:20px;
 
@@ -44,7 +45,7 @@
 
     font-size:20px;
 
-    color:#6b7280;
+    color:#9ca3af !important;
 
     max-width:750px;
 
@@ -64,13 +65,14 @@
 
 .testimonial-card{
 
-    background:white;
+    background:#1a224a !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
 
     border-radius:22px;
 
     padding:35px;
 
-    box-shadow:0 15px 40px rgba(0,0,0,.06);
+    box-shadow:0 15px 40px rgba(0,0,0,.3) !important;
 
     transition:.35s;
 }
@@ -79,14 +81,16 @@
 
     transform:translateY(-10px);
 
-    box-shadow:0 20px 50px rgba(124,58,237,.20);
+    border-color: #a855f7 !important;
+
+    box-shadow:0 20px 50px rgba(168, 85, 247, 0.25) !important;
 }
 
 .review{
 
     font-size:18px;
 
-    color:#555;
+    color:#cbd5e1 !important;
 
     line-height:1.9;
 
@@ -100,6 +104,7 @@
     font-size:22px;
 
     margin-bottom:25px;
+    color: #f59e0b;
 }
 
 .testimonial-section .user-info{
@@ -108,7 +113,7 @@
     align-items:center;
     gap:18px;
     padding-top:20px;
-    border-top:1px solid #ececec;
+    border-top:1px solid rgba(255, 255, 255, 0.08) !important;
     text-align: left;
     justify-content: flex-start;
 }
@@ -124,13 +129,13 @@
 
 .testimonial-section .user-info h3{
     font-size:18px;
-    color:#111827;
+    color:#ffffff !important;
     margin:0 0 4px 0;
     text-align: left;
 }
 
 .testimonial-section .user-info span{
-    color:#6b7280;
+    color:#9ca3af !important;
     font-size:14px;
     text-align: left;
     display: block;

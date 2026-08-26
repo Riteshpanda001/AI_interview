@@ -18,19 +18,7 @@
 
     overflow-x:hidden;
 
-    background:
-
-        radial-gradient(circle at bottom right,
-        rgba(192,132,252,.12),
-        transparent 35%),
-
-        linear-gradient(
-            135deg,
-            #ffffff,
-            #faf7ff,
-            #f5efff,
-            #ffffff
-        );
+    background: #12183B;
 }
 
 /* ==========================================
@@ -51,7 +39,7 @@
 
     text-align:center;
 
-    color:#111827;
+    color:#ffffff;
 
     margin-bottom:18px;
 }

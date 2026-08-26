@@ -36,6 +36,15 @@ const ProtectedRoute = ({ children }) => {
     );
   }
 
+  if (user && !user.is_verified) {
+    return (
+      <Navigate
+        to={`/verify-otp?email=${encodeURIComponent(user.email)}`}
+        replace
+      />
+    );
+  }
+
   return children;
 };
 

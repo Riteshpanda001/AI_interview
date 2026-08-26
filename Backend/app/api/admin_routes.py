@@ -8,14 +8,13 @@ router = APIRouter()
 
 async def get_current_admin_user(current_user = Depends(get_current_active_user)):
     role = current_user.get("role", "user")
-    # Allow admin access if user role is admin or if system debug mode
-    if role.lower() != "admin":
-        # Check if user is first user or superadmin
-        if current_user.get("email") not in ["admin@prepnova.ai", "arjun@prepnova.ai"]:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Admin privileges required to access administrative dashboard endpoints."
-            )
+    email = current_user.get("email", "").lower().strip()
+    # Allow admin access only if user role is admin and email matches prenovaai01@gmail.com
+    if role.lower() != "admin" or email != "prenovaai01@gmail.com":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin privileges required to access administrative dashboard endpoints."
+        )
     return current_user
 
 class UserStatusUpdateRequest(BaseModel):

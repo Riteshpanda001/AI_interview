@@ -19,17 +19,11 @@
     top:0;
     z-index:1000;
 
-    background:linear-gradient(
-        135deg,
-        #ffffff 15%,
-        #fafaff 60%,
-        #f5f5ff 100%
-    );
-
-    /* border-bottom:1px solid rgba(124,58,237,.08); */
+    background: #12183B;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 
     box-shadow:
-        0 10px 30px rgba(0, 0, 0, 0.04);
+        0 10px 30px rgba(0, 0, 0, 0.3);
 
     backdrop-filter:blur(12px);
 }
@@ -52,7 +46,7 @@
 .logo h2 {
   font-size: 2.2rem;
   font-weight: 700;
-  color: #111827;
+  color: #ffffff;
 }
 
 /* =====================
@@ -71,7 +65,7 @@
 
 .nav-links a {
   text-decoration: none;
-  color: #111827;
+  color: #e2e8f0;
   font-size: 20px;
   font-weight: 700;
   padding: 12px 22px;
@@ -158,21 +152,21 @@
   min-width: 155px;
   border: none;
   border-radius: 14px;
-  background: linear-gradient(135deg, #7c3aed, #9333ea);
-  color: #000000;
+  background: #E85D30;
+  color: #ffffff !important;
   font-size: 16px;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 8px 22px rgba(124, 58, 237, 0.28);
+  box-shadow: 0 8px 22px rgba(232, 93, 48, 0.4);
 }
 
 .navbar-start-btn:hover,
 .navbar-start-btn:focus {
-  background: linear-gradient(135deg, #6d28d9, #7c3aed);
+  background: #d44d22;
   transform: translateY(-2px);
-  color: #ffffff;
-  box-shadow: 0 14px 30px rgba(124, 58, 237, 0.40);
+  color: #ffffff !important;
+  box-shadow: 0 14px 30px rgba(232, 93, 48, 0.55);
 }
 /* ==========================
    Feature Dropdown
@@ -191,13 +185,14 @@
 
     width:430px;
 
-    background:#fff;
+    background:#182046;
+    border: 1px solid rgba(255, 255, 255, 0.1);
 
     border-radius:22px;
 
     padding:18px;
 
-    box-shadow:0 15px 40px rgba(0,0,0,.12);
+    box-shadow:0 15px 40px rgba(0,0,0,.4);
 
     opacity:0;
     visibility:hidden;
@@ -225,7 +220,7 @@
 }
 
 .dropdown-item:hover{
-    background:#f5f3ff;
+    background:rgba(255, 255, 255, 0.08);
 }
 
 .dropdown-icon{
@@ -234,7 +229,7 @@
 
     border-radius:12px;
 
-    background:#ede9fe;
+    background:rgba(124, 58, 237, 0.2);
 
     display:flex;
     justify-content:center;
@@ -247,12 +242,12 @@
 
 .dropdown-item h4{
     font-size:18px;
-    color:#111827;
+    color:#ffffff;
     margin-bottom:6px;
 }
 
 .dropdown-item p{
-    color:#6b7280;
+    color:#9ca3af;
     font-size:14px;
     line-height:1.5;
 }

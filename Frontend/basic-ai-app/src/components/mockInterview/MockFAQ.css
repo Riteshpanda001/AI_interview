@@ -5,7 +5,7 @@
 .faq-section{
     width:100%;
     padding:100px 8%;
-    background:#faf9ff;
+    background:#12183B !important;
 }
 
 /* ==========================================
@@ -17,12 +17,13 @@
     margin-bottom:70px;
 }
 
-.faq-header span{
+.faq-section .faq-header > span{
     display:inline-block;
     padding:10px 22px;
     border-radius:999px;
-    background:#ede9fe;
-    color:#7c3aed;
+    background:#000000;
+    border:1px solid rgba(168, 85, 247, 0.4);
+    color:#c084fc;
     font-size:15px;
     font-weight:700;
     letter-spacing:0.5px;
@@ -32,14 +33,20 @@
 .faq-header h2{
     font-size:2.5rem !important;
     font-weight:700 !important;
-    color:#111827;
+    color:#ffffff !important;
     margin-bottom:20px;
+}
+
+.faq-header h2 span {
+  background: linear-gradient(135deg, #f43f5e, #fb923c);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .faq-header p{
     max-width:760px;
     margin:auto;
-    color:#6b7280;
+    color:#9ca3af !important;
     font-size:18px;
     line-height:1.8;
 }
@@ -58,19 +65,19 @@
 ========================================== */
 
 .faq-item{
-    background:#ffffff;
-    border:1px solid #ececec;
+    background:#1a224a !important;
+    border:1px solid rgba(255, 255, 255, 0.1) !important;
     border-radius:18px;
     margin-bottom:22px;
     overflow:hidden;
     transition:all .35s ease;
-    box-shadow:0 10px 25px rgba(0,0,0,.05);
+    box-shadow:0 10px 25px rgba(0,0,0,.25);
 }
 
 .faq-item:hover{
     transform:translateY(-4px);
-    border-color:#7c3aed;
-    box-shadow:0 18px 45px rgba(124,58,237,.15);
+    border-color:#7c3aed !important;
+    box-shadow:0 18px 45px rgba(168, 85, 247, 0.25);
 }
 
 /* ==========================================
@@ -88,7 +95,7 @@
 .faq-question h3{
     font-size:22px;
     font-weight:700;
-    color:#111827;
+    color:#ffffff !important;
     width:90%;
 }
 
@@ -98,7 +105,7 @@
 
 .faq-icon{
     font-size:18px;
-    color:#7c3aed;
+    color:#c084fc;
     transition:.35s ease;
 }
 
@@ -116,7 +123,7 @@
 }
 
 .faq-answer p{
-    color:#6b7280;
+    color:#9ca3af !important;
     font-size:17px;
     line-height:1.9;
 }

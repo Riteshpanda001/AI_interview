@@ -7,7 +7,7 @@ import "./AIInterviewRoom.css";
 const API_BASE_URL = "http://localhost:8000/api";
 
 const AIInterviewRoom = ({ interviewDetails, onViewHistory, onStartNewSession }) => {
-  const { user, token } = useAuth();
+  const { user, token, authFetch } = useAuth();
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [session, setSession] = useState(null);
@@ -298,10 +298,85 @@ const AIInterviewRoom = ({ interviewDetails, onViewHistory, onStartNewSession })
   }, []);
 
   // Fetch / start backend interview session
+  const wsRef = useRef(null);
+
+  const playAudioFromUrl = (url, onEndCallback) => {
+    if (!url) {
+      if (onEndCallback) onEndCallback();
+      return;
+    }
+    const audio = new Audio(url);
+    audio.onended = () => {
+      if (onEndCallback) onEndCallback();
+    };
+    audio.onerror = (e) => {
+      console.warn("Audio playback failed, falling back to speech synthesis:", e);
+      if (onEndCallback) onEndCallback();
+    };
+    audio.play().catch(err => {
+      console.warn("Audio play blocked by browser:", err);
+      if (onEndCallback) onEndCallback();
+    });
+  };
+
+  const speakQuestionText = (questionText, index) => {
+    const lang = interviewDetails.language || "English";
+    let qPrefix = `Question ${index + 1}: `;
+    if (lang === "Spanish") qPrefix = `Pregunta ${index + 1}: `;
+    else if (lang === "French") qPrefix = `Question ${index + 1}: `;
+    else if (lang === "German") qPrefix = `Frage ${index + 1}: `;
+    else if (lang === "Hindi") qPrefix = `प्रश्न ${index + 1}: `;
+
+    setAiSpeaking(true);
+    speakText(`${qPrefix} ${questionText}`, () => {
+      setAiSpeaking(false);
+      if (isHandsFreeRef.current) {
+        startListeningAutomatically();
+      }
+    });
+  };
+
+  const playTransitionAndNextQuestion = (score, nextQuestion, nextIdx) => {
+    let msg = getTransitionMessage(score);
+    setAiSpeaking(true);
+    speakText(msg, () => {
+      setAiSpeaking(false);
+      setAnswerText("");
+      setInterimText("");
+      if (nextQuestion) {
+        if (nextQuestion.voice_url) {
+          setAiSpeaking(true);
+          playAudioFromUrl(nextQuestion.voice_url, () => {
+            setAiSpeaking(false);
+            if (isHandsFreeRef.current) {
+              startListeningAutomatically();
+            }
+          });
+        } else {
+          speakQuestionText(nextQuestion.text, nextIdx);
+        }
+      }
+    });
+  };
+
+  // Fetch / start backend interview session
   useEffect(() => {
     const startSession = async () => {
       try {
         setLoading(true);
+        const activeSessionId = localStorage.getItem("active_interview_session_id");
+
+        if (activeSessionId) {
+          console.log("Resuming active session from localStorage:", activeSessionId);
+          setSession({
+            id: activeSessionId,
+            role_target: localStorage.getItem("active_interview_role_target") || interviewDetails.role_target || "Software Engineer",
+            interview_type: localStorage.getItem("active_interview_type") || interviewDetails.interview_type || "technical",
+            questions: []
+          });
+          return;
+        }
+
         const response = await authFetch(`${API_BASE_URL}/interview/start`, {
           method: "POST",
           headers: {
@@ -321,6 +396,9 @@ const AIInterviewRoom = ({ interviewDetails, onViewHistory, onStartNewSession })
         if (response.ok) {
           const data = await response.json();
           setSession(data);
+          localStorage.setItem("active_interview_session_id", data.id);
+          localStorage.setItem("active_interview_role_target", interviewDetails.role_target || "");
+          localStorage.setItem("active_interview_type", interviewDetails.interview_type || "");
         } else {
           throw new Error("Failed to start backend interview session");
         }
@@ -343,6 +421,133 @@ const AIInterviewRoom = ({ interviewDetails, onViewHistory, onStartNewSession })
       startSession();
     }
   }, [token, interviewDetails]);
+
+  // WebSocket Connection Effect
+  useEffect(() => {
+    if (loading || !session || offlineMode || !token) return;
+    if (session.id === "offline-session-123") return;
+
+    const wsUrl = `ws://localhost:8000/ws/interview/${session.id}`;
+    console.log("[WebSocket] Connecting to:", wsUrl);
+    const ws = new WebSocket(wsUrl);
+    wsRef.current = ws;
+
+    ws.onopen = () => {
+      console.log("[WebSocket] Connected successfully!");
+    };
+
+    ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        console.log("[WebSocket] Received event:", data.type, data);
+
+        if (data.type === "ai_intro") {
+          setInterviewPhase("welcome");
+          setStartedSpeech(true);
+          setAiSpeaking(true);
+          if (data.voice_url) {
+            playAudioFromUrl(data.voice_url, () => {
+              setAiSpeaking(false);
+              if (isHandsFreeRef.current) {
+                startListeningAutomatically();
+              }
+            });
+          } else {
+            speakText(data.message, () => {
+              setAiSpeaking(false);
+              if (isHandsFreeRef.current) {
+                startListeningAutomatically();
+              }
+            });
+          }
+        }
+        else if (data.type === "resume_handshake") {
+          console.log("[WebSocket] Handshake resume active:", data);
+          setInterviewPhase("interview");
+          setStartedSpeech(true);
+
+          if (data.feedback_report) {
+            setFeedbackReport(data.feedback_report);
+            if (data.feedback_report.questions) {
+              setSession(prev => ({
+                ...prev,
+                questions: data.feedback_report.questions
+              }));
+            }
+          }
+
+          setCurrentIdx(data.next_question_idx);
+          setIsTimerRunning(true);
+          setDeviceCheckDone(true);
+
+          if (data.next_question) {
+            speakQuestionText(data.next_question.text, data.next_question_idx);
+          }
+        }
+        else if (data.type === "ai_response") {
+          if (data.feedback_report) {
+            setFeedbackReport(data.feedback_report);
+            if (data.feedback_report.questions) {
+              setSession(prev => ({
+                ...prev,
+                questions: data.feedback_report.questions
+              }));
+            }
+          }
+
+          const nextIdx = currentIdxRef.current + 1;
+          setCurrentIdx(nextIdx);
+
+          const evalScore = data.evaluation?.score ?? 70;
+          playTransitionAndNextQuestion(evalScore, data.next_question, nextIdx);
+        }
+        else if (data.type === "interview_completed") {
+          console.log("[WebSocket] Interview completed successfully!");
+          localStorage.removeItem("active_interview_session_id");
+          localStorage.removeItem("active_interview_role_target");
+          localStorage.removeItem("active_interview_type");
+
+          if (data.feedback_report) {
+            setFeedbackReport(data.feedback_report);
+          }
+
+          setAiSpeaking(true);
+          const lang = interviewDetails.language || "English";
+          let endMsg = "Got it. The interview is completed. Let's check your results.";
+          if (lang === "Spanish") endMsg = "Entendido. La entrevista ha terminado. Generando reporte.";
+          else if (lang === "French") endMsg = "D'accord. L'entretien est terminé. Génération du rapport.";
+          else if (lang === "German") endMsg = "Verstanden. Das Interview ist beendet. Bericht wird erstellt.";
+          else if (lang === "Hindi") endMsg = "ठीक है। साक्षात्कार समाप्त हो गया है। रिपोर्ट तैयार की जा रही है।";
+
+          speakText(endMsg, () => {
+            setAiSpeaking(false);
+            setShowReport(true);
+          });
+        }
+        else if (data.type === "error") {
+          console.warn("[WebSocket] Server error message:", data.message);
+          alert(`Interview error: ${data.message}. Swapping to simulation mode.`);
+          setOfflineMode(true);
+        }
+      } catch (err) {
+        console.error("[WebSocket] Event parsing error:", err);
+      }
+    };
+
+    ws.onerror = (err) => {
+      console.error("[WebSocket] Error occurred:", err);
+    };
+
+    ws.onclose = () => {
+      console.log("[WebSocket] Connection closed.");
+    };
+
+    return () => {
+      if (wsRef.current) {
+        wsRef.current.close();
+      }
+    };
+  }, [loading, session, offlineMode, token]);
 
   // Speak function
   const speakText = (text, onEndCallback) => {
@@ -384,20 +589,7 @@ const AIInterviewRoom = ({ interviewDetails, onViewHistory, onStartNewSession })
   const speakQuestion = (index) => {
     if (!session || !session.questions || !session.questions[index]) return;
     const questionText = session.questions[index].text;
-    const lang = interviewDetails.language || "English";
-    let qPrefix = `Question ${index + 1}: `;
-    if (lang === "Spanish") qPrefix = `Pregunta ${index + 1}: `;
-    else if (lang === "French") qPrefix = `Question ${index + 1}: `;
-    else if (lang === "German") qPrefix = `Frage ${index + 1}: `;
-    else if (lang === "Hindi") qPrefix = `प्रश्न ${index + 1}: `;
-
-    setAiSpeaking(true);
-    speakText(`${qPrefix} ${questionText}`, () => {
-      setAiSpeaking(false);
-      if (isHandsFreeRef.current) {
-        startListeningAutomatically();
-      }
-    });
+    speakQuestionText(questionText, index);
   };
 
   const handleBeginInterview = () => {
@@ -421,12 +613,12 @@ const AIInterviewRoom = ({ interviewDetails, onViewHistory, onStartNewSession })
     });
   };
 
-  // Auto-trigger interview speech flow when session loads
+  // Auto-trigger interview speech flow when session loads (for offlineMode simulation)
   useEffect(() => {
-    if (!loading && session && !startedSpeech) {
+    if (offlineMode && !loading && session && !startedSpeech) {
       handleBeginInterview();
     }
-  }, [loading, session, startedSpeech]);
+  }, [loading, session, startedSpeech, offlineMode]);
 
   const getTransitionMessage = (score) => {
     const lang = interviewDetails.language || "English";
@@ -458,6 +650,7 @@ const AIInterviewRoom = ({ interviewDetails, onViewHistory, onStartNewSession })
   };
 
   const playTransitionAndNext = (score, isLast) => {
+    // Used in simulated offline Mode
     const lang = interviewDetails.language || "English";
     let msg = getTransitionMessage(score);
     if (isLast) {
@@ -546,7 +739,6 @@ const AIInterviewRoom = ({ interviewDetails, onViewHistory, onStartNewSession })
     });
   };
 
-
   const startListeningAutomatically = () => {
     if (!recognitionInstance) return;
     setAnswerText("");
@@ -576,7 +768,6 @@ const AIInterviewRoom = ({ interviewDetails, onViewHistory, onStartNewSession })
     await submitAnswer(textToSubmit, uploadedAudioPath);
   };
 
-
   const toggleListening = () => {
     if (!recognitionInstance) {
       alert("Speech recognition is not supported in this browser. Please use Google Chrome or Microsoft Edge.");
@@ -587,7 +778,6 @@ const AIInterviewRoom = ({ interviewDetails, onViewHistory, onStartNewSession })
       if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
       recognitionInstance.stop();
       setIsListening(false);
-      // Note: Stop recorder and upload is triggered inside handleAutoSubmit
     } else {
       setAnswerText("");
       setInterimText("");
@@ -630,7 +820,14 @@ const AIInterviewRoom = ({ interviewDetails, onViewHistory, onStartNewSession })
       setInterviewPhase("interview");
       setAnswerText("");
       setInterimText("");
-      speakQuestion(0);
+      
+      if (offlineMode) {
+        speakQuestion(0);
+      } else {
+        if (session && session.questions && session.questions[0]) {
+          speakQuestionText(session.questions[0].text, 0);
+        }
+      }
       return;
     }
 
@@ -676,46 +873,59 @@ const AIInterviewRoom = ({ interviewDetails, onViewHistory, onStartNewSession })
         playTransitionAndNext(simulatedScore, isLastQuestion);
       }, 1000);
     } else {
-      try {
-        const response = await authFetch(`${API_BASE_URL}/interview/${sessionRef.current.id}/answer`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            question_id: currentQuestion.question_id,
-            answer_text: text,
-            audio_file_path: audioFilePath
-          }),
-        });
+      if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+        console.log("[WebSocket] Submitting answer via WS channel:", text);
+        wsRef.current.send(JSON.stringify({
+          type: "submit_answer",
+          question_id: currentQuestion.question_id,
+          answer: text,
+          audio_file_path: audioFilePath,
+          role_target: sessionRef.current.role_target || interviewDetails.role_target,
+          interview_type: sessionRef.current.interview_type || interviewDetails.interview_type,
+          experience_level: interviewDetails.experience_level
+        }));
+      } else {
+        console.warn("[WebSocket] Connection not open. Falling back to REST API answer endpoint.");
+        try {
+          const response = await authFetch(`${API_BASE_URL}/interview/${sessionRef.current.id}/answer`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              question_id: currentQuestion.question_id,
+              answer_text: text,
+              audio_file_path: audioFilePath
+            }),
+          });
 
-        if (response.ok) {
-          const data = await response.json();
-          setFeedbackReport(data);
+          if (response.ok) {
+            const data = await response.json();
+            setFeedbackReport(data);
 
-          // Update session questions list dynamically from backend adaptive generator
-          if (data.questions) {
-            setSession((prev) => ({
-              ...prev,
-              questions: data.questions,
-            }));
+            if (data.questions) {
+              setSession((prev) => ({
+                ...prev,
+                questions: data.questions,
+              }));
+            }
+
+            const questionsList = data.questions || sessionRef.current.questions;
+            const isLastQuestion = currentIdxRef.current === questionsList.length - 1;
+            const score = data.answers_feedback[data.answers_feedback.length - 1].score;
+            setSubmitting(false);
+            setAnswerText("");
+            setInterimText("");
+            playTransitionAndNext(score, isLastQuestion);
+          } else {
+            throw new Error("Failed to submit answer to backup REST endpoint");
           }
-
-          const questionsList = data.questions || sessionRef.current.questions;
-          const isLastQuestion = currentIdxRef.current === questionsList.length - 1;
-          const score = data.answers_feedback[data.answers_feedback.length - 1].score;
+        } catch (err) {
+          console.error("Error submitting answer to backup REST endpoint:", err);
+          alert("Failed to submit answer. Swapping to offline simulation.");
+          setOfflineMode(true);
           setSubmitting(false);
-          setAnswerText("");
-          setInterimText("");
-          playTransitionAndNext(score, isLastQuestion);
-        } else {
-          throw new Error("Failed to submit answer");
         }
-      } catch (err) {
-        console.error("Error submitting answer to backend API:", err);
-        alert("Failed to submit answer to API. Continuing in simulation mode.");
-        setOfflineMode(true);
-        setSubmitting(false);
       }
     }
   };
@@ -855,6 +1065,9 @@ const AIInterviewRoom = ({ interviewDetails, onViewHistory, onStartNewSession })
             style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)", color: "#ffffff", border: "none", display: "inline-flex", alignItems: "center", gap: "8px" }}
             onClick={() => {
               stopAllMediaTracks();
+              localStorage.removeItem("active_interview_session_id");
+              localStorage.removeItem("active_interview_role_target");
+              localStorage.removeItem("active_interview_type");
               if (onViewHistory) onViewHistory();
               else window.location.reload();
             }}
@@ -867,6 +1080,9 @@ const AIInterviewRoom = ({ interviewDetails, onViewHistory, onStartNewSession })
             style={{ background: "rgba(255, 255, 255, 0.08)", border: "1px solid rgba(255, 255, 255, 0.2)", display: "inline-flex", alignItems: "center", gap: "8px" }}
             onClick={() => {
               stopAllMediaTracks();
+              localStorage.removeItem("active_interview_session_id");
+              localStorage.removeItem("active_interview_role_target");
+              localStorage.removeItem("active_interview_type");
               if (onStartNewSession) onStartNewSession();
               else window.location.reload();
             }}

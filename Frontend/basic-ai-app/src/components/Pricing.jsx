@@ -1,7 +1,15 @@
-import React from "react";
+import React, { useState } from "react";
 import "./Pricing.css";
+import CheckoutModal from "./Pricing/CheckoutModal";
+import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const Pricing = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [selectedPlanForCheckout, setSelectedPlanForCheckout] = useState(null);
+  const [showCheckoutModal, setShowCheckoutModal] = useState(false);
+
   const plans = [
     {
       name: "Free",
@@ -45,6 +53,25 @@ const Pricing = () => {
       popular: false,
     },
   ];
+
+  const handleChoosePlan = (plan) => {
+    if (plan.name === "Free") {
+      if (!user) {
+        navigate("/register");
+      } else {
+        navigate("/dashboard");
+      }
+      return;
+    }
+
+    if (!user) {
+      navigate("/login?redirect=/");
+      return;
+    }
+
+    setSelectedPlanForCheckout(plan);
+    setShowCheckoutModal(true);
+  };
 
   return (
     <section className="pricing-section">
@@ -98,7 +125,7 @@ const Pricing = () => {
               ))}
             </ul>
 
-            <button>
+            <button onClick={() => handleChoosePlan(plan)}>
               {plan.button}
             </button>
 
@@ -106,6 +133,16 @@ const Pricing = () => {
         ))}
 
       </div>
+
+      <CheckoutModal
+        isOpen={showCheckoutModal}
+        onClose={() => setShowCheckoutModal(false)}
+        selectedPlan={selectedPlanForCheckout}
+        billingCycle="monthly"
+        onPaymentSuccess={() => {
+          window.location.reload();
+        }}
+      />
 
     </section>
   );

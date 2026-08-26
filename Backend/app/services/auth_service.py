@@ -322,6 +322,33 @@ class AuthService:
                 detail="Please verify your email before logging in."
             )
 
+        # Check if MFA is required
+        mfa_totp_enabled = user.get("mfa_totp_enabled", False)
+        mfa_phone_enabled = user.get("mfa_phone_enabled", False)
+
+        if mfa_totp_enabled or mfa_phone_enabled:
+            mfa_type = "totp" if mfa_totp_enabled else "phone"
+            if mfa_phone_enabled and user.get("phone"):
+                # Automatically send SMS OTP
+                try:
+                    await OTPService.send_mobile_otp(user.get("phone"), user_id=user_id_str, req=req)
+                except Exception as e:
+                    print(f"[AUTH SERVICE] Error sending Phone OTP for MFA login: {e}")
+
+            await AuditLogService.log_event("EVENT_MFA_CHALLENGE", email=clean_email, user_id=user_id_str, status="SUCCESS", details={"mfa_type": mfa_type}, req=req, db=db)
+
+            return {
+                "access_token": None,
+                "refresh_token": None,
+                "token_type": "bearer",
+                "role": user.get("role", ROLE_USER),
+                "plan_type": user.get("plan_type", PLAN_FREE),
+                "require_otp": True,
+                "is_verified": True,
+                "email": clean_email,
+                "message": "Authenticator code required" if mfa_totp_enabled else "SMS verification code sent to your registered phone"
+            }
+
         session_id = await AuthService.create_session(user_id_str, req=req, db=db)
         tokens = await AuthService._issue_token_pair(user_id_str, session_id=session_id, db=db)
 
@@ -423,7 +450,7 @@ class AuthService:
         if not user:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=ERROR_USER_NOT_FOUND
+                detail="User account not found. Please register again."
             )
             
         await UserService.mark_user_verified(clean_email, db)
@@ -866,3 +893,68 @@ class AuthService:
             print(f"[AUTH SERVICE] Error deleting user account data: {exc}")
 
         return {"success": True, "message": "Your account and all associated data have been permanently deleted."}
+
+    @staticmethod
+    async def verify_mfa_login(email: str, otp: str, mfa_type: str, db, req = None) -> dict:
+        from app.services.totp_service import TOTPService
+        from app.services.otp_service import OTPService
+        
+        clean_email = email.lower().strip()
+        user = await UserService.find_by_email(clean_email, db)
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=ERROR_USER_NOT_FOUND
+            )
+            
+        user_id_str = str(user["_id"])
+        
+        if mfa_type == "totp":
+            totp_secret = user.get("totp_secret")
+            if not totp_secret:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="TOTP is not configured for this user."
+                )
+            is_valid = TOTPService.verify_code(totp_secret, otp)
+            if not is_valid:
+                await AuditLogService.log_event("EVENT_MFA_TOTP_FAILED", email=clean_email, user_id=user_id_str, status="FAILED", req=req, db=db)
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Invalid authenticator code."
+                )
+        elif mfa_type == "phone":
+            phone = user.get("phone")
+            if not phone:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="No phone number linked to this account."
+                )
+            is_valid = await OTPService.verify_otp(phone, otp, purpose="mobile_verification", req=req)
+            if not is_valid:
+                await AuditLogService.log_event("EVENT_MFA_PHONE_FAILED", email=clean_email, user_id=user_id_str, status="FAILED", req=req, db=db)
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Invalid or expired SMS verification code."
+                )
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid MFA type."
+            )
+            
+        # MFA verification succeeded - issue tokens!
+        session_id = await AuthService.create_session(user_id_str, req=req, db=db)
+        tokens = await AuthService._issue_token_pair(user_id_str, session_id=session_id, db=db)
+
+        await AuthService.record_login_event(clean_email, "SUCCESS", "email_mfa", user_id=user_id_str, req=req, db=db)
+        await AuditLogService.log_event("EVENT_LOGIN_SUCCESS_MFA", email=clean_email, user_id=user_id_str, status="SUCCESS", details={"mfa_type": mfa_type}, req=req, db=db)
+
+        return {
+            "access_token": tokens["access_token"],
+            "refresh_token": tokens["refresh_token"],
+            "token_type": "bearer",
+            "role": user.get("role", ROLE_USER),
+            "plan_type": user.get("plan_type", PLAN_FREE),
+            "is_verified": True
+        }

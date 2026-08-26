@@ -13,21 +13,105 @@ const ContactSection = () => {
     website: "", // Honeypot trap for bots
   });
 
-  // Status & Feedback States
+  // Math Captcha state
+  const [captcha, setCaptcha] = useState({ num1: 0, num2: 0, expected: 0 });
+  const [captchaInput, setCaptchaInput] = useState("");
+
+  // Validation & Status States
+  const [validationErrors, setValidationErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [submittedTicket, setSubmittedTicket] = useState(null);
+
+  // Ticket Tracker State
+  const [lookupTicketNumber, setLookupTicketNumber] = useState("");
+  const [trackerResult, setTrackerResult] = useState(null);
+  const [trackerError, setTrackerError] = useState("");
+  const [isTracking, setIsTracking] = useState(false);
+
+  // FAQ Accordion State
+  const [openFaqIndex, setOpenFaqIndex] = useState(null);
+
+  // Generate Math CAPTCHA
+  const generateCaptcha = () => {
+    const num1 = Math.floor(Math.random() * 9) + 1; // 1-9
+    const num2 = Math.floor(Math.random() * 9) + 1; // 1-9
+    setCaptcha({
+      num1,
+      num2,
+      expected: num1 + num2
+    });
+    setCaptchaInput("");
+  };
+
+  useEffect(() => {
+    generateCaptcha();
+  }, []);
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
     });
+    // Clear validation error when field is typed in
+    if (validationErrors[e.target.name]) {
+      setValidationErrors({
+        ...validationErrors,
+        [e.target.name]: ""
+      });
+    }
+  };
+
+  const validateEmail = (email) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(String(email).toLowerCase());
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMsg("");
+    setValidationErrors({});
+
+    // 1. Frontend Validation
+    const errors = {};
+    if (!formData.name.trim()) {
+      errors.name = "Full Name is required.";
+    } else if (formData.name.trim().length < 2) {
+      errors.name = "Name must be at least 2 characters.";
+    }
+
+    if (!formData.email.trim()) {
+      errors.email = "Email Address is required.";
+    } else if (!validateEmail(formData.email.trim())) {
+      errors.email = "Please enter a valid email address.";
+    }
+
+    if (!formData.subject.trim()) {
+      errors.subject = "Subject is required.";
+    }
+
+    if (!formData.message.trim()) {
+      errors.message = "Message is required.";
+    } else if (formData.message.trim().length < 10) {
+      errors.message = "Message must be at least 10 characters.";
+    }
+
+    if (!captchaInput.trim()) {
+      errors.captcha = "Please complete the math verification.";
+    } else {
+      const ans = parseInt(captchaInput.trim(), 10);
+      if (isNaN(ans)) {
+        errors.captcha = "Captcha answer must be a number.";
+      } else if (ans !== captcha.expected) {
+        errors.captcha = "Incorrect answer. Please verify and try again.";
+      }
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -37,10 +121,12 @@ const ContactSection = () => {
         body: JSON.stringify({
           name: formData.name,
           email: formData.email,
-          phone: formData.phone,
+          phone: formData.phone || null,
           subject: formData.subject,
           message: formData.message,
-          website: formData.website,
+          website: formData.website || null,
+          captcha_answer: parseInt(captchaInput.trim(), 10),
+          captcha_expected: captcha.expected,
         }),
       });
 
@@ -59,12 +145,66 @@ const ContactSection = () => {
         message: "",
         website: "",
       });
+      setCaptchaInput("");
+      generateCaptcha();
     } catch (err) {
       setErrorMsg(err.message || "Something went wrong. Please try again.");
+      generateCaptcha(); // Refresh CAPTCHA on error
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  const handleTicketLookup = async (e) => {
+    e.preventDefault();
+    setTrackerError("");
+    setTrackerResult(null);
+
+    if (!lookupTicketNumber.trim()) {
+      setTrackerError("Please enter a ticket number.");
+      return;
+    }
+
+    setIsTracking(true);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/contact/ticket/${lookupTicketNumber.trim()}`);
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.detail || "Ticket not found.");
+      }
+
+      setTrackerResult(data);
+    } catch (err) {
+      setTrackerError(err.message || "Failed to lookup ticket.");
+    } finally {
+      setIsTracking(false);
+    }
+  };
+
+  const toggleFaq = (index) => {
+    setOpenFaqIndex(openFaqIndex === index ? null : index);
+  };
+
+  const faqData = [
+    {
+      question: "How long does it take to get a response to my support ticket?",
+      answer: "We aim to reply to all support tickets within 24 hours. You will receive an automated email confirmation once your ticket is created, and another email when an agent responds."
+    },
+    {
+      question: "Can I track the status of my ticket directly on the platform?",
+      answer: "Yes! Use the Ticket Tracker widget on this page. Enter your ticket number (e.g., TICK-12345) to see its current status in real time."
+    },
+    {
+      question: "Is there any limit to the number of support requests I can submit?",
+      answer: "To prevent abuse, we limit submissions to 3 tickets per 10 minutes per email or IP address. If you exceed this, please wait before submitting again."
+    },
+    {
+      question: "What is PrepNova AI's refund policy?",
+      answer: "We offer a 7-day money-back guarantee for our Pro and Premium plans if you are unsatisfied with our AI preparation services. Contact us with your email address and payment details to request a refund."
+    }
+  ];
 
   return (
     <section className="contact-section">
@@ -114,6 +254,40 @@ const ContactSection = () => {
               <p>Monday - Saturday</p>
               <p>9:00 AM - 6:00 PM IST</p>
             </div>
+          </div>
+
+          {/* Ticket Tracker Widget */}
+          <div className="ticket-tracker-card">
+            <h4>Ticket Tracker</h4>
+            <p>Check the real-time status of your support request.</p>
+            <form onSubmit={handleTicketLookup} className="ticket-lookup-form">
+              <input
+                type="text"
+                placeholder="Enter Ticket # (e.g. TICK-12345)"
+                value={lookupTicketNumber}
+                onChange={(e) => setLookupTicketNumber(e.target.value)}
+              />
+              <button type="submit" disabled={isTracking}>
+                {isTracking ? "Tracking..." : "Track"}
+              </button>
+            </form>
+
+            {trackerError && <div className="tracker-error">{trackerError}</div>}
+
+            {trackerResult && (
+              <div className="tracker-result-box">
+                <div className="tracker-status-line">
+                  <span>Status:</span>
+                  <span className={`status-pill ${trackerResult.status.toLowerCase()}`}>
+                    {trackerResult.status}
+                  </span>
+                </div>
+                <p className="tracker-subject"><strong>Subject:</strong> {trackerResult.subject}</p>
+                <div className="tracker-time">
+                  Estimated Response: {trackerResult.estimated_response}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -170,8 +344,12 @@ const ContactSection = () => {
                   placeholder="Enter your full name"
                   value={formData.name}
                   onChange={handleChange}
-                  required
                 />
+                {validationErrors.name && (
+                  <span style={{ color: "#ef4444", fontSize: "13px", marginTop: "4px", textAlign: "left" }}>
+                    {validationErrors.name}
+                  </span>
+                )}
               </div>
 
               <div className="form-row">
@@ -183,8 +361,12 @@ const ContactSection = () => {
                     placeholder="Enter your email"
                     value={formData.email}
                     onChange={handleChange}
-                    required
                   />
+                  {validationErrors.email && (
+                    <span style={{ color: "#ef4444", fontSize: "13px", marginTop: "4px", textAlign: "left" }}>
+                      {validationErrors.email}
+                    </span>
+                  )}
                 </div>
 
                 <div className="form-group">
@@ -207,8 +389,12 @@ const ContactSection = () => {
                   placeholder="e.g. Question about ATS resume score"
                   value={formData.subject}
                   onChange={handleChange}
-                  required
                 />
+                {validationErrors.subject && (
+                  <span style={{ color: "#ef4444", fontSize: "13px", marginTop: "4px", textAlign: "left" }}>
+                    {validationErrors.subject}
+                  </span>
+                )}
               </div>
 
               <div className="form-group">
@@ -219,8 +405,40 @@ const ContactSection = () => {
                   placeholder="Write your detailed query or feedback here..."
                   value={formData.message}
                   onChange={handleChange}
-                  required
                 />
+                {validationErrors.message && (
+                  <span style={{ color: "#ef4444", fontSize: "13px", marginTop: "4px", textAlign: "left" }}>
+                    {validationErrors.message}
+                  </span>
+                )}
+              </div>
+
+              {/* Math CAPTCHA Field */}
+              <div className="captcha-group">
+                <label className="captcha-label" style={{ display: "block", textAlign: "left" }}>
+                  Security Verification: <strong>{captcha.num1} + {captcha.num2} = ?</strong>
+                </label>
+                <div className="captcha-input-row" style={{ display: "flex", gap: "10px", alignItems: "center", marginTop: "8px" }}>
+                  <input
+                    type="text"
+                    placeholder="Enter answer"
+                    value={captchaInput}
+                    onChange={(e) => setCaptchaInput(e.target.value)}
+                    style={{ maxWidth: "120px" }}
+                  />
+                  <button
+                    type="button"
+                    className="btn-refresh-captcha"
+                    onClick={generateCaptcha}
+                  >
+                    ↻ Refresh
+                  </button>
+                </div>
+                {validationErrors.captcha && (
+                  <span style={{ color: "#ef4444", fontSize: "13px", marginTop: "6px", display: "block", textAlign: "left" }}>
+                    {validationErrors.captcha}
+                  </span>
+                )}
               </div>
 
               <button
@@ -232,6 +450,36 @@ const ContactSection = () => {
               </button>
             </form>
           )}
+        </div>
+      </div>
+
+      {/* FAQ Section */}
+      <div className="contact-faq-section">
+        <div className="faq-header">
+          <h3>Frequently Asked <span>Questions</span></h3>
+          <p>Common questions about our support ticket system and services.</p>
+        </div>
+
+        <div className="faq-accordion-list">
+          {faqData.map((faq, index) => (
+            <div
+              key={index}
+              className={`faq-item ${openFaqIndex === index ? "open" : ""}`}
+              onClick={() => toggleFaq(index)}
+            >
+              <div className="faq-question-bar">
+                <h4>{faq.question}</h4>
+                <span className="faq-toggle-icon">
+                  {openFaqIndex === index ? "−" : "+"}
+                </span>
+              </div>
+              {openFaqIndex === index && (
+                <div className="faq-answer-content" style={{ textAlign: "left" }}>
+                  {faq.answer}
+                </div>
+              )}
+            </div>
+          ))}
         </div>
       </div>
     </section>

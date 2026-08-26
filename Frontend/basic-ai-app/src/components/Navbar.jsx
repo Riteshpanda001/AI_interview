@@ -12,6 +12,10 @@ const Navbar = () => {
   const { user, logout } = useAuth();
   const { requireAuth } = useRequireAuth();
 
+  const userRole = (user?.role || "").toLowerCase().trim();
+  const userEmail = (user?.email || "").toLowerCase().trim();
+  const isAdmin = userRole === "admin" || userRole === "superadmin" || userEmail === "prenovaai01@gmail.com";
+
   const getActiveTabFromLocation = (pathname, hash) => {
     if (pathname === "/ats-score" || pathname === "/resume-upload") return "ATS Score";
     if (pathname === "/pricing") return "Pricing";
@@ -78,7 +82,11 @@ const Navbar = () => {
     <nav className="navbar">
 
       {/* ================= Logo ================= */}
-      <div className="logo">
+      <div
+        className="logo"
+        style={{ cursor: "pointer" }}
+        onClick={() => navigate(isAdmin ? "/admin" : "/")}
+      >
         <img src={logo} alt="PrepNova AI" />
       </div>
 
@@ -87,15 +95,15 @@ const Navbar = () => {
 
         <li>
           <a
-            href="/"
+            href={isAdmin ? "/admin" : "/"}
             className={active === "Home" ? "active" : ""}
             onClick={(e) => {
               e.preventDefault();
               setActive("Home");
-              navigate("/");
+              navigate(isAdmin ? "/admin" : "/");
             }}
           >
-            Home
+            {isAdmin ? "Admin Dashboard" : "Home"}
           </a>
         </li>
 
@@ -236,6 +244,25 @@ const Navbar = () => {
                 )}
 
                 <div className="profile-dropdown-divider" />
+
+                {isAdmin && (
+                  <button
+                    className="profile-dropdown-item"
+                    style={{
+                      background: "rgba(124, 58, 237, 0.12)",
+                      color: "#a855f7",
+                      fontWeight: "600"
+                    }}
+                    onClick={() => {
+                      setProfileOpen(false);
+                      navigate("/admin");
+                    }}
+                    role="menuitem"
+                  >
+                    <span className="profile-dropdown-item-icon">🛠️</span>
+                    <span>Admin Control Center</span>
+                  </button>
+                )}
 
                 <button
                   className="profile-dropdown-item"

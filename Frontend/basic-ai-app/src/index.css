@@ -1,39 +1,56 @@
 /* ==========================================
-   GLOBAL PREMIUM DARK-CYBER THEME
+   GLOBAL THEME CONFIGURATION
    ========================================== */
 
-/* @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap');
-
 :root {
-  --bg-dark: #05020c;
-  --bg-card: rgba(255, 255, 255, 0.03);
-  --border-light: rgba(168, 85, 247, 0.15);
+  --bg-main: #12183B;
+  --bg-dark: #12183B;
+  --bg-card: #1a224a;
+  --bg-navbar: #12183B;
+  --bg-dropdown: #182046;
+  --border-light: rgba(255, 255, 255, 0.1);
   --border-hover: rgba(168, 85, 247, 0.55);
   --text-white: #ffffff;
-  --text-muted: #a3a3c2;
+  --text-muted: #9ca3af;
+  --accent-orange: #E85D30;
   --accent-purple: #7c3aed;
   --accent-blue: #2563eb;
-  --accent-gradient: linear-gradient(135deg, #7c3aed, #a855f7);
-  --cyber-grid: linear-gradient(rgba(124, 58, 237, 0.03) 1.5px, transparent 1.5px),
-                linear-gradient(90deg, rgba(124, 58, 237, 0.03) 1.5px, transparent 1.5px);
-  --radial-1: rgba(124, 58, 237, 0.15);
-  --radial-2: rgba(59, 130, 246, 0.12);
-  --border-bottom-dim: rgba(124, 58, 237, 0.08);
-  --accent-glow: rgba(124, 58, 237, 0.4);
-  --accent-glow-strong: rgba(124, 58, 237, 0.65);
-  --border-hover-glow: rgba(168, 85, 247, 0.25);
-  --text-gradient: linear-gradient(135deg, #a855f7, #60a5fa, #3b82f6);
-  --badge-bg: rgba(124, 58, 237, 0.16);
-  --badge-color: #c084fc;
-  --badge-border: rgba(168, 85, 247, 0.35);
-  --badge-shadow: rgba(124, 58, 237, 0.2);
-  --bg-navbar: rgba(5, 2, 12, 0.75);
-  --bg-dropdown: #090614;
-  --dropdown-hover: rgba(124, 58, 237, 0.12);
-  --dropdown-icon-bg: rgba(124, 58, 237, 0.25);
-  --input-bg: rgba(5, 2, 12, 0.5);
-  --input-focus-bg: rgba(5, 2, 12, 0.8);
-} */
+  --accent-gradient: linear-gradient(135deg, #E85D30, #ff7a45);
+  --accent-glow: rgba(232, 93, 48, 0.4);
+}
+
+html, body, #root, main {
+  margin: 0;
+  padding: 0;
+  background-color: #12183B !important;
+  color: #ffffff;
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+section, main, article, .page-container, .company-page-container, .company-section, .company-dynamic-content, .hero, .mock-hero, .mock-section, .ats-section, .features-section, .analytics-section, .stats-section, .testimonials-section, .pricing-section, .faq-section, .trusted-section, .dashboard-shell, .coding-page, .ats-page, .profile-page, .resume-page {
+  background-color: #12183B !important;
+}
+
+.footer, footer {
+  background: #000000 !important;
+}
+
+.primary-btn, .mock-btn, .upload-btn, .company-btn, .navbar-start-btn, .start-btn, .practice-btn, .build-btn {
+  background: #E85D30 !important;
+  color: #ffffff !important;
+}
+
+.primary-btn:hover, .mock-btn:hover, .upload-btn:hover, .company-btn:hover, .navbar-start-btn:hover {
+  background: #d44d22 !important;
+}
+
+.check-icon, .check-circle {
+  background: linear-gradient(135deg, #E85D30, #ff7a45) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(232, 93, 48, 0.45) !important;
+}
 
 /* ==========================================
    THEME PRESETS (DYNAMIC OVERRIDES)

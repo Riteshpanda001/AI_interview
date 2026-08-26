@@ -12,6 +12,13 @@ const Profile = () => {
     changePassword,
     logout,
     deleteAccount,
+    getMfaStatus,
+    setupTotp,
+    enableTotp,
+    disableTotp,
+    togglePhoneMfa,
+    sendMobileOtp,
+    verifyMobileOtp,
   } = useAuth();
 
   const [activeTab, setActiveTab] = useState("info");
@@ -23,6 +30,127 @@ const Profile = () => {
   const [targetRole, setTargetRole] = useState(() => user?.target_role || "Software Engineer");
   const [experienceLevel, setExperienceLevel] = useState(() => user?.experience_level || "Mid Level");
   const [bio, setBio] = useState(() => user?.bio || "");
+
+  // MFA States
+  const [mfaStatus, setMfaStatus] = useState({
+    mfa_phone_enabled: false,
+    mfa_totp_enabled: false,
+    phone_verified: false,
+    phone: ""
+  });
+  const [totpSetupData, setTotpSetupData] = useState(null); // { secret, qr_code_url }
+  const [totpCode, setTotpCode] = useState("");
+  const [disableTotpCode, setDisableTotpCode] = useState("");
+  const [showTotpSetup, setShowTotpSetup] = useState(false);
+  const [showTotpDisable, setShowTotpDisable] = useState(false);
+  
+  // Phone Verification for MFA States
+  const [mfaPhoneNum, setMfaPhoneNum] = useState(() => user?.phone || "");
+  const [mfaPhoneCode, setMfaPhoneCode] = useState("");
+  const [isMfaPhoneVerifying, setIsMfaPhoneVerifying] = useState(false);
+  const [showMfaPhoneVerify, setShowMfaPhoneVerify] = useState(false);
+  
+  const [mfaMessage, setMfaMessage] = useState({ type: "", text: "" });
+
+  const fetchMfaStatus = async () => {
+    try {
+      const status = await getMfaStatus();
+      setMfaStatus(status);
+      if (status.phone) setMfaPhoneNum(status.phone);
+    } catch (err) {
+      console.error("Failed to load MFA status:", err);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === "security") {
+      fetchMfaStatus();
+    }
+  }, [activeTab]);
+
+  const handleInitiateTotp = async () => {
+    setMfaMessage({ type: "", text: "" });
+    try {
+      const setupData = await setupTotp();
+      setTotpSetupData(setupData);
+      setShowTotpSetup(true);
+    } catch (err) {
+      setMfaMessage({ type: "error", text: err.message || "Failed to initiate TOTP setup." });
+    }
+  };
+
+  const handleEnableTotpSubmit = async (e) => {
+    e.preventDefault();
+    setMfaMessage({ type: "", text: "" });
+    try {
+      await enableTotp(totpCode);
+      setMfaMessage({ type: "success", text: "Google Authenticator MFA enabled successfully!" });
+      setTotpCode("");
+      setTotpSetupData(null);
+      setShowTotpSetup(false);
+      fetchMfaStatus();
+    } catch (err) {
+      setMfaMessage({ type: "error", text: err.message || "Invalid verification code." });
+    }
+  };
+
+  const handleDisableTotpSubmit = async (e) => {
+    e.preventDefault();
+    setMfaMessage({ type: "", text: "" });
+    try {
+      await disableTotp(disableTotpCode);
+      setMfaMessage({ type: "success", text: "Google Authenticator MFA disabled successfully." });
+      setDisableTotpCode("");
+      setShowTotpDisable(false);
+      fetchMfaStatus();
+    } catch (err) {
+      setMfaMessage({ type: "error", text: err.message || "Invalid verification code." });
+    }
+  };
+
+  const handleTogglePhoneMfa = async (e) => {
+    const checked = e.target.checked;
+    setMfaMessage({ type: "", text: "" });
+    try {
+      await togglePhoneMfa(checked);
+      setMfaMessage({ type: "success", text: `Phone OTP MFA ${checked ? "enabled" : "disabled"} successfully.` });
+      fetchMfaStatus();
+    } catch (err) {
+      setMfaMessage({ type: "error", text: err.message || "Failed to toggle Phone OTP MFA." });
+    }
+  };
+
+  const handleSendPhoneVerifySms = async () => {
+    setMfaMessage({ type: "", text: "" });
+    if (!mfaPhoneNum || mfaPhoneNum.trim().length < 10) {
+      setMfaMessage({ type: "error", text: "Please enter a valid phone number." });
+      return;
+    }
+    try {
+      await sendMobileOtp(mfaPhoneNum.trim());
+      setShowMfaPhoneVerify(true);
+      setMfaMessage({ type: "success", text: "SMS verification code sent to your phone." });
+    } catch (err) {
+      setMfaMessage({ type: "error", text: err.message || "Failed to send verification SMS." });
+    }
+  };
+
+  const handleVerifyPhoneCodeSubmit = async (e) => {
+    e.preventDefault();
+    setMfaMessage({ type: "", text: "" });
+    try {
+      setIsMfaPhoneVerifying(true);
+      await verifyMobileOtp(mfaPhoneNum.trim(), mfaPhoneCode);
+      setMfaMessage({ type: "success", text: "Phone number verified successfully! You can now enable Phone OTP MFA." });
+      setMfaPhoneCode("");
+      setShowMfaPhoneVerify(false);
+      fetchMfaStatus();
+    } catch (err) {
+      setMfaMessage({ type: "error", text: err.message || "Invalid phone verification code." });
+    } finally {
+      setIsMfaPhoneVerifying(false);
+    }
+  };
   const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
   const [profileMessage, setProfileMessage] = useState({ type: "", text: "" });
 
@@ -354,6 +482,341 @@ const Profile = () => {
                   {isChangingPassword ? "Updating Password..." : "Change Password"}
                 </button>
               </form>
+
+              {/* MFA Section */}
+              <div className="profile-form" style={{ marginTop: "32px" }}>
+                <h2>Multi-Factor Authentication (MFA)</h2>
+                <p className="form-subheading">Enhance your account security by requiring an extra verification code upon logging in.</p>
+                
+                {mfaMessage.text && (
+                  <div className={`alert-box ${mfaMessage.type}`} style={{ marginBottom: "20px" }}>
+                    {mfaMessage.text}
+                  </div>
+                )}
+
+                <div className="mfa-methods-container" style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+                  
+                  {/* Method 1: Google Authenticator (TOTP) */}
+                  <div className="mfa-method-card" style={{ padding: "20px", border: "1px solid #27272a", borderRadius: "12px", backgroundColor: "#09090b" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "16px" }}>
+                      <div>
+                        <h3 style={{ fontSize: "1.15rem", fontWeight: "600", color: "#e4e4e7", display: "flex", alignItems: "center", gap: "8px" }}>
+                          📱 Authenticator App (2FA/TOTP)
+                        </h3>
+                        <p style={{ color: "#a1a1aa", fontSize: "0.9rem", marginTop: "4px" }}>
+                          Use Google Authenticator, Microsoft Authenticator, or Authy to generate secure verification codes.
+                        </p>
+                      </div>
+                      
+                      {!mfaStatus.mfa_totp_enabled ? (
+                        <button
+                          type="button"
+                          onClick={handleInitiateTotp}
+                          style={{
+                            background: "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)",
+                            color: "white",
+                            border: "none",
+                            padding: "8px 16px",
+                            borderRadius: "8px",
+                            fontWeight: "600",
+                            cursor: "pointer"
+                          }}
+                        >
+                          Set Up 2FA
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setMfaMessage({ type: "", text: "" });
+                            setShowTotpDisable(true);
+                          }}
+                          style={{
+                            background: "#ef4444",
+                            color: "white",
+                            border: "none",
+                            padding: "8px 16px",
+                            borderRadius: "8px",
+                            fontWeight: "600",
+                            cursor: "pointer"
+                          }}
+                        >
+                          Disable 2FA
+                        </button>
+                      )}
+                    </div>
+
+                    {/* TOTP Setup flow */}
+                    {showTotpSetup && totpSetupData && (
+                      <div style={{ marginTop: "20px", padding: "16px", borderTop: "1px solid #27272a", display: "flex", flexDirection: "column", alignItems: "center", gap: "16px" }}>
+                        <div style={{ color: "#e4e4e7", fontSize: "0.95rem", textAlign: "center" }}>
+                          1. Scan the QR code below using your authenticator app, or enter the text key manually.
+                        </div>
+                        <img src={totpSetupData.qr_code_url} alt="Scan QR Code" style={{ border: "4px solid white", borderRadius: "8px" }} />
+                        <div style={{ color: "#c084fc", fontSize: "0.85rem", wordBreak: "break-all", fontFamily: "monospace" }}>
+                          Secret Key: <strong>{totpSetupData.secret}</strong>
+                        </div>
+                        <form onSubmit={handleEnableTotpSubmit} style={{ width: "100%", maxWidth: "320px", display: "flex", flexDirection: "column", gap: "12px", alignItems: "center" }}>
+                          <div style={{ color: "#e4e4e7", fontSize: "0.95rem", textAlign: "center" }}>
+                            2. Enter the 6-digit verification code from your authenticator app below to verify setup.
+                          </div>
+                          <input
+                            type="text"
+                            placeholder="Enter 6-digit code"
+                            maxLength="6"
+                            value={totpCode}
+                            onChange={(e) => setTotpCode(e.target.value.replace(/\D/g, ""))}
+                            style={{
+                              width: "100%",
+                              padding: "10px",
+                              backgroundColor: "#18181b",
+                              border: "1px solid #27272a",
+                              color: "white",
+                              borderRadius: "8px",
+                              textAlign: "center",
+                              letterSpacing: "4px",
+                              fontSize: "1.1rem"
+                            }}
+                            required
+                          />
+                          <div style={{ display: "flex", gap: "12px", width: "100%" }}>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setShowTotpSetup(false);
+                                setTotpSetupData(null);
+                              }}
+                              style={{
+                                flex: 1,
+                                padding: "8px",
+                                border: "1px solid #27272a",
+                                backgroundColor: "transparent",
+                                color: "#a1a1aa",
+                                borderRadius: "8px",
+                                cursor: "pointer"
+                              }}
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              type="submit"
+                              style={{
+                                flex: 1,
+                                padding: "8px",
+                                background: "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)",
+                                color: "white",
+                                border: "none",
+                                borderRadius: "8px",
+                                fontWeight: "600",
+                                cursor: "pointer"
+                              }}
+                            >
+                              Verify & Enable
+                            </button>
+                          </div>
+                        </form>
+                      </div>
+                    )}
+
+                    {/* TOTP Disable flow */}
+                    {showTotpDisable && (
+                      <form onSubmit={handleDisableTotpSubmit} style={{ marginTop: "20px", padding: "16px", borderTop: "1px solid #27272a", display: "flex", flexDirection: "column", gap: "12px", alignItems: "center" }}>
+                        <div style={{ color: "#e4e4e7", fontSize: "0.95rem", textAlign: "center" }}>
+                          Enter the 6-digit code from your authenticator app to confirm disabling TOTP MFA.
+                        </div>
+                        <input
+                          type="text"
+                          placeholder="Enter 6-digit code"
+                          maxLength="6"
+                          value={disableTotpCode}
+                          onChange={(e) => setDisableTotpCode(e.target.value.replace(/\D/g, ""))}
+                          style={{
+                            width: "100%",
+                            maxWidth: "240px",
+                            padding: "10px",
+                            backgroundColor: "#18181b",
+                            border: "1px solid #27272a",
+                            color: "white",
+                            borderRadius: "8px",
+                            textAlign: "center",
+                            letterSpacing: "4px",
+                            fontSize: "1.1rem"
+                          }}
+                          required
+                        />
+                        <div style={{ display: "flex", gap: "12px", width: "100%", maxWidth: "240px" }}>
+                          <button
+                            type="button"
+                            onClick={() => setShowTotpDisable(false)}
+                            style={{
+                              flex: 1,
+                              padding: "8px",
+                              border: "1px solid #27272a",
+                              backgroundColor: "transparent",
+                              color: "#a1a1aa",
+                              borderRadius: "8px",
+                              cursor: "pointer"
+                            }}
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            type="submit"
+                            style={{
+                              flex: 1,
+                              padding: "8px",
+                              backgroundColor: "#ef4444",
+                              color: "white",
+                              border: "none",
+                              borderRadius: "8px",
+                              fontWeight: "600",
+                              cursor: "pointer"
+                            }}
+                          >
+                            Confirm Disable
+                          </button>
+                        </div>
+                      </form>
+                    )}
+                  </div>
+
+                  {/* Method 2: Phone OTP (SMS) */}
+                  <div className="mfa-method-card" style={{ padding: "20px", border: "1px solid #27272a", borderRadius: "12px", backgroundColor: "#09090b" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "16px" }}>
+                      <div>
+                        <h3 style={{ fontSize: "1.15rem", fontWeight: "600", color: "#e4e4e7", display: "flex", alignItems: "center", gap: "8px" }}>
+                          💬 Phone OTP (SMS) MFA
+                        </h3>
+                        <p style={{ color: "#a1a1aa", fontSize: "0.9rem", marginTop: "4px" }}>
+                          Receive a 6-digit verification code via SMS to your verified phone number on login.
+                        </p>
+                      </div>
+                      
+                      {mfaStatus.phone_verified && (
+                        <label className="switch" style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer" }}>
+                          <input
+                            type="checkbox"
+                            checked={mfaStatus.mfa_phone_enabled}
+                            onChange={handleTogglePhoneMfa}
+                            style={{ width: "18px", height: "18px", accentColor: "#a855f7" }}
+                          />
+                          <span style={{ color: "#e4e4e7", fontSize: "0.95rem" }}>
+                            {mfaStatus.mfa_phone_enabled ? "Enabled" : "Disabled"}
+                          </span>
+                        </label>
+                      )}
+                    </div>
+
+                    {/* Link/Verify Phone flow */}
+                    {!mfaStatus.phone_verified ? (
+                      <div style={{ marginTop: "16px", padding: "16px 0", borderTop: "1px solid #27272a" }}>
+                        <div style={{ color: "#e4e4e7", fontSize: "0.95rem", marginBottom: "12px" }}>
+                          Enter and verify your phone number to enable SMS-based MFA.
+                        </div>
+                        <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", width: "100%" }}>
+                          <input
+                            type="tel"
+                            placeholder="e.g. +91 98765 43210"
+                            value={mfaPhoneNum}
+                            onChange={(e) => setMfaPhoneNum(e.target.value)}
+                            style={{
+                              flex: 1,
+                              minWidth: "200px",
+                              padding: "10px",
+                              backgroundColor: "#18181b",
+                              border: "1px solid #27272a",
+                              color: "white",
+                              borderRadius: "8px"
+                            }}
+                          />
+                          <button
+                            type="button"
+                            onClick={handleSendPhoneVerifySms}
+                            style={{
+                              background: "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)",
+                              color: "white",
+                              border: "none",
+                              padding: "10px 20px",
+                              borderRadius: "8px",
+                              fontWeight: "600",
+                              cursor: "pointer"
+                            }}
+                          >
+                            Send Verification Code
+                          </button>
+                        </div>
+
+                        {showMfaPhoneVerify && (
+                          <form onSubmit={handleVerifyPhoneCodeSubmit} style={{ marginTop: "16px", display: "flex", flexDirection: "column", gap: "12px", maxWidth: "320px" }}>
+                            <div style={{ color: "#e4e4e7", fontSize: "0.9rem" }}>
+                              Enter the 6-digit SMS verification code:
+                            </div>
+                            <div style={{ display: "flex", gap: "12px" }}>
+                              <input
+                                type="text"
+                                placeholder="Enter code"
+                                maxLength="6"
+                                value={mfaPhoneCode}
+                                onChange={(e) => setMfaPhoneCode(e.target.value.replace(/\D/g, ""))}
+                                style={{
+                                  flex: 1,
+                                  padding: "10px",
+                                  backgroundColor: "#18181b",
+                                  border: "1px solid #27272a",
+                                  color: "white",
+                                  borderRadius: "8px",
+                                  textAlign: "center",
+                                  letterSpacing: "2px"
+                                }}
+                                required
+                              />
+                              <button
+                                type="submit"
+                                disabled={isMfaPhoneVerifying}
+                                style={{
+                                  background: "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)",
+                                  color: "white",
+                                  border: "none",
+                                  padding: "10px 20px",
+                                  borderRadius: "8px",
+                                  fontWeight: "600",
+                                  cursor: "pointer"
+                                }}
+                              >
+                                {isMfaPhoneVerifying ? "Verifying..." : "Verify"}
+                              </button>
+                            </div>
+                          </form>
+                        )}
+                      </div>
+                    ) : (
+                      <div style={{ marginTop: "12px", fontSize: "0.9rem", color: "#a1a1aa", display: "flex", alignItems: "center", gap: "6px" }}>
+                        <span>✓ Verified Phone: <strong>{mfaStatus.phone}</strong></span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            // Let user change phone number by resetting verification status in local UI state
+                            setMfaStatus({ ...mfaStatus, phone_verified: false });
+                          }}
+                          style={{
+                            background: "none",
+                            border: "none",
+                            color: "#c084fc",
+                            cursor: "pointer",
+                            fontSize: "0.85rem",
+                            textDecoration: "underline",
+                            padding: 0,
+                            marginLeft: "8px"
+                          }}
+                        >
+                          Change Number
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                  
+                </div>
+              </div>
             </div>
           )}
 

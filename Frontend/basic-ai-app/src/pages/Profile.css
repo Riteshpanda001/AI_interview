@@ -1,7 +1,7 @@
 .profile-page {
   min-height: 100vh;
-  background-color: #f8fafc;
-  color: #0f172a;
+  background-color: #12183B;
+  color: #ffffff;
   font-family: 'Segoe UI', Inter, -apple-system, sans-serif;
   padding-bottom: 60px;
 }
@@ -14,8 +14,8 @@
 
 .profile-loading-screen {
   min-height: 100vh;
-  background-color: #f8fafc;
-  color: #0f172a;
+  background-color: #12183B;
+  color: #ffffff;
 }
 
 .loading-spinner-container {
@@ -29,7 +29,7 @@
 .loading-spinner {
   width: 48px;
   height: 48px;
-  border: 4px solid rgba(124, 58, 237, 0.15);
+  border: 4px solid rgba(255, 255, 255, 0.1);
   border-top-color: #7c3aed;
   border-radius: 50%;
   animation: spinner 0.8s linear infinite;
@@ -44,14 +44,14 @@
 
 /* ================= Banner ================= */
 .profile-banner {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: #1a224a;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 20px;
   padding: 36px;
   display: flex;
   align-items: center;
   gap: 28px;
-  box-shadow: 0 10px 30px rgba(124, 58, 237, 0.06);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
 .profile-avatar-large {
@@ -121,14 +121,14 @@
   display: flex;
   gap: 12px;
   margin: 32px 0 24px 0;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   padding-bottom: 16px;
 }
 
-.tab-btn {
-  background: #ffffff;
-  border: 1.5px solid #e2e8f0;
-  color: #475569;
+.profile-tabs .tab-btn {
+  background: #1a224a;
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  color: #e2e8f0;
   font-size: 15px;
   font-weight: 700;
   padding: 12px 22px;
@@ -140,23 +140,23 @@
   gap: 8px;
 }
 
-.tab-btn:hover {
-  color: #7c3aed;
-  background: #f3e8ff;
-  border-color: #c084fc;
+.profile-tabs .tab-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(168, 85, 247, 0.5);
 }
 
-.tab-btn.active {
+.profile-tabs .tab-btn.active {
   color: #ffffff;
-  background: linear-gradient(135deg, #7c3aed, #9333ea);
+  background: #E85D30;
   border-color: transparent;
-  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.35);
+  box-shadow: 0 6px 20px rgba(232, 93, 48, 0.35);
 }
 
 /* ================= Tab Content ================= */
 .profile-tab-content {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: #1a224a;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 18px;
   padding: 36px;
   box-shadow: 0 10px 35px rgba(0, 0, 0, 0.04);

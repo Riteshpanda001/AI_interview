@@ -14,21 +14,7 @@
 
     padding:120px 8%;
 
-    background:
-        radial-gradient(circle at top left,
-        rgba(168,85,247,.16),
-        transparent 35%),
-
-        radial-gradient(circle at bottom right,
-        rgba(192,132,252,.15),
-        transparent 35%),
-
-        linear-gradient(
-            135deg,
-            #ffffff 0%,
-            #fcf9ff 35%,
-            #f7f0ff 70%,
-            #ffffff 100%);
+    background: #12183B;
 }
 
 /* Decorative Background */
@@ -78,9 +64,9 @@
 
     border-radius:50px;
 
-    background:#ede9fe;
+    background:rgba(124, 58, 237, 0.2);
 
-    color:#7c3aed;
+    color:#a78bfa;
 
     font-size:15px;
 
@@ -95,7 +81,7 @@
 
     font-weight:700 !important;
 
-    color:#111827;
+    color:#ffffff;
 
     line-height:1.2;
 
@@ -104,14 +90,14 @@
 
 .stats-header h2 span{
 
-    color:#cf3aed;
+    color:#c084fc;
 }
 
 .stats-header p{
 
     font-size:20px;
 
-    color:#6b7280;
+    color:#9ca3af;
 
     line-height:1.8;
 }
@@ -137,8 +123,8 @@
 =========================== */
 
 .stats-section .stat-card {
-    background: #ffffff !important;
-    border: 1.5px solid #e9d5ff !important;
+    background: #1a224a !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
     border-radius: 24px !important;
     padding: 36px 16px 32px !important;
     min-height: 230px !important;
@@ -152,14 +138,14 @@
     overflow: hidden !important;
     box-sizing: border-box !important;
     transition: all .35s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    box-shadow: 0 10px 30px rgba(124, 58, 237, 0.08) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3) !important;
 }
 
 .stats-section .stat-card:hover {
     transform: translateY(-8px) !important;
     border-color: #7c3aed !important;
-    background: #ffffff !important;
-    box-shadow: 0 20px 40px rgba(124, 58, 237, 0.18) !important;
+    background: #1e2858 !important;
+    box-shadow: 0 20px 40px rgba(168, 85, 247, 0.25) !important;
 }
 
 /* Number */
@@ -167,7 +153,7 @@
     font-size: clamp(28px, 2.2vw, 34px) !important;
     font-weight: 800 !important;
     line-height: 1.2 !important;
-    color: #7c3aed !important;
+    color: #c084fc !important;
     background: linear-gradient(135deg, #7c3aed, #a855f7);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -186,7 +172,7 @@
 .stats-section .stat-title {
     font-size: 20px !important;
     font-weight: 800 !important;
-    color: #0f172a !important;
+    color: #ffffff !important;
     line-height: 1.3 !important;
     margin-bottom: 10px !important;
     min-height: 52px !important;
@@ -199,7 +185,7 @@
 .stats-section .stat-description {
     font-size: 14px !important;
     line-height: 1.6 !important;
-    color: #475569 !important;
+    color: #9ca3af !important;
     font-weight: 500 !important;
 }
 

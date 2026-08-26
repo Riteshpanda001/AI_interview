@@ -1,15 +1,16 @@
 .faq-section {
   width: 100%;
   padding: 100px 8%;
-  background: linear-gradient(135deg, #faf7ff, #ffffff, #f5f3ff);
+  background: #12183B !important;
 }
 
 .faq-badge {
   display: inline-block;
   padding: 10px 22px;
   border-radius: 999px;
-  background: #ede9fe;
-  color: #7c3aed;
+  background: #000000;
+  border: 1px solid rgba(168, 85, 247, 0.4);
+  color: #c084fc;
   font-size: 15px;
   font-weight: 700;
   letter-spacing: 1px;
@@ -25,10 +26,10 @@
 }
 
 .faq-item-card {
-  background: white;
-  border: 1px solid rgba(124, 58, 237, 0.08);
+  background: #1a224a !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
   border-radius: 20px;
-  box-shadow: 0 10px 30px rgba(124, 58, 237, 0.04);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
   cursor: pointer;
   overflow: hidden;
   transition: all 0.3s ease;
@@ -36,8 +37,13 @@
 }
 
 .faq-item-card:hover {
-  border-color: #7c3aed;
-  box-shadow: 0 15px 40px rgba(124, 58, 237, 0.08);
+  border-color: #a855f7 !important;
+  box-shadow: 0 15px 40px rgba(168, 85, 247, 0.25) !important;
+}
+
+.faq-item-card.active {
+  border-color: #f43f5e !important;
+  box-shadow: 0 15px 40px rgba(244, 63, 94, 0.25) !important;
 }
 
 .faq-question-box {
@@ -49,14 +55,14 @@
 
 .faq-question-box h4 {
   font-size: 17px;
-  color: #111827;
+  color: #ffffff !important;
   font-weight: 700;
   margin: 0;
 }
 
 .faq-toggle-arrow {
   font-size: 12px;
-  color: #6b7280;
+  color: #c084fc !important;
   transition: transform 0.3s ease;
 }
 
@@ -76,19 +82,20 @@
 
 .faq-answer-box p {
   font-size: 15px;
-  color: #4b5563;
+  color: #9ca3af !important;
   line-height: 1.7;
 }
 
 .faq-item-card.active .faq-toggle-arrow {
-  color: #7c3aed;
+  color: #f43f5e !important;
 }
 
-.section-title {
-  font-size: 2.5rem;
-  font-weight: 700;
+.faq-section .section-title {
+  color: #ffffff !important;
 }
 
 .faq-section .section-title span {
-  color: #8b5cf6;
+  background: linear-gradient(135deg, #f43f5e, #fb923c);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }

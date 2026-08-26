@@ -1,13 +1,7 @@
 .features-section {
   padding: 60px 8%;
 
-  background:
-    linear-gradient(
-      135deg,
-      #ffffff,
-      #faf7ff,
-      #f5f3ff
-    );
+  background: #12183B;
 }
 
 .features-container {
@@ -24,17 +18,19 @@
   font-size: 2.5rem;
   font-weight: 700;
 
-  color: #111827;
+  color: #ffffff;
 
   margin-bottom: 20px;
 }
 .features-header h2 span {
-  color: #9c5766;
+  background: linear-gradient(135deg, #38bdf8, #818cf8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 .features-header p {
   font-size: 1.2rem;
 
-  color: #6b7280;
+  color: #9ca3af;
 
   max-width: 800px;
   margin: auto;
@@ -56,20 +52,20 @@
 /* Card */
 
 .feature-card {
-  background: white;
+  background: #1a224a;
 
   padding: 35px;
 
   border-radius: 24px;
 
-  border: 1px solid #ececec;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 
   transition: all 0.35s ease;
 
   cursor: pointer;
 
   box-shadow:
-    0 10px 30px rgba(0, 0, 0, 0.05);
+    0 10px 30px rgba(0, 0, 0, 0.2);
 }
 
 .feature-card:hover {
@@ -78,7 +74,7 @@
   border-color: #a855f7;
 
   box-shadow:
-    0 20px 40px rgba(124, 58, 237, 0.15);
+    0 20px 40px rgba(168, 85, 247, 0.25);
 }
 
 .feature-icon {
@@ -92,28 +88,52 @@
   font-size: 2rem;
 
   border-radius: 20px;
-
-  background:
-    linear-gradient(
-      135deg,
-      #7c3aed,
-      #a855f7
-    );
+  color: white;
 
   margin-bottom: 25px;
+}
+
+.features-grid .feature-card:nth-child(1) .feature-icon {
+  background: linear-gradient(135deg, #7c3aed, #a855f7) !important;
+  box-shadow: 0 8px 20px rgba(124, 58, 237, 0.4);
+}
+
+.features-grid .feature-card:nth-child(2) .feature-icon {
+  background: linear-gradient(135deg, #E85D30, #ff7a45) !important;
+  box-shadow: 0 8px 20px rgba(232, 93, 48, 0.4);
+}
+
+.features-grid .feature-card:nth-child(3) .feature-icon {
+  background: linear-gradient(135deg, #0284c7, #38bdf8) !important;
+  box-shadow: 0 8px 20px rgba(2, 132, 199, 0.4);
+}
+
+.features-grid .feature-card:nth-child(4) .feature-icon {
+  background: linear-gradient(135deg, #10b981, #059669) !important;
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+}
+
+.features-grid .feature-card:nth-child(5) .feature-icon {
+  background: linear-gradient(135deg, #d97706, #f59e0b) !important;
+  box-shadow: 0 8px 20px rgba(217, 119, 6, 0.4);
+}
+
+.features-grid .feature-card:nth-child(6) .feature-icon {
+  background: linear-gradient(135deg, #db2777, #f472b6) !important;
+  box-shadow: 0 8px 20px rgba(219, 39, 119, 0.4);
 }
 
 .feature-card h3 {
   font-size: 1.5rem;
   font-weight: 700;
 
-  color: #111827;
+  color: #ffffff;
 
   margin-bottom: 15px;
 }
 
 .feature-card p {
-  color: #6b7280;
+  color: #9ca3af;
 
   font-size: 1rem;
 

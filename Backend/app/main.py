@@ -15,10 +15,51 @@ from app.api import (
     settings_routes, ws_routes, admin_routes
 )
 
+async def seed_admin_user():
+    """Seed the default admin user prenovaai01@gmail.com with admin role."""
+    from app.services.auth_service import AuthService
+    from app.services.user_service import UserService
+    from app.constants import ROLE_ADMIN
+    
+    email = "prenovaai01@gmail.com"
+    db = db_manager.db
+    
+    if db is not None:
+        user = await db["users"].find_one({"email": email})
+        hashed_password = AuthService.get_password_hash("PreNovaAI01@2005")
+        if not user:
+            print(f"[SEED] Seeding admin user {email}...")
+            await UserService.create_user(
+                email=email,
+                full_name="Admin",
+                password_hash=hashed_password,
+                is_verified=True,
+                db=db
+            )
+            await db["users"].update_one(
+                {"email": email},
+                {"$set": {"role": ROLE_ADMIN, "is_verified": True, "is_active": True}}
+            )
+        else:
+            print(f"[SEED] Aligning admin user credentials for {email}...")
+            await db["users"].update_one(
+                {"email": email},
+                {"$set": {
+                    "hashed_password": hashed_password,
+                    "password": hashed_password,
+                    "role": ROLE_ADMIN,
+                    "is_verified": True,
+                    "is_active": True
+                }}
+            )
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup: Connect to DBs
     await db_manager.connect_to_databases()
+    
+    # Seed admin user
+    await seed_admin_user()
     
     # Create static directories if they don't exist
     for sub in ["uploads", "resumes", "reports", "avatars", "audio"]:
@@ -46,16 +87,16 @@ def _print_smtp_status():
         "YOUR_GOOGLE_APP_PASSWORD", "YOUR_16_CHAR_GMAIL_APP_PASSWORD", ""
     }
 
-    print("\n" + "─" * 60)
-    print("  📧  SMTP CONFIGURATION SUMMARY")
-    print("─" * 60)
+    print("\n" + "-" * 60)
+    print("  SMTP CONFIGURATION SUMMARY")
+    print("-" * 60)
     print(f"  Host     : {settings.SMTP_HOST}:{settings.SMTP_PORT}")
     print(f"  User     : {smtp_user}")
     pw_display = f"{clean_pw[:4]}...{clean_pw[-4:]}" if len(clean_pw) >= 8 else "(not set)"
     print(f"  Password : {pw_display}  ({len(clean_pw)} chars)")
 
     if smtp_user in placeholder_emails or raw_pw in placeholder_passwords or not clean_pw:
-        print("  Status   : ⚠  PLACEHOLDER — emails will NOT be sent")
+        print("  Status   : [WARNING] PLACEHOLDER — emails will NOT be sent")
         if settings.DEBUG:
             print("             OTP codes will be printed to this terminal instead.")
     else:
@@ -63,14 +104,14 @@ def _print_smtp_status():
         try:
             conn = smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT, timeout=5)
             conn.quit()
-            print("  Status   : ✅ SMTP host is reachable")
+            print("  Status   : [OK] SMTP host is reachable")
             print("             Auth will be verified on first email send.")
         except Exception as e:
-            print(f"  Status   : ❌ SMTP host unreachable — {e}")
+            print(f"  Status   : [ERROR] SMTP host unreachable — {e}")
             if settings.DEBUG:
                 print("             OTP codes will be printed to this terminal as fallback.")
 
-    print("─" * 60 + "\n")
+    print("-" * 60 + "\n")
 
 
 
@@ -86,6 +127,8 @@ origins = [
     settings.FRONTEND_URL,
     "http://localhost:5173",
     "http://127.0.0.1:5173",
+    "http://localhost:5174",
+    "http://127.0.0.1:5174",
     "http://localhost:3000",
 ]
 

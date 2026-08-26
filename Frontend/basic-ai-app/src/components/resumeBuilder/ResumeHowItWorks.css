@@ -6,13 +6,7 @@
     width:100%;
     padding:110px 8%;
 
-    background:
-    linear-gradient(
-        135deg,
-        #faf7ff,
-        #ffffff,
-        #f5f3ff
-    );
+    background: #12183B !important;
 }
 
 /* ==========================================
@@ -28,8 +22,9 @@
     display:inline-block;
     padding:10px 22px;
     border-radius:999px;
-    background:#ede9fe;
-    color:#7c3aed;
+    background:#000000;
+    border:1px solid rgba(168, 85, 247, 0.4);
+    color:#c084fc;
     font-size:15px;
     font-weight:700;
     letter-spacing:1px;
@@ -39,19 +34,21 @@
 .resume-work-header h2{
     font-size:2.5rem;
     font-weight:700;
-    color:#111827;
+    color:#ffffff !important;
     margin-bottom:20px;
     line-height:1.2;
 }
 
 .resume-work-header h2 span{
-    color:#7c3aed;
+    background: linear-gradient(135deg, #a855f7, #ec4899);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 .resume-work-header p{
     max-width:760px;
     margin:auto;
-    color:#6b7280;
+    color:#9ca3af !important;
     font-size:19px;
     line-height:1.8;
 }
@@ -74,7 +71,7 @@
 .work-card{
     position:relative;
 
-    background:white;
+    background:#1a224a !important;
 
     padding:45px 30px;
 
@@ -82,10 +79,10 @@
 
     text-align:center;
 
-    border:1px solid rgba(124,58,237,.08);
+    border:1px solid rgba(255, 255, 255, 0.1) !important;
 
     box-shadow:
-    0 20px 45px rgba(124,58,237,.08);
+    0 20px 45px rgba(0, 0, 0, 0.35) !important;
 
     transition:.35s;
 }
@@ -94,10 +91,10 @@
 
     transform:translateY(-10px);
 
-    border-color:#7c3aed;
+    border-color:#a855f7 !important;
 
     box-shadow:
-    0 30px 60px rgba(124,58,237,.18);
+    0 30px 60px rgba(168, 85, 247, 0.25) !important;
 }
 
 /* ==========================================
@@ -115,7 +112,7 @@
 
     font-weight:800;
 
-    color:#d8b4fe;
+    color:#c084fc !important;
 }
 
 /* ==========================================
@@ -124,8 +121,8 @@
 
 .step-icon{
 
-    width:90px;
-    height:90px;
+    width:80px;
+    height:80px;
 
     margin:auto;
 
@@ -137,19 +134,29 @@
 
     border-radius:22px;
 
-    background:
-    linear-gradient(
-        135deg,
-        #7c3aed,
-        #9333ea
-    );
-
     color:white;
 
-    font-size:42px;
+    font-size:36px;
+}
 
-    box-shadow:
-    0 20px 45px rgba(124,58,237,.25);
+.resume-work-grid .work-card:nth-child(1) .step-icon {
+  background: linear-gradient(135deg, #7c3aed, #a855f7) !important;
+  box-shadow: 0 10px 25px rgba(124, 58, 237, 0.4);
+}
+
+.resume-work-grid .work-card:nth-child(2) .step-icon {
+  background: linear-gradient(135deg, #E85D30, #ff7a45) !important;
+  box-shadow: 0 10px 25px rgba(232, 93, 48, 0.4);
+}
+
+.resume-work-grid .work-card:nth-child(3) .step-icon {
+  background: linear-gradient(135deg, #0284c7, #38bdf8) !important;
+  box-shadow: 0 10px 25px rgba(2, 132, 199, 0.4);
+}
+
+.resume-work-grid .work-card:nth-child(4) .step-icon {
+  background: linear-gradient(135deg, #10b981, #059669) !important;
+  box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4);
 }
 
 /* ==========================================
@@ -158,9 +165,9 @@
 
 .work-card h3{
 
-    font-size:2rem;
+    font-size:1.6rem;
 
-    color:#111827;
+    color:#ffffff !important;
 
     margin-bottom:18px;
 
@@ -173,9 +180,9 @@
 
 .work-card p{
 
-    color:#6b7280;
+    color:#9ca3af !important;
 
-    font-size:17px;
+    font-size:16px;
 
     line-height:1.8;
 }
@@ -228,19 +235,19 @@
     background:
     linear-gradient(
         135deg,
-        #7c3aed,
-        #9333ea
+        #E85D30,
+        #ff7a45
     );
 
     box-shadow:
-    0 15px 35px rgba(124,58,237,.25);
+    0 15px 35px rgba(232, 93, 48, 0.4);
 }
 
 .timeline-item p{
 
     margin-top:15px;
 
-    color:#374151;
+    color:#9ca3af !important;
 
     font-weight:600;
 
@@ -256,8 +263,8 @@
     background:
     linear-gradient(
         90deg,
-        #7c3aed,
-        #c084fc
+        #E85D30,
+        #a855f7
     );
 
     margin:0 10px;
@@ -276,7 +283,7 @@
 
 .work-card:hover h3{
 
-    color:#7c3aed;
+    color:#c084fc !important;
 }
 
 /* ==========================================

@@ -22,7 +22,7 @@ const CodingStatistics = () => {
         
         <div className="section-header-mini">
           <span className="section-mini-tag">📊 Profile Performance</span>
-          <h2>Your Practice Analytics</h2>
+          <h2>Your Practice <span>Analytics</span></h2>
           <p>Track your level, progress by difficulty, and daily coding activity over the past 12 weeks.</p>
         </div>
 

@@ -91,7 +91,7 @@ export const AuthProvider = ({ children }) => {
   // Fetch current user details
   const fetchCurrentUser = async (authToken) => {
     if (authToken === "mock-access-token-12345") {
-      setUser({
+      const mockUser = {
         email: "simulated@prepnova.ai",
         full_name: "Simulated PrepNova Candidate",
         role: "User",
@@ -100,9 +100,10 @@ export const AuthProvider = ({ children }) => {
         experience_level: "Mid Level",
         bio: "AI Interview enthusiast",
         created_at: new Date().toISOString(),
-      });
+      };
+      setUser(mockUser);
       setLoading(false);
-      return;
+      return mockUser;
     }
 
     try {
@@ -110,11 +111,14 @@ export const AuthProvider = ({ children }) => {
       if (response.ok) {
         const userData = await response.json();
         setUser(userData);
+        return userData;
       } else {
         clearTokens();
+        return null;
       }
     } catch (error) {
       console.error("Error fetching current user:", error);
+      return null;
     } finally {
       setLoading(false);
     }
@@ -222,8 +226,8 @@ export const AuthProvider = ({ children }) => {
       }
 
       saveTokens(data.access_token, data.refresh_token);
-      await fetchCurrentUser(data.access_token);
-      return data;
+      const userObj = await fetchCurrentUser(data.access_token);
+      return { ...data, user: userObj };
     } catch (error) {
       console.error("OTP verification error:", error);
       throw error;
@@ -252,8 +256,8 @@ export const AuthProvider = ({ children }) => {
       }
 
       saveTokens(data.access_token, data.refresh_token);
-      await fetchCurrentUser(data.access_token);
-      return data;
+      const userObj = await fetchCurrentUser(data.access_token);
+      return { ...data, user: userObj };
     } catch (error) {
       console.error("Login error:", error);
       throw error;
@@ -275,8 +279,8 @@ export const AuthProvider = ({ children }) => {
       }
 
       saveTokens(data.access_token, data.refresh_token);
-      await fetchCurrentUser(data.access_token);
-      return data;
+      const userObj = await fetchCurrentUser(data.access_token);
+      return { ...data, user: userObj };
     } catch (error) {
       console.error("Google login error:", error);
       throw error;
@@ -567,6 +571,122 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Get MFA Status
+  const getMfaStatus = async () => {
+    try {
+      const response = await authFetch(`${API_BASE_URL}/auth/mfa/status`);
+      if (!response.ok) throw new Error("Failed to fetch MFA status");
+      return await response.json();
+    } catch (error) {
+      console.error("Get MFA status error:", error);
+      throw error;
+    }
+  };
+
+  // Setup TOTP
+  const setupTotp = async () => {
+    try {
+      const response = await authFetch(`${API_BASE_URL}/auth/mfa/setup-totp`, {
+        method: "POST",
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.detail || "Failed to initiate TOTP setup");
+      }
+      return data;
+    } catch (error) {
+      console.error("Setup TOTP error:", error);
+      throw error;
+    }
+  };
+
+  // Enable TOTP
+  const enableTotp = async (code) => {
+    try {
+      const response = await authFetch(`${API_BASE_URL}/auth/mfa/enable-totp`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.detail || "Failed to verify and enable TOTP");
+      }
+      if (user) {
+        setUser({ ...user, mfa_totp_enabled: true });
+      }
+      return data;
+    } catch (error) {
+      console.error("Enable TOTP error:", error);
+      throw error;
+    }
+  };
+
+  // Disable TOTP
+  const disableTotp = async (code) => {
+    try {
+      const response = await authFetch(`${API_BASE_URL}/auth/mfa/disable-totp`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.detail || "Failed to disable TOTP");
+      }
+      if (user) {
+        setUser({ ...user, mfa_totp_enabled: false });
+      }
+      return data;
+    } catch (error) {
+      console.error("Disable TOTP error:", error);
+      throw error;
+    }
+  };
+
+  // Toggle Phone MFA
+  const togglePhoneMfa = async (enabled) => {
+    try {
+      const response = await authFetch(`${API_BASE_URL}/auth/mfa/toggle-phone`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ enabled }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.detail || "Failed to toggle Phone OTP MFA");
+      }
+      if (user) {
+        setUser({ ...user, mfa_phone_enabled: enabled });
+      }
+      return data;
+    } catch (error) {
+      console.error("Toggle Phone MFA error:", error);
+      throw error;
+    }
+  };
+
+  // Verify MFA Login
+  const verifyMfaLogin = async (email, otp, mfaType) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/verify-mfa-login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, otp, mfa_type: mfaType }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.detail || "MFA login verification failed");
+      }
+      saveTokens(data.access_token, data.refresh_token);
+      const userObj = await fetchCurrentUser(data.access_token);
+      return { ...data, user: userObj };
+    } catch (error) {
+      console.error("Verify MFA Login error:", error);
+      throw error;
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -597,6 +717,12 @@ export const AuthProvider = ({ children }) => {
         revokeOtherSessions,
         getLoginActivity,
         deleteAccount,
+        getMfaStatus,
+        setupTotp,
+        enableTotp,
+        disableTotp,
+        togglePhoneMfa,
+        verifyMfaLogin,
       }}
     >
       {children}

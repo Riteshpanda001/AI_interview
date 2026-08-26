@@ -1,14 +1,8 @@
 .trusted-section{
-  padding:0 0 60px;
+  padding:40px 0 60px;
   overflow:hidden;
   margin:0;
-  background:
-    linear-gradient(
-      135deg,
-      #ffffff 0%,
-      #b3acbf 60%,
-      #cbc7e1 100%
-    );
+  background: #12183B;
 }
 
 .trusted-section h2{
@@ -18,16 +12,18 @@
   text-align:center;
   font-size:2.5rem;
   font-weight:700;
-  color:#101829;
+  color:#ffffff;
 }
 
 .trusted-section h2 span{
-  color:#4300b7;
+  background: linear-gradient(135deg, #f43f5e, #a855f7);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .trusted-section p{
   text-align:center;
-  color:#6b7280;
+  color:#9ca3af;
   margin-top:15px;
   margin-bottom:50px;
   font-size:1.1rem;
@@ -37,29 +33,67 @@
   width:100%;
   overflow:hidden;
   position:relative;
+  padding: 10px 0;
+}
+
+.logo-slider::before,
+.logo-slider::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 120px;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.logo-slider::before {
+  left: 0;
+  background: linear-gradient(to right, #12183B, transparent);
+}
+
+.logo-slider::after {
+  right: 0;
+  background: linear-gradient(to left, #12183B, transparent);
 }
 
 .logo-track{
   display:flex;
   align-items:center;
-  gap:80px;
+  gap:35px;
   width:fit-content;
 
   animation: scroll 25s linear infinite;
 }
 
-.logo-track img{
-  height:60px;
-  width:auto;
-  object-fit:contain;
-  opacity:0.8;
-
-   transition: 0.3s ease;
+.logo-badge {
+  background: #ffffff;
+  padding: 12px 28px;
+  border-radius: 16px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 64px;
+  min-width: 150px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.35s ease;
+  flex-shrink: 0;
 }
 
-.logo-track img:hover{
-  opacity:1;
-  transform:scale(1.1);
+.logo-badge:hover {
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: 0 12px 30px rgba(168, 85, 247, 0.35);
+  border-color: #a855f7;
+}
+
+.logo-badge img {
+  height: 38px;
+  max-width: 120px;
+  width: auto;
+  object-fit: contain;
+  filter: none;
+  opacity: 1;
 }
 
 @keyframes scroll{

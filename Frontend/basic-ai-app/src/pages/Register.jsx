@@ -7,54 +7,9 @@ import logo from "../assets/prenova_ai_logo.png";
 const Register = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { register, verifyOtp, resendOtp, googleLogin, sendMobileOtp, verifyMobileOtp } = useAuth();
-  // Mobile Verification States
-  const [phoneVerified, setPhoneVerified] = useState(false);
-  const [isSendingMobileOtp, setIsSendingMobileOtp] = useState(false);
-  const [showMobileOtpModal, setShowMobileOtpModal] = useState(false);
-  const [mobileOtpDigits, setMobileOtpDigits] = useState(["", "", "", "", "", ""]);
-  const [mobileOtpError, setMobileOtpError] = useState("");
-  const [isVerifyingMobileOtp, setIsVerifyingMobileOtp] = useState(false);
+  const { register, verifyOtp, resendOtp, googleLogin } = useAuth();
 
-  const handleSendMobileOtp = async () => {
-    if (!phone || phone.trim().length < 10) {
-      setErrorMsg("Please enter a valid mobile number first.");
-      return;
-    }
-    setIsSendingMobileOtp(true);
-    setErrorMsg("");
-    try {
-      await sendMobileOtp(phone.trim());
-      setShowMobileOtpModal(true);
-      setMobileOtpDigits(["", "", "", "", "", ""]);
-      setInfoMsg(`SMS verification code sent to +91 ******${phone.trim().slice(-4)}`);
-    } catch (err) {
-      setErrorMsg(err.message || "Failed to send mobile OTP.");
-    } finally {
-      setIsSendingMobileOtp(false);
-    }
-  };
 
-  const handleVerifyMobileOtpSubmit = async (e) => {
-    e.preventDefault();
-    const fullCode = mobileOtpDigits.join("");
-    if (fullCode.length !== 6) {
-      setMobileOtpError("Please enter all 6 digits of your SMS code.");
-      return;
-    }
-    setIsVerifyingMobileOtp(true);
-    setMobileOtpError("");
-    try {
-      await verifyMobileOtp(phone.trim(), fullCode);
-      setPhoneVerified(true);
-      setShowMobileOtpModal(false);
-      setInfoMsg("Mobile number verified successfully! ✓");
-    } catch (err) {
-      setMobileOtpError(err.message || "Invalid SMS verification code.");
-    } finally {
-      setIsVerifyingMobileOtp(false);
-    }
-  };
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState(() => searchParams.get("email") || "");
@@ -96,8 +51,8 @@ const Register = () => {
         size: "large",
         text: "signup_with",
         shape: "rectangular",
-        width: googleBtnRef.current.offsetWidth || 360,
         logo_alignment: "left",
+        width: "380",
       });
     };
 
@@ -344,37 +299,12 @@ const Register = () => {
 
             <div className="input-row">
               <div className="input-group">
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
-                  <label style={{ margin: 0 }}>Mobile Number</label>
-                  {phoneVerified ? (
-                    <span style={{ fontSize: "0.8rem", color: "#34d399", fontWeight: "700" }}>✓ Mobile Verified</span>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={handleSendMobileOtp}
-                      disabled={isSendingMobileOtp || !phone}
-                      style={{
-                        background: "none",
-                        border: "none",
-                        color: "#c084fc",
-                        fontSize: "0.8rem",
-                        fontWeight: "700",
-                        cursor: "pointer",
-                        textDecoration: "underline"
-                      }}
-                    >
-                      {isSendingMobileOtp ? "Sending..." : "[ Verify ]"}
-                    </button>
-                  )}
-                </div>
+                <label>Mobile Number</label>
                 <input
                   type="tel"
                   placeholder="+91 XXXXX XXXXX"
                   value={phone}
-                  onChange={(e) => {
-                    setPhone(e.target.value);
-                    if (phoneVerified) setPhoneVerified(false);
-                  }}
+                  onChange={(e) => setPhone(e.target.value)}
                 />
               </div>
 
@@ -433,13 +363,23 @@ const Register = () => {
               <span>or sign up with</span>
             </div>
 
-            {/* Official Google Sign-In button rendered by the GSI library */}
-            <div
-              id="google-signin-btn-register"
-              ref={googleBtnRef}
-              className="google-signin-btn-container"
-              style={{ minHeight: "44px", display: "flex", justifyContent: "center" }}
-            />
+            {/* Custom Google Button with absolute-positioned GSI iframe overlay */}
+            <div className="google-btn-wrapper">
+              <button type="button" className="custom-google-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="20px" height="20px" className="google-icon-svg">
+                  <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                  <path fill="#4285F4" d="M46.5 24c0-1.61-.15-3.16-.42-4.69H24v8.88h12.66c-.55 2.87-2.17 5.31-4.61 6.94l7.2 5.58C39.46 35.15 46.5 29.5 46.5 24z"/>
+                  <path fill="#FBBC05" d="M10.54 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.98-6.19z"/>
+                  <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.2-5.58c-2 1.34-4.55 2.13-8.69 2.13-6.26 0-11.57-4.22-13.46-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                </svg>
+                <span>Sign up with Google</span>
+              </button>
+              <div
+                id="google-signin-btn-register"
+                ref={googleBtnRef}
+                className="google-signin-btn-container-overlay"
+              />
+            </div>
             {isGoogleLoading && (
               <p style={{ textAlign: "center", color: "#c084fc", fontSize: "0.9rem", marginTop: "8px" }}>
                 Connecting to Google...
@@ -531,57 +471,7 @@ const Register = () => {
         </div>
       )}
 
-      {/* Mobile SMS OTP Modal Overlay */}
-      {showMobileOtpModal && (
-        <div className="otp-modal-overlay">
-          <div className="otp-modal">
-            <div className="otp-icon-header">
-              <span>📱</span>
-            </div>
-            <h3>Verify Mobile Number</h3>
-            <p>Enter the 6-digit SMS code sent to <strong>+91 ******{phone.slice(-4)}</strong></p>
-            
-            {mobileOtpError && <div className="alert-message error">{mobileOtpError}</div>}
-            
-            <form onSubmit={handleVerifyMobileOtpSubmit}>
-              <div className="otp-boxes-container">
-                {mobileOtpDigits.map((digit, idx) => (
-                  <input
-                    key={idx}
-                    type="text"
-                    maxLength="1"
-                    className="otp-box-digit"
-                    value={digit}
-                    onChange={(e) => {
-                      const cleanVal = e.target.value.replace(/\D/g, "");
-                      const newArr = [...mobileOtpDigits];
-                      newArr[idx] = cleanVal;
-                      setMobileOtpDigits(newArr);
-                    }}
-                  />
-                ))}
-              </div>
 
-              <div className="otp-modal-buttons" style={{ marginTop: "24px" }}>
-                <button
-                  type="button"
-                  className="otp-cancel-btn"
-                  onClick={() => setShowMobileOtpModal(false)}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="otp-submit-btn"
-                  disabled={isVerifyingMobileOtp || mobileOtpDigits.join("").length !== 6}
-                >
-                  {isVerifyingMobileOtp ? "Verifying..." : "Verify Mobile"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

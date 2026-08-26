@@ -582,15 +582,23 @@ const AdminDashboard = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {resumesList.map((r) => (
-                        <tr key={r.id}>
-                          <td><strong>{r.title || r.full_name || "Untitled Resume"}</strong></td>
-                          <td>{r.user_id}</td>
-                          <td>{r.target_role || "Software Engineer"}</td>
-                          <td><strong style={{ color: "#10b981" }}>{r.ats_score || 85}%</strong></td>
-                          <td>{new Date(r.updated_at || Date.now()).toLocaleDateString()}</td>
+                      {resumesList.length === 0 ? (
+                        <tr>
+                          <td colSpan="5" style={{ textAlign: "center", padding: "2.5rem 1rem", color: "#94a3b8" }}>
+                            📄 No resume parsing records stored in database yet.
+                          </td>
                         </tr>
-                      ))}
+                      ) : (
+                        resumesList.map((r) => (
+                          <tr key={r.id}>
+                            <td><strong>{r.title || r.full_name || "Untitled Resume"}</strong></td>
+                            <td>{r.user_id}</td>
+                            <td>{r.target_role || "Software Engineer"}</td>
+                            <td><strong style={{ color: "#10b981" }}>{r.ats_score || 85}%</strong></td>
+                            <td>{new Date(r.updated_at || Date.now()).toLocaleDateString()}</td>
+                          </tr>
+                        ))
+                      )}
                     </tbody>
                   </table>
                 </div>
@@ -615,15 +623,23 @@ const AdminDashboard = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {interviewsList.map((inv) => (
-                        <tr key={inv.id}>
-                          <td><strong>{inv.role_target}</strong></td>
-                          <td><span className={`diff-tag ${inv.difficulty?.toLowerCase()}`}>{inv.difficulty}</span></td>
-                          <td>{inv.interview_type}</td>
-                          <td><strong style={{ color: "#a855f7" }}>{inv.overall_score || "N/A"}/100</strong></td>
-                          <td>{new Date(inv.created_at || Date.now()).toLocaleString()}</td>
+                      {interviewsList.length === 0 ? (
+                        <tr>
+                          <td colSpan="5" style={{ textAlign: "center", padding: "2.5rem 1rem", color: "#94a3b8" }}>
+                            🎙️ No mock interview sessions logged in database yet.
+                          </td>
                         </tr>
-                      ))}
+                      ) : (
+                        interviewsList.map((inv) => (
+                          <tr key={inv.id}>
+                            <td><strong>{inv.role_target}</strong></td>
+                            <td><span className={`diff-tag ${inv.difficulty?.toLowerCase()}`}>{inv.difficulty}</span></td>
+                            <td>{inv.interview_type}</td>
+                            <td><strong style={{ color: "#a855f7" }}>{inv.overall_score || "N/A"}/100</strong></td>
+                            <td>{new Date(inv.created_at || Date.now()).toLocaleString()}</td>
+                          </tr>
+                        ))
+                      )}
                     </tbody>
                   </table>
                 </div>

@@ -100,6 +100,21 @@ const Sidebar = () => {
             {isActive(item.path) && <span className="sidebar-active-dot" />}
           </button>
         ))}
+        {user && user.role === "admin" && (
+          <button
+            id="sidebar-admin-control"
+            className={`sidebar-nav-btn${isActive("/admin") ? " active" : ""}`}
+            onClick={() => navigate("/admin")}
+          >
+            <span className="sidebar-nav-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="#ec4899" />
+              </svg>
+            </span>
+            <span className="sidebar-nav-label" style={{ color: "#ec4899", fontWeight: "600" }}>Admin Control</span>
+            {isActive("/admin") && <span className="sidebar-active-dot" />}
+          </button>
+        )}
       </nav>
 
       {/* ── Spacer ── */}

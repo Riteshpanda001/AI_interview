@@ -8,8 +8,8 @@ class ContactCreateRequest(BaseModel):
     phone: Optional[str] = None
     subject: str
     message: str
-    captcha_answer: Optional[int] = None
-    captcha_expected: Optional[int] = None
+    captcha_answer: int
+    captcha_expected: int
     website: Optional[str] = None  # Honeypot spam trap (must remain empty for real users)
 
 class ContactResponse(BaseModel):

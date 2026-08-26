@@ -17,13 +17,11 @@ const VerifyOTP = () => {
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
 
-  const inputRefs = useRef([...Array(6)].map(() => React.createRef()));
+  const inputRefs = useRef([]);
 
   // Auto focus first box on load
   useEffect(() => {
-    if (inputRefs.current[0]?.current) {
-      inputRefs.current[0].current.focus();
-    }
+    inputRefs.current[0]?.focus();
   }, []);
 
   // 5-Minute Countdown Timer (300 seconds)
@@ -56,7 +54,7 @@ const VerifyOTP = () => {
       });
       setOtpDigits(newOtp);
       const nextFocus = Math.min(index + digits.length, 5);
-      inputRefs[nextFocus]?.current?.focus();
+      inputRefs.current[nextFocus]?.focus();
       return;
     }
 
@@ -66,13 +64,13 @@ const VerifyOTP = () => {
 
     // Auto Focus Next Input Box
     if (cleanValue && index < 5) {
-      inputRefs.current[index + 1]?.current?.focus();
+      inputRefs.current[index + 1]?.focus();
     }
   };
 
   const handleKeyDown = (index, e) => {
     if (e.key === "Backspace" && !otpDigits[index] && index > 0) {
-      inputRefs.current[index - 1]?.current?.focus();
+      inputRefs.current[index - 1]?.focus();
     }
   };
 
@@ -88,7 +86,7 @@ const VerifyOTP = () => {
     });
     setOtpDigits(newOtp);
     const focusIdx = Math.min(digits.length, 5);
-    inputRefs.current[focusIdx]?.current?.focus();
+    inputRefs.current[focusIdx]?.focus();
   };
 
   const handleResendOTP = async () => {
@@ -162,7 +160,18 @@ const VerifyOTP = () => {
           </p>
         </div>
 
-        {errorMsg && <div className="otp-alert error">⚠️ {errorMsg}</div>}
+        {errorMsg && (
+          <div className="otp-alert error">
+            ⚠️ {errorMsg}
+            {errorMsg.toLowerCase().includes("not found") && (
+              <div style={{ marginTop: "8px" }}>
+                <Link to="/register" style={{ color: "#c084fc", fontWeight: "bold", textDecoration: "underline" }}>
+                  → Register New Account
+                </Link>
+              </div>
+            )}
+          </div>
+        )}
         {successMsg && <div className="otp-alert success">✅ {successMsg}</div>}
 
         <form onSubmit={handleVerifySubmit}>

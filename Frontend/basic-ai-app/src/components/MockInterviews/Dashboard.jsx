@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import useRequireAuth from "../../hooks/useRequireAuth";
-import { FaLaptopCode, FaCommentDots, FaAward, FaCalendarAlt, FaTrophy, FaArrowUp, FaCheckCircle, FaExclamationTriangle, FaLightbulb } from "react-icons/fa";
+import { FaLaptopCode, FaCommentDots, FaCalendarAlt, FaTrophy, FaArrowUp, FaCheckCircle, FaExclamationTriangle } from "react-icons/fa";
 import "./Dashboard.css";
 
 const API_BASE_URL = "http://localhost:8000/api";
@@ -80,13 +80,6 @@ const Dashboard = ({ onPracticeNow }) => {
   };
 
   const readiness = metrics?.interview_readiness ?? 82;
-  const strong = metrics?.strong_skills ?? ["Java", "React", "Communication"];
-  const weak = metrics?.weak_skills ?? ["System Design", "SQL", "Behavioral Answers"];
-  const recommendations = metrics?.ai_recommendations ?? [
-    "→ Practice 3 System Design interviews",
-    "→ Complete SQL roadmap",
-    "→ Take 2 behavioral interviews"
-  ];
 
   return (
     <div className="dashboard">
@@ -177,58 +170,7 @@ const Dashboard = ({ onPracticeNow }) => {
         </div>
       </div>
 
-      {/* Strong Skills vs Needs Improvement Matrix & AI Recommendations */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem", margin: "2rem 0" }}>
-        
-        {/* Strong vs Weak Skills Matrix */}
-        <div style={{ background: "#ffffff", border: "1.5px solid #e2e8f0", borderRadius: "16px", padding: "1.5rem", boxShadow: "0 8px 25px rgba(0,0,0,0.03)" }}>
-          <h3 style={{ margin: "0 0 1rem 0", fontSize: "1.2rem", color: "#0f172a", fontWeight: "800", display: "flex", alignItems: "center", gap: "0.5rem" }}>
-            <FaAward style={{ color: "#d97706" }} /> Skill Proficiency Breakdown
-          </h3>
 
-          <div style={{ marginBottom: "1.25rem" }}>
-            <strong style={{ color: "#047857", fontSize: "0.9rem", display: "block", marginBottom: "0.5rem", fontWeight: "700" }}>
-              ✓ Strong Demonstrated Skills
-            </strong>
-            <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
-              {strong.map((sk, i) => (
-                <span key={i} style={{ background: "#ecfdf5", border: "1px solid #a7f3d0", color: "#047857", padding: "0.35rem 0.75rem", borderRadius: "8px", fontSize: "0.85rem", fontWeight: "700" }}>
-                  ✓ {sk}
-                </span>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <strong style={{ color: "#b91c1c", fontSize: "0.9rem", display: "block", marginBottom: "0.5rem", fontWeight: "700" }}>
-              ⚠️ Needs Improvement & Focus
-            </strong>
-            <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
-              {weak.map((sk, i) => (
-                <span key={i} style={{ background: "#fef2f2", border: "1px solid #fecaca", color: "#b91c1c", padding: "0.35rem 0.75rem", borderRadius: "8px", fontSize: "0.85rem", fontWeight: "700" }}>
-                  ⚠️ {sk}
-                </span>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* AI Recommendations Box */}
-        <div style={{ background: "linear-gradient(135deg, #f5f3ff 0%, #eff6ff 100%)", border: "1.5px solid #ddd6fe", borderRadius: "16px", padding: "1.5rem", boxShadow: "0 8px 25px rgba(124,58,237,0.05)" }}>
-          <h3 style={{ margin: "0 0 1rem 0", fontSize: "1.2rem", color: "#6b21a8", fontWeight: "800", display: "flex", alignItems: "center", gap: "0.5rem" }}>
-            <FaLightbulb style={{ color: "#d97706" }} /> Actionable AI Recommendations
-          </h3>
-
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-            {recommendations.map((rec, i) => (
-              <div key={i} style={{ background: "#ffffff", border: "1px solid #cbd5e1", padding: "0.75rem 1rem", borderRadius: "10px", color: "#0f172a", fontSize: "0.9rem", fontWeight: "600", cursor: "pointer", transition: "all 0.2s ease", boxShadow: "0 2px 8px rgba(0,0,0,0.03)" }} onClick={() => requireAuth(onPracticeNow, "/mock-interview")}>
-                {rec}
-              </div>
-            ))}
-          </div>
-        </div>
-
-      </div>
 
       {/* Recent Activity */}
       <div>

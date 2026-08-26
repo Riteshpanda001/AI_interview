@@ -289,6 +289,7 @@ const CompanyQuestions = ({ companyName = "Google" }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [solvedIds, setSolvedIds] = useState(new Set());
   const [showAllQuestions, setShowAllQuestions] = useState(false);
+  const [filterRole, setFilterRole] = useState("All Roles");
 
   // Problem Practice Studio State
   const [activeProblem, setActiveProblem] = useState(null);
@@ -349,7 +350,8 @@ const CompanyQuestions = ({ companyName = "Google" }) => {
     const matchesDiff = filterDifficulty === "All" || q.difficulty.toLowerCase() === filterDifficulty.toLowerCase();
     const matchesTopic = selectedTopic === "All" || q.topic.toLowerCase().includes(selectedTopic.toLowerCase());
     const matchesSearch = !searchQuery || q.title.toLowerCase().includes(searchQuery.toLowerCase()) || q.topic.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesDiff && matchesTopic && matchesSearch;
+    const matchesRole = filterRole === "All Roles" || !q.role_target || q.role_target.toLowerCase().includes(filterRole.toLowerCase()) || q.role_target.toLowerCase() === "all" || q.role_target.toLowerCase() === "all roles";
+    return matchesDiff && matchesTopic && matchesSearch && matchesRole;
   });
 
   const topicsList = ["All", "Arrays", "Strings", "Hashing", "Two Pointers", "Linked List", "Stack & Queue", "Trees & BST", "Heap", "Graph", "Dynamic Programming", "Searching"];

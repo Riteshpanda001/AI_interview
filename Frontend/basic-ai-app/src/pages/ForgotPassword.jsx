@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import logo from "../assets/prenova_ai_logo.png";
@@ -23,6 +23,16 @@ const ForgotPassword = () => {
 
   const [resendTimer, setResendTimer] = useState(0);
   const [isResending, setIsResending] = useState(false);
+
+  const inputRefs = useRef([]);
+
+  useEffect(() => {
+    if (step === 2) {
+      setTimeout(() => {
+        inputRefs.current[0]?.focus();
+      }, 50);
+    }
+  }, [step]);
 
   useEffect(() => {
     let timer;
@@ -79,6 +89,52 @@ const ForgotPassword = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleDigitChange = (index, value) => {
+    const cleanValue = value.replace(/\D/g, "");
+    if (cleanValue.length > 1) {
+      const digits = cleanValue.slice(0, 6).split("");
+      const newOtp = [...otpDigits];
+      digits.forEach((d, idx) => {
+        if (index + idx < 6) {
+          newOtp[index + idx] = d;
+        }
+      });
+      setOtpDigits(newOtp);
+      const nextFocus = Math.min(index + digits.length, 5);
+      inputRefs.current[nextFocus]?.focus();
+      return;
+    }
+
+    const newOtp = [...otpDigits];
+    newOtp[index] = cleanValue;
+    setOtpDigits(newOtp);
+
+    if (cleanValue && index < 5) {
+      inputRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleKeyDown = (index, e) => {
+    if (e.key === "Backspace" && !otpDigits[index] && index > 0) {
+      inputRefs.current[index - 1]?.focus();
+    }
+  };
+
+  const handlePaste = (e) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+    if (!pastedData) return;
+
+    const digits = pastedData.split("");
+    const newOtp = ["", "", "", "", "", ""];
+    digits.forEach((d, i) => {
+      newOtp[i] = d;
+    });
+    setOtpDigits(newOtp);
+    const focusIdx = Math.min(digits.length, 5);
+    inputRefs.current[focusIdx]?.focus();
   };
 
   // Resend OTP Code
@@ -178,20 +234,17 @@ const ForgotPassword = () => {
         {/* STEP 2: Enter OTP */}
         {step === 2 && (
           <form onSubmit={handleVerifyOtp} className="forgot-password-form">
-            <div className="otp-boxes-container" style={{ margin: "20px 0" }}>
+            <div className="otp-boxes-container" onPaste={handlePaste} style={{ margin: "20px 0" }}>
               {otpDigits.map((digit, idx) => (
                 <input
                   key={idx}
+                  ref={(el) => (inputRefs.current[idx] = el)}
                   type="text"
                   maxLength="1"
                   className="otp-box-digit"
                   value={digit}
-                  onChange={(e) => {
-                    const cleanVal = e.target.value.replace(/\D/g, "");
-                    const newArr = [...otpDigits];
-                    newArr[idx] = cleanVal;
-                    setOtpDigits(newArr);
-                  }}
+                  onChange={(e) => handleDigitChange(idx, e.target.value)}
+                  onKeyDown={(e) => handleKeyDown(idx, e)}
                   autoFocus={idx === 0}
                 />
               ))}

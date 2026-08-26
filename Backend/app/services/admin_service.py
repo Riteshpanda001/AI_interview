@@ -5,6 +5,30 @@ from app.services.email_service import EmailService
 
 class AdminService:
     @staticmethod
+    def _serialize_doc(doc):
+        if doc is None:
+            return None
+        if isinstance(doc, list):
+            return [AdminService._serialize_doc(item) for item in doc]
+        if isinstance(doc, dict):
+            new_doc = {}
+            for k, v in doc.items():
+                if isinstance(v, ObjectId):
+                    new_doc[k] = str(v)
+                elif isinstance(v, (dict, list)):
+                    new_doc[k] = AdminService._serialize_doc(v)
+                else:
+                    new_doc[k] = v
+            if "_id" in new_doc:
+                new_doc["_id"] = str(new_doc["_id"])
+                if "id" not in new_doc:
+                    new_doc["id"] = new_doc["_id"]
+            return new_doc
+        if isinstance(doc, ObjectId):
+            return str(doc)
+        return doc
+
+    @staticmethod
     async def get_system_stats(db) -> dict:
         now = datetime.now(timezone.utc)
         start_of_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
@@ -23,7 +47,17 @@ class AdminService:
         payments_cursor = db["payments"].find({"status": "succeeded"})
         payments = await payments_cursor.to_list(length=1000)
         total_revenue = sum(float(p.get("amount", 0.0)) for p in payments)
-        monthly_revenue = sum(float(p.get("amount", 0.0)) for p in payments if p.get("created_at") and p.get("created_at") >= start_of_month)
+
+        def to_aware(dt):
+            if isinstance(dt, datetime) and dt.tzinfo is None:
+                return dt.replace(tzinfo=timezone.utc)
+            return dt
+
+        monthly_revenue = sum(
+            float(p.get("amount", 0.0))
+            for p in payments
+            if p.get("created_at") and to_aware(p.get("created_at")) >= start_of_month
+        )
 
         return {
             "total_users": total_users,
@@ -65,14 +99,14 @@ class AdminService:
                 "is_verified": u.get("is_verified", False),
                 "created_at": u.get("created_at")
             })
-        return result
+        return AdminService._serialize_doc(result)
 
     @staticmethod
     async def log_admin_action(admin_id: str, admin_email: str, action_type: str, target: str, details: str, db):
         try:
             await db["admin_audit_logs"].insert_one({
                 "admin_id": str(admin_id),
-                "admin_email": admin_email or "admin@prepnova.ai",
+                "admin_email": admin_email or "prenovaai01@gmail.com",
                 "action_type": action_type,
                 "target": target,
                 "details": details,
@@ -91,7 +125,7 @@ class AdminService:
             logs = [
                 {
                     "id": "log-1",
-                    "admin_email": "arjun@prepnova.ai",
+                    "admin_email": "prenovaai01@gmail.com",
                     "action_type": "USER_ROLE_UPDATE",
                     "target": "user_dev@prepnova.ai",
                     "details": "Promoted user role to Senior Candidate",
@@ -99,7 +133,7 @@ class AdminService:
                 },
                 {
                     "id": "log-2",
-                    "admin_email": "admin@prepnova.ai",
+                    "admin_email": "prenovaai01@gmail.com",
                     "action_type": "PLAN_GRANT",
                     "target": "candidate_test@gmail.com",
                     "details": "Granted Enterprise Plan for 30 days",
@@ -111,7 +145,7 @@ class AdminService:
             if "_id" in l:
                 l["_id"] = str(l["_id"])
             l["id"] = str(l.get("_id", l.get("id", "")))
-        return logs
+        return AdminService._serialize_doc(logs)
 
     @staticmethod
     async def get_llm_token_usage(db) -> dict:
@@ -156,7 +190,7 @@ class AdminService:
 
         await AdminService.log_admin_action(
             admin_id="system",
-            admin_email="admin@prepnova.ai",
+            admin_email="prenovaai01@gmail.com",
             action_type="USER_STATUS_UPDATE",
             target=user_id,
             details=f"Updated user status to {'active' if is_active else 'suspended'}",
@@ -178,7 +212,7 @@ class AdminService:
 
         await AdminService.log_admin_action(
             admin_id="system",
-            admin_email="admin@prepnova.ai",
+            admin_email="prenovaai01@gmail.com",
             action_type="USER_ROLE_UPDATE",
             target=user_id,
             details=f"Updated user role to '{role}'",
@@ -203,7 +237,7 @@ class AdminService:
 
         await AdminService.log_admin_action(
             admin_id="system",
-            admin_email="admin@prepnova.ai",
+            admin_email="prenovaai01@gmail.com",
             action_type="USER_DELETE",
             target=user_id,
             details="Permanently deleted user profile and active subscriptions",
@@ -216,25 +250,19 @@ class AdminService:
     async def get_resumes_list(db, limit: int = 50) -> list:
         cursor = db["resumes"].find({}).sort("updated_at", -1)
         resumes = await cursor.to_list(length=limit)
-        for r in resumes:
-            r["id"] = str(r["_id"])
-        return resumes
+        return AdminService._serialize_doc(resumes)
 
     @staticmethod
     async def get_interviews_list(db, limit: int = 50) -> list:
         cursor = db["interview_sessions"].find({}).sort("created_at", -1)
         interviews = await cursor.to_list(length=limit)
-        for i in interviews:
-            i["id"] = str(i["_id"])
-        return interviews
+        return AdminService._serialize_doc(interviews)
 
     @staticmethod
     async def get_coding_problems_list(db) -> list:
         cursor = db["coding_problems"].find({})
         problems = await cursor.to_list(length=100)
-        for p in problems:
-            p["id"] = str(p["_id"])
-        return problems
+        return AdminService._serialize_doc(problems)
 
     @staticmethod
     async def save_coding_problem(problem_data: dict, db) -> dict:
@@ -251,7 +279,7 @@ class AdminService:
             result = await db["coding_problems"].insert_one(update_doc)
             problem_data["id"] = str(result.inserted_id)
 
-        return problem_data
+        return AdminService._serialize_doc(problem_data)
 
     @staticmethod
     async def delete_coding_problem(problem_id: str, db) -> dict:
@@ -269,17 +297,13 @@ class AdminService:
     async def get_payments_list(db, limit: int = 100) -> list:
         cursor = db["payments"].find({}).sort("created_at", -1)
         payments = await cursor.to_list(length=limit)
-        for p in payments:
-            p["id"] = str(p["_id"])
-        return payments
+        return AdminService._serialize_doc(payments)
 
     @staticmethod
     async def get_subscriptions_list(db, limit: int = 100) -> list:
         cursor = db["subscriptions"].find({}).sort("updated_at", -1)
         subscriptions = await cursor.to_list(length=limit)
-        for s in subscriptions:
-            s["id"] = str(s["_id"])
-        return subscriptions
+        return AdminService._serialize_doc(subscriptions)
 
     @staticmethod
     async def grant_user_subscription(user_id: str, plan_type: str, duration_days: int, db) -> dict:
@@ -310,7 +334,7 @@ class AdminService:
 
         await AdminService.log_admin_action(
             admin_id="system",
-            admin_email="admin@prepnova.ai",
+            admin_email="prenovaai01@gmail.com",
             action_type="PLAN_GRANT",
             target=user_id,
             details=f"Granted {plan_type.upper()} plan for {duration_days} days",
@@ -327,9 +351,7 @@ class AdminService:
 
         cursor = db["contacts"].find(query).sort("created_at", -1)
         tickets = await cursor.to_list(length=100)
-        for t in tickets:
-            t["id"] = str(t["_id"])
-        return tickets
+        return AdminService._serialize_doc(tickets)
 
     @staticmethod
     async def reply_to_ticket(ticket_number: str, reply_message: str, new_status: str, db) -> dict:
@@ -388,9 +410,7 @@ class AdminService:
     async def get_ats_reports_list(db, limit: int = 50) -> list:
         cursor = db["ats_analyses"].find({}).sort("created_at", -1)
         reports = await cursor.to_list(length=limit)
-        for r in reports:
-            r["id"] = str(r["_id"])
-        return reports
+        return AdminService._serialize_doc(reports)
 
     @staticmethod
     async def get_system_prompts(db) -> list:
@@ -409,9 +429,7 @@ class AdminService:
             await db["system_prompts"].insert_many(default_prompts)
             prompts = await db["system_prompts"].find({}).to_list(length=100)
 
-        for p in prompts:
-            p["id"] = str(p["_id"])
-        return prompts
+        return AdminService._serialize_doc(prompts)
 
     @staticmethod
     async def save_system_prompt(name: str, category: str, system_instruction: str, db) -> dict:
@@ -435,14 +453,14 @@ class AdminService:
 
         await AdminService.log_admin_action(
             admin_id="system",
-            admin_email="admin@prepnova.ai",
+            admin_email="prenovaai01@gmail.com",
             action_type="SYSTEM_PROMPT_UPDATE",
             target=cat_clean,
             details=f"Updated system prompt for {name}",
             db=db
         )
 
-        return payload
+        return AdminService._serialize_doc(payload)
 
     @staticmethod
     async def get_system_health(db) -> dict:
@@ -461,21 +479,4 @@ class AdminService:
             "timestamp": now
         }
 
-
-    @staticmethod
-    async def get_system_health(db) -> dict:
-        now = datetime.now(timezone.utc)
-        db_connected = True
-        try:
-            await db.command("ping")
-        except Exception:
-            db_connected = False
-
-        return {
-            "database_status": "Connected (MongoDB)" if db_connected else "Disconnected",
-            "cache_status": "Active (Redis / Fallback Memory)",
-            "llm_service": "Operational (Gemini 1.5 / Groq Llama 3.1)",
-            "smtp_service": "Active",
-            "timestamp": now
-        }
 

@@ -5,13 +5,10 @@
 .company-prep-hero {
   position: relative;
   padding: 100px 8% 60px;
-  background: 
-    radial-gradient(circle at top left, rgba(124, 58, 237, 0.08), transparent 40%),
-    radial-gradient(circle at bottom right, rgba(2, 132, 199, 0.08), transparent 40%),
-    linear-gradient(135deg, #ffffff, #faf8ff, #f3efff, #ffffff);
+  background: #12183B;
   overflow: hidden;
   text-align: center;
-  border-bottom: 1px solid #ece8ff;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .hero-glow-1 {
@@ -49,31 +46,32 @@
   display: inline-block;
   padding: 8px 18px;
   border-radius: 999px;
-  background: #f3e8ff;
-  color: #7c3aed;
+  background: #000000;
+  border: 1px solid rgba(168, 85, 247, 0.4);
+  color: #c084fc;
   font-size: 14px;
   font-weight: 700;
   margin-bottom: 25px;
-  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.06);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
 .company-hero-content h1 {
-  font-size: 3rem;
-  color: #111827;
-  font-weight: 700;
+  font-size: 3.5rem;
+  color: #ffffff;
+  font-weight: 800;
   line-height: 1.2;
   margin-bottom: 22px;
 }
 
 .company-hero-content h1 span {
-  background: linear-gradient(135deg, #7c3aed, #0284c7);
+  background: linear-gradient(135deg, #a855f7, #60a5fa);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .company-hero-content p {
   font-size: 19px;
-  color: #6b7280;
+  color: #9ca3af;
   line-height: 1.8;
   max-width: 780px;
   margin: 0 auto 50px;
@@ -92,30 +90,30 @@
 .hero-stat-card {
   flex: 1;
   min-width: 160px;
-  background: #ffffff;
-  border: 1px solid #ede9fe;
+  background: #1a224a;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   padding: 20px;
   border-radius: 16px;
-  box-shadow: 0 10px 25px rgba(124, 58, 237, 0.03);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
   transition: all 0.3s;
 }
 
 .hero-stat-card:hover {
   transform: translateY(-5px);
   border-color: #7c3aed;
-  box-shadow: 0 15px 35px rgba(124, 58, 237, 0.08);
+  box-shadow: 0 15px 35px rgba(168, 85, 247, 0.25);
 }
 
 .hero-stat-card h3 {
   font-size: 2rem;
   font-weight: 800;
-  color: #7c3aed;
+  color: #c084fc;
   margin-bottom: 5px;
 }
 
 .hero-stat-card p {
   font-size: 13px;
-  color: #6b7280;
+  color: #9ca3af;
   margin: 0;
   font-weight: 600;
 }

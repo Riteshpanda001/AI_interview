@@ -304,7 +304,7 @@ const ATSResumeScore = ({ resumeData }) => {
               </div>
             )}
 
-            <div className="kw-section" style={{ marginTop: "20px" }}>
+            <div className="kw-section kw-section-missing">
               <span className="kw-status-lbl missing">⚠️ Missing Keywords ({missingKeywords.length})</span>
               {missingKeywords.length === 0 ? (
                 <p className="success-msg">✓ Excellent! All required keywords detected in your resume.</p>
@@ -320,7 +320,7 @@ const ATSResumeScore = ({ resumeData }) => {
             </div>
           </div>
 
-          <div className="feedback-block" style={{ marginTop: "30px" }}>
+          <div className="feedback-block feedback-block-checklist">
             <h4>Resume Parser Checklist</h4>
             <ul className="checklist">
               <li className={hasSummary ? "checked" : ""}>

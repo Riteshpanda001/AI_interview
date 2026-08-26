@@ -1,4 +1,6 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 import Navbar from "../components/Navbar";
 import Hero from "../components/Hero";
@@ -14,8 +16,23 @@ import Pricing from "../components/Pricing";
 import FAQ from "../components/FAQ";
 import Footer from "../components/Footer";
 
-
 const Home = () => {
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
+
+  const role = (user?.role || "").toLowerCase().trim();
+  const email = (user?.email || "").toLowerCase().trim();
+  const isAdmin = role === "admin" || role === "superadmin" || email === "prenovaai01@gmail.com";
+
+  useEffect(() => {
+    if (!loading && user && isAdmin) {
+      navigate("/admin", { replace: true });
+    }
+  }, [user, loading, isAdmin, navigate]);
+
+  if (!loading && user && isAdmin) {
+    return null;
+  }
 
   return (
     <>

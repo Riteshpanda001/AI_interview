@@ -1,0 +1,139 @@
+{
+  "users": {
+    "6a8c66c7dc24fe1b99b0a2b8": {
+      "email": "prenovaai01@gmail.com",
+      "full_name": "Admin",
+      "name": "Admin",
+      "hashed_password": "$2b$12$fqZnNdq64n3wRQtQaSmpXOzD4HroU/y55H1u4PBJ7ILY5DDjXyJDC",
+      "password": "$2b$12$fqZnNdq64n3wRQtQaSmpXOzD4HroU/y55H1u4PBJ7ILY5DDjXyJDC",
+      "provider": "email",
+      "auth_provider": "local",
+      "google_id": null,
+      "google_email": null,
+      "google_verified": false,
+      "profile_picture": null,
+      "avatar_url": null,
+      "phone": null,
+      "mobile_number": null,
+      "phone_verified": false,
+      "phone_verified_at": null,
+      "gender": null,
+      "role": "admin",
+      "plan_type": "free",
+      "is_verified": true,
+      "is_active": true,
+      "target_role": "Software Engineer",
+      "experience_level": "Mid Level",
+      "bio": "",
+      "created_at": "2026-08-24T15:44:07.615224+00:00",
+      "updated_at": "2026-08-24T15:44:07.615224+00:00",
+      "_id": "6a8c66c7dc24fe1b99b0a2b8"
+    },
+    "6a8c688cdc24fe1b99b0a2b9": {
+      "email": "riteshkumarpanda044@gmail.com",
+      "full_name": "Ritesh Kumar Panda",
+      "name": "Ritesh Kumar Panda",
+      "hashed_password": "$2b$12$/f.7yWEuUGH3VvEoLFRD9uwsMtjO7UMd0xLU114HkwZHKK5w.IAMm",
+      "password": "$2b$12$/f.7yWEuUGH3VvEoLFRD9uwsMtjO7UMd0xLU114HkwZHKK5w.IAMm",
+      "provider": "email",
+      "auth_provider": "local",
+      "google_id": null,
+      "google_email": null,
+      "google_verified": false,
+      "profile_picture": null,
+      "avatar_url": null,
+      "phone": "9692229676",
+      "mobile_number": "9692229676",
+      "phone_verified": false,
+      "phone_verified_at": null,
+      "gender": "Male",
+      "role": "user",
+      "plan_type": "free",
+      "is_verified": true,
+      "is_active": true,
+      "target_role": "Software Engineer",
+      "experience_level": "Mid Level",
+      "bio": "",
+      "created_at": "2026-08-24T15:51:40.851871+00:00",
+      "updated_at": "2026-08-24T15:52:06.394873+00:00",
+      "_id": "6a8c688cdc24fe1b99b0a2b9"
+    }
+  },
+  "otps": {},
+  "audit_logs": {
+    "6a8c6891dc24fe1b99b0a2bb": {
+      "event_type": "EVENT_OTP_GENERATED",
+      "email": "riteshkumarpanda044@gmail.com",
+      "user_id": null,
+      "status": "SUCCESS",
+      "ip_address": "127.0.0.1",
+      "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36",
+      "details": {
+        "purpose": "email_verification"
+      },
+      "timestamp": "2026-08-24T15:51:45.500587+00:00",
+      "_id": "6a8c6891dc24fe1b99b0a2bb"
+    },
+    "6a8c6891dc24fe1b99b0a2bc": {
+      "event_type": "EVENT_USER_REGISTERED",
+      "email": "riteshkumarpanda044@gmail.com",
+      "user_id": "6a8c688cdc24fe1b99b0a2b9",
+      "status": "SUCCESS",
+      "ip_address": "127.0.0.1",
+      "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36",
+      "details": {},
+      "timestamp": "2026-08-24T15:51:45.502425+00:00",
+      "_id": "6a8c6891dc24fe1b99b0a2bc"
+    },
+    "6a8c68a6dc24fe1b99b0a2bd": {
+      "event_type": "EVENT_OTP_VERIFIED",
+      "email": "riteshkumarpanda044@gmail.com",
+      "user_id": null,
+      "status": "SUCCESS",
+      "ip_address": "127.0.0.1",
+      "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36",
+      "details": {
+        "purpose": "email_verification"
+      },
+      "timestamp": "2026-08-24T15:52:06.392691+00:00",
+      "_id": "6a8c68a6dc24fe1b99b0a2bd"
+    },
+    "6a8c68a6dc24fe1b99b0a2c0": {
+      "event_type": "EVENT_USER_VERIFIED",
+      "email": "riteshkumarpanda044@gmail.com",
+      "user_id": "6a8c688cdc24fe1b99b0a2b9",
+      "status": "SUCCESS",
+      "ip_address": "127.0.0.1",
+      "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36",
+      "details": {},
+      "timestamp": "2026-08-24T15:52:06.410683+00:00",
+      "_id": "6a8c68a6dc24fe1b99b0a2c0"
+    }
+  },
+  "sessions": {
+    "6a8c68a6dc24fe1b99b0a2be": {
+      "user_id": "6a8c688cdc24fe1b99b0a2b9",
+      "ip_address": "127.0.0.1",
+      "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36",
+      "device": "Google Chrome on Windows (Desktop)",
+      "device_type": "Desktop",
+      "browser": "Google Chrome",
+      "os": "Windows",
+      "created_at": "2026-08-24T15:52:06.396997+00:00",
+      "last_active": "2026-08-24T15:52:06.396997+00:00",
+      "is_active": true,
+      "_id": "6a8c68a6dc24fe1b99b0a2be"
+    }
+  },
+  "refresh_tokens": {
+    "6a8c68a6dc24fe1b99b0a2bf": {
+      "jti": "7e0bf88b-a7a8-4bc9-9815-6436127df2d9",
+      "user_id": "6a8c688cdc24fe1b99b0a2b9",
+      "session_id": "6a8c68a6dc24fe1b99b0a2be",
+      "created_at": "2026-08-24T15:52:06.401594+00:00",
+      "expires_at": "2026-08-31T15:52:06.401594+00:00",
+      "is_revoked": false,
+      "_id": "6a8c68a6dc24fe1b99b0a2bf"
+    }
+  }
+}

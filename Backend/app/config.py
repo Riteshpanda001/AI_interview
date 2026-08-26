@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     HOST: str = "0.0.0.0"
 
     # JWT Settings
-    JWT_SECRET: str = "super-secret-jwt-key-change-in-production"
+    JWT_SECRET: str = "c7e39fa2da16b6070624e54826b1ea51c360a0fcf60c1d6837130a1bf6f7b15a"
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7

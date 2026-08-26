@@ -1,15 +1,16 @@
 .templates-section {
   width: 100%;
   padding: 100px 8%;
-  background: linear-gradient(135deg, #ffffff, #faf7ff, #f5f3ff);
+  background: #12183B !important;
 }
 
 .templates-badge {
   display: inline-block;
   padding: 10px 22px;
   border-radius: 999px;
-  background: #ede9fe;
-  color: #7c3aed;
+  background: #000000;
+  border: 1px solid rgba(168, 85, 247, 0.4);
+  color: #c084fc;
   font-size: 15px;
   font-weight: 700;
   letter-spacing: 1px;
@@ -24,11 +25,11 @@
 }
 
 .template-card {
-  background: white;
-  border: 1px solid rgba(124, 58, 237, 0.08);
+  background: #1a224a !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
   border-radius: 24px;
   padding: 24px;
-  box-shadow: 0 15px 40px rgba(124, 58, 237, 0.06);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.35);
   cursor: pointer;
   transition: all 0.35s ease;
   position: relative;
@@ -38,15 +39,15 @@
 }
 
 .template-card.selected {
-  border-color: #7c3aed;
-  box-shadow: 0 20px 45px rgba(124, 58, 237, 0.15);
+  border-color: #a855f7 !important;
+  box-shadow: 0 20px 45px rgba(168, 85, 247, 0.25) !important;
   transform: translateY(-8px);
 }
 
 .template-card:hover {
   transform: translateY(-8px);
-  border-color: #7c3aed;
-  box-shadow: 0 20px 45px rgba(124, 58, 237, 0.12);
+  border-color: #a855f7 !important;
+  box-shadow: 0 20px 45px rgba(168, 85, 247, 0.25) !important;
 }
 
 .tpl-tag {
@@ -124,14 +125,14 @@
 
 .tpl-info h3 {
   font-size: 20px;
-  color: #111827;
+  color: #ffffff !important;
   font-weight: 700;
   margin-bottom: 10px;
 }
 
 .tpl-info p {
   font-size: 14px;
-  color: #6b7280;
+  color: #9ca3af !important;
   line-height: 1.6;
   margin-bottom: 20px;
   flex-grow: 1;
@@ -169,8 +170,11 @@
 .section-title {
   font-size: 2.5rem;
   font-weight: 700;
+  color: #ffffff !important;
 }
 
 .templates-section .section-title span {
-  color: #3b82f6;
+  background: linear-gradient(135deg, #a855f7, #ec4899);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }

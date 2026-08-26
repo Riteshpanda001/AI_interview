@@ -1,16 +1,17 @@
 .role-templates-section {
   width: 100%;
   padding: 80px 8%;
-  background: linear-gradient(135deg, #f5f3ff, #faf7ff, #ffffff);
-  border-top: 1px solid rgba(124, 58, 237, 0.05);
+  background: #12183B !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .role-badge {
   display: inline-block;
   padding: 10px 22px;
   border-radius: 999px;
-  background: #ede9fe;
-  color: #7c3aed;
+  background: #000000;
+  border: 1px solid rgba(168, 85, 247, 0.4);
+  color: #c084fc;
   font-size: 15px;
   font-weight: 700;
   letter-spacing: 1px;
@@ -25,11 +26,11 @@
 }
 
 .role-card {
-  background: white;
-  border: 1px solid rgba(124, 58, 237, 0.08);
+  background: #1a224a !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
   border-radius: 20px;
   padding: 24px 20px;
-  box-shadow: 0 10px 30px rgba(124, 58, 237, 0.04);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
   cursor: pointer;
   transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
@@ -42,8 +43,8 @@
 
 .role-card:hover {
   transform: translateY(-8px);
-  border-color: #7c3aed;
-  box-shadow: 0 20px 40px rgba(124, 58, 237, 0.1);
+  border-color: #a855f7 !important;
+  box-shadow: 0 20px 40px rgba(168, 85, 247, 0.25) !important;
 }
 
 .role-card::before {
@@ -53,7 +54,7 @@
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(to right, #7c3aed, #ec4899);
+  background: linear-gradient(to right, #E85D30, #a855f7);
   opacity: 0;
   transition: opacity 0.3s ease;
 }
@@ -63,25 +64,35 @@
 }
 
 .role-card-icon {
-  font-size: 40px;
+  font-size: 34px;
   margin-bottom: 15px;
-  transition: transform 0.3s ease;
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: transform 0.3s ease, background 0.3s ease;
 }
 
 .role-card:hover .role-card-icon {
-  transform: scale(1.15) rotate(5deg);
+  transform: scale(1.1) rotate(5deg);
+  background: rgba(168, 85, 247, 0.15);
+  border-color: rgba(168, 85, 247, 0.4);
 }
 
 .role-card h3 {
   font-size: 18px;
-  color: #111827;
+  color: #ffffff !important;
   font-weight: 700;
   margin-bottom: 10px;
 }
 
 .role-card p {
   font-size: 13px;
-  color: #6b7280;
+  color: #9ca3af !important;
   line-height: 1.5;
   margin-bottom: 20px;
   flex-grow: 1;
@@ -90,22 +101,22 @@
 .load-role-btn {
   width: 100%;
   padding: 10px 0;
-  border: 1px dashed #7c3aed;
+  border: 1px dashed rgba(232, 93, 48, 0.6);
   border-radius: 10px;
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
-  background: transparent;
-  color: #7c3aed;
+  background: rgba(232, 93, 48, 0.1);
+  color: #E85D30 !important;
   transition: all 0.3s ease;
 }
 
 .role-card:hover .load-role-btn {
-  background: linear-gradient(135deg, #7c3aed, #9333ea);
+  background: #E85D30 !important;
   border-style: solid;
   border-color: transparent;
-  color: white;
-  box-shadow: 0 5px 15px rgba(124, 58, 237, 0.2);
+  color: #ffffff !important;
+  box-shadow: 0 5px 15px rgba(232, 93, 48, 0.4);
 }
 
 @media (max-width: 1200px) {
@@ -124,4 +135,14 @@
   .roles-grid {
     grid-template-columns: 1fr;
   }
+}
+
+.role-templates-section .section-title {
+  color: #ffffff !important;
+}
+
+.role-templates-section .section-title span {
+  background: linear-gradient(135deg, #a855f7, #ec4899);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }

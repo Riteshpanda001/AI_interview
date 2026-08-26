@@ -16,7 +16,7 @@
 
     height:100vh;
 
-    background:#f5f7fb;
+    background:#12183B;
 
     font-family:'Poppins',sans-serif;
 
@@ -33,7 +33,7 @@
 
     height:100vh;
 
-    background:#ffffff;
+    background:#182046;
 
     display:flex;
 
@@ -43,9 +43,9 @@
 
     padding:25px;
 
-    border-right:1px solid #e5e7eb;
+    border-right:1px solid rgba(255, 255, 255, 0.1);
 
-    box-shadow:4px 0 15px rgba(0,0,0,.05);
+    box-shadow:4px 0 15px rgba(0,0,0,.3);
 
     flex-shrink:0;
 

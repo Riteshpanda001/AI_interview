@@ -4,12 +4,33 @@ from fastapi import HTTPException
 
 class CompanyService:
     @staticmethod
+    def serialize_doc(doc):
+        if not doc:
+            return doc
+        if isinstance(doc, list):
+            return [CompanyService.serialize_doc(d) for d in doc]
+        if isinstance(doc, dict):
+            new_doc = {}
+            for k, v in doc.items():
+                if k == "_id" or isinstance(v, ObjectId):
+                    new_doc[k] = str(v)
+                elif isinstance(v, dict):
+                    new_doc[k] = CompanyService.serialize_doc(v)
+                elif isinstance(v, list):
+                    new_doc[k] = [CompanyService.serialize_doc(item) for item in v]
+                else:
+                    new_doc[k] = v
+            # Ensure "id" field is populated
+            if "_id" in new_doc and "id" not in new_doc:
+                new_doc["id"] = new_doc["_id"]
+            return new_doc
+        return doc
+
+    @staticmethod
     async def get_all_companies(db) -> list:
         cursor = db["companies"].find({})
         companies = await cursor.to_list(length=100)
-        for comp in companies:
-            comp["id"] = str(comp["_id"])
-        return companies
+        return [CompanyService.serialize_doc(comp) for comp in companies]
 
     @staticmethod
     async def get_company_by_slug(slug: str, db) -> dict:
@@ -20,8 +41,7 @@ class CompanyService:
             comp = await db["companies"].find_one({"name": {"$regex": slug_clean, "$options": "i"}})
         
         if comp:
-            comp["id"] = str(comp["_id"])
-            return comp
+            return CompanyService.serialize_doc(comp)
             
         # Standard default schema fallback for unscheduled companies
         return {
@@ -72,9 +92,10 @@ class CompanyService:
             if comp and "questions" in comp:
                 questions = comp["questions"]
 
-        for q in questions:
-            if "_id" in q:
-                q["id"] = str(q["_id"])
+        # Serialize documents to handle ObjectId type
+        serialized_questions = [CompanyService.serialize_doc(q) for q in questions]
+
+        for q in serialized_questions:
             if "role_target" not in q:
                 q["role_target"] = "All Roles"
 
@@ -82,12 +103,12 @@ class CompanyService:
         if role and role.lower() not in ["all", "all roles"]:
             role_clean = role.lower().strip()
             filtered = [
-                q for q in questions
+                q for q in serialized_questions
                 if role_clean in q.get("role_target", "all").lower() or "all" in q.get("role_target", "all").lower()
             ]
-            return filtered if filtered else questions
+            return filtered if filtered else serialized_questions
 
-        return questions
+        return serialized_questions
 
     @staticmethod
     async def get_user_company_progress(user_id: str, slug: str, db) -> dict:
@@ -228,6 +249,8 @@ class CompanyService:
         question_data["created_at"] = datetime.now(timezone.utc)
         result = await db["company_questions"].insert_one(question_data)
         question_data["id"] = str(result.inserted_id)
+        if "_id" in question_data:
+            question_data["_id"] = str(question_data["_id"])
         return question_data
 
     @staticmethod
@@ -243,6 +266,8 @@ class CompanyService:
             raise HTTPException(status_code=404, detail="Question not found")
         
         question_data["id"] = question_id
+        if "_id" in question_data:
+            question_data["_id"] = str(question_data["_id"])
         return question_data
 
     @staticmethod

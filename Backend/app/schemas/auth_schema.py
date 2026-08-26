@@ -77,4 +77,29 @@ class VerifyMobileOTPRequest(BaseModel):
     phone: str = Field(..., min_length=10)
     otp: str = Field(..., min_length=6, max_length=6)
 
+class MFAStatusResponse(BaseModel):
+    mfa_phone_enabled: bool
+    mfa_totp_enabled: bool
+    phone_verified: bool
+    phone: Optional[str] = None
+
+class SetupTOTPResponse(BaseModel):
+    secret: str
+    qr_code_url: str
+
+class EnableTOTPRequest(BaseModel):
+    code: str
+
+class DisableTOTPRequest(BaseModel):
+    code: str
+
+class TogglePhoneMFARequest(BaseModel):
+    enabled: bool
+
+class VerifyMFALoginRequest(BaseModel):
+    email: EmailStr
+    otp: str
+    mfa_type: str
+
+
 

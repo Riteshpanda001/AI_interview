@@ -1,13 +1,7 @@
 .pricing-section {
   padding: 100px 8%;
 
-  background:
-    linear-gradient(
-      135deg,
-      #ffffff,
-      #faf7ff,
-      #f5f3ff
-    );
+  background: #12183B;
 }
 
 .pricing-header {
@@ -22,9 +16,9 @@
 
   border-radius: 999px;
 
-  background: rgba(124,58,237,0.1);
+  background: rgba(124, 58, 237, 0.2);
 
-  color: #7c3aed;
+  color: #a78bfa;
 
   font-weight: 600;
 
@@ -35,13 +29,13 @@
   font-size: 3rem;
   font-weight: 700;
 
-  color: #111827;
+  color: #ffffff;
 
   margin-bottom: 20px;
 }
 
 .pricing-header h2 span {
-  color: #067a82;
+  color: #38bdf8;
 }
 
 .pricing-header p {
@@ -49,7 +43,7 @@
 
   margin: auto;
 
-  color: #6b7280;
+  color: #9ca3af;
 
   font-size: 1.1rem;
 
@@ -72,31 +66,31 @@
 .pricing-card {
   position: relative;
 
-  background: white;
+  background: #1a224a;
 
   padding: 40px;
 
   border-radius: 24px;
 
-  border: 1px solid #ececec;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 
   transition: 0.3s ease;
 
   box-shadow:
-    0 10px 30px rgba(0,0,0,0.05);
+    0 10px 30px rgba(0,0,0,0.2);
 }
 
 .pricing-card:hover {
   transform: translateY(-10px);
 
   box-shadow:
-    0 20px 40px rgba(124,58,237,0.15);
+    0 20px 40px rgba(168, 85, 247, 0.25);
 }
 
 .pricing-card h3 {
   font-size: 1.8rem;
 
-  color: #111827;
+  color: #ffffff;
 
   margin-bottom: 20px;
 }
@@ -106,7 +100,7 @@
 
   font-weight: 800;
 
-  color: #7c3aed;
+  color: #c084fc;
 
   margin-bottom: 25px;
 }
@@ -114,7 +108,7 @@
 .price span {
   font-size: 1rem;
 
-  color: #6b7280;
+  color: #9ca3af;
 }
 
 .pricing-card ul {
@@ -126,7 +120,7 @@
 .pricing-card ul li {
   padding: 10px 0;
 
-  color: #4b5563;
+  color: #cbd5e1;
 }
 
 .pricing-card button {

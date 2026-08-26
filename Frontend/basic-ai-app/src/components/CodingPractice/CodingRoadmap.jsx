@@ -164,7 +164,7 @@ const CodingRoadmap = () => {
         {/* Section Header */}
         <div className="section-header-mini">
           <span className="section-mini-tag">🗓️ Language Learning Path</span>
-          <h2>The Coding Roadmap</h2>
+          <h2>The Coding <span>Roadmap</span></h2>
           <p>Accelerate your growth. Select your target programming language to view the curated step-by-step interview roadmap.</p>
         </div>
 

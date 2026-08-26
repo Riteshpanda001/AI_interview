@@ -138,7 +138,7 @@ const CodingCategories = ({ selectedCategory, onSelectCategory, onSelectProblem 
         
         <div className="section-header-mini">
           <span className="section-mini-tag">🗂️ Practice Domains</span>
-          <h2>Explore by Category</h2>
+          <h2>Explore by <span>Category</span></h2>
           <p>Click any category card below to filter the practice challenge directory and target specific concepts.</p>
         </div>
 
