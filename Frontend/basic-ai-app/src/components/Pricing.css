@@ -35,7 +35,9 @@
 }
 
 .pricing-header h2 span {
-  color: #38bdf8;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6, #ec4899);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .pricing-header p {

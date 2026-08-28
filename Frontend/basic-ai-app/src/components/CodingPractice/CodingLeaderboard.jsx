@@ -16,7 +16,7 @@ const CodingLeaderboard = () => {
         
         <div className="section-header-mini">
           <span className="section-mini-tag">🏆 Top Performers</span>
-          <h2>Global Practice Leaderboard</h2>
+          <h2>Global Practice <span>Leaderboard</span></h2>
           <p>Compete with peer developers. Rank is updated in real-time based on successful challenge compilations and streak durations.</p>
         </div>
 

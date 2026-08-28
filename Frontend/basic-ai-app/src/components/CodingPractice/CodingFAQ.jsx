@@ -25,7 +25,7 @@ const CodingFAQ = () => {
         
         <div className="section-header-mini">
           <span className="section-mini-tag">💬 FAQ Help</span>
-          <h2>Practice FAQ</h2>
+          <h2>Practice <span>FAQ</span></h2>
           <p>Get answers to common queries about compilers, programming languages, and AI scoring metrics.</p>
         </div>
 

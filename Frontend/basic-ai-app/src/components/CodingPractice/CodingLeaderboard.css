@@ -4,8 +4,8 @@
 
 .coding-leaderboard-section {
   padding: 40px 8% 60px;
-  background: #ffffff;
-  border-bottom: 1px solid #ece8ff;
+  background: #12183B !important;
+  border-bottom: none !important;
 }
 
 .coding-leaderboard-container {
@@ -13,9 +13,50 @@
   margin: 0 auto;
 }
 
+.section-header-mini {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.section-mini-tag {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(168, 85, 247, 0.12) !important;
+  border: 1px solid rgba(168, 85, 247, 0.35) !important;
+  color: #c084fc !important;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.section-header-mini h2 {
+  font-size: 2.5rem !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  margin-bottom: 12px;
+}
+
+.coding-leaderboard-section .section-header-mini h2 span {
+  background: linear-gradient(135deg, #facc15, #f97316, #ef4444) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  text-shadow: 0 0 25px rgba(250, 204, 21, 0.4);
+}
+
+.section-header-mini p {
+  font-size: 16px;
+  color: #9ca3af !important;
+  max-width: 650px;
+  margin: 0 auto;
+}
+
 .leaderboard-card {
   overflow: hidden;
-  background: white;
+  background: #1a224a !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 20px;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.35);
   padding: 0;
 }
 
@@ -23,10 +64,10 @@
   display: grid;
   grid-template-columns: 0.8fr 2.5fr 1fr 1fr 1fr;
   padding: 16px 28px;
-  background: #f9fafb;
-  border-bottom: 1px solid #ece8ff;
+  background: #12183B !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
   font-weight: 700;
-  color: #374151;
+  color: #c084fc !important;
   font-size: 13.5px;
 }
 
@@ -39,24 +80,24 @@
   display: grid;
   grid-template-columns: 0.8fr 2.5fr 1fr 1fr 1fr;
   padding: 18px 28px;
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
   align-items: center;
   transition: all 0.2s;
 }
 
 .leaderboard-row:last-child {
-  border-bottom: none;
+  border-bottom: none !important;
 }
 
 .leaderboard-row:hover {
-  background: #fdfcff;
+  background: rgba(255, 255, 255, 0.04) !important;
 }
 
 /* RANK CELLS */
 .row-rank-cell {
   font-size: 15px;
   font-weight: 700;
-  color: #4b5563;
+  color: #ffffff !important;
 }
 
 .rank-badge {
@@ -75,11 +116,13 @@
   font-size: 20px;
   width: 36px;
   height: 36px;
-  background: #f3e8ff;
+  background: rgba(168, 85, 247, 0.15) !important;
+  border: 1px solid rgba(168, 85, 247, 0.3) !important;
   border-radius: 50%;
   display: flex;
   justify-content: center;
   align-items: center;
+  color: #ffffff;
 }
 
 .user-info {
@@ -89,14 +132,15 @@
 
 .user-info strong {
   font-size: 14.5px;
-  color: #111827;
+  color: #ffffff !important;
 }
 
 .admin-tag {
   font-size: 10px;
   font-weight: 700;
-  color: #7c3aed;
-  background: rgba(124, 58, 237, 0.08);
+  color: #c084fc !important;
+  background: rgba(168, 85, 247, 0.15) !important;
+  border: 1px solid rgba(168, 85, 247, 0.3) !important;
   padding: 2px 6px;
   border-radius: 4px;
   width: fit-content;
@@ -105,16 +149,17 @@
 
 /* DATA CELLS */
 .row-solved-cell strong {
-  color: #111827;
+  color: #ffffff !important;
 }
 
 .row-xp-cell strong {
-  color: #7c3aed;
+  color: #c084fc !important;
 }
 
 .leaderboard-streak-badge {
-  background: rgba(245, 158, 11, 0.08);
-  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.15) !important;
+  border: 1px solid rgba(245, 158, 11, 0.3) !important;
+  color: #fbbf24 !important;
   font-weight: 600;
   font-size: 12.5px;
   padding: 4px 10px;

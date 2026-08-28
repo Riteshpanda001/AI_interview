@@ -4,7 +4,7 @@
 
 .top-companies-section {
   padding: 60px 8% 40px;
-  background: #ffffff;
+  background: transparent;
 }
 
 .top-companies-container {
@@ -22,8 +22,9 @@
   display: inline-block;
   padding: 6px 14px;
   border-radius: 999px;
-  background: #e0f2fe;
-  color: #0284c7;
+  background: rgba(124, 58, 237, 0.18);
+  color: #c084fc;
+  border: 1px solid rgba(168, 85, 247, 0.35);
   font-size: 13px;
   font-weight: 700;
   margin-bottom: 12px;
@@ -31,14 +32,21 @@
 
 .section-header-mini h2 {
   font-size: 2.5rem;
-  color: #111827;
-  font-weight: 700;
+  color: #ffffff;
+  font-weight: 800;
   margin-bottom: 12px;
+}
+
+.section-header-mini h2 span {
+  background: linear-gradient(135deg, #a855f7, #c084fc);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 20px rgba(168, 85, 247, 0.3);
 }
 
 .section-header-mini p {
   font-size: 16px;
-  color: #6b7280;
+  color: #cbd5e1;
   max-width: 650px;
   margin: 0 auto;
 }
@@ -56,34 +64,35 @@
   gap: 16px;
   padding: 16px 20px;
   border-radius: 16px;
-  border: 1px solid #e5e7eb;
-  background: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: #1a224a;
   cursor: pointer;
   text-align: left;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
 }
 
 .company-tab-btn:hover {
   transform: translateY(-4px);
-  background: var(--brand-bg);
-  border-color: var(--brand-color);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.03);
+  background: #1e2756;
+  border-color: #a855f7;
+  box-shadow: 0 10px 25px rgba(168, 85, 247, 0.2);
 }
 
 .company-tab-btn.selected {
-  background: var(--brand-bg);
-  border-color: var(--brand-color);
+  background: #1e2756;
+  border-color: #a855f7;
   border-width: 2px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 8px 24px rgba(168, 85, 247, 0.3);
 }
 
 .tab-logo {
   font-size: 24px;
   width: 44px;
   height: 44px;
-  background: #f3f4f6;
+  background: rgba(255, 255, 255, 0.08);
   border-radius: 10px;
   display: flex;
   align-items: center;
@@ -92,19 +101,19 @@
 }
 
 .company-tab-btn.selected .tab-logo {
-  background: #ffffff;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
+  background: rgba(168, 85, 247, 0.2);
+  box-shadow: 0 4px 10px rgba(124, 58, 237, 0.3);
 }
 
 .tab-text strong {
   display: block;
   font-size: 16px;
-  color: #111827;
+  color: #ffffff;
 }
 
 .tab-text span {
   font-size: 12px;
-  color: #6b7280;
+  color: #cbd5e1;
 }
 
 .active-dot {

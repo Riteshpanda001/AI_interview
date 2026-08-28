@@ -41,7 +41,7 @@
 }
 
 .mock-left h2 span {
-  background: linear-gradient(135deg, #ec4899, #8b5cf6);
+  background: linear-gradient(135deg, #10b981, #34d399, #facc15);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }

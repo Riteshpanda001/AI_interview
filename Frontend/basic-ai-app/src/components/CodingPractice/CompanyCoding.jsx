@@ -20,7 +20,7 @@ const CompanyCoding = ({ selectedCompany, onSelectCompany }) => {
         
         <div className="section-header-mini">
           <span className="section-mini-tag">🏢 Company Tagging</span>
-          <h2>Target Top Companies</h2>
+          <h2>Target Top <span>Companies</span></h2>
           <p>Solve coding problems specifically asked in interviews by major tech employers. Toggle a company to filter challenges.</p>
         </div>
 

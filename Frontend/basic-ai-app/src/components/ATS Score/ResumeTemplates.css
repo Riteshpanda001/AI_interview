@@ -10,8 +10,9 @@
   display: inline-block;
   padding: 8px 20px;
   border-radius: 999px;
-  background: #f3e8ff;
-  color: #7c3aed;
+  background: rgba(124, 58, 237, 0.18);
+  color: #c084fc;
+  border: 1px solid rgba(168, 85, 247, 0.35);
   font-size: 0.85rem;
   font-weight: 700;
   letter-spacing: 0.8px;
@@ -26,9 +27,9 @@
 }
 
 .category-pills button {
-  background: #ffffff;
-  border: 1px solid rgba(124, 58, 237, 0.15);
-  color: #6b7280;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #cbd5e1;
   padding: 8px 22px;
   border-radius: 20px;
   font-size: 0.88rem;
@@ -38,9 +39,9 @@
 }
 
 .category-pills button:hover {
-  background: #fdf4ff;
+  background: rgba(168, 85, 247, 0.15);
   border-color: #a855f7;
-  color: #7c3aed;
+  color: #c084fc;
 }
 
 .category-pills button.active {
@@ -59,30 +60,30 @@
 }
 
 .ats-template-card {
-  background: #ffffff;
-  border: 1px solid rgba(124, 58, 237, 0.12);
+  background: #1a224a;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 18px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 10px 30px rgba(124, 58, 237, 0.04);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .ats-template-card:hover {
   transform: translateY(-5px);
   border-color: #a855f7;
-  box-shadow: 0 18px 40px rgba(168, 85, 247, 0.12);
+  box-shadow: 0 18px 40px rgba(168, 85, 247, 0.2);
 }
 
 .ats-template-preview-mock {
   height: 160px;
-  background: linear-gradient(135deg, #fdf4ff 0%, #f3e8ff 100%);
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.15) 0%, rgba(168, 85, 247, 0.1) 100%);
   display: flex;
   justify-content: center;
   align-items: center;
   position: relative;
-  border-bottom: 1px solid rgba(124, 58, 237, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .ats-template-emoji {
@@ -95,7 +96,7 @@
   top: 12px;
   right: 12px;
   background: rgba(16, 185, 129, 0.12);
-  color: #059669;
+  color: #10b981;
   border: 1px solid rgba(16, 185, 129, 0.3);
   padding: 4px 10px;
   border-radius: 99px;
@@ -112,14 +113,14 @@
 
 .ats-template-info h3 {
   font-size: 1.1rem;
-  color: #111827;
+  color: #ffffff;
   font-weight: 700;
   margin: 0 0 8px 0;
 }
 
 .ats-template-info p {
   font-size: 0.85rem;
-  color: #6b7280;
+  color: #cbd5e1;
   line-height: 1.5;
   margin: 0 0 20px 0;
   flex: 1;
@@ -132,9 +133,9 @@
 
 .ats-preview-template-btn {
   flex: 1;
-  background: rgba(255, 255, 255, 0.8);
-  border: 1px solid rgba(124, 58, 237, 0.2);
-  color: #7c3aed;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
   padding: 9px;
   border-radius: 10px;
   font-size: 0.8rem;
@@ -144,7 +145,8 @@
 }
 
 .ats-preview-template-btn:hover {
-  background: #f3e8ff;
+  background: rgba(124, 58, 237, 0.2);
+  border-color: #a855f7;
 }
 
 .ats-use-template-btn {

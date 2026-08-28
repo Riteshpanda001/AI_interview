@@ -36,7 +36,7 @@
 }
 
 .company-header h2 span {
-  background: linear-gradient(135deg, #f43f5e, #a855f7);
+  background: linear-gradient(135deg, #facc15, #f97316, #ef4444);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }

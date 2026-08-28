@@ -4,7 +4,7 @@
 
 .company-faq-section {
   padding: 40px 8% 100px;
-  background: #ffffff;
+  background: transparent;
 }
 
 .company-faq-container {
@@ -22,8 +22,9 @@
   display: inline-block;
   padding: 6px 14px;
   border-radius: 999px;
-  background: #ede9fe;
-  color: #7c3aed;
+  background: rgba(124, 58, 237, 0.18);
+  color: #c084fc;
+  border: 1px solid rgba(168, 85, 247, 0.35);
   font-size: 13px;
   font-weight: 700;
   margin-bottom: 12px;
@@ -31,14 +32,14 @@
 
 .section-header-mini h2 {
   font-size: 2.5rem;
-  color: #111827;
-  font-weight: 700;
+  color: #ffffff;
+  font-weight: 800;
   margin-bottom: 12px;
 }
 
 .section-header-mini p {
   font-size: 16px;
-  color: #6b7280;
+  color: #cbd5e1;
   max-width: 650px;
   margin: 0 auto;
 }
@@ -51,23 +52,24 @@
 }
 
 .company-faq-item {
-  background: #ffffff;
-  border: 1px solid #ece8ff;
+  background: #1a224a;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
   padding: 22px 28px;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
 }
 
 .company-faq-item:hover {
-  border-color: #0284c7;
-  box-shadow: 0 10px 25px rgba(2, 132, 199, 0.06);
+  border-color: #a855f7;
+  box-shadow: 0 10px 25px rgba(168, 85, 247, 0.2);
 }
 
 .company-faq-item.open {
-  border-color: #7c3aed;
-  box-shadow: 0 10px 30px rgba(124, 58, 237, 0.08);
-  background: #faf8ff;
+  border-color: #a855f7;
+  box-shadow: 0 10px 30px rgba(124, 58, 237, 0.2);
+  background: #1e2756;
 }
 
 .faq-question-row {
@@ -79,32 +81,32 @@
 
 .faq-question-row h3 {
   font-size: 1.15rem;
-  color: #1f2937;
+  color: #ffffff;
   font-weight: 700;
   line-height: 1.4;
 }
 
 .faq-arrow {
-  color: #9ca3af;
+  color: #cbd5e1;
   font-size: 13px;
   transition: transform 0.3s;
 }
 
 .faq-arrow.rotate {
   transform: rotate(180deg);
-  color: #7c3aed;
+  color: #c084fc;
 }
 
 .faq-answer-row {
   margin-top: 15px;
-  border-top: 1px solid #ece8ff;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
   padding-top: 15px;
   animation: expandFade 0.3s ease-out;
 }
 
 .faq-answer-row p {
   font-size: 14.5px;
-  color: #4b5563;
+  color: #cbd5e1;
   line-height: 1.7;
 }
 

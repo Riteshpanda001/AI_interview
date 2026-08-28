@@ -288,7 +288,7 @@ const CompanyQuestions = ({ companyName = "Google" }) => {
   const [selectedTopic, setSelectedTopic] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [solvedIds, setSolvedIds] = useState(new Set());
-  const [showAllQuestions, setShowAllQuestions] = useState(false);
+  const [visibleQuestionsCount, setVisibleQuestionsCount] = useState(10);
   const [filterRole, setFilterRole] = useState("All Roles");
 
   // Problem Practice Studio State
@@ -311,7 +311,7 @@ const CompanyQuestions = ({ companyName = "Google" }) => {
 
   // Load questions for company using Top 100 DSA Sheet dataset
   useEffect(() => {
-    setShowAllQuestions(false);
+    setVisibleQuestionsCount(10);
     const customData = QUESTIONS_DATA[companyName];
     if (customData && customData.length > 0) {
       // Merge company specific custom problems with Top 100 sheet problems tagged for this company
@@ -328,6 +328,15 @@ const CompanyQuestions = ({ companyName = "Google" }) => {
       setQuestions(getQuestionsForCompany(companyName));
     }
   }, [companyName]);
+
+  // Auto-expand pagination when filters (Easy, Medium, Hard, Topic, Search, Role) change
+  useEffect(() => {
+    if (filterDifficulty !== "All" || selectedTopic !== "All" || searchQuery.trim() !== "" || (filterRole !== "All Roles" && filterRole !== "All")) {
+      setVisibleQuestionsCount(1000);
+    } else {
+      setVisibleQuestionsCount(10);
+    }
+  }, [filterDifficulty, selectedTopic, searchQuery, filterRole]);
 
   // Load solved state
   useEffect(() => {
@@ -565,7 +574,7 @@ const CompanyQuestions = ({ companyName = "Google" }) => {
 
             {/* Questions Grid */}
             <div className="company-questions-grid">
-              {(showAllQuestions ? filteredQuestions : filteredQuestions.slice(0, 3)).map((q) => {
+              {filteredQuestions.slice(0, visibleQuestionsCount).map((q) => {
                 const isSolved = solvedIds.has(q.id);
                 return (
                   <div 
@@ -612,32 +621,50 @@ const CompanyQuestions = ({ companyName = "Google" }) => {
               )}
             </div>
 
-            {/* View All Questions Toggle Button (Small & Subtle) */}
-            {filteredQuestions.length > 3 && (
-              <div style={{ display: "flex", justifyContent: "center", width: "100%", margin: "1.2rem 0 0.5rem 0" }}>
-                <button
-                  onClick={() => setShowAllQuestions(!showAllQuestions)}
-                  style={{
-                    padding: "0.45rem 1.1rem",
-                    borderRadius: "8px",
-                    border: "1px solid rgba(168, 85, 247, 0.35)",
-                    background: "rgba(168, 85, 247, 0.08)",
-                    color: "#a855f7",
-                    fontSize: "0.85rem",
-                    fontWeight: "600",
-                    cursor: "pointer",
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "0.4rem",
-                    transition: "all 0.2s ease"
-                  }}
-                >
-                  {showAllQuestions 
-                    ? "Show Less ↑" 
-                    : `View All Questions (${filteredQuestions.length}) ↓`}
-                </button>
+            {/* Learn More / Show Next 10 Questions Button */}
+            {filteredQuestions.length > 10 && (
+              <div style={{ display: "flex", justifyContent: "center", width: "100%", margin: "1.5rem 0 0.5rem 0" }}>
+                {visibleQuestionsCount < filteredQuestions.length ? (
+                  <button
+                    onClick={() => setVisibleQuestionsCount((prev) => prev + 10)}
+                    style={{
+                      padding: "0.6rem 1.4rem",
+                      borderRadius: "12px",
+                      border: "1px solid rgba(168, 85, 247, 0.4)",
+                      background: "linear-gradient(135deg, rgba(124, 58, 237, 0.12) 0%, rgba(168, 85, 247, 0.2) 100%)",
+                      color: "#ffffff",
+                      fontSize: "0.9rem",
+                      fontWeight: "700",
+                      cursor: "pointer",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      boxShadow: "0 4px 15px rgba(124, 58, 237, 0.2)",
+                      transition: "all 0.2s ease"
+                    }}
+                  >
+                    <span>Learn More</span>
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => setVisibleQuestionsCount(10)}
+                    style={{
+                      padding: "0.5rem 1.2rem",
+                      borderRadius: "10px",
+                      border: "1px solid rgba(255, 255, 255, 0.2)",
+                      background: "rgba(255, 255, 255, 0.08)",
+                      color: "#cbd5e1",
+                      fontSize: "0.85rem",
+                      fontWeight: "600",
+                      cursor: "pointer"
+                    }}
+                  >
+                    Show Less ↑
+                  </button>
+                )}
               </div>
             )}
+
 
         {/* FULL CODING PRACTICE STUDIO MODAL */}
         {activeProblem && (

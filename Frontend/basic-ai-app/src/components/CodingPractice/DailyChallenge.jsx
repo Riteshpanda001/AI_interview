@@ -11,7 +11,7 @@ const DailyChallenge = ({ onSolve }) => {
         
         <div className="section-header-mini">
           <span className="section-mini-tag">🔥 Streak Challenge</span>
-          <h2>Daily Coding Challenge</h2>
+          <h2>Daily Coding <span>Challenge</span></h2>
           <p>Solve today's selected problem to level up your streak, earn dynamic rank points, and test your speed limits.</p>
         </div>
 

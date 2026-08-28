@@ -1217,14 +1217,72 @@ const PROBLEMS = [
   }
 ];
 
+const STORAGE_KEY = "my_actual_solved_problem_ids_v1";
+
 const CodingProblems = ({ selectedCategory, onSelectCategory, selectedCompany, onSelectCompany, onSelectProblem }) => {
   const { requireAuth } = useRequireAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [difficultyFilter, setDifficultyFilter] = useState("All");
   const [statusFilter, setStatusFilter] = useState("All");
+  const [visibleCount, setVisibleCount] = useState(10);
+  const [solvedIds, setSolvedIds] = useState(() => {
+    try {
+      // Clear legacy test data keys to ensure fresh user state
+      localStorage.removeItem("user_solved_problem_ids");
+      localStorage.removeItem("coding_problems_solved");
+
+      const saved = localStorage.getItem(STORAGE_KEY);
+      return saved ? new Set(JSON.parse(saved)) : new Set();
+    } catch {
+      return new Set();
+    }
+  });
+
+  // Auto-expand to show all questions when any filter (e.g. Easy, Medium, Hard, Solved, Search) is selected
+  React.useEffect(() => {
+    if (difficultyFilter !== "All" || statusFilter !== "All" || searchTerm.trim() !== "" || selectedCategory || selectedCompany) {
+      setVisibleCount(1000);
+    } else {
+      setVisibleCount(10);
+    }
+  }, [searchTerm, difficultyFilter, statusFilter, selectedCategory, selectedCompany]);
+
+  // Handle Solve button click: mark solved, open official practice link automatically, and load workspace
+  const handleSolveClick = (problem) => {
+    requireAuth(() => {
+      // 1. Mark problem as solved in state & localStorage
+      setSolvedIds((prev) => {
+        const next = new Set(prev);
+        next.add(problem.id);
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(next)));
+        } catch (e) {
+          console.error(e);
+        }
+        return next;
+      });
+
+      // 2. Automatically open the official practice link in a new tab if present
+      if (problem.practiceLink) {
+        window.open(problem.practiceLink, "_blank", "noopener,noreferrer");
+      }
+
+      // 3. Load problem into code sandbox workspace
+      onSelectProblem({ ...problem, status: "Solved" });
+
+      // 4. Smooth scroll to AI Coding Assistant workspace below
+      const workspaceEl = document.getElementById("ai-coding-assistant") || document.querySelector(".ai-assistant-section");
+      if (workspaceEl) {
+        workspaceEl.scrollIntoView({ behavior: "smooth" });
+      }
+    }, "/coding-practice");
+  };
 
   // Filtering Logic
   const filteredProblems = PROBLEMS.filter((problem) => {
+    const isSolved = solvedIds.has(problem.id);
+    const currentStatus = isSolved ? "Solved" : "Unsolved";
+
     // 1. Search filter
     const matchesSearch = problem.title.toLowerCase().includes(searchTerm.toLowerCase());
 
@@ -1234,14 +1292,17 @@ const CodingProblems = ({ selectedCategory, onSelectCategory, selectedCompany, o
     // 3. Company filter (from external companies pills)
     const matchesCompany = !selectedCompany || problem.companies.includes(selectedCompany);
 
-    // 4. Difficulty dropdown filter
-    const matchesDifficulty = difficultyFilter === "All" || problem.difficulty === difficultyFilter;
+    // 4. Difficulty dropdown filter (case-insensitive)
+    const matchesDifficulty = difficultyFilter === "All" || problem.difficulty.toLowerCase() === difficultyFilter.toLowerCase();
 
-    // 5. Status dropdown filter
-    const matchesStatus = statusFilter === "All" || problem.status === statusFilter;
+    // 5. Status dropdown filter (case-insensitive)
+    const matchesStatus = statusFilter === "All" || currentStatus.toLowerCase() === statusFilter.toLowerCase();
 
     return matchesSearch && matchesCategory && matchesCompany && matchesDifficulty && matchesStatus;
   });
+
+  // Display only up to visibleCount (first 10, then +10 on Learn More)
+  const displayedProblems = filteredProblems.slice(0, visibleCount);
 
   return (
     <section className="coding-problems-section" id="coding-problems-list">
@@ -1285,7 +1346,6 @@ const CodingProblems = ({ selectedCategory, onSelectCategory, selectedCompany, o
               <option value="All">All Statuses</option>
               <option value="Solved">Solved</option>
               <option value="Unsolved">Unsolved</option>
-              <option value="In Progress">In Progress</option>
             </select>
           </div>
         </div>
@@ -1319,67 +1379,55 @@ const CodingProblems = ({ selectedCategory, onSelectCategory, selectedCompany, o
                 <th>Difficulty</th>
                 <th>Acceptance</th>
                 <th>Ask Target</th>
-                <th>Official Practice</th>
                 <th>Action</th>
               </tr>
             </thead>
             <tbody>
-              {filteredProblems.length > 0 ? (
-                filteredProblems.map((problem) => (
-                  <tr key={problem.id}>
-                    <td>
-                      <span className={`status-badge ${problem.status.replace(/\s+/g, '-').toLowerCase()}`}>
-                        {problem.status === "Solved" ? "✓ Solved" : problem.status === "In Progress" ? "⚡ In Progress" : "○ Unsolved"}
-                      </span>
-                    </td>
-                    <td className="problem-title-cell">
-                      <strong>{problem.title}</strong>
-                    </td>
-                    <td>
-                      <span className="category-cell-tag">{problem.category}</span>
-                    </td>
-                    <td>
-                      <span className={`diff-chip ${problem.difficulty.toLowerCase()}`}>
-                        {problem.difficulty}
-                      </span>
-                    </td>
-                    <td>{problem.acceptance}</td>
-                    <td>
-                      <div className="company-logos-row">
-                        {problem.companies.map((comp) => (
-                          <span key={comp} className={`mini-company-tag ${comp.toLowerCase()}`}>
-                            {comp}
-                          </span>
-                        ))}
-                      </div>
-                    </td>
-                    <td>
-                      {problem.practiceLink ? (
-                        <a 
-                          href={problem.practiceLink} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="official-link-btn"
+              {displayedProblems.length > 0 ? (
+                displayedProblems.map((problem) => {
+                  const isSolved = solvedIds.has(problem.id);
+                  return (
+                    <tr key={problem.id}>
+                      <td>
+                        <span className={`status-badge ${isSolved ? "solved" : "unsolved"}`}>
+                          {isSolved ? "✓ Solved" : "○ Unsolved"}
+                        </span>
+                      </td>
+                      <td className="problem-title-cell">
+                        <strong>{problem.title}</strong>
+                      </td>
+                      <td>
+                        <span className="category-cell-tag">{problem.category}</span>
+                      </td>
+                      <td>
+                        <span className={`diff-chip ${problem.difficulty.toLowerCase()}`}>
+                          {problem.difficulty}
+                        </span>
+                      </td>
+                      <td>{problem.acceptance}</td>
+                      <td>
+                        <div className="company-logos-row">
+                          {problem.companies.map((comp) => (
+                            <span key={comp} className={`mini-company-tag ${comp.toLowerCase()}`}>
+                              {comp}
+                            </span>
+                          ))}
+                        </div>
+                      </td>
+                      <td>
+                        <button 
+                          className={`problem-solve-cta ${isSolved ? "solved-cta-btn" : ""}`}
+                          onClick={() => handleSolveClick(problem)}
                         >
-                          {problem.practiceLink.includes("leetcode.com") ? "LeetCode 🔗" : problem.practiceLink.includes("geeksforgeeks.org") ? "GeeksforGeeks 🔗" : "Practice 🔗"}
-                        </a>
-                      ) : (
-                        "-"
-                      )}
-                    </td>
-                    <td>
-                      <button 
-                        className="problem-solve-cta"
-                        onClick={() => requireAuth(() => onSelectProblem(problem), "/coding-practice")}
-                      >
-                        Solve ⚙️
-                      </button>
-                    </td>
-                  </tr>
-                ))
+                          {isSolved ? "✓ Solved" : "Solve"}
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })
               ) : (
                 <tr>
-                  <td colSpan="8" className="empty-results-cell">
+                  <td colSpan="7" className="empty-results-cell">
                     <p>🔍 No practice problems match your search criteria. Try removing some filters.</p>
                   </td>
                 </tr>
@@ -1387,6 +1435,56 @@ const CodingProblems = ({ selectedCategory, onSelectCategory, selectedCompany, o
             </tbody>
           </table>
         </div>
+
+        {/* Learn More / Next 10 Questions Pagination Button */}
+        {filteredProblems.length > 10 && (
+          <div className="load-more-questions-wrap" style={{ display: "flex", justifyContent: "center", alignItems: "center", marginTop: "24px" }}>
+            {visibleCount < filteredProblems.length ? (
+              <button
+                className="load-more-questions-btn"
+                onClick={() => setVisibleCount((prev) => prev + 10)}
+                style={{
+                  padding: "12px 28px",
+                  borderRadius: "14px",
+                  border: "1px solid rgba(168, 85, 247, 0.4)",
+                  background: "linear-gradient(135deg, rgba(124, 58, 237, 0.15) 0%, rgba(168, 85, 247, 0.25) 100%)",
+                  color: "#ffffff",
+                  fontSize: "15px",
+                  fontWeight: "700",
+                  cursor: "pointer",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "10px",
+                  boxShadow: "0 6px 20px rgba(124, 58, 237, 0.2)",
+                  transition: "all 0.25s ease"
+                }}
+              >
+                <span>Learn More</span>
+              </button>
+            ) : (
+              <button
+                className="show-less-questions-btn"
+                onClick={() => setVisibleCount(10)}
+                style={{
+                  padding: "10px 24px",
+                  borderRadius: "14px",
+                  border: "1px solid rgba(255, 255, 255, 0.2)",
+                  background: "rgba(255, 255, 255, 0.08)",
+                  color: "#cbd5e1",
+                  fontSize: "14px",
+                  fontWeight: "600",
+                  cursor: "pointer",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  transition: "all 0.25s ease"
+                }}
+              >
+                Show Less ↑
+              </button>
+            )}
+          </div>
+        )}
 
       </div>
     </section>

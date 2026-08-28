@@ -29,9 +29,6 @@ const ContactSection = () => {
   const [trackerError, setTrackerError] = useState("");
   const [isTracking, setIsTracking] = useState(false);
 
-  // FAQ Accordion State
-  const [openFaqIndex, setOpenFaqIndex] = useState(null);
-
   // Generate Math CAPTCHA
   const generateCaptcha = () => {
     const num1 = Math.floor(Math.random() * 9) + 1; // 1-9
@@ -182,29 +179,6 @@ const ContactSection = () => {
       setIsTracking(false);
     }
   };
-
-  const toggleFaq = (index) => {
-    setOpenFaqIndex(openFaqIndex === index ? null : index);
-  };
-
-  const faqData = [
-    {
-      question: "How long does it take to get a response to my support ticket?",
-      answer: "We aim to reply to all support tickets within 24 hours. You will receive an automated email confirmation once your ticket is created, and another email when an agent responds."
-    },
-    {
-      question: "Can I track the status of my ticket directly on the platform?",
-      answer: "Yes! Use the Ticket Tracker widget on this page. Enter your ticket number (e.g., TICK-12345) to see its current status in real time."
-    },
-    {
-      question: "Is there any limit to the number of support requests I can submit?",
-      answer: "To prevent abuse, we limit submissions to 3 tickets per 10 minutes per email or IP address. If you exceed this, please wait before submitting again."
-    },
-    {
-      question: "What is PrepNova AI's refund policy?",
-      answer: "We offer a 7-day money-back guarantee for our Pro and Premium plans if you are unsatisfied with our AI preparation services. Contact us with your email address and payment details to request a refund."
-    }
-  ];
 
   return (
     <section className="contact-section">
@@ -453,35 +427,7 @@ const ContactSection = () => {
         </div>
       </div>
 
-      {/* FAQ Section */}
-      <div className="contact-faq-section">
-        <div className="faq-header">
-          <h3>Frequently Asked <span>Questions</span></h3>
-          <p>Common questions about our support ticket system and services.</p>
-        </div>
 
-        <div className="faq-accordion-list">
-          {faqData.map((faq, index) => (
-            <div
-              key={index}
-              className={`faq-item ${openFaqIndex === index ? "open" : ""}`}
-              onClick={() => toggleFaq(index)}
-            >
-              <div className="faq-question-bar">
-                <h4>{faq.question}</h4>
-                <span className="faq-toggle-icon">
-                  {openFaqIndex === index ? "−" : "+"}
-                </span>
-              </div>
-              {openFaqIndex === index && (
-                <div className="faq-answer-content" style={{ textAlign: "left" }}>
-                  {faq.answer}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
     </section>
   );
 };

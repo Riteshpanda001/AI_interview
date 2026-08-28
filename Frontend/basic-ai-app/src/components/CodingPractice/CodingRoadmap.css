@@ -40,10 +40,10 @@
   margin-bottom: 10px;
 }
 
-.section-header-mini h2 span {
-  background: linear-gradient(135deg, #a855f7, #ec4899);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+.coding-roadmap-section .section-header-mini h2 span {
+  background: linear-gradient(135deg, #10b981, #34d399, #06b6d4) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
 }
 
 .section-header-mini p {

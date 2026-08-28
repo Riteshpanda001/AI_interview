@@ -223,7 +223,7 @@ const AICodingAssistant = ({ selectedProblem }) => {
     <section className="ai-coding-section" id="ai-workspace">
       <div className="section-header-mini">
         <span className="section-mini-tag">🛡️ Subprocess Sandbox & AI Evaluator</span>
-        <h2>Multi-Language Sandbox & Performance Analytics</h2>
+        <h2>Multi-Language Sandbox & <span>Performance Analytics</span></h2>
         <p>Compile and run Python, JavaScript, C++, or Java code in isolated containers with real test case breakdowns & LeetCode-style histograms.</p>
       </div>
 

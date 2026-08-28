@@ -4,7 +4,7 @@
 
 .interview-rounds-section {
   padding: 40px 8%;
-  background: #ffffff;
+  background: transparent;
 }
 
 .interview-rounds-container {
@@ -22,8 +22,9 @@
   display: inline-block;
   padding: 6px 14px;
   border-radius: 999px;
-  background: #ede9fe;
-  color: #7c3aed;
+  background: rgba(124, 58, 237, 0.18);
+  color: #c084fc;
+  border: 1px solid rgba(168, 85, 247, 0.35);
   font-size: 13px;
   font-weight: 700;
   margin-bottom: 12px;
@@ -31,35 +32,35 @@
 
 .section-header-mini h2 {
   font-size: 2.5rem;
-  color: #111827;
-  font-weight: 700;
+  color: #ffffff;
+  font-weight: 800;
   margin-bottom: 12px;
 }
 
 .section-header-mini p {
   font-size: 16px;
-  color: #6b7280;
+  color: #cbd5e1;
   max-width: 650px;
   margin: 0 auto;
 }
 
 /* ROUNDS TABLE CARD */
 .rounds-table-card {
-  background: #ffffff;
-  border: 1px solid #ece8ff;
+  background: #1a224a;
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 24px;
   overflow: hidden;
-  box-shadow: 0 12px 30px rgba(124, 58, 237, 0.03);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
 }
 
 .rounds-table-header {
   display: grid;
   grid-template-columns: 1fr 100px 1.2fr 1.5fr;
-  background: #faf8ff;
-  border-bottom: 1px solid #ede9fe;
+  background: #1e2756;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   padding: 20px 24px;
   font-weight: 700;
-  color: #374151;
+  color: #c084fc;
   font-size: 15px;
 }
 
@@ -67,7 +68,7 @@
   display: grid;
   grid-template-columns: 1fr 100px 1.2fr 1.5fr;
   padding: 24px;
-  border-bottom: 1px solid #f5efff;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   align-items: center;
   transition: background 0.3s;
 }
@@ -77,35 +78,35 @@
 }
 
 .rounds-table-row:hover {
-  background: #fafbfe;
+  background: rgba(255, 255, 255, 0.04);
 }
 
 .round-name-cell strong {
   font-size: 16px;
-  color: #111827;
+  color: #ffffff;
 }
 
 .round-duration-cell span {
   font-size: 13px;
-  color: #6b7280;
+  color: #cbd5e1;
   font-weight: 700;
   font-family: monospace;
 }
 
 .round-focus-cell span {
   font-size: 14px;
-  color: #4b5563;
+  color: #cbd5e1;
   line-height: 1.5;
-  background: #f3f4f6;
+  background: rgba(255, 255, 255, 0.06);
   padding: 6px 12px;
   border-radius: 8px;
 }
 
 .round-tip-cell p {
   font-size: 14px;
-  color: #5b21b6;
-  background: #f5efff;
-  border-left: 3px solid #7c3aed;
+  color: #c084fc;
+  background: rgba(124, 58, 237, 0.15);
+  border-left: 3px solid #a855f7;
   padding: 10px 14px;
   border-radius: 0 8px 8px 0;
   margin: 0;

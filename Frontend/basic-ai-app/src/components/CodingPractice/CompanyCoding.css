@@ -4,12 +4,18 @@
 
 .company-coding-section {
   padding: 40px 8% 60px;
-  background: #ffffff;
+  background: #12183B !important;
 }
 
 .company-coding-container {
   max-width: 1200px;
   margin: 0 auto;
+}
+
+.company-coding-section .section-header-mini h2 span {
+  background: linear-gradient(135deg, #facc15, #f97316, #ef4444) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
 }
 
 .companies-horizontal-list {
@@ -27,19 +33,22 @@
   padding: 12px 24px;
   border-radius: 100px;
   cursor: pointer;
-  background: white;
+  background: #1a224a !important;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  border: 1px solid #ece8ff;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
   user-select: none;
+  color: #ffffff !important;
 }
 
 .company-pill:hover {
   transform: translateY(-4px);
-  box-shadow: 0 10px 20px rgba(124, 58, 237, 0.08);
+  border-color: #a855f7 !important;
+  box-shadow: 0 10px 25px rgba(168, 85, 247, 0.25) !important;
 }
 
 .company-pill.active {
   transform: translateY(-4px);
+  border-color: #a855f7 !important;
 }
 
 .company-logo-avatar {
@@ -58,7 +67,7 @@
 .company-pill-name {
   font-size: 14.5px;
   font-weight: 700;
-  color: #4b5563;
+  color: #ffffff !important;
 }
 
 .active-dot-indicator {

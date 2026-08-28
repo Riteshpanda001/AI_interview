@@ -4,7 +4,7 @@
 
 .daily-challenge-section {
   padding: 40px 8%;
-  background: radial-gradient(circle at center, rgba(2, 132, 199, 0.02), transparent 60%);
+  background: #12183B !important;
 }
 
 .daily-challenge-container {
@@ -12,14 +12,51 @@
   margin: 0 auto;
 }
 
+.section-header-mini {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.section-mini-tag {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(168, 85, 247, 0.12) !important;
+  border: 1px solid rgba(168, 85, 247, 0.35) !important;
+  color: #c084fc !important;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.section-header-mini h2 {
+  font-size: 2.5rem !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  margin-bottom: 12px;
+}
+
+.daily-challenge-section .section-header-mini h2 span {
+  background: linear-gradient(135deg, #ff7e5f, #f43f5e, #fb7185) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+.section-header-mini p {
+  font-size: 16px;
+  color: #9ca3af !important;
+  max-width: 650px;
+  margin: 0 auto;
+}
+
 /* CHALLENGE CARD */
 .challenge-hero-card {
   position: relative;
-  background: #ffffff;
-  border: 1px solid #ece8ff;
+  background: #1a224a !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
   border-radius: 28px;
   padding: 40px;
-  box-shadow: 0 15px 40px rgba(124, 58, 237, 0.04);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.35);
   overflow: hidden;
 }
 
@@ -30,15 +67,16 @@
   left: 0;
   width: 6px;
   height: 100%;
-  background: linear-gradient(to bottom, #7c3aed, #0284c7);
+  background: linear-gradient(to bottom, #f97316, #a855f7);
 }
 
 .challenge-card-badge {
   position: absolute;
   top: 24px;
   right: 30px;
-  background: #fee2e2;
-  color: #ef4444;
+  background: rgba(239, 68, 68, 0.15) !important;
+  border: 1px solid rgba(239, 68, 68, 0.3) !important;
+  color: #f87171 !important;
   font-size: 11px;
   font-weight: 800;
   padding: 6px 14px;
@@ -63,7 +101,7 @@
 /* DETAILS */
 .challenge-details h3 {
   font-size: 2.1rem;
-  color: #111827;
+  color: #ffffff !important;
   font-weight: 800;
   margin-bottom: 15px;
 }
@@ -83,21 +121,22 @@
   border-radius: 6px;
 }
 
-.challenge-difficulty.easy { background: #d1fae5; color: #065f46; }
-.challenge-difficulty.medium { background: #fef3c7; color: #92400e; }
-.challenge-difficulty.hard { background: #fee2e2; color: #991b1b; }
+.challenge-difficulty.easy { background: rgba(52, 211, 153, 0.15) !important; color: #34d399 !important; border: 1px solid rgba(52, 211, 153, 0.3); }
+.challenge-difficulty.medium { background: rgba(251, 191, 36, 0.15) !important; color: #fbbf24 !important; border: 1px solid rgba(251, 191, 36, 0.3); }
+.challenge-difficulty.hard { background: rgba(248, 113, 113, 0.15) !important; color: #f87171 !important; border: 1px solid rgba(248, 113, 113, 0.3); }
 
 .challenge-acceptance {
   font-size: 13.5px;
-  color: #6b7280;
+  color: #9ca3af !important;
   font-weight: 600;
 }
 
 .challenge-score {
   font-size: 13px;
   font-weight: 700;
-  color: #0284c7;
-  background: #e0f2fe;
+  color: #c084fc !important;
+  background: rgba(168, 85, 247, 0.15) !important;
+  border: 1px solid rgba(168, 85, 247, 0.3) !important;
   padding: 4px 10px;
   border-radius: 6px;
 }
@@ -105,16 +144,17 @@
 .challenge-desc {
   font-size: 16px;
   line-height: 1.7;
-  color: #4b5563;
+  color: #9ca3af !important;
   margin-bottom: 30px;
 }
 
 .challenge-desc code {
-  background: #f3f4f6;
+  background: rgba(168, 85, 247, 0.15) !important;
+  border: 1px solid rgba(168, 85, 247, 0.3) !important;
   padding: 2px 6px;
   border-radius: 4px;
   font-family: monospace;
-  color: #7c3aed;
+  color: #c084fc !important;
 }
 
 /* STREAK STATS */
@@ -122,8 +162,8 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 20px;
-  background: #faf8ff;
-  border: 1px solid #ede9fe;
+  background: #12183B !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
   border-radius: 16px;
   padding: 20px 24px;
   margin-bottom: 35px;
@@ -137,13 +177,13 @@
 
 .streak-stat strong {
   font-size: 1.4rem;
-  color: #7c3aed;
+  color: #c084fc !important;
   font-weight: 800;
 }
 
 .streak-stat span {
   font-size: 12.5px;
-  color: #6b7280;
+  color: #9ca3af !important;
   font-weight: 600;
 }
 

@@ -73,6 +73,10 @@
    HEADER
 ========================================== */
 
+/* ==========================================
+   HEADER
+========================================== */
+
 .contact-header{
 
     position:relative;
@@ -96,9 +100,13 @@
 
     border-radius:999px;
 
-    background:#ede9fe;
+    background:rgba(124, 58, 237, 0.18);
 
-    color:#7c3aed;
+    color:#c084fc;
+
+    border: 1px solid rgba(168, 85, 247, 0.35);
+
+    box-shadow: 0 0 15px rgba(124, 58, 237, 0.2);
 
     font-size:15px;
 
@@ -109,25 +117,30 @@
 
 .contact-header h2{
 
-    font-size:2.5rem;
+    font-size:3rem;
 
-    font-weight:700;
+    font-weight:600;
 
-    color:#111827;
+    color:#ffffff;
 
     margin-bottom:20px;
+
+    letter-spacing: -0.5px;
 }
 
 .contact-header h2 span{
 
-    color:#7c3aed;
+    background: linear-gradient(135deg, #ff7a45, #E85D30);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 25px rgba(232, 93, 48, 0.4);
 }
 
 .contact-header p{
 
     font-size:18px;
 
-    color:#6b7280;
+    color:#cbd5e1;
 
     line-height:1.8;
 }
@@ -172,28 +185,28 @@
 
     gap:20px;
 
-    background:#ffffff;
+    background:#1a224a;
 
     padding:25px;
 
     border-radius:22px;
 
-    border:1px solid #ece8ff;
+    border:1px solid rgba(255, 255, 255, 0.12);
 
     transition:.35s ease;
 
     box-shadow:
-    0 15px 35px rgba(124,58,237,.08);
+    0 15px 35px rgba(0,0,0,.3);
 }
 
 .info-card:hover{
 
     transform:translateY(-8px);
 
-    border-color:#7c3aed;
+    border-color:#a855f7;
 
     box-shadow:
-    0 25px 55px rgba(124,58,237,.16);
+    0 25px 55px rgba(124,58,237,.3);
 }
 
 .info-icon{
@@ -220,6 +233,8 @@
     font-size:28px;
 
     flex-shrink:0;
+
+    box-shadow: 0 8px 20px rgba(124, 58, 237, 0.35);
 }
 
 .info-card h3{
@@ -228,7 +243,7 @@
 
     font-weight:700;
 
-    color:#111827;
+    color:#ffffff;
 
     margin-bottom:8px;
 }
@@ -237,7 +252,7 @@
 
     font-size:16px;
 
-    color:#6b7280;
+    color:#cbd5e1;
 
     line-height:1.7;
 }
@@ -248,17 +263,18 @@
 
 .contact-form-card{
 
-    background:#ffffff;
+    background:#1a224a;
 
     padding:40px;
 
     border-radius:28px;
 
-    border:1px solid #ece8ff;
+    border:1px solid rgba(255, 255, 255, 0.12);
 
     box-shadow:
-    0 20px 50px rgba(124,58,237,.08);
+    0 20px 60px rgba(0, 0, 0, 0.35);
 }
+
 /* ==========================================
    CONTACT FORM
 ========================================== */
@@ -283,44 +299,63 @@
 .form-group label{
     font-size:15px !important;
     font-weight:700 !important;
-    color:#1f2937 !important;
+    color:#ffffff !important;
     margin-bottom:8px !important;
     display:block !important;
     text-align:left !important;
 }
 
+.contact-section .contact-form-card input,
+.contact-section .contact-form-card textarea,
+.contact-section .form-group input,
+.contact-section .form-group textarea,
+.contact-form-card input,
+.contact-form-card textarea,
 .form-group input,
-.form-group textarea{
-    width:100% !important;
-    padding:16px 20px !important;
-    border:1.5px solid #e2e8f0 !important;
-    border-radius:14px !important;
-    outline:none !important;
-    font-size:15px !important;
-    color:#0f172a !important;
-    background-color:#f8fafc !important;
-    background:#f8fafc !important;
-    transition:all 0.25s ease-in-out !important;
-    box-shadow:inset 0 2px 4px rgba(0, 0, 0, 0.02) !important;
+.form-group textarea {
+    width: 100% !important;
+    padding: 16px 20px !important;
+    border: 1.5px solid rgba(168, 85, 247, 0.4) !important;
+    border-radius: 14px !important;
+    outline: none !important;
+    font-size: 15px !important;
+    color: #ffffff !important;
+    background-color: #12183B !important;
+    background: #12183B !important;
+    transition: all 0.25s ease-in-out !important;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3) !important;
 }
 
+.contact-section .contact-form-card input::placeholder,
+.contact-section .contact-form-card textarea::placeholder,
+.contact-section .form-group input::placeholder,
+.contact-section .form-group textarea::placeholder,
+.contact-form-card input::placeholder,
+.contact-form-card textarea::placeholder,
 .form-group input::placeholder,
-.form-group textarea::placeholder{
-    color:#94a3b8 !important;
-    font-size:14px !important;
+.form-group textarea::placeholder {
+    color: #94a3b8 !important;
+    font-size: 14px !important;
+    opacity: 0.9 !important;
 }
 
-.form-group textarea{
-    resize:none !important;
-    min-height:160px !important;
+.form-group textarea {
+    resize: none !important;
+    min-height: 160px !important;
 }
 
+.contact-section .contact-form-card input:focus,
+.contact-section .contact-form-card textarea:focus,
+.contact-section .form-group input:focus,
+.contact-section .form-group textarea:focus,
+.contact-form-card input:focus,
+.contact-form-card textarea:focus,
 .form-group input:focus,
-.form-group textarea:focus{
-    border-color:#7c3aed !important;
-    background-color:#ffffff !important;
-    background:#ffffff !important;
-    box-shadow:0 0 0 4px rgba(124, 58, 237, 0.15) !important;
+.form-group textarea:focus {
+    border-color: #c084fc !important;
+    background-color: #0f1433 !important;
+    background: #0f1433 !important;
+    box-shadow: 0 0 15px rgba(168, 85, 247, 0.4) !important;
 }
 
 .form-group input:-webkit-autofill,
@@ -329,8 +364,8 @@
 .form-group textarea:-webkit-autofill,
 .form-group textarea:-webkit-autofill:hover,
 .form-group textarea:-webkit-autofill:focus {
-    -webkit-text-fill-color: #0f172a !important;
-    -webkit-box-shadow: 0 0 0px 1000px #f8fafc inset !important;
+    -webkit-text-fill-color: #ffffff !important;
+    -webkit-box-shadow: 0 0 0px 1000px #1a224a inset !important;
     transition: background-color 5000s ease-in-out 0s !important;
 }
 
@@ -583,15 +618,15 @@ margin-bottom:10px;
 }
 
 .captcha-group {
-  background: #f8fafc;
-  border: 1px dashed #cbd5e1;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px dashed rgba(255, 255, 255, 0.2);
   padding: 16px;
   border-radius: 14px;
 }
 
 .captcha-label {
   font-size: 14px !important;
-  color: #334155 !important;
+  color: #ffffff !important;
   margin-bottom: 8px !important;
 }
 
@@ -602,12 +637,22 @@ margin-bottom:10px;
 
 .captcha-input-row input {
   max-width: 140px !important;
+  background: #12183B !important;
+  color: #ffffff !important;
+  border: 1.5px solid rgba(168, 85, 247, 0.3) !important;
+  border-radius: 10px !important;
+  padding: 10px 14px !important;
+}
+
+.captcha-input-row input::placeholder {
+  color: #94a3b8 !important;
+  opacity: 0.85 !important;
 }
 
 .btn-refresh-captcha {
-  background: #e2e8f0;
-  color: #475569;
-  border: none;
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
   padding: 8px 14px;
   border-radius: 10px;
   font-size: 13px;
@@ -617,7 +662,8 @@ margin-bottom:10px;
 }
 
 .btn-refresh-captcha:hover {
-  background: #cbd5e1;
+  background: rgba(168, 85, 247, 0.25);
+  border-color: #a855f7;
 }
 
 /* ==========================================
@@ -632,40 +678,41 @@ margin-bottom:10px;
   width: 65px;
   height: 65px;
   border-radius: 50%;
-  background: #dcfce7;
-  color: #16a34a;
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
   font-size: 32px;
   font-weight: 800;
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0 auto 20px auto;
-  border: 2px solid #86efac;
+  border: 2px solid rgba(16, 185, 129, 0.35);
 }
 
 .ticket-success-card h2 {
   font-size: 24px;
   font-weight: 800;
-  color: #0f172a;
+  color: #ffffff;
   margin-bottom: 10px;
 }
 
 .ticket-number-display {
   font-size: 18px;
-  color: #7c3aed;
+  color: #c084fc;
   margin-bottom: 20px;
 }
 
 .ticket-number-display strong {
-  background: #f3e8ff;
+  background: rgba(124, 58, 237, 0.2);
   padding: 4px 14px;
   border-radius: 20px;
-  border: 1px solid #d8b4fe;
+  border: 1px solid rgba(168, 85, 247, 0.35);
+  color: #ffffff;
 }
 
 .success-details-box {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 14px;
   padding: 18px;
   text-align: left;
@@ -675,11 +722,11 @@ margin-bottom:10px;
 
 .success-details-box p {
   margin: 6px 0;
-  color: #334155;
+  color: #cbd5e1;
 }
 
 .email-sent-note {
-  color: #64748b;
+  color: #94a3b8;
   font-size: 14px;
   margin-bottom: 24px;
 }
@@ -693,30 +740,30 @@ margin-bottom:10px;
   font-size: 15px;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 8px 20px rgba(124, 58, 237, 0.25);
+  box-shadow: 0 8px 20px rgba(124, 58, 237, 0.35);
 }
 
 /* ==========================================
    TICKET TRACKER WIDGET
 ========================================== */
 .ticket-tracker-card {
-  background: #ffffff;
-  border: 1px solid #ece8ff;
+  background: #1a224a;
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 22px;
   padding: 24px;
-  box-shadow: 0 15px 35px rgba(124, 58, 237, 0.08);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
 }
 
 .ticket-tracker-card h4 {
   font-size: 18px;
   font-weight: 700;
-  color: #111827;
+  color: #ffffff;
   margin: 0 0 4px 0;
 }
 
 .ticket-tracker-card p {
   font-size: 13px;
-  color: #6b7280;
+  color: #cbd5e1;
   margin: 0 0 16px 0;
 }
 
@@ -728,14 +775,16 @@ margin-bottom:10px;
 .ticket-lookup-form input {
   flex: 1;
   padding: 10px 14px;
-  border: 1.5px solid #cbd5e1;
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
   border-radius: 10px;
   font-size: 14px;
   outline: none;
+  background: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
 }
 
 .ticket-lookup-form button {
-  background: #7c3aed;
+  background: linear-gradient(135deg, #7c3aed, #9333ea);
   color: #ffffff;
   border: none;
   padding: 10px 18px;
@@ -743,6 +792,7 @@ margin-bottom:10px;
   font-weight: 700;
   font-size: 13px;
   cursor: pointer;
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
 }
 
 .tracker-error {
@@ -754,8 +804,8 @@ margin-bottom:10px;
 
 .tracker-result-box {
   margin-top: 14px;
-  background: #faf5ff;
-  border: 1px solid #e9d5ff;
+  background: rgba(124, 58, 237, 0.12);
+  border: 1px solid rgba(168, 85, 247, 0.3);
   border-radius: 12px;
   padding: 14px;
 }
@@ -766,7 +816,7 @@ margin-bottom:10px;
   align-items: center;
   font-weight: 700;
   font-size: 13px;
-  color: #1f2937;
+  color: #ffffff;
   margin-bottom: 6px;
 }
 
@@ -778,24 +828,73 @@ margin-bottom:10px;
 }
 
 .status-pill.open {
-  background: #dbeafe;
-  color: #1d4ed8;
+  background: rgba(59, 130, 246, 0.2);
+  color: #60a5fa;
 }
 
 .status-pill.in_progress {
-  background: #fef3c7;
-  color: #b45309;
+  background: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
 }
 
 .status-pill.resolved {
-  background: #dcfce7;
-  color: #15803d;
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
 }
 
 .tracker-subject {
   font-size: 13px;
-  color: #4b5563;
+  color: #cbd5e1;
   margin: 0 0 6px 0;
+}
+
+.faq-item {
+  background: #1a224a;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 20px 24px;
+  margin-bottom: 16px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+.faq-item:hover {
+  border-color: #a855f7;
+  box-shadow: 0 10px 30px rgba(124, 58, 237, 0.2);
+}
+
+.faq-item.open {
+  border-color: #a855f7;
+  background: #1e2756;
+}
+
+.faq-question-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.faq-question-bar h4 {
+  font-size: 17px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+}
+
+.faq-toggle-icon {
+  font-size: 22px;
+  font-weight: 700;
+  color: #c084fc;
+}
+
+.faq-answer-content {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  color: #cbd5e1;
+  font-size: 15px;
+  line-height: 1.7;
 }
 
 .tracker-time {
@@ -820,18 +919,22 @@ margin-bottom:10px;
 }
 
 .faq-header h3 {
-  font-size: 2rem;
-  font-weight: 700;
-  color: #111827;
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #ffffff !important;
   margin-bottom: 10px;
+  letter-spacing: -0.5px;
 }
 
 .faq-header h3 span {
-  color: #7c3aed;
+  background: linear-gradient(135deg, #a855f7, #c084fc);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 20px rgba(168, 85, 247, 0.3);
 }
 
 .faq-header p {
-  color: #6b7280;
+  color: #cbd5e1 !important;
   font-size: 16px;
 }
 
@@ -841,24 +944,28 @@ margin-bottom:10px;
   gap: 16px;
 }
 
+.contact-section .faq-item,
 .faq-item {
-  background: #ffffff;
-  border: 1px solid #ece8ff;
+  background: #1a224a !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
   border-radius: 18px;
   padding: 20px 24px;
   cursor: pointer;
   transition: all 0.25s ease;
-  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.04);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25) !important;
 }
 
+.contact-section .faq-item:hover,
 .faq-item:hover {
-  border-color: #c084fc;
-  box-shadow: 0 10px 30px rgba(124, 58, 237, 0.1);
+  border-color: #a855f7 !important;
+  box-shadow: 0 10px 30px rgba(168, 85, 247, 0.25) !important;
+  transform: translateY(-2px);
 }
 
+.contact-section .faq-item.open,
 .faq-item.open {
-  border-color: #7c3aed;
-  background: #fdfcff;
+  border-color: #a855f7 !important;
+  background: #1e2756 !important;
 }
 
 .faq-question-bar {
@@ -867,24 +974,26 @@ margin-bottom:10px;
   align-items: center;
 }
 
+.contact-section .faq-question-bar h4,
 .faq-question-bar h4 {
   font-size: 17px;
   font-weight: 700;
-  color: #1f2937;
+  color: #ffffff !important;
   margin: 0;
 }
 
 .faq-toggle-icon {
   font-size: 22px;
   font-weight: 700;
-  color: #7c3aed;
+  color: #c084fc !important;
 }
 
+.contact-section .faq-answer-content,
 .faq-answer-content {
   margin-top: 14px;
   padding-top: 14px;
-  border-top: 1px solid #f3e8ff;
-  color: #4b5563;
+  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: #cbd5e1 !important;
   font-size: 15px;
   line-height: 1.7;
 }

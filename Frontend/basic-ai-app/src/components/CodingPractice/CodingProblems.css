@@ -225,21 +225,37 @@
 
 /* ACTION BUTTON */
 .problem-solve-cta {
-  padding: 8px 16px;
+  padding: 9px 20px;
   background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
-  color: white;
+  color: #ffffff;
   border: none;
-  border-radius: 8px;
-  font-size: 13px;
+  border-radius: 10px;
+  font-size: 13.5px;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 4px 10px rgba(124, 58, 237, 0.15);
-  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.2);
+  transition: all 0.25s ease;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 75px;
 }
 
 .problem-solve-cta:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 14px rgba(124, 58, 237, 0.25);
+  background: linear-gradient(135deg, #6d28d9 0%, #5b21b6 100%);
+  box-shadow: 0 6px 18px rgba(124, 58, 237, 0.35);
+}
+
+.problem-solve-cta.solved-cta-btn {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25) !important;
+}
+
+.problem-solve-cta.solved-cta-btn:hover {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+  box-shadow: 0 6px 18px rgba(16, 185, 129, 0.35) !important;
 }
 
 .empty-results-cell {
@@ -288,4 +304,54 @@
   border-color: #c084fc;
   color: #7c3aed;
   transform: translateY(-1px);
+}
+
+/* LEARN MORE / SHOW LESS BUTTON HOVER EFFECTS */
+.load-more-questions-btn {
+  padding: 12px 28px;
+  border-radius: 14px;
+  border: 1px solid rgba(168, 85, 247, 0.4);
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.15) 0%, rgba(168, 85, 247, 0.25) 100%);
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.load-more-questions-btn:hover {
+  transform: translateY(-3px) scale(1.02);
+  background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%) !important;
+  border-color: #c084fc !important;
+  box-shadow: 0 10px 28px rgba(124, 58, 237, 0.45) !important;
+}
+
+.load-more-questions-btn:active {
+  transform: translateY(-1px) scale(0.99);
+}
+
+.show-less-questions-btn {
+  padding: 10px 24px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.08);
+  color: #cbd5e1;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.show-less-questions-btn:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.16) !important;
+  color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
 }
