@@ -7,6 +7,7 @@ import InterviewSetup from "../components/MockInterviews/InterviewSetup";
 import AIInterviewRoom from "../components/MockInterviews/AIInterviewRoom";
 import InterviewHistory from "../components/MockInterviews/InterviewHistory";
 import Settings from "../components/MockInterviews/Settings";
+import "../components/Sidebar.css";
 import "./DashboardPage.css";
 
 const DashboardPage = () => {
@@ -90,16 +91,25 @@ const DashboardPage = () => {
       <main className="dashboard-main">
         <header className="dashboard-topbar">
           <div className="topbar-left">
-            <h1 className="topbar-title">{pageTitles[section] || "Dashboard"}</h1>
-            <p className="topbar-subtitle">
-              {section === "dashboard" && `Welcome back, ${user?.full_name?.split(" ")[0] || "there"}! 👋`}
-              {section === "new-interview" && "Configure and start a new AI-powered mock interview session"}
-              {section === "history" && "Review your past interview sessions and performance scores"}
-              {section === "settings" && "Manage your account preferences and integrations"}
-            </p>
+            {section !== "dashboard" && (
+              <>
+                <h1 className="topbar-title">{pageTitles[section]}</h1>
+                <p className="topbar-subtitle">
+                  {section === "new-interview" && "Configure and start a new AI-powered mock interview session"}
+                  {section === "history" && "Review your past interview sessions and performance scores"}
+                  {section === "settings" && "Manage your account preferences and integrations"}
+                </p>
+              </>
+            )}
           </div>
           <div className="topbar-right">
-            <div className="topbar-avatar">{user?.full_name ? user.full_name.charAt(0).toUpperCase() : "U"}</div>
+            <div 
+              className="topbar-user-badge" 
+              onClick={() => navigate("/profile")}
+              title={`My Profile & Security (${user?.full_name || "User"})`}
+            >
+              <div className="topbar-avatar">{user?.full_name ? user.full_name.charAt(0).toUpperCase() : "U"}</div>
+            </div>
           </div>
         </header>
 
@@ -115,19 +125,23 @@ const SidebarWithState = ({ section, setSection }) => {
   const navigate = useNavigate();
   const { logout } = useAuth();
 
-  const handleNav = (path) => {
-    if (path.includes("resume-builder")) {
-      navigate("/resume-builder");
+  const handleNav = (item) => {
+    if (typeof item === "string") {
+      if (item.includes("settings")) setSection("settings");
+      else if (item.includes("history")) setSection("history");
+      else if (item.includes("new-interview")) setSection("new-interview");
+      else navigate(item);
       return;
     }
-    if (path.includes("ats-score") || path.includes("job-matcher")) {
-      navigate("/ats-score");
-      return;
+    if (item.path) {
+      if (item.path.startsWith("/dashboard")) {
+        if (item.path.includes("history")) setSection("history");
+        else if (item.path.includes("new-interview")) setSection("new-interview");
+        else setSection("dashboard");
+      } else {
+        navigate(item.path);
+      }
     }
-    if (path.includes("new-interview")) setSection("new-interview");
-    else if (path.includes("history")) setSection("history");
-    else if (path.includes("settings")) setSection("settings");
-    else setSection("dashboard");
   };
 
   return (
@@ -152,62 +166,68 @@ const SidebarInner = ({ onNav, section, onLogout }) => {
 
   const NAV = [
     {
-      id: "dashboard",
-      label: "Dashboard",
-      icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5" /><rect x="14" y="3" width="7" height="7" rx="1.5" /><rect x="3" y="14" width="7" height="7" rx="1.5" /><rect x="14" y="14" width="7" height="7" rx="1.5" /></svg>,
-    },
-    {
-      id: "new-interview",
-      label: "New Interview",
-      icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" /><line x1="8" y1="12" x2="16" y2="12" /></svg>,
-    },
-    {
-      id: "job-matcher",
-      label: "AI Job Matcher",
-      icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>,
-    },
-    {
       id: "resume-builder",
       label: "AI Resume Builder",
+      path: "/resume-builder",
       icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>,
+    },
+    {
+      id: "coding-practice",
+      label: "Coding Practice",
+      path: "/coding-practice",
+      icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 18 22 12 16 6" /><polyline points="8 6 2 12 8 18" /></svg>,
+    },
+    {
+      id: "company-preparation",
+      label: "Company Preparation",
+      path: "/company-preparation",
+      icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-3"/><path d="M9 9h1"/><path d="M9 13h1"/><path d="M9 17h1"/></svg>,
+    },
+    {
+      id: "mock-interview",
+      label: "AI Interview Preparations",
+      path: "/mock-interview",
+      icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>,
+    },
+    {
+      id: "ats-score",
+      label: "ATS Score",
+      path: "/ats-score",
+      icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>,
     },
     {
       id: "history",
       label: "Interview History",
+      path: "/dashboard/history",
       icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="12 8 12 12 14 14" /><path d="M3.05 11a9 9 0 1 0 .5-4" /><polyline points="3 3 3 8 8 8" /></svg>,
     },
   ];
 
   return (
     <aside className="sidebar">
-      <div className="sidebar-logo">
-        <img
-          src={logo}
-          alt="PrepNova AI"
-          className="sidebar-logo-img"
-        />
+      <div className="sidebar-header-title-block" style={{ padding: "20px 20px 14px" }}>
+        <h2 style={{
+          fontSize: "26px",
+          fontWeight: "700",
+          background: "linear-gradient(135deg, #fbbf24 0%, #f43f5e 100%)",
+          WebkitBackgroundClip: "text",
+          WebkitTextFillColor: "transparent",
+          margin: "0 0 4px 0",
+          letterSpacing: "-0.3px",
+          lineHeight: "1.2"
+        }}>Dashboard</h2>
+        <p style={{ fontSize: "13.5px", color: "#a5b4fc", margin: 0, fontWeight: "500", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+          Welcome back, {user?.full_name?.split(" ")[0] || "there"}! 👋
+        </p>
       </div>
-
-      {user && (
-        <div className="sidebar-user-card">
-          <div className="sidebar-user-avatar">{getInitials(user.full_name)}</div>
-          <div className="sidebar-user-info">
-            <span className="sidebar-user-name">{user.full_name || "User"}</span>
-            <span className="sidebar-user-email">{user.email}</span>
-          </div>
-        </div>
-      )}
-
-      <div className="sidebar-divider" />
-
+      <div className="sidebar-divider" style={{ margin: "10px 20px" }} />
       <nav className="sidebar-nav">
-        <p className="sidebar-section-label">Main Menu</p>
         {NAV.map((item) => (
           <button
             key={item.id}
             id={`sidebar-${item.id}`}
             className={`sidebar-nav-btn${section === item.id ? " active" : ""}`}
-            onClick={() => onNav(item.id === "job-matcher" ? "/ats-score" : item.id === "resume-builder" ? "/resume-builder" : `/dashboard/${item.id}`)}
+            onClick={() => onNav(item)}
           >
             <span className="sidebar-nav-icon">{item.icon}</span>
             <span className="sidebar-nav-label">{item.label}</span>

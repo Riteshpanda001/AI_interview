@@ -268,24 +268,24 @@ const Navbar = () => {
                   className="profile-dropdown-item"
                   onClick={() => {
                     setProfileOpen(false);
-                    navigate("/dashboard");
-                  }}
-                  role="menuitem"
-                >
-                  <span className="profile-dropdown-item-icon">📊</span>
-                  <span>Dashboard</span>
-                </button>
-
-                <button
-                  className="profile-dropdown-item"
-                  onClick={() => {
-                    setProfileOpen(false);
                     navigate("/profile");
                   }}
                   role="menuitem"
                 >
                   <span className="profile-dropdown-item-icon">👤</span>
                   <span>My Profile & Security</span>
+                </button>
+
+                <button
+                  className="profile-dropdown-item"
+                  onClick={() => {
+                    setProfileOpen(false);
+                    navigate("/dashboard");
+                  }}
+                  role="menuitem"
+                >
+                  <span className="profile-dropdown-item-icon">📊</span>
+                  <span>Dashboard</span>
                 </button>
 
                 {/* Logout */}

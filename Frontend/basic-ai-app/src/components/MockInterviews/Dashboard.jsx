@@ -83,17 +83,6 @@ const Dashboard = ({ onPracticeNow }) => {
 
   return (
     <div className="dashboard">
-      {/* Welcome Card */}
-      <div className="welcomeCard">
-        <h1>Welcome back, {user?.full_name || "PrepNova Candidate"}! 👋</h1>
-        <p>
-          Your interview readiness score is recalculated in real time based on ATS match, resume quality, coding correctness, and AI mock evaluations.
-        </p>
-        <button className="practiceBtn" onClick={() => requireAuth(onPracticeNow, "/mock-interview")}>
-          🚀 Practice Now
-        </button>
-      </div>
-
       {/* Main Interview Readiness Card */}
       <div style={{
         background: "#ffffff",

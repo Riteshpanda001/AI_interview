@@ -6,27 +6,65 @@ import "./Sidebar.css";
 
 const NAV_ITEMS = [
   {
-    id: "dashboard",
-    label: "Dashboard",
-    path: "/dashboard",
+    id: "resume-builder",
+    label: "AI Resume Builder",
+    path: "/resume-builder",
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="3" y="3" width="7" height="7" rx="1.5" />
-        <rect x="14" y="3" width="7" height="7" rx="1.5" />
-        <rect x="3" y="14" width="7" height="7" rx="1.5" />
-        <rect x="14" y="14" width="7" height="7" rx="1.5" />
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+        <polyline points="14 2 14 8 20 8"/>
+        <line x1="16" y1="13" x2="8" y2="13"/>
+        <line x1="16" y1="17" x2="8" y2="17"/>
+        <polyline points="10 9 9 9 8 9"/>
       </svg>
     ),
   },
   {
-    id: "new-interview",
-    label: "New Interview",
-    path: "/dashboard/new-interview",
+    id: "coding-practice",
+    label: "Coding Practice",
+    path: "/coding-practice",
     icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="10" />
-        <line x1="12" y1="8" x2="12" y2="16" />
-        <line x1="8" y1="12" x2="16" y2="12" />
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="16 18 22 12 16 6" />
+        <polyline points="8 6 2 12 8 18" />
+      </svg>
+    ),
+  },
+  {
+    id: "company-preparation",
+    label: "Company Preparation",
+    path: "/company-preparation",
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M3 21h18"/>
+        <path d="M5 21V7l8-4v18"/>
+        <path d="M19 21V11l-6-3"/>
+        <path d="M9 9h1"/>
+        <path d="M9 13h1"/>
+        <path d="M9 17h1"/>
+      </svg>
+    ),
+  },
+  {
+    id: "mock-interview",
+    label: "AI Interview Preparations",
+    path: "/mock-interview",
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/>
+        <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+        <line x1="12" y1="19" x2="12" y2="22"/>
+      </svg>
+    ),
+  },
+  {
+    id: "ats-score",
+    label: "ATS Score",
+    path: "/ats-score",
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="m9 12 2 2 4-4"/>
       </svg>
     ),
   },
@@ -66,28 +104,24 @@ const Sidebar = () => {
 
   return (
     <aside className="sidebar">
-      {/* ── Logo ── */}
-      <div className="sidebar-logo" onClick={() => navigate("/")}>
-        <img src={logo} alt="PrepNova AI" className="sidebar-logo-img" />
+      <div className="sidebar-header-title-block" style={{ padding: "20px 20px 14px" }}>
+        <h2 style={{
+          fontSize: "26px",
+          fontWeight: "700",
+          background: "linear-gradient(135deg, #fbbf24 0%, #f43f5e 100%)",
+          WebkitBackgroundClip: "text",
+          WebkitTextFillColor: "transparent",
+          margin: "0 0 4px 0",
+          letterSpacing: "-0.3px",
+          lineHeight: "1.2"
+        }}>Dashboard</h2>
+        <p style={{ fontSize: "13.5px", color: "#a5b4fc", margin: 0, fontWeight: "500", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+          Welcome back, {user?.full_name?.split(" ")[0] || "there"}! 👋
+        </p>
       </div>
-
-      {/* ── User mini-profile ── */}
-      {user && (
-        <div className="sidebar-user-card" onClick={() => navigate("/profile")} style={{ cursor: "pointer" }}>
-          <div className="sidebar-user-avatar">{getInitials(user.full_name)}</div>
-          <div className="sidebar-user-info">
-            <span className="sidebar-user-name">{user.full_name || "User"}</span>
-            <span className="sidebar-user-email">{user.email}</span>
-          </div>
-        </div>
-      )}
-
-      {/* ── Divider ── */}
-      <div className="sidebar-divider" />
-
+      <div className="sidebar-divider" style={{ margin: "10px 20px" }} />
       {/* ── Main Nav ── */}
       <nav className="sidebar-nav">
-        <p className="sidebar-section-label">Main Menu</p>
         {NAV_ITEMS.map((item) => (
           <button
             key={item.id}
