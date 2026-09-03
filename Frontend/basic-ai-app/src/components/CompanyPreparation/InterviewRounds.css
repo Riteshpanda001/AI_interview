@@ -30,11 +30,18 @@
   margin-bottom: 12px;
 }
 
-.section-header-mini h2 {
-  font-size: 2.5rem;
-  color: #ffffff;
-  font-weight: 800;
+.section-header-mini h2.interview-rounds-title {
+  font-size: 2.5rem !important;
+  color: #ffe4e6 !important;
+  font-weight: 600 !important;
   margin-bottom: 12px;
+  letter-spacing: -0.3px;
+}
+
+.section-header-mini h2.interview-rounds-title span {
+  background: linear-gradient(135deg, #f43f5e, #8b5cf6) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
 }
 
 .section-header-mini p {
@@ -112,6 +119,19 @@
   margin: 0;
   line-height: 1.5;
 }
+
+/* ROW COLOR VARIATIONS */
+.rounds-table-row:nth-child(1) .round-name-cell strong { color: #38bdf8; }
+.rounds-table-row:nth-child(1) .round-tip-cell p { color: #38bdf8; background: rgba(56, 189, 248, 0.12); border-left-color: #38bdf8; }
+
+.rounds-table-row:nth-child(2) .round-name-cell strong { color: #c084fc; }
+.rounds-table-row:nth-child(2) .round-tip-cell p { color: #c084fc; background: rgba(192, 132, 252, 0.12); border-left-color: #c084fc; }
+
+.rounds-table-row:nth-child(3) .round-name-cell strong { color: #f43f5e; }
+.rounds-table-row:nth-child(3) .round-tip-cell p { color: #f43f5e; background: rgba(244, 63, 94, 0.12); border-left-color: #f43f5e; }
+
+.rounds-table-row:nth-child(4) .round-name-cell strong { color: #fbbf24; }
+.rounds-table-row:nth-child(4) .round-tip-cell p { color: #fbbf24; background: rgba(251, 191, 36, 0.12); border-left-color: #fbbf24; }
 
 @media (max-width: 992px) {
   .rounds-table-header {

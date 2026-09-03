@@ -64,7 +64,7 @@ const PreparationRoadmap = ({ companyName }) => {
         
         <div className="section-header-mini">
           <span className="section-mini-tag">🗓️ Prep Timeline</span>
-          <h2>4-Week Custom Roadmap</h2>
+          <h2 className="roadmap-title">4-Week <span>Custom Roadmap</span></h2>
           <p>An interactive, week-by-week blueprint customized specifically for the recruitment criteria of {companyName}.</p>
         </div>
 

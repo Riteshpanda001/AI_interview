@@ -98,6 +98,22 @@ class CodingService:
         submission_record["_id"] = str(result.inserted_id)
         submission_record["id"] = str(result.inserted_id)
         
+        try:
+            from app.services.activity_service import ActivityService
+            prob_title = problem.get("title", f"Problem #{problem_id[:6]}")
+            act_type = "CODING_SOLVED" if current_status == "accepted" else "CODING_ATTEMPTED"
+            act_title = f"💻 Solved {prob_title}" if current_status == "accepted" else f"💻 Attempted {prob_title}"
+            await ActivityService.log_activity(
+                user_id=user_id,
+                activity_type=act_type,
+                title=act_title,
+                description=f"Language: {language.upper()} | Verdict: {current_status.replace('_', ' ').title()}",
+                metadata={"problem_id": problem_id, "status": current_status, "language": language},
+                db=db
+            )
+        except Exception as ce:
+            print(f"Error logging coding activity: {ce}")
+
         return submission_record
 
     @staticmethod
@@ -114,4 +130,90 @@ class CodingService:
             doc["id"] = str(doc.get("_id", ""))
             history.append(doc)
         return history
+
+    @staticmethod
+    async def get_user_all_submissions(user_id: str, db) -> list:
+        cursor = db["coding_submissions"].find({"user_id": str(user_id)}).sort("created_at", -1)
+        subs = await cursor.to_list(length=200)
+
+        # Map problem info
+        all_problems = await CodingService.get_all_problems(db)
+        prob_map = {str(p["id"]): p for p in all_problems}
+
+        # Track attempts per problem for current user
+        attempts_map = {}
+        for s in reversed(subs):
+            pid = str(s.get("problem_id", ""))
+            attempts_map[pid] = attempts_map.get(pid, 0) + 1
+            s["attempts_count"] = attempts_map[pid]
+
+        result = []
+        for doc in subs:
+            if "_id" in doc:
+                doc["_id"] = str(doc["_id"])
+            doc["id"] = str(doc.get("_id", ""))
+            pid = str(doc.get("problem_id", ""))
+            p_info = prob_map.get(pid, {})
+            doc["problem_name"] = p_info.get("title", f"Problem #{pid[:6]}")
+            doc["difficulty"] = p_info.get("difficulty", "Medium")
+            doc["category"] = p_info.get("category", "General")
+            if "created_at" in doc and hasattr(doc["created_at"], "isoformat"):
+                doc["created_at"] = doc["created_at"].isoformat()
+            result.append(doc)
+        return result
+
+    @staticmethod
+    async def get_user_coding_statistics(user_id: str, db) -> dict:
+        subs = await CodingService.get_user_all_submissions(user_id, db)
+        total_submissions = len(subs)
+        accepted_subs = [s for s in subs if s.get("status") == "accepted"]
+        
+        unique_solved = set(s.get("problem_id") for s in accepted_subs)
+        unique_attempted = set(s.get("problem_id") for s in subs)
+
+        easy_count = sum(1 for s in accepted_subs if s.get("difficulty", "").lower() == "easy")
+        medium_count = sum(1 for s in accepted_subs if s.get("difficulty", "").lower() == "medium")
+        hard_count = sum(1 for s in accepted_subs if s.get("difficulty", "").lower() == "hard")
+
+        accuracy = int(round((len(accepted_subs) / max(1, total_submissions)) * 100)) if total_submissions > 0 else 0
+
+        # Topic Breakdown
+        topics = ["Arrays", "Strings", "Linked Lists", "Trees", "Graphs", "Dynamic Programming"]
+        topic_stats = {t: {"attempted": 0, "solved": 0} for t in topics}
+
+        for s in subs:
+            cat = s.get("category", "Arrays")
+            matched = "Arrays"
+            for t in topics:
+                if t.lower() in cat.lower():
+                    matched = t
+                    break
+            topic_stats[matched]["attempted"] += 1
+            if s.get("status") == "accepted":
+                topic_stats[matched]["solved"] += 1
+
+        topic_performance = {}
+        weakest = "Dynamic Programming"
+        min_acc = 100.0
+
+        for t_name, t_data in topic_stats.items():
+            acc = round((t_data["solved"] / t_data["attempted"]) * 100) if t_data["attempted"] > 0 else 0
+            topic_performance[t_name] = acc
+            if t_data["attempted"] > 0 and acc < min_acc:
+                min_acc = acc
+                weakest = t_name
+
+        return {
+            "total_problems_bank": 120,
+            "problems_solved": len(unique_solved),
+            "problems_attempted": len(unique_attempted),
+            "total_submissions": total_submissions,
+            "accuracy": accuracy,
+            "easy_solved": easy_count,
+            "medium_solved": medium_count,
+            "hard_solved": hard_count,
+            "topic_performance": topic_performance,
+            "weakest_topic": weakest
+        }
+
 

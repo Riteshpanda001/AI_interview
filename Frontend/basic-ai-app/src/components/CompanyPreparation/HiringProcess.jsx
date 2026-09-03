@@ -66,7 +66,7 @@ const HiringProcess = ({ companyName }) => {
         
         <div className="section-header-mini">
           <span className="section-mini-tag">⏳ Hiring Funnel</span>
-          <h2>The hiring process at {companyName}</h2>
+          <h2 className="hiring-process-title">The hiring process at <span>{companyName}</span></h2>
           <p>Navigate the official pipeline steps from initial resume screening to the final compensation discussions.</p>
         </div>
 

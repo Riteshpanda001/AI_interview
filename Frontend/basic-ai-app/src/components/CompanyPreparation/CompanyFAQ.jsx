@@ -48,7 +48,7 @@ const CompanyFAQ = ({ companyName }) => {
         
         <div className="section-header-mini">
           <span className="section-mini-tag">💬 FAQ Help</span>
-          <h2>Hiring FAQs</h2>
+          <h2 className="faq-title">Hiring <span>FAQs</span></h2>
           <p>Read commonly asked questions about recruitment parameters, eligibility criteria, and screen expectations at {companyName}.</p>
         </div>
 

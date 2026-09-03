@@ -30,11 +30,18 @@
   margin-bottom: 12px;
 }
 
-.section-header-mini h2 {
-  font-size: 2.5rem;
-  color: #ffffff;
-  font-weight: 800;
+.section-header-mini h2.hiring-process-title {
+  font-size: 2.5rem !important;
+  color: #fef3c7 !important;
+  font-weight: 600 !important;
   margin-bottom: 12px;
+  letter-spacing: -0.3px;
+}
+
+.section-header-mini h2.hiring-process-title span {
+  background: linear-gradient(135deg, #f59e0b, #ef4444) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
 }
 
 .section-header-mini p {
@@ -126,6 +133,27 @@
   border-color: #a855f7;
   box-shadow: 0 15px 35px rgba(168, 85, 247, 0.2);
 }
+
+/* STEP NODE COLOR VARIATIONS */
+.process-step-node:nth-child(1) .step-counter-bubble { border-color: #c084fc; }
+.process-step-node:nth-child(1) .step-counter-bubble span { color: #c084fc; }
+.process-step-node:nth-child(1) .step-content-box:hover { border-color: #c084fc; box-shadow: 0 15px 35px rgba(192, 132, 252, 0.25); }
+
+.process-step-node:nth-child(2) .step-counter-bubble { border-color: #38bdf8; }
+.process-step-node:nth-child(2) .step-counter-bubble span { color: #38bdf8; }
+.process-step-node:nth-child(2) .step-content-box:hover { border-color: #38bdf8; box-shadow: 0 15px 35px rgba(56, 189, 248, 0.25); }
+
+.process-step-node:nth-child(3) .step-counter-bubble { border-color: #34d399; }
+.process-step-node:nth-child(3) .step-counter-bubble span { color: #34d399; }
+.process-step-node:nth-child(3) .step-content-box:hover { border-color: #34d399; box-shadow: 0 15px 35px rgba(52, 211, 153, 0.25); }
+
+.process-step-node:nth-child(4) .step-counter-bubble { border-color: #fbbf24; }
+.process-step-node:nth-child(4) .step-counter-bubble span { color: #fbbf24; }
+.process-step-node:nth-child(4) .step-content-box:hover { border-color: #fbbf24; box-shadow: 0 15px 35px rgba(251, 191, 36, 0.25); }
+
+.process-step-node:nth-child(5) .step-counter-bubble { border-color: #f43f5e; }
+.process-step-node:nth-child(5) .step-counter-bubble span { color: #f43f5e; }
+.process-step-node:nth-child(5) .step-content-box:hover { border-color: #f43f5e; box-shadow: 0 15px 35px rgba(244, 63, 94, 0.25); }
 
 .step-content-box h4 {
   font-size: 1.2rem;

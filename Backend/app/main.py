@@ -12,7 +12,7 @@ from app.api import (
     auth_routes, user_routes, resume_routes, ats_routes,
     interview_routes, coding_routes, company_routes, pricing_routes,
     payment_routes, contact_routes, dashboard_routes, history_routes,
-    settings_routes, ws_routes, admin_routes
+    settings_routes, ws_routes, admin_routes, activity_routes, goals_routes
 )
 
 async def seed_admin_user():
@@ -160,6 +160,8 @@ app.include_router(dashboard_routes.router, prefix="/api/dashboard", tags=["Dash
 app.include_router(history_routes.router, prefix="/api/history", tags=["History"])
 app.include_router(settings_routes.router, prefix="/api/settings", tags=["Settings"])
 app.include_router(admin_routes.router, prefix="/api/admin", tags=["Admin Dashboard"])
+app.include_router(activity_routes.router, prefix="/api/activity", tags=["Activity History"])
+app.include_router(goals_routes.router, prefix="/api/goals", tags=["Goals"])
 
 
 @app.get("/")

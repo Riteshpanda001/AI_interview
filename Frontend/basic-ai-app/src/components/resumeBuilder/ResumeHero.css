@@ -36,25 +36,17 @@
 ========================================== */
 
 .resume-badge{
-
     display:inline-block;
-
-    background:#000000;
-    border:1px solid rgba(168, 85, 247, 0.4);
-
-    color:#c084fc !important;
-
-    padding:10px 22px;
-
-    border-radius:999px;
-
-    font-size:14px;
-
-    font-weight:700;
-
-    margin-bottom:30px;
-
-    box-shadow:0 10px 25px rgba(0, 0, 0, 0.4);
+    background: rgba(168, 85, 247, 0.14) !important;
+    border: 1px solid rgba(192, 132, 252, 0.35) !important;
+    color: #e0e7ff !important;
+    padding: 10px 22px;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 15px rgba(168, 85, 247, 0.15);
 }
 
 .resume-hero-left h2{

@@ -84,7 +84,7 @@ const ResumeTemplates = ({ selectedTemplate, setSelectedTemplate }) => {
     <section id="resume-templates-section" className="templates-section">
       <div className="section-header">
         <span className="templates-badge">🎨 CHOOSE YOUR FORMAT</span>
-        <h2 className="section-title">
+        <h2 className="templates-section-title">
           Professional <span>Resume Templates</span>
         </h2>
         <p className="section-subtitle">

@@ -39,3 +39,20 @@ async def get_problem_submissions(
     user_id = str(current_user["_id"])
     return await CodingService.get_user_submission_history(user_id, problem_id, db)
 
+@router.get("/history")
+async def get_coding_history(
+    current_user = Depends(get_current_active_user),
+    db = Depends(get_db)
+):
+    user_id = str(current_user["_id"])
+    return await CodingService.get_user_all_submissions(user_id, db)
+
+@router.get("/statistics")
+async def get_coding_statistics(
+    current_user = Depends(get_current_active_user),
+    db = Depends(get_db)
+):
+    user_id = str(current_user["_id"])
+    return await CodingService.get_user_coding_statistics(user_id, db)
+
+

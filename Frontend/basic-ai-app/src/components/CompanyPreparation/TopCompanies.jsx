@@ -68,7 +68,7 @@ const TopCompanies = ({ selectedCompany, onSelectCompany }) => {
       <div className="top-companies-container">
         <div className="section-header-mini">
           <span className="section-mini-tag">🏢 Target Selection</span>
-          <h2>Select Target <span>Company</span></h2>
+          <h2 className="top-companies-title">Select Target <span>Company</span></h2>
           <p>Choose from top product & service companies to unlock customized multi-step hiring tracks and question banks.</p>
         </div>
 

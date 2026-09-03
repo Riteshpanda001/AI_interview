@@ -122,8 +122,11 @@ def test_ats_history_tracking():
         from app.database import MockDatabase
         db = MockDatabase()
         
+        # Clear any past test records for user_id
+        user_id = "test-user-ats-history-99"
+        await db["ats_analyses"].delete_many({"user_id": user_id})
+
         # Insert multiple fake analyses for test user
-        user_id = "test-user-123"
         await ATSService.analyze_ats_score(
             user_id=user_id,
             resume_id="res-1",

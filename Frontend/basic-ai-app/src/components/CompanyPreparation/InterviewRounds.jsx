@@ -49,7 +49,7 @@ const InterviewRounds = ({ companyName }) => {
         
         <div className="section-header-mini">
           <span className="section-mini-tag">🛡️ Round Guide</span>
-          <h2>Targeted Round Strategy</h2>
+          <h2 className="interview-rounds-title">Targeted <span>Round Strategy</span></h2>
           <p>Read the structured round patterns, specific technical focuses, and optimization tips designed to beat the panel.</p>
         </div>
 

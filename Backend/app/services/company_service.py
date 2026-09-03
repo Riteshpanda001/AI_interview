@@ -133,6 +133,45 @@ class CompanyService:
             "progress_percentage": min(100, pct)
         }
 
+    @staticmethod
+    async def get_user_company_history(user_id: str, db) -> list:
+        cursor = db["user_company_progress"].find({"user_id": str(user_id)}).sort("updated_at", -1)
+        progress_docs = await cursor.to_list(length=100)
+
+        all_companies = await CompanyService.get_all_companies(db)
+        comp_map = {c.get("slug", "").lower(): c for c in all_companies}
+
+        history = []
+        for doc in progress_docs:
+            slug = doc.get("company_slug", "").lower()
+            completed_qs = doc.get("completed_question_ids", [])
+            comp_info = comp_map.get(slug, {})
+            
+            created_at = doc.get("updated_at") or doc.get("created_at")
+            updated_str = created_at.isoformat() if hasattr(created_at, "isoformat") else str(created_at)
+
+            all_qs = await CompanyService.get_company_questions(slug, "all", db)
+            total = len(all_qs) if all_qs else 10
+            pct = int((len(completed_qs) / max(1, total)) * 100)
+
+            history.append({
+                "id": str(doc.get("_id", "")),
+                "company": comp_info.get("name", slug.title()),
+                "slug": slug,
+                "started_date": updated_str,
+                "progress_percentage": min(100, pct),
+                "questions_completed": len(completed_qs),
+                "last_activity": updated_str
+            })
+        return history
+
+    @staticmethod
+    async def reset_company_progress(user_id: str, slug: str, db) -> dict:
+        slug_clean = slug.lower().strip()
+        await db["user_company_progress"].delete_one({"user_id": str(user_id), "company_slug": slug_clean})
+        return {"message": f"Successfully reset preparation progress for {slug_clean.title()}", "company_slug": slug_clean}
+
+
 
     @staticmethod
     async def toggle_question_completion(user_id: str, slug: str, question_id: str, db) -> dict:
@@ -156,6 +195,19 @@ class CompanyService:
             await db["user_company_progress"].update_one({"_id": doc["_id"]}, {"$set": update_doc})
         else:
             await db["user_company_progress"].insert_one(update_doc)
+
+        try:
+            from app.services.activity_service import ActivityService
+            await ActivityService.log_activity(
+                user_id=user_id,
+                activity_type="COMPANY_PROGRESS",
+                title=f"🏢 Updated {slug_clean.title()} Preparation",
+                description=f"Completed {len(completed_ids)} target company preparation questions.",
+                metadata={"company_slug": slug_clean, "completed_count": len(completed_ids)},
+                db=db
+            )
+        except Exception as cpe:
+            print(f"Error logging company activity: {cpe}")
 
         return await CompanyService.get_user_company_progress(user_id, slug_clean, db)
 

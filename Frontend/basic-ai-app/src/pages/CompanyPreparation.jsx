@@ -94,6 +94,12 @@ const CompanyPreparation = () => {
           selectedCompany={selectedCompany} 
           onSelectCompany={(comp) => {
             setSelectedCompany(comp);
+            setTimeout(() => {
+              const questionsVault = document.getElementById("company-questions-vault");
+              if (questionsVault) {
+                questionsVault.scrollIntoView({ behavior: "smooth", block: "start" });
+              }
+            }, 100);
           }} 
         />
 
@@ -106,7 +112,7 @@ const CompanyPreparation = () => {
         </div>
 
         {/* DSA Questions Section */}
-        <div style={{ maxWidth: "1200px", margin: "2rem auto 3rem auto", padding: "0 1rem" }}>
+        <div id="company-questions-vault" style={{ maxWidth: "1200px", margin: "2rem auto 3rem auto", padding: "0 1rem" }}>
           <CompanyQuestions companyName={selectedCompany} />
         </div>
 
@@ -127,5 +133,7 @@ const CompanyPreparation = () => {
 };
 
 export default CompanyPreparation;
+
+
 
 

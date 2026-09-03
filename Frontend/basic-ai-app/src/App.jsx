@@ -20,6 +20,7 @@ import Contact from "./pages/Contact";
 import Profile from "./pages/Profile";
 import AdminDashboard from "./pages/AdminDashboard";
 import PayUpiQr from "./pages/PayUpiQr";
+import ActivityHistory from "./pages/ActivityHistory";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function ScrollToTop() {
@@ -77,6 +78,14 @@ function App() {
           element={
             <ProtectedRoute>
               <DashboardPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/activity-history"
+          element={
+            <ProtectedRoute>
+              <ActivityHistory />
             </ProtectedRoute>
           }
         />

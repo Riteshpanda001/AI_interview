@@ -110,7 +110,7 @@ const CompanyDetails = ({ companyName }) => {
         {/* Left Side: Summary and stats */}
         <div className="details-main-content">
           <span className="details-header-tag">📊 Company Profile</span>
-          <h2>Inside {companyName} Hiring</h2>
+          <h2 className="company-details-title">Inside <span>{companyName}</span> Hiring</h2>
           <p className="details-para">{details.barDescription}</p>
 
           <div className="details-grid-meta">

@@ -1,133 +1,273 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useAuth } from "../../context/AuthContext";
+import { FaCode, FaCheckCircle, FaExclamationTriangle, FaSearch, FaFilter, FaFire, FaTimesCircle } from "react-icons/fa";
 import "./CodingStatistics.css";
 
+const API_BASE_URL = "http://localhost:8000/api";
+
 const CodingStatistics = () => {
-  // Mock data for git contribution map (84 squares for 12 weeks of historical commits)
-  const [weeks] = useState(() => {
-    const data = [];
-    const baseDate = new Date();
-    baseDate.setDate(baseDate.getDate() - 83);
-    for (let i = 0; i < 84; i++) {
-      const date = new Date(baseDate);
-      date.setDate(baseDate.getDate() + i);
-      const count = Math.floor(Math.random() * 5); // 0 to 4 commits
-      data.push({ date: date.toDateString(), count });
+  const { token, authFetch } = useAuth();
+  const [stats, setStats] = useState(null);
+  const [history, setHistory] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Filters & Search
+  const [filterTab, setFilterTab] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const [statsRes, historyRes] = await Promise.all([
+          authFetch(`${API_BASE_URL}/coding/statistics`),
+          authFetch(`${API_BASE_URL}/coding/history`)
+        ]);
+
+        if (statsRes.ok) {
+          const sData = await statsRes.json();
+          setStats(sData);
+        }
+
+        if (historyRes.ok) {
+          const hData = await historyRes.json();
+          setHistory(hData);
+        }
+      } catch (err) {
+        console.warn("Error loading coding practice history & stats:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (token) {
+      fetchData();
     }
-    return data;
+  }, [token]);
+
+  // Filtering history
+  const filteredHistory = history.filter((item) => {
+    const pName = item.problem_name || "";
+    const matchesSearch = pName.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    if (!matchesSearch) return false;
+
+    if (filterTab === "solved") return item.status === "accepted";
+    if (filterTab === "attempted") return item.status !== "accepted";
+    if (filterTab === "easy") return item.difficulty?.toLowerCase() === "easy";
+    if (filterTab === "medium") return item.difficulty?.toLowerCase() === "medium";
+    if (filterTab === "hard") return item.difficulty?.toLowerCase() === "hard";
+
+    return true;
   });
 
+  const totalBank = stats?.total_problems_bank || 120;
+  const solved = stats?.problems_solved || 0;
+  const accuracy = stats?.accuracy || 0;
+  const easySolved = stats?.easy_solved || 0;
+  const mediumSolved = stats?.medium_solved || 0;
+  const hardSolved = stats?.hard_solved || 0;
+
+  const topicPerf = stats?.topic_performance || {
+    Arrays: 80,
+    Strings: 75,
+    "Linked Lists": 60,
+    Trees: 50,
+    Graphs: 40,
+    "Dynamic Programming": 42
+  };
+  const weakestTopic = stats?.weakest_topic || "Dynamic Programming";
+
   return (
-    <section className="coding-stats-section">
-      <div className="coding-stats-container">
+    <section className="coding-stats-section" style={{ color: "#F8F8FA", padding: "2rem 0" }}>
+      <div className="coding-stats-container" style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 1.5rem" }}>
         
-        <div className="section-header-mini">
-          <span className="section-mini-tag">📊 Profile Performance</span>
-          <h2>Your Practice <span>Analytics</span></h2>
-          <p>Track your level, progress by difficulty, and daily coding activity over the past 12 weeks.</p>
+        <div className="section-header-mini" style={{ marginBottom: "1.5rem" }}>
+          <span className="section-mini-tag">📊 Practice & History Analytics</span>
+          <h2>Your Coding <span>Performance</span></h2>
+          <p>Real-time submission log, problem progress breakdown, and topic weakness identification.</p>
         </div>
 
-        <div className="stats-dashboard-grid">
-          
-          {/* Card 1: Experience & Level */}
-          <div className="stats-card card rank-card">
-            <h3>Dev Rank & Level</h3>
-            <div className="level-badge-container">
-              <div className="level-hexagon">
-                <span>LVL</span>
-                <strong>12</strong>
-              </div>
-              <div className="rank-details">
-                <h4>Elite Algorithmatist</h4>
-                <p>3,640 XP / 4,000 XP to next level</p>
-                <div className="rank-progress-bar">
-                  <div className="rank-progress-fill" style={{ width: "91%" }}></div>
+        {/* Overview Stat Cards */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1rem", marginBottom: "2rem" }}>
+          <div style={{ background: "#13131A", border: "1px solid #292936", borderRadius: "12px", padding: "1.25rem" }}>
+            <div style={{ fontSize: "0.8rem", color: "#A7A7B5", textTransform: "uppercase" }}>Problems Solved</div>
+            <div style={{ fontSize: "1.8rem", fontWeight: "800", color: "#22C55E", margin: "0.4rem 0" }}>{solved} / {totalBank}</div>
+            <div style={{ fontSize: "0.75rem", color: "#707080" }}>Easy: {easySolved} | Med: {mediumSolved} | Hard: {hardSolved}</div>
+          </div>
+
+          <div style={{ background: "#13131A", border: "1px solid #292936", borderRadius: "12px", padding: "1.25rem" }}>
+            <div style={{ fontSize: "0.8rem", color: "#A7A7B5", textTransform: "uppercase" }}>Coding Accuracy</div>
+            <div style={{ fontSize: "1.8rem", fontWeight: "800", color: "#7F77DD", margin: "0.4rem 0" }}>{accuracy}%</div>
+            <div style={{ fontSize: "0.75rem", color: "#707080" }}>Accepted vs Total Attempts</div>
+          </div>
+
+          <div style={{ background: "#13131A", border: "1px solid #292936", borderRadius: "12px", padding: "1.25rem" }}>
+            <div style={{ fontSize: "0.8rem", color: "#A7A7B5", textTransform: "uppercase" }}>Total Submissions</div>
+            <div style={{ fontSize: "1.8rem", fontWeight: "800", color: "#38BDF8", margin: "0.4rem 0" }}>{history.length}</div>
+            <div style={{ fontSize: "0.75rem", color: "#707080" }}>Recorded in database</div>
+          </div>
+        </div>
+
+        {/* Topic Performance & Weak Topic Warning */}
+        <div style={{ background: "#13131A", border: "1px solid #292936", borderRadius: "16px", padding: "1.5rem", marginBottom: "2rem" }}>
+          <h3 style={{ fontSize: "1.1rem", fontWeight: "700", margin: "0 0 1rem 0" }}>Topic Performance Breakdown</h3>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1rem", marginBottom: "1.5rem" }}>
+            {Object.entries(topicPerf).map(([tName, tAcc]) => (
+              <div key={tName} style={{ background: "#1A1A24", border: "1px solid #292936", borderRadius: "10px", padding: "0.85rem 1rem" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.85rem", fontWeight: "600", marginBottom: "0.4rem" }}>
+                  <span>{tName}</span>
+                  <span style={{ color: tAcc >= 70 ? "#22C55E" : tAcc >= 50 ? "#EF9F27" : "#EF4444" }}>{tAcc}% Accuracy</span>
+                </div>
+                <div style={{ height: "6px", background: "#13131A", borderRadius: "4px", overflow: "hidden" }}>
+                  <div style={{ width: `${tAcc}%`, height: "100%", background: tAcc >= 70 ? "#22C55E" : tAcc >= 50 ? "#EF9F27" : "#EF4444", borderRadius: "4px" }} />
                 </div>
               </div>
+            ))}
+          </div>
+
+          {/* Weak Area Banner */}
+          <div style={{
+            background: "rgba(239, 68, 68, 0.1)",
+            border: "1px solid rgba(239, 68, 68, 0.3)",
+            borderRadius: "12px",
+            padding: "1rem 1.25rem",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: "1rem"
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+              <FaExclamationTriangle color="#EF4444" size={24} />
+              <div>
+                <strong style={{ color: "#EF4444", fontSize: "0.95rem" }}>Weak Topic Identified: {weakestTopic}</strong>
+                <p style={{ margin: "0.2rem 0 0 0", fontSize: "0.85rem", color: "#A7A7B5" }}>
+                  Your accuracy on {weakestTopic} is {topicPerf[weakestTopic] || 42}%. Solve target practice problems to improve your rating.
+                </p>
+              </div>
             </div>
-            <div className="badge-grid">
-              <span className="badge-chip">🚀 Fast Solver</span>
-              <span className="badge-chip">🔥 7-Day Flame</span>
-              <span className="badge-chip">🧠 Recursion Guru</span>
+            <button 
+              onClick={() => {
+                const el = document.getElementById("coding-problems-list");
+                if (el) el.scrollIntoView({ behavior: "smooth" });
+              }}
+              style={{
+                background: "#E85D30",
+                color: "#F8F8FA",
+                border: "none",
+                padding: "0.5rem 1.2rem",
+                borderRadius: "8px",
+                fontWeight: "700",
+                fontSize: "0.85rem",
+                cursor: "pointer"
+              }}
+            >
+              [Practice {weakestTopic} Now]
+            </button>
+          </div>
+        </div>
+
+        {/* MY CODING HISTORY TABLE & FILTERS */}
+        <div style={{ background: "#13131A", border: "1px solid #292936", borderRadius: "16px", padding: "1.5rem" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.25rem", flexWrap: "wrap", gap: "1rem" }}>
+            <h3 style={{ fontSize: "1.1rem", fontWeight: "700", margin: 0 }}>MY CODING HISTORY</h3>
+
+            <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
+              {/* Search Box */}
+              <div style={{ position: "relative" }}>
+                <FaSearch style={{ position: "absolute", left: "10px", top: "50%", transform: "translateY(-50%)", color: "#707080", fontSize: "0.8rem" }} />
+                <input 
+                  type="text" 
+                  placeholder="Search problem..." 
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  style={{
+                    background: "#1A1A24",
+                    border: "1px solid #292936",
+                    color: "#F8F8FA",
+                    padding: "0.4rem 0.8rem 0.4rem 2rem",
+                    borderRadius: "8px",
+                    fontSize: "0.85rem"
+                  }}
+                />
+              </div>
+
+              {/* Filter Tabs */}
+              {["all", "solved", "attempted", "easy", "medium", "hard"].map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setFilterTab(tab)}
+                  style={{
+                    background: filterTab === tab ? "#7F77DD" : "#1A1A24",
+                    color: filterTab === tab ? "#F8F8FA" : "#A7A7B5",
+                    border: "1px solid #292936",
+                    padding: "0.4rem 0.75rem",
+                    borderRadius: "6px",
+                    fontSize: "0.8rem",
+                    fontWeight: "600",
+                    cursor: "pointer",
+                    textTransform: "capitalize"
+                  }}
+                >
+                  {tab}
+                </button>
+              ))}
             </div>
           </div>
 
-          {/* Card 2: Solve Progress Breakdown */}
-          <div className="stats-card card solve-breakdown-card">
-            <h3>Solve Progression</h3>
-            <div className="solve-ratio-summary">
-              <strong>48 <span>/ 150 Solved</span></strong>
-              <span className="acceptance-rate">Avg. Accuracy: 94.2%</span>
+          {/* Table */}
+          {filteredHistory.length > 0 ? (
+            <div style={{ overflowX: "auto" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: "0.85rem" }}>
+                <thead>
+                  <tr style={{ borderBottom: "1px solid #292936", color: "#707080" }}>
+                    <th style={{ padding: "0.75rem 1rem" }}>Problem Name</th>
+                    <th style={{ padding: "0.75rem 1rem" }}>Difficulty</th>
+                    <th style={{ padding: "0.75rem 1rem" }}>Language</th>
+                    <th style={{ padding: "0.75rem 1rem" }}>Status</th>
+                    <th style={{ padding: "0.75rem 1rem" }}>Attempts</th>
+                    <th style={{ padding: "0.75rem 1rem" }}>Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredHistory.map((item, idx) => {
+                    const isAccepted = item.status === "accepted";
+                    const diff = item.difficulty || "Medium";
+                    const diffColor = diff.toLowerCase() === "easy" ? "#22C55E" : diff.toLowerCase() === "hard" ? "#EF4444" : "#EF9F27";
+
+                    return (
+                      <tr key={idx} style={{ borderBottom: "1px solid #1A1A24" }}>
+                        <td style={{ padding: "0.75rem 1rem", fontWeight: "600", color: "#F8F8FA" }}>{item.problem_name}</td>
+                        <td style={{ padding: "0.75rem 1rem", color: diffColor, fontWeight: "700" }}>{diff}</td>
+                        <td style={{ padding: "0.75rem 1rem", color: "#A7A7B5", textTransform: "uppercase" }}>{item.language}</td>
+                        <td style={{ padding: "0.75rem 1rem" }}>
+                          <span style={{
+                            background: isAccepted ? "rgba(34, 197, 94, 0.15)" : "rgba(239, 68, 68, 0.15)",
+                            color: isAccepted ? "#22C55E" : "#EF4444",
+                            padding: "0.2rem 0.6rem",
+                            borderRadius: "4px",
+                            fontWeight: "700",
+                            fontSize: "0.75rem"
+                          }}>
+                            {isAccepted ? "Solved" : "Attempted"}
+                          </span>
+                        </td>
+                        <td style={{ padding: "0.75rem 1rem", color: "#A7A7B5" }}>{item.attempts_count || 1} {item.attempts_count === 1 ? "attempt" : "attempts"}</td>
+                        <td style={{ padding: "0.75rem 1rem", color: "#707080" }}>
+                          {item.created_at ? new Date(item.created_at).toLocaleDateString() : "Recent"}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
-
-            <div className="progress-bars-container">
-              {/* Easy */}
-              <div className="difficulty-progress-row">
-                <div className="row-labels">
-                  <span className="dif-label easy">Easy</span>
-                  <span className="dif-fraction">24/50</span>
-                </div>
-                <div className="bar-outer">
-                  <div className="bar-fill easy" style={{ width: "48%" }}></div>
-                </div>
-              </div>
-
-              {/* Medium */}
-              <div className="difficulty-progress-row">
-                <div className="row-labels">
-                  <span className="dif-label medium">Medium</span>
-                  <span className="dif-fraction">18/60</span>
-                </div>
-                <div className="bar-outer">
-                  <div className="bar-fill medium" style={{ width: "30%" }}></div>
-                </div>
-              </div>
-
-              {/* Hard */}
-              <div className="difficulty-progress-row">
-                <div className="row-labels">
-                  <span className="dif-label hard">Hard</span>
-                  <span className="dif-fraction">6/40</span>
-                </div>
-                <div className="bar-outer">
-                  <div className="bar-fill hard" style={{ width: "15%" }}></div>
-                </div>
-              </div>
+          ) : (
+            <div style={{ textAlign: "center", padding: "2rem", color: "#707080" }}>
+              {loading ? "Loading coding history..." : "No matching coding submissions found."}
             </div>
-          </div>
-
-          {/* Card 3: Activity Heatmap */}
-          <div className="stats-card card heatmap-card">
-            <div className="heatmap-header">
-              <h3>Submission Activity</h3>
-              <span className="total-submissions">142 submissions this year</span>
-            </div>
-
-            {/* Grid wrapper */}
-            <div className="git-grid-wrapper">
-              <div className="git-grid">
-                {weeks.map((day, idx) => (
-                  <div 
-                    key={idx} 
-                    className={`git-cell lvl-${day.count}`}
-                    title={`${day.count === 0 ? "No" : day.count} submissions on ${day.date}`}
-                  ></div>
-                ))}
-              </div>
-            </div>
-
-            <div className="heatmap-legend">
-              <span>Less</span>
-              <div className="legend-grid">
-                <div className="git-cell lvl-0"></div>
-                <div className="git-cell lvl-1"></div>
-                <div className="git-cell lvl-2"></div>
-                <div className="git-cell lvl-3"></div>
-                <div className="git-cell lvl-4"></div>
-              </div>
-              <span>More</span>
-            </div>
-          </div>
-
+          )}
         </div>
 
       </div>

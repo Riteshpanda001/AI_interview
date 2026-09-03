@@ -18,31 +18,34 @@
     margin-bottom:80px;
 }
 
-.resume-work-header span{
+.resume-work-header > span{
     display:inline-block;
     padding:10px 22px;
     border-radius:999px;
-    background:#000000;
-    border:1px solid rgba(168, 85, 247, 0.4);
-    color:#c084fc;
-    font-size:15px;
+    background: rgba(168, 85, 247, 0.14) !important;
+    border: 1px solid rgba(192, 132, 252, 0.35) !important;
+    color: #e0e7ff !important;
+    font-size:14px;
     font-weight:700;
-    letter-spacing:1px;
+    letter-spacing:0.5px;
     margin-bottom:20px;
+    box-shadow: 0 4px 15px rgba(168, 85, 247, 0.15);
 }
 
 .resume-work-header h2{
     font-size:2.5rem;
-    font-weight:700;
-    color:#ffffff !important;
+    font-weight:600 !important;
+    color:#fef3c7 !important;
+    letter-spacing: -0.3px;
     margin-bottom:20px;
     line-height:1.2;
 }
 
 .resume-work-header h2 span{
-    background: linear-gradient(135deg, #a855f7, #ec4899);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    background: linear-gradient(135deg, #f59e0b, #ef4444) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    font-weight: 600 !important;
 }
 
 .resume-work-header p{

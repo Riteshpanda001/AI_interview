@@ -39,10 +39,17 @@
   font-weight: 700;
 }
 
-.details-main-content h2 {
-  font-size: 2.5rem;
-  color: #ffffff;
-  font-weight: 800;
+.details-main-content h2.company-details-title {
+  font-size: 2.5rem !important;
+  color: #d1fae5 !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.3px;
+}
+
+.details-main-content h2.company-details-title span {
+  background: linear-gradient(135deg, #10b981, #06b6d4) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
 }
 
 .details-para {
@@ -166,6 +173,16 @@
   border-radius: 999px;
   background: linear-gradient(135deg, #7c3aed, #0284c7);
 }
+
+/* WEIGHT ROW COLOR VARIATIONS */
+.weight-row:nth-child(1) .weight-meta strong { color: #c084fc; }
+.weight-row:nth-child(1) .weight-bar-fill { background: linear-gradient(135deg, #a855f7, #c084fc); }
+
+.weight-row:nth-child(2) .weight-meta strong { color: #38bdf8; }
+.weight-row:nth-child(2) .weight-bar-fill { background: linear-gradient(135deg, #0284c7, #38bdf8); }
+
+.weight-row:nth-child(3) .weight-meta strong { color: #34d399; }
+.weight-row:nth-child(3) .weight-bar-fill { background: linear-gradient(135deg, #059669, #34d399); }
 
 @media (max-width: 992px) {
   .company-details-container {

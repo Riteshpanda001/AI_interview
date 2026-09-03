@@ -15,19 +15,19 @@ const CompanyHero = () => {
         </p>
 
         <div className="company-hero-stats">
-          <div className="hero-stat-card">
+          <div className="hero-stat-card stat-purple">
             <h3>8+</h3>
             <p>Top Tech Giants</p>
           </div>
-          <div className="hero-stat-card">
+          <div className="hero-stat-card stat-cyan">
             <h3>150+</h3>
             <p>Interview Rounds</p>
           </div>
-          <div className="hero-stat-card">
+          <div className="hero-stat-card stat-amber">
             <h3>500+</h3>
             <p>Solved Questions</p>
           </div>
-          <div className="hero-stat-card">
+          <div className="hero-stat-card stat-emerald">
             <h3>98%</h3>
             <p>Placement Rate</p>
           </div>

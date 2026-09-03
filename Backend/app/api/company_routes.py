@@ -50,6 +50,23 @@ async def get_company_questions(
 ):
     return await CompanyService.get_company_questions(slug, category, db, role=role)
 
+@router.get("/history")
+async def get_user_company_history(
+    current_user = Depends(get_current_active_user),
+    db = Depends(get_db)
+):
+    user_id = str(current_user["_id"])
+    return await CompanyService.get_user_company_history(user_id, db)
+
+@router.post("/{slug}/reset-progress")
+async def reset_user_company_progress(
+    slug: str,
+    current_user = Depends(get_current_active_user),
+    db = Depends(get_db)
+):
+    user_id = str(current_user["_id"])
+    return await CompanyService.reset_company_progress(user_id, slug, db)
+
 @router.get("/{slug}/progress")
 async def get_company_progress(
     slug: str,

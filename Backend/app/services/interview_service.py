@@ -194,6 +194,20 @@ class InterviewService:
             }
             await db["interview_results"].insert_one(result_record)
             
+            try:
+                from app.services.activity_service import ActivityService
+                role_txt = updated_session.get("role_target", "Technical Mock Interview")
+                await ActivityService.log_activity(
+                    user_id=user_id,
+                    activity_type="INTERVIEW_COMPLETED",
+                    title=f"🎤 Completed {role_txt}",
+                    description=f"Overall Rating: {avg_score}% | Verdict: {result_record['verdict']}",
+                    metadata={"session_id": session_id, "score": avg_score, "role": role_txt},
+                    db=db
+                )
+            except Exception as ie:
+                print(f"Error logging interview activity: {ie}")
+            
         # Compile response
         answers_feedback = []
         for resp in updated_session.get("responses", []):

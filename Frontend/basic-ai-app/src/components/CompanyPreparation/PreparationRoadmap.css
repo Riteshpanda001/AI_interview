@@ -30,11 +30,18 @@
   margin-bottom: 12px;
 }
 
-.section-header-mini h2 {
-  font-size: 2.5rem;
-  color: #ffffff;
-  font-weight: 800;
+.section-header-mini h2.roadmap-title {
+  font-size: 2.5rem !important;
+  color: #e0f2fe !important;
+  font-weight: 600 !important;
   margin-bottom: 12px;
+  letter-spacing: -0.3px;
+}
+
+.section-header-mini h2.roadmap-title span {
+  background: linear-gradient(135deg, #0284c7, #38bdf8) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
 }
 
 .section-header-mini p {
@@ -65,6 +72,19 @@
   border-color: #a855f7;
   box-shadow: 0 15px 35px rgba(168, 85, 247, 0.2);
 }
+
+/* WEEK CARD COLOR VARIATIONS */
+.roadmap-week-card:nth-child(1) .week-label-tag { background: linear-gradient(135deg, #a855f7, #6366f1); }
+.roadmap-week-card:nth-child(1):hover { border-color: #c084fc; box-shadow: 0 15px 35px rgba(192, 132, 252, 0.25); }
+
+.roadmap-week-card:nth-child(2) .week-label-tag { background: linear-gradient(135deg, #0284c7, #38bdf8); }
+.roadmap-week-card:nth-child(2):hover { border-color: #38bdf8; box-shadow: 0 15px 35px rgba(56, 189, 248, 0.25); }
+
+.roadmap-week-card:nth-child(3) .week-label-tag { background: linear-gradient(135deg, #059669, #34d399); }
+.roadmap-week-card:nth-child(3):hover { border-color: #34d399; box-shadow: 0 15px 35px rgba(52, 211, 153, 0.25); }
+
+.roadmap-week-card:nth-child(4) .week-label-tag { background: linear-gradient(135deg, #e11d48, #fbbf24); }
+.roadmap-week-card:nth-child(4):hover { border-color: #fbbf24; box-shadow: 0 15px 35px rgba(251, 191, 36, 0.25); }
 
 .week-badge-row {
   display: flex;

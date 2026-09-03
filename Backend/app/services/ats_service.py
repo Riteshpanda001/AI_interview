@@ -109,6 +109,19 @@ class ATSService:
         ats_record["_id"] = str(result.inserted_id)
         ats_record["id"] = str(result.inserted_id)
         
+        try:
+            from app.services.activity_service import ActivityService
+            await ActivityService.log_activity(
+                user_id=user_id,
+                activity_type="ATS_ANALYZED",
+                title="📄 Resume Analyzed with ATS Engine",
+                description=f"Target Role: {job_title or 'Software Engineer'} | ATS Score: {analysis_result.get('score', 78)}%",
+                metadata={"score": analysis_result.get("score", 78), "job_title": job_title},
+                db=db
+            )
+        except Exception as ae:
+            print(f"Error logging ATS activity: {ae}")
+
         return ats_record
 
     @staticmethod

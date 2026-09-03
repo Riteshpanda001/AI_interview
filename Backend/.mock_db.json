@@ -402,6 +402,1192 @@
       "ai_engine": "Deterministic Matrix & Gemini Explanation Engine",
       "created_at": "2026-08-29T17:28:05.530614+00:00",
       "_id": "6a9316a5bece94847db440b4"
+    },
+    "6a947c19c0a1123139544532": {
+      "user_id": "test-user-123",
+      "resume_id": "res-1",
+      "job_title": "Software Engineer",
+      "target_company": "",
+      "target_location": "",
+      "experience_level_target": "Mid Level",
+      "job_description": "Python SDE",
+      "score": 52,
+      "category_breakdown": {
+        "skills_match": {
+          "score": 25,
+          "max": 25,
+          "weight": "25%"
+        },
+        "keyword_match": {
+          "score": 20,
+          "max": 20,
+          "weight": "20%"
+        },
+        "experience_match": {
+          "score": 0,
+          "max": 15,
+          "weight": "15%"
+        },
+        "projects_match": {
+          "score": 0,
+          "max": 10,
+          "weight": "10%"
+        },
+        "education": {
+          "score": 0,
+          "max": 10,
+          "weight": "10%"
+        },
+        "resume_structure": {
+          "score": 2,
+          "max": 10,
+          "weight": "10%"
+        },
+        "job_relevance": {
+          "score": 5,
+          "max": 10,
+          "weight": "10%"
+        }
+      },
+      "matched_skills": [
+        "Python"
+      ],
+      "missing_skills": [],
+      "resume_quality_audit": {
+        "quality_score": 50,
+        "extracted_sections": {
+          "name": true,
+          "contact_information": false,
+          "skills": true,
+          "work_experience": false,
+          "projects": false,
+          "education": false,
+          "certifications": false,
+          "languages": false,
+          "links": false
+        },
+        "missing_sections": [
+          "Contact Information",
+          "Work Experience",
+          "Projects",
+          "Education",
+          "Certifications",
+          "Languages",
+          "Links"
+        ],
+        "improvement_suggestions": [
+          "Add a Certifications section (e.g. AWS Certified, Meta React Developer) to stand out.",
+          "Add GitHub, LinkedIn, or Portfolio URLs to improve candidate credibility.",
+          "Specify multilingual proficiency or spoken languages.",
+          "Include quantified impact metrics (e.g. 'Improved performance by 30%') in your work experience."
+        ]
+      },
+      "hard_skills": {
+        "score": 100,
+        "matched": [
+          "Python"
+        ],
+        "missing_critical": [],
+        "missing_optional": []
+      },
+      "soft_skills": {
+        "score": 100,
+        "matched": [
+          "Communication",
+          "Problem Solving",
+          "Collaboration"
+        ],
+        "missing": [
+          "Mentorship",
+          "Strategic Planning"
+        ]
+      },
+      "experience_level": {
+        "score": 0,
+        "status": "Aligned",
+        "details": "Work history matches technical expectations for Mid Level tier."
+      },
+      "impact_quantification": {
+        "score": 0,
+        "details": "Experience evaluation highlights quantitative metrics and active verb density."
+      },
+      "tailored_bullet_suggestions": [
+        {
+          "original": "Built web application components and REST APIs.",
+          "tailored": "Architected high-performance web APIs incorporating Docker, improving response times by 35%.",
+          "target_keyword": "REST APIs"
+        }
+      ],
+      "interview_questions": [
+        {
+          "id": "q1",
+          "category": "Technical Gap",
+          "question": "How would you approach learning and deploying system scaling in our tech stack?",
+          "sample_answer_key": "Demonstrate technical adaptability, documentation review, and hands-on proof-of-concept building.",
+          "target_gap": "System Scaling"
+        }
+      ],
+      "recommendations": [
+        "Quantify experience with impact metrics.",
+        "Ensure project descriptions highlight modern cloud architecture."
+      ],
+      "detailed_feedback": "Candidate achieved a deterministic ATS match score of 52%. Skills match score is 25/25, with 1 matched skill(s) and 0 gap(s) identified.",
+      "ai_engine": "Deterministic Matrix & Gemini Explanation Engine",
+      "created_at": "2026-08-30T18:53:13.028012+00:00",
+      "_id": "6a947c19c0a1123139544532"
+    },
+    "6a947c1ac0a1123139544533": {
+      "user_id": "test-user-123",
+      "resume_id": "res-1",
+      "job_title": "Frontend Engineer",
+      "target_company": "",
+      "target_location": "",
+      "experience_level_target": "Mid Level",
+      "job_description": "React SDE",
+      "score": 52,
+      "category_breakdown": {
+        "skills_match": {
+          "score": 25,
+          "max": 25,
+          "weight": "25%"
+        },
+        "keyword_match": {
+          "score": 20,
+          "max": 20,
+          "weight": "20%"
+        },
+        "experience_match": {
+          "score": 0,
+          "max": 15,
+          "weight": "15%"
+        },
+        "projects_match": {
+          "score": 0,
+          "max": 10,
+          "weight": "10%"
+        },
+        "education": {
+          "score": 0,
+          "max": 10,
+          "weight": "10%"
+        },
+        "resume_structure": {
+          "score": 2,
+          "max": 10,
+          "weight": "10%"
+        },
+        "job_relevance": {
+          "score": 5,
+          "max": 10,
+          "weight": "10%"
+        }
+      },
+      "matched_skills": [
+        "React"
+      ],
+      "missing_skills": [],
+      "resume_quality_audit": {
+        "quality_score": 50,
+        "extracted_sections": {
+          "name": true,
+          "contact_information": false,
+          "skills": true,
+          "work_experience": false,
+          "projects": false,
+          "education": false,
+          "certifications": false,
+          "languages": false,
+          "links": false
+        },
+        "missing_sections": [
+          "Contact Information",
+          "Work Experience",
+          "Projects",
+          "Education",
+          "Certifications",
+          "Languages",
+          "Links"
+        ],
+        "improvement_suggestions": [
+          "Add a Certifications section (e.g. AWS Certified, Meta React Developer) to stand out.",
+          "Add GitHub, LinkedIn, or Portfolio URLs to improve candidate credibility.",
+          "Specify multilingual proficiency or spoken languages.",
+          "Include quantified impact metrics (e.g. 'Improved performance by 30%') in your work experience."
+        ]
+      },
+      "hard_skills": {
+        "score": 100,
+        "matched": [
+          "React"
+        ],
+        "missing_critical": [],
+        "missing_optional": []
+      },
+      "soft_skills": {
+        "score": 100,
+        "matched": [
+          "Communication",
+          "Problem Solving",
+          "Collaboration"
+        ],
+        "missing": [
+          "Mentorship",
+          "Strategic Planning"
+        ]
+      },
+      "experience_level": {
+        "score": 0,
+        "status": "Aligned",
+        "details": "Work history matches technical expectations for Mid Level tier."
+      },
+      "impact_quantification": {
+        "score": 0,
+        "details": "Experience evaluation highlights quantitative metrics and active verb density."
+      },
+      "tailored_bullet_suggestions": [
+        {
+          "original": "Built web application components and REST APIs.",
+          "tailored": "Architected high-performance web APIs incorporating Docker, improving response times by 35%.",
+          "target_keyword": "REST APIs"
+        }
+      ],
+      "interview_questions": [
+        {
+          "id": "q1",
+          "category": "Technical Gap",
+          "question": "How would you approach learning and deploying system scaling in our tech stack?",
+          "sample_answer_key": "Demonstrate technical adaptability, documentation review, and hands-on proof-of-concept building.",
+          "target_gap": "System Scaling"
+        }
+      ],
+      "recommendations": [
+        "Quantify experience with impact metrics.",
+        "Ensure project descriptions highlight modern cloud architecture."
+      ],
+      "detailed_feedback": "Candidate achieved a deterministic ATS match score of 52%. Skills match score is 25/25, with 1 matched skill(s) and 0 gap(s) identified.",
+      "ai_engine": "Deterministic Matrix & Gemini Explanation Engine",
+      "created_at": "2026-08-30T18:53:14.904603+00:00",
+      "_id": "6a947c1ac0a1123139544533"
+    },
+    "6a98658e1256955882b7821a": {
+      "user_id": "test-user-123",
+      "resume_id": "res-1",
+      "job_title": "Software Engineer",
+      "target_company": "",
+      "target_location": "",
+      "experience_level_target": "Mid Level",
+      "job_description": "Python SDE",
+      "score": 52,
+      "category_breakdown": {
+        "skills_match": {
+          "score": 25,
+          "max": 25,
+          "weight": "25%"
+        },
+        "keyword_match": {
+          "score": 20,
+          "max": 20,
+          "weight": "20%"
+        },
+        "experience_match": {
+          "score": 0,
+          "max": 15,
+          "weight": "15%"
+        },
+        "projects_match": {
+          "score": 0,
+          "max": 10,
+          "weight": "10%"
+        },
+        "education": {
+          "score": 0,
+          "max": 10,
+          "weight": "10%"
+        },
+        "resume_structure": {
+          "score": 2,
+          "max": 10,
+          "weight": "10%"
+        },
+        "job_relevance": {
+          "score": 5,
+          "max": 10,
+          "weight": "10%"
+        }
+      },
+      "matched_skills": [
+        "Python"
+      ],
+      "missing_skills": [],
+      "resume_quality_audit": {
+        "quality_score": 50,
+        "extracted_sections": {
+          "name": true,
+          "contact_information": false,
+          "skills": true,
+          "work_experience": false,
+          "projects": false,
+          "education": false,
+          "certifications": false,
+          "languages": false,
+          "links": false
+        },
+        "missing_sections": [
+          "Contact Information",
+          "Work Experience",
+          "Projects",
+          "Education",
+          "Certifications",
+          "Languages",
+          "Links"
+        ],
+        "improvement_suggestions": [
+          "Add a Certifications section (e.g. AWS Certified, Meta React Developer) to stand out.",
+          "Add GitHub, LinkedIn, or Portfolio URLs to improve candidate credibility.",
+          "Specify multilingual proficiency or spoken languages.",
+          "Include quantified impact metrics (e.g. 'Improved performance by 30%') in your work experience."
+        ]
+      },
+      "hard_skills": {
+        "score": 100,
+        "matched": [
+          "Python"
+        ],
+        "missing_critical": [],
+        "missing_optional": []
+      },
+      "soft_skills": {
+        "score": 100,
+        "matched": [
+          "Communication",
+          "Problem Solving",
+          "Collaboration"
+        ],
+        "missing": [
+          "Mentorship",
+          "Strategic Planning"
+        ]
+      },
+      "experience_level": {
+        "score": 0,
+        "status": "Aligned",
+        "details": "Work history matches technical expectations for Mid Level tier."
+      },
+      "impact_quantification": {
+        "score": 0,
+        "details": "Experience evaluation highlights quantitative metrics and active verb density."
+      },
+      "tailored_bullet_suggestions": [
+        {
+          "original": "Built web application components and REST APIs.",
+          "tailored": "Architected high-performance web APIs incorporating Docker, improving response times by 35%.",
+          "target_keyword": "REST APIs"
+        }
+      ],
+      "interview_questions": [
+        {
+          "id": "q1",
+          "category": "Technical Gap",
+          "question": "How would you approach learning and deploying system scaling in our tech stack?",
+          "sample_answer_key": "Demonstrate technical adaptability, documentation review, and hands-on proof-of-concept building.",
+          "target_gap": "System Scaling"
+        }
+      ],
+      "recommendations": [
+        "Quantify experience with impact metrics.",
+        "Ensure project descriptions highlight modern cloud architecture."
+      ],
+      "detailed_feedback": "Candidate achieved a deterministic ATS match score of 52%. Skills match score is 25/25, with 1 matched skill(s) and 0 gap(s) identified.",
+      "ai_engine": "Deterministic Matrix & Gemini Explanation Engine",
+      "created_at": "2026-09-02T18:06:06.397826+00:00",
+      "_id": "6a98658e1256955882b7821a"
+    },
+    "6a9865901256955882b7821c": {
+      "user_id": "test-user-123",
+      "resume_id": "res-1",
+      "job_title": "Frontend Engineer",
+      "target_company": "",
+      "target_location": "",
+      "experience_level_target": "Mid Level",
+      "job_description": "React SDE",
+      "score": 52,
+      "category_breakdown": {
+        "skills_match": {
+          "score": 25,
+          "max": 25,
+          "weight": "25%"
+        },
+        "keyword_match": {
+          "score": 20,
+          "max": 20,
+          "weight": "20%"
+        },
+        "experience_match": {
+          "score": 0,
+          "max": 15,
+          "weight": "15%"
+        },
+        "projects_match": {
+          "score": 0,
+          "max": 10,
+          "weight": "10%"
+        },
+        "education": {
+          "score": 0,
+          "max": 10,
+          "weight": "10%"
+        },
+        "resume_structure": {
+          "score": 2,
+          "max": 10,
+          "weight": "10%"
+        },
+        "job_relevance": {
+          "score": 5,
+          "max": 10,
+          "weight": "10%"
+        }
+      },
+      "matched_skills": [
+        "React"
+      ],
+      "missing_skills": [],
+      "resume_quality_audit": {
+        "quality_score": 50,
+        "extracted_sections": {
+          "name": true,
+          "contact_information": false,
+          "skills": true,
+          "work_experience": false,
+          "projects": false,
+          "education": false,
+          "certifications": false,
+          "languages": false,
+          "links": false
+        },
+        "missing_sections": [
+          "Contact Information",
+          "Work Experience",
+          "Projects",
+          "Education",
+          "Certifications",
+          "Languages",
+          "Links"
+        ],
+        "improvement_suggestions": [
+          "Add a Certifications section (e.g. AWS Certified, Meta React Developer) to stand out.",
+          "Add GitHub, LinkedIn, or Portfolio URLs to improve candidate credibility.",
+          "Specify multilingual proficiency or spoken languages.",
+          "Include quantified impact metrics (e.g. 'Improved performance by 30%') in your work experience."
+        ]
+      },
+      "hard_skills": {
+        "score": 100,
+        "matched": [
+          "React"
+        ],
+        "missing_critical": [],
+        "missing_optional": []
+      },
+      "soft_skills": {
+        "score": 100,
+        "matched": [
+          "Communication",
+          "Problem Solving",
+          "Collaboration"
+        ],
+        "missing": [
+          "Mentorship",
+          "Strategic Planning"
+        ]
+      },
+      "experience_level": {
+        "score": 0,
+        "status": "Aligned",
+        "details": "Work history matches technical expectations for Mid Level tier."
+      },
+      "impact_quantification": {
+        "score": 0,
+        "details": "Experience evaluation highlights quantitative metrics and active verb density."
+      },
+      "tailored_bullet_suggestions": [
+        {
+          "original": "Built web application components and REST APIs.",
+          "tailored": "Architected high-performance web APIs incorporating Docker, improving response times by 35%.",
+          "target_keyword": "REST APIs"
+        }
+      ],
+      "interview_questions": [
+        {
+          "id": "q1",
+          "category": "Technical Gap",
+          "question": "How would you approach learning and deploying system scaling in our tech stack?",
+          "sample_answer_key": "Demonstrate technical adaptability, documentation review, and hands-on proof-of-concept building.",
+          "target_gap": "System Scaling"
+        }
+      ],
+      "recommendations": [
+        "Quantify experience with impact metrics.",
+        "Ensure project descriptions highlight modern cloud architecture."
+      ],
+      "detailed_feedback": "Candidate achieved a deterministic ATS match score of 52%. Skills match score is 25/25, with 1 matched skill(s) and 0 gap(s) identified.",
+      "ai_engine": "Deterministic Matrix & Gemini Explanation Engine",
+      "created_at": "2026-09-02T18:06:08.263501+00:00",
+      "_id": "6a9865901256955882b7821c"
+    },
+    "6a9865ae8e4b39cfc8194a65": {
+      "user_id": "test-user-123",
+      "resume_id": "res-1",
+      "job_title": "Software Engineer",
+      "target_company": "",
+      "target_location": "",
+      "experience_level_target": "Mid Level",
+      "job_description": "Python SDE",
+      "score": 52,
+      "category_breakdown": {
+        "skills_match": {
+          "score": 25,
+          "max": 25,
+          "weight": "25%"
+        },
+        "keyword_match": {
+          "score": 20,
+          "max": 20,
+          "weight": "20%"
+        },
+        "experience_match": {
+          "score": 0,
+          "max": 15,
+          "weight": "15%"
+        },
+        "projects_match": {
+          "score": 0,
+          "max": 10,
+          "weight": "10%"
+        },
+        "education": {
+          "score": 0,
+          "max": 10,
+          "weight": "10%"
+        },
+        "resume_structure": {
+          "score": 2,
+          "max": 10,
+          "weight": "10%"
+        },
+        "job_relevance": {
+          "score": 5,
+          "max": 10,
+          "weight": "10%"
+        }
+      },
+      "matched_skills": [
+        "Python"
+      ],
+      "missing_skills": [],
+      "resume_quality_audit": {
+        "quality_score": 50,
+        "extracted_sections": {
+          "name": true,
+          "contact_information": false,
+          "skills": true,
+          "work_experience": false,
+          "projects": false,
+          "education": false,
+          "certifications": false,
+          "languages": false,
+          "links": false
+        },
+        "missing_sections": [
+          "Contact Information",
+          "Work Experience",
+          "Projects",
+          "Education",
+          "Certifications",
+          "Languages",
+          "Links"
+        ],
+        "improvement_suggestions": [
+          "Add a Certifications section (e.g. AWS Certified, Meta React Developer) to stand out.",
+          "Add GitHub, LinkedIn, or Portfolio URLs to improve candidate credibility.",
+          "Specify multilingual proficiency or spoken languages.",
+          "Include quantified impact metrics (e.g. 'Improved performance by 30%') in your work experience."
+        ]
+      },
+      "hard_skills": {
+        "score": 100,
+        "matched": [
+          "Python"
+        ],
+        "missing_critical": [],
+        "missing_optional": []
+      },
+      "soft_skills": {
+        "score": 100,
+        "matched": [
+          "Communication",
+          "Problem Solving",
+          "Collaboration"
+        ],
+        "missing": [
+          "Mentorship",
+          "Strategic Planning"
+        ]
+      },
+      "experience_level": {
+        "score": 0,
+        "status": "Aligned",
+        "details": "Work history matches technical expectations for Mid Level tier."
+      },
+      "impact_quantification": {
+        "score": 0,
+        "details": "Experience evaluation highlights quantitative metrics and active verb density."
+      },
+      "tailored_bullet_suggestions": [
+        {
+          "original": "Built web application components and REST APIs.",
+          "tailored": "Architected high-performance web APIs incorporating Docker, improving response times by 35%.",
+          "target_keyword": "REST APIs"
+        }
+      ],
+      "interview_questions": [
+        {
+          "id": "q1",
+          "category": "Technical Gap",
+          "question": "How would you approach learning and deploying system scaling in our tech stack?",
+          "sample_answer_key": "Demonstrate technical adaptability, documentation review, and hands-on proof-of-concept building.",
+          "target_gap": "System Scaling"
+        }
+      ],
+      "recommendations": [
+        "Quantify experience with impact metrics.",
+        "Ensure project descriptions highlight modern cloud architecture."
+      ],
+      "detailed_feedback": "Candidate achieved a deterministic ATS match score of 52%. Skills match score is 25/25, with 1 matched skill(s) and 0 gap(s) identified.",
+      "ai_engine": "Deterministic Matrix & Gemini Explanation Engine",
+      "created_at": "2026-09-02T18:06:38.556828+00:00",
+      "_id": "6a9865ae8e4b39cfc8194a65"
+    },
+    "6a9865b08e4b39cfc8194a67": {
+      "user_id": "test-user-123",
+      "resume_id": "res-1",
+      "job_title": "Frontend Engineer",
+      "target_company": "",
+      "target_location": "",
+      "experience_level_target": "Mid Level",
+      "job_description": "React SDE",
+      "score": 52,
+      "category_breakdown": {
+        "skills_match": {
+          "score": 25,
+          "max": 25,
+          "weight": "25%"
+        },
+        "keyword_match": {
+          "score": 20,
+          "max": 20,
+          "weight": "20%"
+        },
+        "experience_match": {
+          "score": 0,
+          "max": 15,
+          "weight": "15%"
+        },
+        "projects_match": {
+          "score": 0,
+          "max": 10,
+          "weight": "10%"
+        },
+        "education": {
+          "score": 0,
+          "max": 10,
+          "weight": "10%"
+        },
+        "resume_structure": {
+          "score": 2,
+          "max": 10,
+          "weight": "10%"
+        },
+        "job_relevance": {
+          "score": 5,
+          "max": 10,
+          "weight": "10%"
+        }
+      },
+      "matched_skills": [
+        "React"
+      ],
+      "missing_skills": [],
+      "resume_quality_audit": {
+        "quality_score": 50,
+        "extracted_sections": {
+          "name": true,
+          "contact_information": false,
+          "skills": true,
+          "work_experience": false,
+          "projects": false,
+          "education": false,
+          "certifications": false,
+          "languages": false,
+          "links": false
+        },
+        "missing_sections": [
+          "Contact Information",
+          "Work Experience",
+          "Projects",
+          "Education",
+          "Certifications",
+          "Languages",
+          "Links"
+        ],
+        "improvement_suggestions": [
+          "Add a Certifications section (e.g. AWS Certified, Meta React Developer) to stand out.",
+          "Add GitHub, LinkedIn, or Portfolio URLs to improve candidate credibility.",
+          "Specify multilingual proficiency or spoken languages.",
+          "Include quantified impact metrics (e.g. 'Improved performance by 30%') in your work experience."
+        ]
+      },
+      "hard_skills": {
+        "score": 100,
+        "matched": [
+          "React"
+        ],
+        "missing_critical": [],
+        "missing_optional": []
+      },
+      "soft_skills": {
+        "score": 100,
+        "matched": [
+          "Communication",
+          "Problem Solving",
+          "Collaboration"
+        ],
+        "missing": [
+          "Mentorship",
+          "Strategic Planning"
+        ]
+      },
+      "experience_level": {
+        "score": 0,
+        "status": "Aligned",
+        "details": "Work history matches technical expectations for Mid Level tier."
+      },
+      "impact_quantification": {
+        "score": 0,
+        "details": "Experience evaluation highlights quantitative metrics and active verb density."
+      },
+      "tailored_bullet_suggestions": [
+        {
+          "original": "Built web application components and REST APIs.",
+          "tailored": "Architected high-performance web APIs incorporating Docker, improving response times by 35%.",
+          "target_keyword": "REST APIs"
+        }
+      ],
+      "interview_questions": [
+        {
+          "id": "q1",
+          "category": "Technical Gap",
+          "question": "How would you approach learning and deploying system scaling in our tech stack?",
+          "sample_answer_key": "Demonstrate technical adaptability, documentation review, and hands-on proof-of-concept building.",
+          "target_gap": "System Scaling"
+        }
+      ],
+      "recommendations": [
+        "Quantify experience with impact metrics.",
+        "Ensure project descriptions highlight modern cloud architecture."
+      ],
+      "detailed_feedback": "Candidate achieved a deterministic ATS match score of 52%. Skills match score is 25/25, with 1 matched skill(s) and 0 gap(s) identified.",
+      "ai_engine": "Deterministic Matrix & Gemini Explanation Engine",
+      "created_at": "2026-09-02T18:06:40.628719+00:00",
+      "_id": "6a9865b08e4b39cfc8194a67"
+    },
+    "6a98680181bc7964081e46c6": {
+      "user_id": "test-user-ats-history-99",
+      "resume_id": "res-1",
+      "job_title": "Software Engineer",
+      "target_company": "",
+      "target_location": "",
+      "experience_level_target": "Mid Level",
+      "job_description": "Python SDE",
+      "score": 52,
+      "category_breakdown": {
+        "skills_match": {
+          "score": 25,
+          "max": 25,
+          "weight": "25%"
+        },
+        "keyword_match": {
+          "score": 20,
+          "max": 20,
+          "weight": "20%"
+        },
+        "experience_match": {
+          "score": 0,
+          "max": 15,
+          "weight": "15%"
+        },
+        "projects_match": {
+          "score": 0,
+          "max": 10,
+          "weight": "10%"
+        },
+        "education": {
+          "score": 0,
+          "max": 10,
+          "weight": "10%"
+        },
+        "resume_structure": {
+          "score": 2,
+          "max": 10,
+          "weight": "10%"
+        },
+        "job_relevance": {
+          "score": 5,
+          "max": 10,
+          "weight": "10%"
+        }
+      },
+      "matched_skills": [
+        "Python"
+      ],
+      "missing_skills": [],
+      "resume_quality_audit": {
+        "quality_score": 50,
+        "extracted_sections": {
+          "name": true,
+          "contact_information": false,
+          "skills": true,
+          "work_experience": false,
+          "projects": false,
+          "education": false,
+          "certifications": false,
+          "languages": false,
+          "links": false
+        },
+        "missing_sections": [
+          "Contact Information",
+          "Work Experience",
+          "Projects",
+          "Education",
+          "Certifications",
+          "Languages",
+          "Links"
+        ],
+        "improvement_suggestions": [
+          "Add a Certifications section (e.g. AWS Certified, Meta React Developer) to stand out.",
+          "Add GitHub, LinkedIn, or Portfolio URLs to improve candidate credibility.",
+          "Specify multilingual proficiency or spoken languages.",
+          "Include quantified impact metrics (e.g. 'Improved performance by 30%') in your work experience."
+        ]
+      },
+      "hard_skills": {
+        "score": 100,
+        "matched": [
+          "Python"
+        ],
+        "missing_critical": [],
+        "missing_optional": []
+      },
+      "soft_skills": {
+        "score": 100,
+        "matched": [
+          "Communication",
+          "Problem Solving",
+          "Collaboration"
+        ],
+        "missing": [
+          "Mentorship",
+          "Strategic Planning"
+        ]
+      },
+      "experience_level": {
+        "score": 0,
+        "status": "Aligned",
+        "details": "Work history matches technical expectations for Mid Level tier."
+      },
+      "impact_quantification": {
+        "score": 0,
+        "details": "Experience evaluation highlights quantitative metrics and active verb density."
+      },
+      "tailored_bullet_suggestions": [
+        {
+          "original": "Built web application components and REST APIs.",
+          "tailored": "Architected high-performance web APIs incorporating Docker, improving response times by 35%.",
+          "target_keyword": "REST APIs"
+        }
+      ],
+      "interview_questions": [
+        {
+          "id": "q1",
+          "category": "Technical Gap",
+          "question": "How would you approach learning and deploying system scaling in our tech stack?",
+          "sample_answer_key": "Demonstrate technical adaptability, documentation review, and hands-on proof-of-concept building.",
+          "target_gap": "System Scaling"
+        }
+      ],
+      "recommendations": [
+        "Quantify experience with impact metrics.",
+        "Ensure project descriptions highlight modern cloud architecture."
+      ],
+      "detailed_feedback": "Candidate achieved a deterministic ATS match score of 52%. Skills match score is 25/25, with 1 matched skill(s) and 0 gap(s) identified.",
+      "ai_engine": "Deterministic Matrix & Gemini Explanation Engine",
+      "created_at": "2026-09-02T18:16:33.285101+00:00",
+      "_id": "6a98680181bc7964081e46c6"
+    },
+    "6a98680381bc7964081e46c8": {
+      "user_id": "test-user-ats-history-99",
+      "resume_id": "res-1",
+      "job_title": "Frontend Engineer",
+      "target_company": "",
+      "target_location": "",
+      "experience_level_target": "Mid Level",
+      "job_description": "React SDE",
+      "score": 52,
+      "category_breakdown": {
+        "skills_match": {
+          "score": 25,
+          "max": 25,
+          "weight": "25%"
+        },
+        "keyword_match": {
+          "score": 20,
+          "max": 20,
+          "weight": "20%"
+        },
+        "experience_match": {
+          "score": 0,
+          "max": 15,
+          "weight": "15%"
+        },
+        "projects_match": {
+          "score": 0,
+          "max": 10,
+          "weight": "10%"
+        },
+        "education": {
+          "score": 0,
+          "max": 10,
+          "weight": "10%"
+        },
+        "resume_structure": {
+          "score": 2,
+          "max": 10,
+          "weight": "10%"
+        },
+        "job_relevance": {
+          "score": 5,
+          "max": 10,
+          "weight": "10%"
+        }
+      },
+      "matched_skills": [
+        "React"
+      ],
+      "missing_skills": [],
+      "resume_quality_audit": {
+        "quality_score": 50,
+        "extracted_sections": {
+          "name": true,
+          "contact_information": false,
+          "skills": true,
+          "work_experience": false,
+          "projects": false,
+          "education": false,
+          "certifications": false,
+          "languages": false,
+          "links": false
+        },
+        "missing_sections": [
+          "Contact Information",
+          "Work Experience",
+          "Projects",
+          "Education",
+          "Certifications",
+          "Languages",
+          "Links"
+        ],
+        "improvement_suggestions": [
+          "Add a Certifications section (e.g. AWS Certified, Meta React Developer) to stand out.",
+          "Add GitHub, LinkedIn, or Portfolio URLs to improve candidate credibility.",
+          "Specify multilingual proficiency or spoken languages.",
+          "Include quantified impact metrics (e.g. 'Improved performance by 30%') in your work experience."
+        ]
+      },
+      "hard_skills": {
+        "score": 100,
+        "matched": [
+          "React"
+        ],
+        "missing_critical": [],
+        "missing_optional": []
+      },
+      "soft_skills": {
+        "score": 100,
+        "matched": [
+          "Communication",
+          "Problem Solving",
+          "Collaboration"
+        ],
+        "missing": [
+          "Mentorship",
+          "Strategic Planning"
+        ]
+      },
+      "experience_level": {
+        "score": 0,
+        "status": "Aligned",
+        "details": "Work history matches technical expectations for Mid Level tier."
+      },
+      "impact_quantification": {
+        "score": 0,
+        "details": "Experience evaluation highlights quantitative metrics and active verb density."
+      },
+      "tailored_bullet_suggestions": [
+        {
+          "original": "Built web application components and REST APIs.",
+          "tailored": "Architected high-performance web APIs incorporating Docker, improving response times by 35%.",
+          "target_keyword": "REST APIs"
+        }
+      ],
+      "interview_questions": [
+        {
+          "id": "q1",
+          "category": "Technical Gap",
+          "question": "How would you approach learning and deploying system scaling in our tech stack?",
+          "sample_answer_key": "Demonstrate technical adaptability, documentation review, and hands-on proof-of-concept building.",
+          "target_gap": "System Scaling"
+        }
+      ],
+      "recommendations": [
+        "Quantify experience with impact metrics.",
+        "Ensure project descriptions highlight modern cloud architecture."
+      ],
+      "detailed_feedback": "Candidate achieved a deterministic ATS match score of 52%. Skills match score is 25/25, with 1 matched skill(s) and 0 gap(s) identified.",
+      "ai_engine": "Deterministic Matrix & Gemini Explanation Engine",
+      "created_at": "2026-09-02T18:16:35.183581+00:00",
+      "_id": "6a98680381bc7964081e46c8"
+    }
+  },
+  "activities": {
+    "6a98658e1256955882b7821b": {
+      "user_id": "test-user-123",
+      "type": "ATS_ANALYZED",
+      "title": "\ud83d\udcc4 Resume Analyzed with ATS Engine",
+      "description": "Target Role: Software Engineer | ATS Score: 52%",
+      "metadata": {
+        "score": 52,
+        "job_title": "Software Engineer"
+      },
+      "created_at": "2026-09-02T18:06:06.401765+00:00",
+      "_id": "6a98658e1256955882b7821b"
+    },
+    "6a9865901256955882b7821d": {
+      "user_id": "test-user-123",
+      "type": "ATS_ANALYZED",
+      "title": "\ud83d\udcc4 Resume Analyzed with ATS Engine",
+      "description": "Target Role: Frontend Engineer | ATS Score: 52%",
+      "metadata": {
+        "score": 52,
+        "job_title": "Frontend Engineer"
+      },
+      "created_at": "2026-09-02T18:06:08.267143+00:00",
+      "_id": "6a9865901256955882b7821d"
+    },
+    "6a9865ae8e4b39cfc8194a66": {
+      "user_id": "test-user-123",
+      "type": "ATS_ANALYZED",
+      "title": "\ud83d\udcc4 Resume Analyzed with ATS Engine",
+      "description": "Target Role: Software Engineer | ATS Score: 52%",
+      "metadata": {
+        "score": 52,
+        "job_title": "Software Engineer"
+      },
+      "created_at": "2026-09-02T18:06:38.562152+00:00",
+      "_id": "6a9865ae8e4b39cfc8194a66"
+    },
+    "6a9865b08e4b39cfc8194a68": {
+      "user_id": "test-user-123",
+      "type": "ATS_ANALYZED",
+      "title": "\ud83d\udcc4 Resume Analyzed with ATS Engine",
+      "description": "Target Role: Frontend Engineer | ATS Score: 52%",
+      "metadata": {
+        "score": 52,
+        "job_title": "Frontend Engineer"
+      },
+      "created_at": "2026-09-02T18:06:40.633660+00:00",
+      "_id": "6a9865b08e4b39cfc8194a68"
+    },
+    "6a98661c06ca866bc953ee34": {
+      "user_id": "test-user-ats-history-99",
+      "type": "ATS_ANALYZED",
+      "title": "\ud83d\udcc4 Resume Analyzed with ATS Engine",
+      "description": "Target Role: Software Engineer | ATS Score: 52%",
+      "metadata": {
+        "score": 52,
+        "job_title": "Software Engineer"
+      },
+      "created_at": "2026-09-02T18:08:28.220912+00:00",
+      "_id": "6a98661c06ca866bc953ee34"
+    },
+    "6a98661d06ca866bc953ee36": {
+      "user_id": "test-user-ats-history-99",
+      "type": "ATS_ANALYZED",
+      "title": "\ud83d\udcc4 Resume Analyzed with ATS Engine",
+      "description": "Target Role: Frontend Engineer | ATS Score: 52%",
+      "metadata": {
+        "score": 52,
+        "job_title": "Frontend Engineer"
+      },
+      "created_at": "2026-09-02T18:08:29.605497+00:00",
+      "_id": "6a98661d06ca866bc953ee36"
+    },
+    "6a98678cb21626d39fdd779f": {
+      "user_id": "test-user-ats-history-99",
+      "type": "ATS_ANALYZED",
+      "title": "\ud83d\udcc4 Resume Analyzed with ATS Engine",
+      "description": "Target Role: Software Engineer | ATS Score: 52%",
+      "metadata": {
+        "score": 52,
+        "job_title": "Software Engineer"
+      },
+      "created_at": "2026-09-02T18:14:36.491593+00:00",
+      "_id": "6a98678cb21626d39fdd779f"
+    },
+    "6a98678eb21626d39fdd77a1": {
+      "user_id": "test-user-ats-history-99",
+      "type": "ATS_ANALYZED",
+      "title": "\ud83d\udcc4 Resume Analyzed with ATS Engine",
+      "description": "Target Role: Frontend Engineer | ATS Score: 52%",
+      "metadata": {
+        "score": 52,
+        "job_title": "Frontend Engineer"
+      },
+      "created_at": "2026-09-02T18:14:38.330286+00:00",
+      "_id": "6a98678eb21626d39fdd77a1"
+    },
+    "6a98680181bc7964081e46c7": {
+      "user_id": "test-user-ats-history-99",
+      "type": "ATS_ANALYZED",
+      "title": "\ud83d\udcc4 Resume Analyzed with ATS Engine",
+      "description": "Target Role: Software Engineer | ATS Score: 52%",
+      "metadata": {
+        "score": 52,
+        "job_title": "Software Engineer"
+      },
+      "created_at": "2026-09-02T18:16:33.290898+00:00",
+      "_id": "6a98680181bc7964081e46c7"
+    },
+    "6a98680381bc7964081e46c9": {
+      "user_id": "test-user-ats-history-99",
+      "type": "ATS_ANALYZED",
+      "title": "\ud83d\udcc4 Resume Analyzed with ATS Engine",
+      "description": "Target Role: Frontend Engineer | ATS Score: 52%",
+      "metadata": {
+        "score": 52,
+        "job_title": "Frontend Engineer"
+      },
+      "created_at": "2026-09-02T18:16:35.190129+00:00",
+      "_id": "6a98680381bc7964081e46c9"
     }
   }
 }
