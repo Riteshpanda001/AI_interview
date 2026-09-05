@@ -36,14 +36,18 @@ Resume Building ➔ ATS Analysis ➔ Skill Gap Analysis ➔ DSA Coding Practice
 - **Keyword & Skill Gap Analysis**: Highlights missing industry keywords for targeted technical roles.
 - **Actionable AI Suggestions**: Specific, actionable recommendations for resume optimization.
 
-### 💻 DSA & Coding Practice
-- **126+ Interactive Coding Problems**: Easy, Medium, and 20 Hard LeetCode Blind 75 questions (Sliding Window Maximum, Merge k Sorted Lists, Trapping Rain Water, N-Queens, Sudoku Solver, Alien Dictionary, etc.).
-- **Multi-Language Code Execution**: Code editor supporting JavaScript, Python, C, C++, and Java.
-- **Comprehensive Solution Guides**: Intuition breakdown, time/space complexity analysis, and multi-language implementations.
-- **883+ Total DSA Question Bank**: Includes 19 downloadable company-specific DSA preparation guides.
+### 💻 DSA & Coding Practice (LeetCode-Style Practice Studio)
+- **Split-Pane IDE Workspace**: Dual-pane workspace featuring Problem Description & Test Cases on the left, and an interactive Code Editor on the right.
+- **Problem Metadata & Badges**: Displays difficulty (`Easy`, `Medium`, `Hard`), topic tags, company badges, acceptance rates, and `Solved ✓` status.
+- **Multi-Language Code Execution**: Code editor supporting **JavaScript**, **Python**, **C**, **C++**, and **Java** boilerplate templates.
+- **Comprehensive Problem Specs**: Problem statement, formatted examples (input/output/explanation), constraints, and expected Time/Space complexity bounds.
+- **Testcase Execution Engine**: Instant code evaluation against sample test cases and hidden edge cases with runtime (ms) & memory usage metrics.
+- **AI Complexity Analyzer**: AI-driven evaluation for space-time complexity optimization, code structure review, and dry-run feedback.
+- **883+ Total DSA Question Bank**: Includes 100 questions per company vault and 19 downloadable company preparation guides.
 
 ### 🏢 Company-Specific Preparation
 - **Top Tech Companies**: Preparation modules for Google, Amazon, Microsoft, Meta, Apple, TCS, Infosys, Wipro, Accenture, and more.
+- **100 DSA Questions Per Company**: Structured vault with 35 Easy, 35 Medium, and 30 Hard questions per target company.
 - **Round-by-Round Breakdown**: Online Assessments, Technical Round 1/2, System Design, and Behavioral HR rounds.
 - **Interactive Practice Guides**: Downloadable & viewable preparation sheets.
 
