@@ -109,64 +109,7 @@ const CodingStatistics = () => {
           </div>
         </div>
 
-        {/* Topic Performance & Weak Topic Warning */}
-        <div style={{ background: "#13131A", border: "1px solid #292936", borderRadius: "16px", padding: "1.5rem", marginBottom: "2rem" }}>
-          <h3 style={{ fontSize: "1.1rem", fontWeight: "700", margin: "0 0 1rem 0" }}>Topic Performance Breakdown</h3>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1rem", marginBottom: "1.5rem" }}>
-            {Object.entries(topicPerf).map(([tName, tAcc]) => (
-              <div key={tName} style={{ background: "#1A1A24", border: "1px solid #292936", borderRadius: "10px", padding: "0.85rem 1rem" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.85rem", fontWeight: "600", marginBottom: "0.4rem" }}>
-                  <span>{tName}</span>
-                  <span style={{ color: tAcc >= 70 ? "#22C55E" : tAcc >= 50 ? "#EF9F27" : "#EF4444" }}>{tAcc}% Accuracy</span>
-                </div>
-                <div style={{ height: "6px", background: "#13131A", borderRadius: "4px", overflow: "hidden" }}>
-                  <div style={{ width: `${tAcc}%`, height: "100%", background: tAcc >= 70 ? "#22C55E" : tAcc >= 50 ? "#EF9F27" : "#EF4444", borderRadius: "4px" }} />
-                </div>
-              </div>
-            ))}
-          </div>
 
-          {/* Weak Area Banner */}
-          <div style={{
-            background: "rgba(239, 68, 68, 0.1)",
-            border: "1px solid rgba(239, 68, 68, 0.3)",
-            borderRadius: "12px",
-            padding: "1rem 1.25rem",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            flexWrap: "wrap",
-            gap: "1rem"
-          }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-              <FaExclamationTriangle color="#EF4444" size={24} />
-              <div>
-                <strong style={{ color: "#EF4444", fontSize: "0.95rem" }}>Weak Topic Identified: {weakestTopic}</strong>
-                <p style={{ margin: "0.2rem 0 0 0", fontSize: "0.85rem", color: "#A7A7B5" }}>
-                  Your accuracy on {weakestTopic} is {topicPerf[weakestTopic] || 42}%. Solve target practice problems to improve your rating.
-                </p>
-              </div>
-            </div>
-            <button 
-              onClick={() => {
-                const el = document.getElementById("coding-problems-list");
-                if (el) el.scrollIntoView({ behavior: "smooth" });
-              }}
-              style={{
-                background: "#E85D30",
-                color: "#F8F8FA",
-                border: "none",
-                padding: "0.5rem 1.2rem",
-                borderRadius: "8px",
-                fontWeight: "700",
-                fontSize: "0.85rem",
-                cursor: "pointer"
-              }}
-            >
-              [Practice {weakestTopic} Now]
-            </button>
-          </div>
-        </div>
 
         {/* MY CODING HISTORY TABLE & FILTERS */}
         <div style={{ background: "#13131A", border: "1px solid #292936", borderRadius: "16px", padding: "1.5rem" }}>

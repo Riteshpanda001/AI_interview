@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import "./CompanyQuestions.css";
 import logo from "../../assets/prenova_ai_logo.png";
+import { useAuth } from "../../context/AuthContext";
 import { TOP_100_DSA_PROBLEMS, getQuestionsForCompany, enrichProblemDetails } from "../../data/dsaSheetData";
 
 const COMPANY_LOGOS = {
@@ -397,32 +399,21 @@ const generate90CompanyQuestions = (companyName) => {
       const id = `${cName.toLowerCase()}-${diff.toLowerCase()}-${i + 1}`;
       items.push(enrichProblemDetails({
         id,
-        title: `${template.title} (${cName} ${diff})`,
+        title: template.title,
         difficulty: diff,
         topic: template.topic,
         acceptance: template.acceptance,
         frequency: `${Math.max(65, Math.floor(98 - i * 0.8))}% Asked`,
         instructions: `${template.instructions} (Asked frequently in ${cName} technical screening and loop interviews).`,
         companies: [cName, "Top Product"],
-        examples: [
-          { input: "Sample input 1", output: "Sample output 1", explanation: `Standard test case for ${template.title}.` },
-          { input: "Sample input 2", output: "Sample output 2", explanation: "Edge boundary condition." }
-        ],
         constraints: "1 <= N <= 10^5",
-        testCases: [
-          { id: 1, name: "Test Case 1", input: "Sample input 1", expected: "Sample output 1", isHidden: false },
-          { id: 2, name: "Test Case 2", input: "Sample input 2", expected: "Sample output 2", isHidden: false },
-          { id: 3, name: "Test Case 3 (Hidden Edge)", input: "Hidden Large Stream", expected: "Optimal Output", isHidden: true },
-          { id: 4, name: "Test Case 4 (Hidden Boundary)", input: "Max Limit Input", expected: "Boundary Result", isHidden: true },
-          { id: 5, name: "Test Case 5 (Hidden Corner Case)", input: "Negative / Corner Input", expected: "Corner Output", isHidden: true }
-        ],
         codeTemplates: {
           javascript: `function solve(input) {\n  // TODO: Write your solution logic here for ${template.title}\n  \n}`,
           python: `def solve(input):\n    # TODO: Write your solution logic here for ${template.title}\n    pass`,
           cpp: `#include <iostream>\n#include <vector>\nusing namespace std;\n\nint solve() {\n    // TODO: Write your C++ solution logic for ${template.title}\n    return 0;\n}`,
           java: `import java.util.*;\n\nclass Solution {\n    public int solve() {\n        // TODO: Write your Java solution logic for ${template.title}\n        return 0;\n    }\n}`
         }
-      }, cName));
+      }));
     }
     return items;
   };
@@ -435,6 +426,41 @@ const generate90CompanyQuestions = (companyName) => {
 };
 
 const CompanyQuestions = ({ companyName = "Google" }) => {
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
+  const [profileOpen, setProfileOpen] = useState(false);
+  const profileRef = useRef(null);
+
+  const userRole = (user?.role || "").toLowerCase().trim();
+  const userEmail = (user?.email || "").toLowerCase().trim();
+  const isAdmin = userRole === "admin" || userRole === "superadmin" || userEmail === "prenovaai01@gmail.com";
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (profileRef.current && !profileRef.current.contains(e.target)) {
+        setProfileOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const getInitials = (name) => {
+    if (!name) return "U";
+    const parts = name.trim().split(" ");
+    return parts.length >= 2
+      ? parts[0][0].toUpperCase() + parts[1][0].toUpperCase()
+      : parts[0][0].toUpperCase();
+  };
+
+  const getPlanColor = (plan) => {
+    if (!plan) return { bg: "#fef3c7", color: "#d97706" };
+    const p = plan.toLowerCase();
+    if (p === "pro" || p === "pro plan") return { bg: "#fef3c7", color: "#d97706" };
+    if (p === "enterprise" || p === "lifetime") return { bg: "#dcfce7", color: "#16a34a" };
+    return { bg: "#fef3c7", color: "#d97706" };
+  };
+
   const [questions, setQuestions] = useState([]);
   const [filterDifficulty, setFilterDifficulty] = useState("All");
   const [selectedTopic, setSelectedTopic] = useState("All");
@@ -554,12 +580,13 @@ const CompanyQuestions = ({ companyName = "Google" }) => {
     const prob = targetProb || activeProblem;
     if (!prob) return;
 
-    const cases = prob.testCases && prob.testCases.length >= 5 ? prob.testCases : [
-      { id: 1, name: "Test Case 1 (Sample)", input: prob.examples?.[0]?.input || "Sample input 1", expected: prob.examples?.[0]?.output || "Sample output 1", isHidden: false },
-      { id: 2, name: "Test Case 2 (Sample)", input: prob.examples?.[1]?.input || "Sample input 2", expected: prob.examples?.[1]?.output || "Sample output 2", isHidden: false },
-      { id: 3, name: "Test Case 3 (Hidden Large Input)", input: "100000\n[10^5 Stream Data]", expected: "Optimal Output", isHidden: true },
-      { id: 4, name: "Test Case 4 (Hidden Boundary Limits)", input: "Min/Max Boundary Constraints", expected: "Boundary Result", isHidden: true },
-      { id: 5, name: "Test Case 5 (Hidden Corner Case)", input: "Empty / Negative Stream", expected: "Corner Case Output", isHidden: true }
+    const cases = prob.testCases && prob.testCases.length >= 3 ? prob.testCases : [
+      { id: 1, name: "Test Case 1", input: prob.examples?.[0]?.input || "nums = [2,7,11,15], target = 9", expected: prob.examples?.[0]?.output || "[0,1]", isHidden: false },
+      { id: 2, name: "Test Case 2", input: prob.examples?.[1]?.input || "nums = [3,2,4], target = 6", expected: prob.examples?.[1]?.output || "[1,2]", isHidden: false },
+      { id: 3, name: "Test Case 3", input: prob.examples?.[2]?.input || "nums = [3,3], target = 6", expected: prob.examples?.[2]?.output || "[0,1]", isHidden: false },
+      { id: 4, name: "Test Case 4 (Hidden Large Stream)", input: "Large dataset stream (10^5 elements)", expected: "Optimal Output Result", isHidden: true },
+      { id: 5, name: "Test Case 5 (Hidden Boundary)", input: "Min/Max Boundary Constraints", expected: "Boundary Result", isHidden: true },
+      { id: 6, name: "Test Case 6 (Hidden Corner Case)", input: "Empty / Negative / Zero Stream", expected: "Corner Case Output", isHidden: true }
     ];
     
     const executedResults = cases.map((tc) => ({
@@ -725,7 +752,7 @@ const CompanyQuestions = ({ companyName = "Google" }) => {
                           {COMPANY_LOGOS[companyName] || "🏢"}
                         </span>
                       )}
-                      <h3 style={{ margin: 0, fontSize: "1.15rem", color: "#ffffff", fontWeight: "700", lineHeight: "1.3" }}>{q.title}</h3>
+                      <h3 style={{ margin: 0, fontSize: "1.15rem", color: "#ffffff", fontWeight: "600", lineHeight: "1.3" }}>{q.title}</h3>
                     </div>
                     <p className="q-topic">📂 {q.topic}</p>
 
@@ -808,217 +835,327 @@ const CompanyQuestions = ({ companyName = "Google" }) => {
           <div className={`problem-solver-modal-overlay ${isFullScreen ? "full-screen" : ""}`}>
             <div className={`problem-solver-studio-card ${isFullScreen ? "full-screen" : ""}`}>
               
-              {/* Studio Header Bar */}
-              <div className="studio-header-bar" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              {/* Studio Header Bar (Matching Navbar Design) */}
+              <div className="studio-header-bar" style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                padding: "10px 28px",
+                background: "#12183B",
+                borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
+                boxShadow: "0 4px 20px rgba(0, 0, 0, 0.25)"
+              }}>
                 {/* Website Logo Branding */}
                 <div className="studio-brand-logo" style={{ display: "flex", alignItems: "center" }}>
                   <img 
                     src={logo} 
                     alt="PreNova AI" 
-                    style={{ height: "52px", width: "auto", objectFit: "contain" }} 
+                    style={{ height: "80px", width: "auto", objectFit: "contain" }} 
                   />
                 </div>
 
-                {/* Studio Header Actions */}
-                <div className="studio-header-actions" style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                  <button 
-                    className="toggle-fullscreen-btn"
-                    onClick={() => setIsFullScreen(!isFullScreen)}
-                    title={isFullScreen ? "Switch to Windowed Modal" : "Switch to Full Screen Workspace"}
+                {/* User Profile Avatar & Interactive Dropdown (Matching Home Page Navbar) */}
+                <div className="navbar-profile-wrapper" ref={profileRef} style={{ position: "relative" }}>
+                  <button
+                    className={`navbar-profile-pill icon-only${profileOpen ? " open" : ""}`}
+                    onClick={() => setProfileOpen((prev) => !prev)}
+                    style={{
+                      padding: "3px",
+                      borderRadius: "50%",
+                      background: "#ffffff",
+                      border: "2px solid #e9d5ff",
+                      boxShadow: "0 4px 14px rgba(124, 58, 237, 0.35)",
+                      cursor: "pointer",
+                      outline: "none"
+                    }}
+                    title={user?.full_name || "Profile"}
                   >
-                    {isFullScreen ? "🗗 Windowed" : "⛶ Full Screen"}
+                    <div style={{
+                      width: "38px",
+                      height: "38px",
+                      borderRadius: "50%",
+                      background: "linear-gradient(135deg, #7c3aed, #a855f7)",
+                      color: "#ffffff",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      fontWeight: "800",
+                      fontSize: "14px",
+                      border: "2px solid rgba(255, 255, 255, 0.4)",
+                      letterSpacing: "0.5px"
+                    }}>
+                      {getInitials(user?.full_name || user?.username)}
+                    </div>
                   </button>
 
-                  <button 
-                    className={`mark-solved-btn ${solvedIds.has(activeProblem.id) ? "active" : ""}`}
-                    onClick={() => toggleSolvedStatus(activeProblem.id)}
-                  >
-                    {solvedIds.has(activeProblem.id) ? "✓ Solved" : "Mark as Solved"}
-                  </button>
+                  {/* Profile Dropdown */}
+                  {profileOpen && (
+                    <div className="profile-dropdown" role="menu" style={{
+                      position: "absolute",
+                      top: "calc(100% + 14px)",
+                      right: 0,
+                      width: "290px",
+                      background: "#ffffff",
+                      border: "1px solid rgba(168, 85, 247, 0.15)",
+                      borderRadius: "20px",
+                      boxShadow: "0 20px 60px rgba(0, 0, 0, 0.25), 0 4px 16px rgba(124, 58, 237, 0.15)",
+                      zIndex: 3000,
+                      overflow: "hidden",
+                      textAlign: "left"
+                    }}>
 
-                  <button className="close-solver-btn" onClick={() => setActiveProblem(null)}>
-                    ✕ Exit Studio
-                  </button>
+                      {/* Header */}
+                      <div className="profile-dropdown-header" style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "14px",
+                        padding: "20px 20px 16px",
+                        background: "linear-gradient(135deg, #f5f3ff 0%, #faf5ff 100%)"
+                      }}>
+                        <div style={{
+                          width: "48px",
+                          height: "48px",
+                          borderRadius: "50%",
+                          background: "linear-gradient(135deg, #7c3aed, #a855f7)",
+                          color: "white",
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          fontWeight: "800",
+                          fontSize: "18px",
+                          flexShrink: 0,
+                          border: "3px solid rgba(124, 58, 237, 0.2)",
+                          boxShadow: "0 4px 14px rgba(124, 58, 237, 0.3)"
+                        }}>
+                          {getInitials(user?.full_name || user?.username)}
+                        </div>
+                        <div className="profile-dropdown-info" style={{ display: "flex", flexDirection: "column" }}>
+                          <span style={{ fontSize: "15px", fontWeight: "700", color: "#111827" }}>
+                            {user?.full_name || user?.username || "User"}
+                          </span>
+                          <span style={{ fontSize: "12px", color: "#6b7280", wordBreak: "break-all" }}>
+                            {user?.email || "user@prenova.ai"}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div style={{ height: "1px", background: "#f3f4f6" }} />
+
+                      {/* Badges Row */}
+                      <div className="profile-dropdown-badges" style={{ display: "flex", gap: "8px", padding: "14px 20px 10px" }}>
+                        <span
+                          className="profile-plan-badge"
+                          style={{
+                            fontSize: "10px",
+                            fontWeight: "800",
+                            padding: "4px 10px",
+                            borderRadius: "20px",
+                            background: getPlanColor(user?.plan_type || user?.subscription_tier).bg,
+                            color: getPlanColor(user?.plan_type || user?.subscription_tier).color,
+                            letterSpacing: "0.5px"
+                          }}
+                        >
+                          {(user?.plan_type || user?.subscription_tier || "Pro").toUpperCase()} PLAN
+                        </span>
+                        <span style={{
+                          fontSize: "10px",
+                          fontWeight: "700",
+                          padding: "4px 10px",
+                          borderRadius: "20px",
+                          background: "#dcfce7",
+                          color: "#16a34a"
+                        }}>
+                          ✓ Verified
+                        </span>
+                      </div>
+
+                      {/* Member Since */}
+                      <div className="profile-dropdown-meta" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "2px 20px 14px", fontSize: "12px" }}>
+                        <span style={{ color: "#9ca3af" }}>Member since</span>
+                        <span style={{ color: "#374151", fontWeight: "600" }}>
+                          {user?.created_at ? new Date(user.created_at).toLocaleDateString("en-US", { month: "long", year: "numeric" }) : "August 2026"}
+                        </span>
+                      </div>
+
+                      <div style={{ height: "1px", background: "#f3f4f6" }} />
+
+                      {isAdmin && (
+                        <button
+                          className="profile-dropdown-item"
+                          onClick={() => {
+                            setProfileOpen(false);
+                            navigate("/admin");
+                          }}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "12px",
+                            width: "100%",
+                            padding: "12px 20px",
+                            background: "rgba(124, 58, 237, 0.12)",
+                            border: "none",
+                            fontSize: "14px",
+                            fontWeight: "600",
+                            color: "#7c3aed",
+                            cursor: "pointer",
+                            textAlign: "left"
+                          }}
+                        >
+                          <span style={{ fontSize: "16px" }}>🛠️</span>
+                          <span>Admin Control Center</span>
+                        </button>
+                      )}
+
+                      <button
+                        className="profile-dropdown-item"
+                        onClick={() => {
+                          setProfileOpen(false);
+                          navigate("/profile");
+                        }}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "12px",
+                          width: "100%",
+                          padding: "12px 20px",
+                          background: "transparent",
+                          border: "none",
+                          fontSize: "14px",
+                          fontWeight: "600",
+                          color: "#1f2937",
+                          cursor: "pointer",
+                          textAlign: "left"
+                        }}
+                      >
+                        <span style={{ fontSize: "16px" }}>👤</span>
+                        <span>My Profile & Security</span>
+                      </button>
+
+                      <button
+                        className="profile-dropdown-item"
+                        onClick={() => {
+                          setProfileOpen(false);
+                          navigate("/dashboard");
+                        }}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "12px",
+                          width: "100%",
+                          padding: "12px 20px",
+                          background: "transparent",
+                          border: "none",
+                          fontSize: "14px",
+                          fontWeight: "600",
+                          color: "#1f2937",
+                          cursor: "pointer",
+                          textAlign: "left"
+                        }}
+                      >
+                        <span style={{ fontSize: "16px" }}>📊</span>
+                        <span>Dashboard</span>
+                      </button>
+
+                      <button
+                        className="profile-dropdown-logout"
+                        onClick={() => {
+                          setProfileOpen(false);
+                          logout();
+                          navigate("/login");
+                        }}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "10px",
+                          width: "100%",
+                          padding: "14px 20px",
+                          background: "transparent",
+                          border: "none",
+                          borderTop: "1px solid #f3f4f6",
+                          cursor: "pointer",
+                          fontSize: "14px",
+                          fontWeight: "600",
+                          color: "#ef4444",
+                          textAlign: "left"
+                        }}
+                      >
+                        <span style={{ fontSize: "16px" }}>🛑</span>
+                        <span>Sign Out</span>
+                      </button>
+
+                    </div>
+                  )}
                 </div>
               </div>
 
               {/* Studio Main Split Workspace */}
               <div className="studio-split-workspace">
                 
-                {/* Left Column: Problem Question Details & Test Cases Tabbed Area */}
+                {/* Left Column: Problem Question Details */}
                 <div className="studio-left-pane">
-                  <div className="studio-pane-tabs">
-                    <button
-                      className={`pane-tab-btn ${activeStudioTab === "description" ? "active" : ""}`}
-                      onClick={() => setActiveStudioTab("description")}
-                    >
-                      📋 Question Details
-                    </button>
-                    <button
-                      className={`pane-tab-btn ${activeStudioTab === "testcases" ? "active" : ""}`}
-                      onClick={() => setActiveStudioTab("testcases")}
-                    >
-                      🧪 Test Cases {testResults ? `(${testResults.passedCount}/${testResults.totalCount} Passed)` : ""}
-                    </button>
-                  </div>
-
                   <div className="studio-pane-content">
-                    {activeStudioTab === "description" ? (
-                      <div className="question-description-content">
-                        {/* Question Details Header Block (Company Tag, Title, Difficulty, Category & Acceptance) */}
-                        <div className="question-details-header-block" style={{ marginBottom: "1.25rem", paddingBottom: "1rem", borderBottom: "1px solid rgba(255, 255, 255, 0.1)" }}>
-                          <span className="company-tag-pill">🏢 {companyName} DSA Studio</span>
-                          <h2 style={{ fontSize: "1.6rem", margin: "0.6rem 0 0.5rem 0", color: "#ffffff", fontWeight: "800", lineHeight: "1.25" }}>
-                            {activeProblem.title}
-                          </h2>
-                          <div className="studio-meta-pills" style={{ display: "flex", gap: "0.6rem", alignItems: "center", flexWrap: "wrap" }}>
-                            <span className={`diff-badge-text ${activeProblem.difficulty.toLowerCase()}`}>{activeProblem.difficulty}</span>
-                            <span className="studio-pill">Category: {activeProblem.topic}</span>
-                            <span className="studio-pill">Acceptance: {activeProblem.acceptance}</span>
-                          </div>
+                    <div className="question-description-content">
+                      {/* Question Details Header Block (Company Tag, Title, Difficulty, Category & Acceptance) */}
+                      <div className="question-details-header-block" style={{ marginBottom: "1.25rem", paddingBottom: "1rem", borderBottom: "1px solid rgba(255, 255, 255, 0.1)" }}>
+                        <h2 style={{ fontSize: "1.6rem", margin: "0 0 0.5rem 0", color: "#ffffff", fontWeight: "600", lineHeight: "1.25" }}>
+                          {activeProblem.title}
+                        </h2>
+                        <div className="studio-meta-pills" style={{ display: "flex", gap: "0.6rem", alignItems: "center", flexWrap: "wrap" }}>
+                          <span className={`diff-badge-text ${activeProblem.difficulty.toLowerCase()}`}>{activeProblem.difficulty}</span>
+                          <span className="studio-pill">Category: {activeProblem.topic}</span>
+                          <span className="studio-pill">Acceptance: {activeProblem.acceptance}</span>
                         </div>
+                      </div>
 
-                        <h4>Problem Statement & Description</h4>
-                        <div className="problem-text-box">
-                          <p>{activeProblem.instructions}</p>
-                          
-                          {activeProblem.whatWeAreDoing && (
-                            <div style={{ marginTop: "1rem", padding: "0.85rem 1.1rem", background: "rgba(168, 85, 247, 0.12)", borderRadius: "12px", borderLeft: "4px solid #a855f7" }}>
-                              <strong style={{ color: "#e9d5ff", fontSize: "0.92rem", display: "flex", alignItems: "center", gap: "0.4rem" }}>
-                                💡 What We Are Doing Here:
-                              </strong>
-                              <p style={{ margin: "0.35rem 0 0 0", color: "#cbd5e1", fontSize: "0.88rem", lineHeight: "1.5" }}>
-                                {activeProblem.whatWeAreDoing}
-                              </p>
-                            </div>
-                          )}
-                        </div>
+                      <h4>Problem Statement & Description</h4>
+                      <div className="problem-text-box">
+                        <p>{activeProblem.instructions}</p>
+                      </div>
 
-                        {activeProblem.examples && activeProblem.examples.length > 0 && (
-                          <div className="examples-section">
-                            <h4>Examples & Sample Outputs</h4>
-                            {activeProblem.examples.slice(0, 2).map((ex, idx) => (
-                              <div key={idx} className="example-item-box">
-                                <span className="ex-title">Example {idx + 1}:</span>
-                                <div className="ex-code-block">
-                                  <strong>Input:</strong> <code>{ex.input}</code><br/>
-                                  <strong>Output:</strong> <code>{ex.output}</code><br/>
-                                  {ex.explanation && <><strong>Explanation:</strong> {ex.explanation}</>}
-                                </div>
+                      {activeProblem.examples && activeProblem.examples.length > 0 && (
+                        <div className="examples-section">
+                          <h4>Examples & Sample Outputs</h4>
+                          {activeProblem.examples.slice(0, 2).map((ex, idx) => (
+                            <div key={idx} className="example-item-box">
+                              <span className="ex-title">Example {idx + 1}:</span>
+                              <div className="ex-code-block">
+                                <strong>Input:</strong> <code>{ex.input}</code><br/>
+                                <strong>Output:</strong> <code>{ex.output}</code><br/>
+                                {ex.explanation && <><strong>Explanation:</strong> {ex.explanation}</>}
                               </div>
-                            ))}
-                          </div>
-                        )}
-
-                        {activeProblem.constraints && (
-                          <div className="constraints-section">
-                            <h4>Constraints</h4>
-                            <pre className="constraints-box">{activeProblem.constraints}</pre>
-                          </div>
-                        )}
-
-                        <div className="complexity-section" style={{ marginTop: "1.25rem" }}>
-                          <h4 style={{ color: "#38bdf8", fontSize: "0.95rem", marginBottom: "0.6rem" }}>Expected Complexity Limits</h4>
-                          <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
-                            <div style={{ background: "rgba(59, 130, 246, 0.12)", border: "1px solid rgba(59, 130, 246, 0.3)", borderRadius: "10px", padding: "0.65rem 1rem", flex: "1", minWidth: "140px" }}>
-                              <span style={{ color: "#93c5fd", fontSize: "0.78rem", fontWeight: "700", display: "block" }}>⏱️ EXPECTED TIME COMPLEXITY</span>
-                              <strong style={{ color: "#60a5fa", fontSize: "1.05rem" }}>{activeProblem.targetTime || "O(N)"}</strong>
                             </div>
+                          ))}
+                        </div>
+                      )}
 
-                            <div style={{ background: "rgba(168, 85, 247, 0.12)", border: "1px solid rgba(168, 85, 247, 0.3)", borderRadius: "10px", padding: "0.65rem 1rem", flex: "1", minWidth: "140px" }}>
-                              <span style={{ color: "#e9d5ff", fontSize: "0.78rem", fontWeight: "700", display: "block" }}>💾 EXPECTED SPACE COMPLEXITY</span>
-                              <strong style={{ color: "#c084fc", fontSize: "1.05rem" }}>{activeProblem.targetSpace || "O(1)"}</strong>
-                            </div>
+                      {activeProblem.constraints && (
+                        <div className="constraints-section">
+                          <h4>Constraints</h4>
+                          <pre className="constraints-box">{activeProblem.constraints}</pre>
+                        </div>
+                      )}
+
+                      <div className="complexity-section" style={{ marginTop: "1.25rem" }}>
+                        <h4 style={{ color: "#38bdf8", fontSize: "0.95rem", marginBottom: "0.6rem" }}>Expected Complexity Limits</h4>
+                        <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
+                          <div style={{ background: "rgba(59, 130, 246, 0.12)", border: "1px solid rgba(59, 130, 246, 0.3)", borderRadius: "10px", padding: "0.65rem 1rem", flex: "1", minWidth: "140px" }}>
+                            <span style={{ color: "#93c5fd", fontSize: "0.78rem", fontWeight: "700", display: "block" }}>⏱️ EXPECTED TIME COMPLEXITY</span>
+                            <strong style={{ color: "#60a5fa", fontSize: "1.05rem" }}>{activeProblem.targetTime || "O(N)"}</strong>
+                          </div>
+
+                          <div style={{ background: "rgba(168, 85, 247, 0.12)", border: "1px solid rgba(168, 85, 247, 0.3)", borderRadius: "10px", padding: "0.65rem 1rem", flex: "1", minWidth: "140px" }}>
+                            <span style={{ color: "#e9d5ff", fontSize: "0.78rem", fontWeight: "700", display: "block" }}>💾 EXPECTED SPACE COMPLEXITY</span>
+                            <strong style={{ color: "#c084fc", fontSize: "1.05rem" }}>{activeProblem.targetSpace || "O(1)"}</strong>
                           </div>
                         </div>
                       </div>
-                    ) : (
-                      /* LeetCode-Style Test Cases & Submission View */
-                      <div className="testcases-pane-content">
-                        {testResults && (
-                          <div style={{
-                            background: "linear-gradient(135deg, rgba(16, 185, 129, 0.14) 0%, rgba(15, 23, 42, 0.95) 100%)",
-                            border: "1px solid rgba(16, 185, 129, 0.35)",
-                            borderRadius: "14px",
-                            padding: "1.2rem 1.4rem",
-                            marginBottom: "1.2rem",
-                            boxShadow: "0 4px 16px rgba(16, 185, 129, 0.15)"
-                          }}>
-                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
-                              <span style={{ color: "#34d399", fontWeight: "800", fontSize: "1.25rem", display: "flex", alignItems: "center", gap: "0.4rem" }}>
-                                🎉 Accepted
-                              </span>
-                              <span style={{ background: "rgba(16, 185, 129, 0.2)", color: "#6ee7b7", padding: "4px 12px", borderRadius: "20px", fontSize: "0.82rem", fontWeight: "700", border: "1px solid rgba(16, 185, 129, 0.3)" }}>
-                                {testResults.passedCount} / {testResults.totalCount} Testcases Passed (Sample + Hidden)
-                              </span>
-                            </div>
-                            
-                            <div style={{ display: "flex", gap: "1.5rem", color: "#94a3b8", fontSize: "0.85rem", marginTop: "0.6rem" }}>
-                              <span>⚡ <strong>Runtime:</strong> {testResults.runtime || "12ms"} <span style={{ color: "#38bdf8", fontWeight: "600" }}>(Beats 95.4%)</span></span>
-                              <span>💾 <strong>Memory:</strong> {testResults.memory || "13.4 MB"} <span style={{ color: "#a855f7", fontWeight: "600" }}>(Beats 91.8%)</span></span>
-                            </div>
-                          </div>
-                        )}
-
-                        {(() => {
-                          const sampleCases = (activeProblem.testCases || []).filter(tc => !tc.isHidden);
-                          const activeCase = sampleCases[selectedTestCaseIndex] || sampleCases[0];
-
-                          return (
-                            <>
-                              <div className="testcase-selector-bar">
-                                {sampleCases.map((tc, idx) => {
-                                  const tcRes = testResults?.results?.find(r => r.id === tc.id);
-                                  return (
-                                    <button
-                                      key={tc.id}
-                                      className={`tc-tab-pill ${selectedTestCaseIndex === idx ? "active" : ""} ${tcRes?.passed ? "passed" : ""}`}
-                                      onClick={() => setSelectedTestCaseIndex(idx)}
-                                    >
-                                      {tcRes ? (tcRes.passed ? "✓ " : "❌ ") : ""}{tc.name}
-                                    </button>
-                                  );
-                                })}
-                              </div>
-
-                              {activeCase && (
-                                <div className="testcase-detail-box">
-                                  <div className="tc-header-row">
-                                    <strong>{activeCase.name}</strong>
-                                  </div>
-
-                                  <div className="tc-field-group">
-                                    <label>Input:</label>
-                                    <pre className="tc-val-box">{activeCase.input}</pre>
-                                  </div>
-
-                                  <div className="tc-field-group">
-                                    <label>Expected Output:</label>
-                                    <pre className="tc-val-box green">{activeCase.expected}</pre>
-                                  </div>
-
-                                  {testResults && (
-                                    <div className="tc-field-group">
-                                      <label>Actual Output (Your Solution):</label>
-                                      <pre className="tc-val-box blue">
-                                        {testResults.results?.find(r => r.id === activeCase.id)?.actual || activeCase.expected}
-                                      </pre>
-                                    </div>
-                                  )}
-                                </div>
-                              )}
-                            </>
-                          );
-                        })()}
-                      </div>
-                    )}
+                    </div>
                   </div>
                 </div>
 
                 {/* Right Column: Code Editor & Execution Console */}
                 <div className="studio-right-pane">
                   <div className="editor-top-toolbar">
-                    <span>Code Editor ({selectedLang.toUpperCase()})</span>
                     <div className="lang-picker-box">
                       <label>Language:</label>
                       <select value={selectedLang} onChange={(e) => handleLanguageChange(e.target.value)}>
@@ -1029,6 +1166,10 @@ const CompanyQuestions = ({ companyName = "Google" }) => {
                         <option value="java">Java 17</option>
                       </select>
                     </div>
+
+                    <button className="close-solver-btn" onClick={() => setActiveProblem(null)}>
+                      ✕ Exit Studio
+                    </button>
                   </div>
 
                   {copyWarning && (
@@ -1060,7 +1201,7 @@ const CompanyQuestions = ({ companyName = "Google" }) => {
                   {/* Studio Action Buttons */}
                   <div className="studio-actions-bar">
                     <button className="btn-run-tests" onClick={handleRunCode} disabled={evaluating}>
-                      {evaluating ? "⏳ Executing..." : "▶ Run Test Cases"}
+                      {evaluating ? "⏳ Executing..." : "▶ Run"}
                     </button>
 
                     <button className="btn-submit-solution" onClick={handleSubmitSolution} disabled={evaluating}>
@@ -1068,24 +1209,99 @@ const CompanyQuestions = ({ companyName = "Google" }) => {
                     </button>
                   </div>
 
-                  {/* Console Execution Results Box */}
-                  {(testResults || aiOutput) && (
-                    <div className="studio-console-output-box">
+                  {/* Test Cases & Execution Results Panel */}
+                  <div className="testcases-pane-content" style={{ marginTop: "1.25rem", paddingTop: "1rem", borderTop: "1px solid rgba(255, 255, 255, 0.1)" }}>
+                    <h4 style={{ color: "#ffffff", fontSize: "0.95rem", marginBottom: "0.8rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                      🧪 Test Cases & Results
                       {testResults && (
-                        <div className="console-results-header">
-                          <span className="console-title">📊 Execution Results:</span>
-                          <span className="console-badge green">✓ Passed {testResults.passedCount}/{testResults.totalCount} Test Cases</span>
-                          <span className="console-speed">Speed: {testResults.runtime}</span>
-                        </div>
+                        <span style={{ background: "rgba(16, 185, 129, 0.2)", color: "#6ee7b7", padding: "2px 10px", borderRadius: "12px", fontSize: "0.78rem", fontWeight: "700", border: "1px solid rgba(16, 185, 129, 0.3)" }}>
+                          {testResults.passedCount} / {testResults.totalCount} Passed
+                        </span>
                       )}
+                    </h4>
 
-                      {aiOutput && (
-                        <div className="ai-output-area">
-                          <pre>{aiOutput}</pre>
+                    {testResults && (
+                      <div style={{
+                        background: "linear-gradient(135deg, rgba(16, 185, 129, 0.14) 0%, rgba(15, 23, 42, 0.95) 100%)",
+                        border: "1px solid rgba(16, 185, 129, 0.35)",
+                        borderRadius: "14px",
+                        padding: "1rem 1.25rem",
+                        marginBottom: "1rem",
+                        boxShadow: "0 4px 16px rgba(16, 185, 129, 0.15)"
+                      }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.4rem" }}>
+                          <span style={{ color: "#34d399", fontWeight: "800", fontSize: "1.15rem", display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                            🎉 Accepted
+                          </span>
+                          <span style={{ background: "rgba(16, 185, 129, 0.2)", color: "#6ee7b7", padding: "4px 12px", borderRadius: "20px", fontSize: "0.82rem", fontWeight: "700", border: "1px solid rgba(16, 185, 129, 0.3)" }}>
+                            {testResults.passedCount} / {testResults.totalCount} Testcases Passed (Sample + Hidden)
+                          </span>
                         </div>
-                      )}
-                    </div>
-                  )}
+                        
+                        <div style={{ display: "flex", gap: "1.5rem", color: "#94a3b8", fontSize: "0.85rem", marginTop: "0.4rem" }}>
+                          <span>⚡ <strong>Runtime:</strong> {testResults.runtime || "12ms"} <span style={{ color: "#38bdf8", fontWeight: "600" }}>(Beats 95.4%)</span></span>
+                          <span>💾 <strong>Memory:</strong> {testResults.memory || "13.4 MB"} <span style={{ color: "#a855f7", fontWeight: "600" }}>(Beats 91.8%)</span></span>
+                        </div>
+                      </div>
+                    )}
+
+                    {aiOutput && (
+                      <div className="ai-output-area" style={{ marginBottom: "1rem" }}>
+                        <pre>{aiOutput}</pre>
+                      </div>
+                    )}
+
+                    {(() => {
+                      const sampleCases = (activeProblem.testCases || []).filter(tc => !tc.isHidden);
+                      const activeCase = sampleCases[selectedTestCaseIndex] || sampleCases[0];
+
+                      return (
+                        <>
+                          <div className="testcase-selector-bar">
+                            {sampleCases.map((tc, idx) => {
+                              const tcRes = testResults?.results?.find(r => r.id === tc.id);
+                              return (
+                                <button
+                                  key={tc.id}
+                                  className={`tc-tab-pill ${selectedTestCaseIndex === idx ? "active" : ""} ${tcRes?.passed ? "passed" : ""}`}
+                                  onClick={() => setSelectedTestCaseIndex(idx)}
+                                >
+                                  {tcRes ? (tcRes.passed ? "✓ " : "❌ ") : ""}{tc.name}
+                                </button>
+                              );
+                            })}
+                          </div>
+
+                          {activeCase && (
+                            <div className="testcase-detail-box">
+                              <div className="tc-header-row">
+                                <strong>{activeCase.name}</strong>
+                              </div>
+
+                              <div className="tc-field-group">
+                                <label>Input:</label>
+                                <pre className="tc-val-box">{activeCase.input}</pre>
+                              </div>
+
+                              <div className="tc-field-group">
+                                <label>Expected Output:</label>
+                                <pre className="tc-val-box green">{activeCase.expected}</pre>
+                              </div>
+
+                              {testResults && (
+                                <div className="tc-field-group">
+                                  <label>Actual Output (Your Solution):</label>
+                                  <pre className="tc-val-box blue">
+                                    {testResults.results?.find(r => r.id === activeCase.id)?.actual || activeCase.expected}
+                                  </pre>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </>
+                      );
+                    })()}
+                  </div>
 
                 </div>
 

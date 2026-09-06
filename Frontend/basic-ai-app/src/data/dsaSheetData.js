@@ -679,36 +679,122 @@ export const TOP_100_DSA_PROBLEMS = [
   }
 ];
 
-// Helper function to guarantee whatWeAreDoing explanation, 2 examples, 2 visible test cases + 3 hidden test cases, and multi-language code templates
+// Helper to construct 3 realistic problem-specific sample test cases based on topic and title
+export const generateTestCasesForProblem = (title = "", topic = "", instructions = "", existingCases = [], existingExamples = []) => {
+  const normTopic = (topic || "").toLowerCase();
+  const normTitle = (title || "").toLowerCase();
+
+  // Filter out any existing cases that have valid custom inputs
+  const validExisting = (existingCases || []).filter(tc => 
+    tc && tc.input && !tc.input.includes("Sample input") && !tc.input.includes("Hidden Large")
+  );
+
+  let tc1, tc2, tc3;
+
+  if (normTopic.includes("string") || normTitle.includes("string") || normTitle.includes("palindrome") || normTitle.includes("anagram") || normTitle.includes("word") || normTitle.includes("parentheses")) {
+    if (normTitle.includes("palindrome")) {
+      tc1 = { input: 's = "A man, a plan, a canal: Panama"', expected: "true" };
+      tc2 = { input: 's = "race a car"', expected: "false" };
+      tc3 = { input: 's = " "', expected: "true" };
+    } else if (normTitle.includes("anagram")) {
+      tc1 = { input: 's = "anagram", t = "nagaram"', expected: "true" };
+      tc2 = { input: 's = "rat", t = "car"', expected: "false" };
+      tc3 = { input: 's = "a", t = "a"', expected: "true" };
+    } else if (normTitle.includes("parentheses") || normTitle.includes("bracket")) {
+      tc1 = { input: 's = "()[]{}"', expected: "true" };
+      tc2 = { input: 's = "(]"', expected: "false" };
+      tc3 = { input: 's = "([{}])"', expected: "true" };
+    } else {
+      tc1 = { input: 's = "leetcode"', expected: "2" };
+      tc2 = { input: 's = "loveleetcode"', expected: "2" };
+      tc3 = { input: 's = "a"', expected: "0" };
+    }
+  } else if (normTopic.includes("tree") || normTopic.includes("bst") || normTitle.includes("tree") || normTitle.includes("bst")) {
+    tc1 = { input: "root = [3,9,20,null,null,15,7]", expected: "3" };
+    tc2 = { input: "root = [1,null,2]", expected: "2" };
+    tc3 = { input: "root = []", expected: "0" };
+  } else if (normTopic.includes("linked list") || normTitle.includes("list") || normTitle.includes("node")) {
+    tc1 = { input: "head = [1,2,3,4,5]", expected: "[5,4,3,2,1]" };
+    tc2 = { input: "head = [1,2]", expected: "[2,1]" };
+    tc3 = { input: "head = []", expected: "[]" };
+  } else if (normTopic.includes("graph") || normTitle.includes("island") || normTitle.includes("course") || normTitle.includes("graph")) {
+    tc1 = { input: 'grid = [["1","1","0"],["1","1","0"],["0","0","1"]]', expected: "2" };
+    tc2 = { input: 'grid = [["1","1","1"],["0","1","0"],["1","1","1"]]', expected: "1" };
+    tc3 = { input: 'grid = [["0","0"],["0","0"]]', expected: "0" };
+  } else if (normTopic.includes("search") || normTitle.includes("search") || normTitle.includes("binary search") || normTitle.includes("sorted")) {
+    tc1 = { input: "nums = [-1,0,3,5,9,12], target = 9", expected: "4" };
+    tc2 = { input: "nums = [-1,0,3,5,9,12], target = 2", expected: "-1" };
+    tc3 = { input: "nums = [5], target = 5", expected: "0" };
+  } else if (normTopic.includes("dynamic") || normTopic.includes("dp") || normTitle.includes("climb") || normTitle.includes("stock") || normTitle.includes("robber") || normTitle.includes("coin")) {
+    if (normTitle.includes("stock")) {
+      tc1 = { input: "prices = [7,1,5,3,6,4]", expected: "5" };
+      tc2 = { input: "prices = [7,6,4,3,1]", expected: "0" };
+      tc3 = { input: "prices = [1,2,3,4,5]", expected: "4" };
+    } else if (normTitle.includes("climb")) {
+      tc1 = { input: "n = 2", expected: "2" };
+      tc2 = { input: "n = 3", expected: "3" };
+      tc3 = { input: "n = 5", expected: "8" };
+    } else {
+      tc1 = { input: "nums = [10,9,2,5,3,7,101,18]", expected: "4" };
+      tc2 = { input: "nums = [0,1,0,3,2,3]", expected: "4" };
+      tc3 = { input: "nums = [7,7,7,7]", expected: "1" };
+    }
+  } else if (normTopic.includes("heap") || normTitle.includes("kth") || normTitle.includes("median") || normTitle.includes("frequent")) {
+    tc1 = { input: "nums = [3,2,1,5,6,4], k = 2", expected: "5" };
+    tc2 = { input: "nums = [3,2,3,1,2,4,5,5,6], k = 4", expected: "4" };
+    tc3 = { input: "nums = [1], k = 1", expected: "1" };
+  } else {
+    // Default Array / Hash test cases
+    tc1 = { input: "nums = [2,7,11,15], target = 9", expected: "[0,1]" };
+    tc2 = { input: "nums = [3,2,4], target = 6", expected: "[1,2]" };
+    tc3 = { input: "nums = [3,3], target = 6", expected: "[0,1]" };
+  }
+
+  // Override with valid existing cases if provided
+  if (validExisting[0]) {
+    tc1 = { input: validExisting[0].input, expected: validExisting[0].expected };
+  }
+  if (validExisting[1]) {
+    tc2 = { input: validExisting[1].input, expected: validExisting[1].expected };
+  }
+  if (validExisting[2]) {
+    tc3 = { input: validExisting[2].input, expected: validExisting[2].expected };
+  }
+
+  // Also check existingExamples
+  if (existingExamples[0] && existingExamples[0].input && !existingExamples[0].input.includes("Sample input")) {
+    tc1 = { input: existingExamples[0].input, expected: existingExamples[0].output || tc1.expected };
+  }
+  if (existingExamples[1] && existingExamples[1].input && !existingExamples[1].input.includes("Sample input")) {
+    tc2 = { input: existingExamples[1].input, expected: existingExamples[1].output || tc2.expected };
+  }
+  if (existingExamples[2] && existingExamples[2].input && !existingExamples[2].input.includes("Sample input")) {
+    tc3 = { input: existingExamples[2].input, expected: existingExamples[2].output || tc3.expected };
+  }
+
+  return [
+    { id: 1, name: "Test Case 1", input: tc1.input, expected: tc1.expected, isHidden: false },
+    { id: 2, name: "Test Case 2", input: tc2.input, expected: tc2.expected, isHidden: false },
+    { id: 3, name: "Test Case 3", input: tc3.input, expected: tc3.expected, isHidden: false },
+    { id: 4, name: "Test Case 4 (Hidden Large Stream)", input: "Large dataset stream (10^5 elements)", expected: "Optimal Output Result", isHidden: true },
+    { id: 5, name: "Test Case 5 (Hidden Boundary)", input: "Min/Max Boundary Constraints", expected: "Boundary Result", isHidden: true },
+    { id: 6, name: "Test Case 6 (Hidden Corner Case)", input: "Empty / Negative / Zero Stream", expected: "Corner Case Output", isHidden: true }
+  ];
+};
+
+// Helper function to guarantee whatWeAreDoing explanation, 3 examples, 3 visible test cases + 3 hidden test cases, and multi-language code templates
 export const enrichProblemDetails = (prob) => {
   const title = prob.title || "DSA Problem";
-  
-  // Default C template
-  const defaultCTemplate = `#include <stdio.h>\n#include <stdlib.h>\n\n// Solution for ${title} in C Language\nint solve() {\n    // Write your C code here\n    return 0;\n}`;
+  const topic = prob.topic || "Arrays";
 
-  // 2 Examples per problem
-  const existingExamples = prob.examples || [];
-  const ex1 = existingExamples[0] || {
-    input: "nums = [2,7,11,15], target = 9",
-    output: "[0,1]",
-    explanation: "Because nums[0] + nums[1] == 9, we return [0, 1]."
-  };
-  const ex2 = existingExamples[1] || {
-    input: "nums = [3,2,4], target = 6",
-    output: "[1,2]",
-    explanation: "Because nums[1] + nums[2] == 6, we return [1, 2]."
-  };
+  const builtCases = generateTestCasesForProblem(title, topic, prob.instructions, prob.testCases, prob.examples);
 
-  // 2 Visible Sample Test Cases + 3 Hidden Evaluation Test Cases (5 Total)
-  const cases = prob.testCases || [];
-  const tc1 = cases[0] || { id: 1, name: "Test Case 1 (Sample)", input: ex1.input, expected: ex1.output, isHidden: false };
-  const tc2 = cases[1] || { id: 2, name: "Test Case 2 (Sample)", input: ex2.input, expected: ex2.output, isHidden: false };
-  const tc3 = cases[2] || { id: 3, name: "Test Case 3 (Hidden Large Input)", input: "100000\n[10^5 Large Array Stream]", expected: "Optimal Result", isHidden: true };
-  const tc4 = cases[3] || { id: 4, name: "Test Case 4 (Hidden Boundary Limits)", input: "Min/Max Boundary Constraints", expected: "Boundary Result", isHidden: true };
-  const tc5 = cases[4] || { id: 5, name: "Test Case 5 (Hidden Corner Case)", input: "Empty / Negative / Zero Stream", expected: "Corner Case Output", isHidden: true };
+  const ex1 = { input: builtCases[0].input, output: builtCases[0].expected, explanation: `Standard primary test case for ${title}.` };
+  const ex2 = { input: builtCases[1].input, output: builtCases[1].expected, explanation: `Secondary variant test case for ${title}.` };
+  const ex3 = { input: builtCases[2].input, output: builtCases[2].expected, explanation: `Boundary / edge test case for ${title}.` };
 
   const whatWeAreDoing = prob.whatWeAreDoing || 
-    `Our objective is to design an optimal algorithm for "${title}" that fulfills the problem constraints with minimal time & space complexity, handling all sample inputs as well as 3 hidden evaluation test cases.`;
+    `Our objective is to design an optimal algorithm for "${title}" that fulfills the problem constraints with minimal time & space complexity, handling 3 sample test cases as well as hidden evaluation test cases.`;
 
   const targetTime = prob.targetTime || "O(n)";
   const targetSpace = prob.targetSpace || "O(1)";
@@ -718,9 +804,9 @@ export const enrichProblemDetails = (prob) => {
     targetTime,
     targetSpace,
     whatWeAreDoing,
-    examples: [ex1, ex2],
-    testCases: [tc1, tc2, tc3, tc4, tc5],
-    codeTemplates: {
+    examples: [ex1, ex2, ex3],
+    testCases: builtCases,
+    codeTemplates: prob.codeTemplates || {
       javascript: `function solve(input) {\n  // TODO: Write your solution logic here\n  \n}`,
       python: `def solve(input):\n    # TODO: Write your solution logic here\n    pass`,
       c: `#include <stdio.h>\n#include <stdlib.h>\n\nint solve() {\n    // TODO: Write your C solution logic here\n    return 0;\n}`,
@@ -757,4 +843,5 @@ export const getQuestionsForCompany = (companyName = "Google") => {
 
   return result.map(enrichProblemDetails);
 };
+
 

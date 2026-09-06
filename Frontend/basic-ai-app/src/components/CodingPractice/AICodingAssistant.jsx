@@ -232,7 +232,7 @@ const AICodingAssistant = ({ selectedProblem }) => {
         <div className="editor-side">
           <div className="editor-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-              <span>💻 Code Editor {selectedProblem ? `- ${selectedProblem.title}` : ""}</span>
+              {selectedProblem && <span>{selectedProblem.title}</span>}
               <select
                 value={language}
                 onChange={(e) => handleLanguageChange(e.target.value)}
