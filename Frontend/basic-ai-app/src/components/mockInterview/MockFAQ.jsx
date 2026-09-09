@@ -5,91 +5,37 @@ const faqData = [
   {
     question: "What is an AI Mock Interview?",
     answer:
-      "PrepNova AI Mock Interview simulates a real interview experience using Artificial Intelligence. It asks technical, HR, behavioral, coding, and company-specific questions based on your resume, selected company, and job role. After every answer, the AI provides instant feedback to improve your interview performance."
+      "PrepNova AI Mock Interview simulates a real interview experience using Artificial Intelligence. It asks technical, HR, behavioral, coding, and company-specific questions based on your resume, selected company, and job role. After every answer, the AI provides instant feedback to improve your performance."
   },
 
   {
-    question: "Is this platform suitable for freshers?",
+    question: "Can I practice company-specific and resume-based interviews?",
     answer:
-      "Yes. PrepNova AI is designed for freshers as well as experienced professionals. Freshers can practice HR, aptitude, and technical interviews, while experienced candidates can prepare for senior-level technical and managerial interviews."
-  },
-
-  {
-    question: "Can I practice company-specific interviews?",
-    answer:
-      "Yes. You can prepare for interviews of Google, Microsoft, Amazon, Meta, Netflix, Apple, TCS, Infosys, Wipro, Cognizant, Deloitte, Capgemini, IBM, Accenture, and many other companies."
+      "Yes. You can upload your resume or job description to receive tailored questions, or select target companies like Google, Microsoft, Amazon, TCS, Infosys, and many more to practice role-specific scenarios."
   },
 
   {
     question: "Does the AI provide feedback after every interview?",
     answer:
-      "Absolutely. After every interview, PrepNova AI generates a detailed report including technical score, communication score, confidence level, grammar analysis, vocabulary, answer quality, and personalized improvement suggestions."
+      "Absolutely. After every interview, PrepNova AI generates a detailed report including technical score, communication score, confidence level, grammar analysis, answer quality, and personalized improvement suggestions."
   },
 
   {
-    question: "Will interview questions be based on my resume?",
+    question: "Does the platform support coding and voice-based interviews?",
     answer:
-      "Yes. Once you upload your resume, the AI analyzes your education, projects, internships, certifications, skills, and experience to generate personalized interview questions."
-  },
-
-  {
-    question: "Can I upload a Job Description (JD)?",
-    answer:
-      "Yes. Uploading a Job Description allows the AI to generate role-specific interview questions based on the required technologies, responsibilities, and skills mentioned by the recruiter."
-  },
-
-  {
-    question: "Does the platform support coding interviews?",
-    answer:
-      "Yes. Practice Data Structures & Algorithms, SQL, System Design, OOP, Java, Python, JavaScript, C++, Machine Learning, Web Development, and many other technical interview topics."
-  },
-
-  {
-    question: "Can I take voice-based interviews?",
-    answer:
-      "Yes. PrepNova AI supports voice interviews using Speech Recognition, allowing you to answer naturally just like a real interview."
-  },
-
-  {
-    question: "Does the platform support webcam analysis?",
-    answer:
-      "Yes. With your permission, the AI can analyze facial expressions, confidence, posture, eye contact, and speaking behavior to provide more realistic interview feedback."
-  },
-
-  {
-    question: "How is my interview score calculated?",
-    answer:
-      "Your score is calculated using communication skills, technical knowledge, answer relevance, confidence, fluency, grammar, vocabulary, response time, and overall interview performance."
-  },
-
-  {
-    question: "Can I track my interview progress?",
-    answer:
-      "Yes. Every completed interview is stored in your dashboard where you can compare previous scores, identify weak areas, and monitor your improvement over time."
+      "Yes. PrepNova AI supports real-time voice interviews using speech recognition as well as technical coding interviews covering Data Structures, Algorithms, System Design, SQL, and popular programming languages."
   },
 
   {
     question: "Is my resume and interview data secure?",
     answer:
-      "Absolutely. Your uploaded resumes, interview recordings, reports, and personal information are securely stored and never shared with recruiters or third parties without your permission."
-  },
-
-  {
-    question: "Can I practice unlimited interviews?",
-    answer:
-      "Depending on your subscription plan, you can practice unlimited mock interviews, receive unlimited reports, retry interviews, and continuously improve your performance."
-  },
-
-  {
-    question: "Can experienced professionals also use PrepNova AI?",
-    answer:
-      "Yes. Experienced professionals can prepare for Senior Software Engineer, Tech Lead, Manager, Product Manager, DevOps Engineer, Cloud Engineer, Data Scientist, AI Engineer, and Architect interviews."
+      "Absolutely. Your uploaded resumes, interview recordings, reports, and personal information are securely encrypted and never shared with recruiters or third parties without your explicit permission."
   },
 
   {
     question: "Why should I choose PrepNova AI over traditional mock interviews?",
     answer:
-      "PrepNova AI is available 24/7, provides instant personalized feedback, supports company-specific interviews, analyzes resumes and job descriptions, tracks progress, supports voice interviews, and allows unlimited practice at a much lower cost than traditional mock interviews."
+      "PrepNova AI is available 24/7, provides instant personalized feedback, tracks your progress over time, and allows unlimited practice at a fraction of the cost of traditional human mock interviews."
   }
 ];
 
@@ -111,7 +57,7 @@ const MockFAQ = () => {
 
         <span>Frequently Asked Questions</span>
 
-        <h2>Everything You Need To Know</h2>
+        <h2>Everything You <span>Need To Know</span></h2>
 
         <p>
           Find answers to the most common questions about

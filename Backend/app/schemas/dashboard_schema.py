@@ -64,7 +64,7 @@ class DashboardMetricsResponse(BaseModel):
     recommendations: List[Dict[str, Any]] = Field(default_factory=list)
     career_roadmap: List[Dict[str, Any]] = Field(default_factory=list)
     weak_areas: List[Dict[str, Any]] = Field(default_factory=list)
-    weekly_activity: List[Dict[str, Any]] = Field(default_factory=list)
+    weekly_activity: Dict[str, Any] = Field(default_factory=dict)
     performance_history: Dict[str, Any] = Field(default_factory=dict)
     goals: List[Dict[str, Any]] = Field(default_factory=list)
     achievements: Dict[str, Any] = Field(default_factory=dict)

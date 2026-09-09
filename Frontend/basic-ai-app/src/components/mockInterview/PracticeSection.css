@@ -2,7 +2,7 @@
 
     padding:50px 8%;
 
-    background:white;
+    background:#12183B;
 }
 
 .practice-title{
@@ -14,20 +14,32 @@
 
 .practice-title h2{
 
-    font-size:50px;
+    font-size:42px;
 
-    font-weight:550;
+    font-weight:600;
 
-    color:#111827;
+    color:#ffffff;
 
     margin-bottom:20px;
 }
 
+.practice-title h2 span,
+.practice-left h3 span{
+
+    background: linear-gradient(135deg, #ff7a45, #E85D30);
+
+    -webkit-background-clip: text;
+
+    -webkit-text-fill-color: transparent;
+
+    display: inline-block;
+}
+
 .practice-title p{
 
-    font-size:20px;
+    font-size:18px;
 
-    color:#6b7280;
+    color:#cbd5e1;
 
     max-width:850px;
 
@@ -49,22 +61,24 @@
 
 .practice-left h3{
 
-    font-size:40px;
+    font-size:36px;
 
     line-height:1.2;
 
     margin-bottom:30px;
 
-    color:#111827;
+    color:#ffffff;
+
+    font-weight:600;
 }
 
 .practice-left p{
 
-    font-size:20px;
+    font-size:18px;
 
     line-height:1.9;
 
-    color:#6b7280;
+    color:#cbd5e1;
 
     margin-bottom:40px;
 }
@@ -84,7 +98,7 @@
 
     font-weight:500;
 
-    color:#111827;
+    color:#e2e8f0;
 }
 
 .practice-right{

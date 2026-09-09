@@ -13,7 +13,7 @@ import {
   FaSignOutAlt,
 } from "react-icons/fa";
 
-import Dashboard from "../components/MockInterviews/Dashboard";
+import MockInterviewWelcome from "../components/MockInterviews/MockInterviewWelcome";
 import InterviewSetup from "../components/MockInterviews/InterviewSetup";
 import AIInterviewRoom from "../components/MockInterviews/AIInterviewRoom";
 import InterviewHistory from "../components/MockInterviews/InterviewHistory";
@@ -23,7 +23,7 @@ const MockInterviews = () => {
   const navigate = useNavigate();
   const { token, loading, logout } = useAuth();
 
-  const [activePage, setActivePage] = useState("dashboard");
+  const [activePage, setActivePage] = useState("welcome");
 
   const [interviewStarted, setInterviewStarted] = useState(false);
 
@@ -57,7 +57,7 @@ const MockInterviews = () => {
           <div className="loader-spinner"></div>
 
           <h3 className="loader-text">
-            Loading PrepNova AI Dashboard...
+            Loading PrepNova AI Workspace...
           </h3>
         </div>
       </div>
@@ -111,14 +111,14 @@ const MockInterviews = () => {
         <div className="sidebarMenu">
 
           <button
-            className={`menuBtn ${activePage === "dashboard" ? "active" : ""}`}
+            className={`menuBtn ${activePage === "welcome" ? "active" : ""}`}
             onClick={() => {
               setInterviewStarted(false);
-              setActivePage("dashboard");
+              setActivePage("welcome");
             }}
           >
             <FaHome />
-            <span>Dashboard</span>
+            <span>Welcome</span>
           </button>
 
           <button
@@ -168,9 +168,11 @@ const MockInterviews = () => {
 
       <main className="mockContent">
 
-        {activePage === "dashboard" && (
-          <Dashboard
-            onPracticeNow={handlePracticeNow}
+        {activePage === "welcome" && (
+          <MockInterviewWelcome
+            onStartInterview={handlePracticeNow}
+            onViewHistory={() => setActivePage("history")}
+            onQuickPreset={handleStartInterview}
           />
         )}
 

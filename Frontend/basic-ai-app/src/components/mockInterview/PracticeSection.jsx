@@ -10,7 +10,7 @@ const PracticeSection = () => {
       <div className="practice-title">
 
         <h2>
-          Practice Makes You Interview-Perfect
+          Practice Makes You <span>Interview-Perfect</span>
         </h2>
 
         <p>
@@ -25,7 +25,7 @@ const PracticeSection = () => {
         <div className="practice-left">
 
           <h3>
-            Your Next Interview = Your Dream Job
+            Your Next Interview = <span>Your Dream Job</span>
           </h3>
 
           <p>
@@ -43,7 +43,7 @@ const PracticeSection = () => {
 
             <div>✔ Recruiter-trained AI Questions</div>
 
-            <div>✔ Free AI Imterview Practice</div>
+            <div>✔ Free AI Interview Practice</div>
 
           </div>
 

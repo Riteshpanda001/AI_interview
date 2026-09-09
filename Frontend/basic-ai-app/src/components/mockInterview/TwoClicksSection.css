@@ -6,7 +6,7 @@
 
     padding:120px 8%;
 
-    background:#fff;
+    background:#12183B;
 }
 
 .two-container{
@@ -26,16 +26,16 @@
 
     line-height:1.15;
 
-    color:#111827;
+    color:#ffffff;
 
     margin-bottom:25px;
 
-    font-weight:700;
+    font-weight:600;
 }
 
 .two-content p{
 
-    color:#6b7280;
+    color:#cbd5e1;
 
     font-size:19px;
 
@@ -61,7 +61,7 @@
 
     font-weight:500;
 
-    color:#111827;
+    color:#e2e8f0;
 }
 
 .two-image{

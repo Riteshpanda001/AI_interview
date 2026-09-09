@@ -6,7 +6,7 @@
 
     padding:120px 8%;
 
-    background:#fff;
+    background:#12183B;
 }
 
 .comparison-container{
@@ -55,18 +55,18 @@
 
     line-height:1.2;
 
-    color:#111827;
+    color:#ffffff;
 
     margin-bottom:25px;
 
-    font-weight:700;
+    font-weight:600;
 }
 
 .comparison-content p{
 
     font-size:19px;
 
-    color:#6b7280;
+    color:#cbd5e1;
 
     line-height:1.9;
 
@@ -90,7 +90,7 @@
 
     font-weight:500;
 
-    color:#111827;
+    color:#e2e8f0;
 }
 
 @media(max-width:1000px){

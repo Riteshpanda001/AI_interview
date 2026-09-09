@@ -155,9 +155,9 @@ const AICodingAssistant = ({ selectedProblem }) => {
         evalData.runtime_percentile = data.runtime_percentile || evalData.runtime_percentile || 92.4;
         evalData.memory_percentile = data.memory_percentile || evalData.memory_percentile || 88.5;
         evalData.test_case_results = data.test_case_results || evalData.test_case_results || evalData.public_results || [];
-
         setEvalResult(evalData);
         fetchSubmissionHistory();
+        window.dispatchEvent(new Event("coding-submission-created"));
       } else {
         throw new Error("Failed to execute code in sandbox");
       }
@@ -185,6 +185,7 @@ const AICodingAssistant = ({ selectedProblem }) => {
           "Clean code structure and idiomatic language usage."
         ]
       });
+      window.dispatchEvent(new Event("coding-submission-created"));
     } finally {
       setLoading(false);
     }

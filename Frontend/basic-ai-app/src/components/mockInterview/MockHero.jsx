@@ -13,9 +13,13 @@ const MockHero = () => {
     <section className="mock-hero">
 
       <div className="mock-hero-left">
+        <div className="hero-badge">
+          🎤 AI Powered Mock Interview Platform
+        </div>
+
         <h2>
-          Ace Interviews with our
-          <span> AI Mock Interview </span>
+          Ace Interviews with our{" "}
+          <span>AI Mock Interview</span>{" "}
           Platform
         </h2>
 

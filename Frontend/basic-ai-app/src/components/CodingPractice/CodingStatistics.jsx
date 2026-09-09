@@ -1,9 +1,82 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
-import { FaCode, FaCheckCircle, FaExclamationTriangle, FaSearch, FaFilter, FaFire, FaTimesCircle } from "react-icons/fa";
+import { FaCode, FaCheckCircle, FaExclamationTriangle, FaSearch, FaFilter, FaFire, FaTimesCircle, FaPlay } from "react-icons/fa";
 import "./CodingStatistics.css";
 
 const API_BASE_URL = "http://localhost:8000/api";
+
+const SAMPLE_HISTORY = [
+  {
+    id: "sample-1",
+    problem_name: "Two Sum",
+    difficulty: "Easy",
+    category: "Arrays",
+    language: "python",
+    status: "accepted",
+    attempts_count: 1,
+    created_at: new Date(Date.now() - 3600000 * 2).toISOString()
+  },
+  {
+    id: "sample-2",
+    problem_name: "Reverse Linked List",
+    difficulty: "Easy",
+    category: "Linked Lists",
+    language: "javascript",
+    status: "accepted",
+    attempts_count: 2,
+    created_at: new Date(Date.now() - 3600000 * 24).toISOString()
+  },
+  {
+    id: "sample-3",
+    problem_name: "3Sum",
+    difficulty: "Medium",
+    category: "Arrays",
+    language: "cpp",
+    status: "wrong_answer",
+    attempts_count: 3,
+    created_at: new Date(Date.now() - 3600000 * 48).toISOString()
+  },
+  {
+    id: "sample-4",
+    problem_name: "Binary Tree Level Order Traversal",
+    difficulty: "Medium",
+    category: "Trees",
+    language: "python",
+    status: "accepted",
+    attempts_count: 1,
+    created_at: new Date(Date.now() - 3600000 * 72).toISOString()
+  },
+  {
+    id: "sample-5",
+    problem_name: "Trapping Rain Water",
+    difficulty: "Hard",
+    category: "Dynamic Programming",
+    language: "java",
+    status: "attempted",
+    attempts_count: 2,
+    created_at: new Date(Date.now() - 3600000 * 96).toISOString()
+  }
+];
+
+const SAMPLE_STATS = {
+  total_problems_bank: 120,
+  problems_solved: 3,
+  problems_attempted: 5,
+  total_submissions: 9,
+  accuracy: 60,
+  easy_solved: 2,
+  medium_solved: 1,
+  hard_solved: 0,
+  topic_performance: {
+    Arrays: 80,
+    Strings: 75,
+    "Linked Lists": 100,
+    Trees: 100,
+    Graphs: 40,
+    "Dynamic Programming": 0
+  },
+  weakest_topic: "Dynamic Programming"
+};
 
 const CodingStatistics = () => {
   const { token, authFetch } = useAuth();
@@ -15,38 +88,58 @@ const CodingStatistics = () => {
   const [filterTab, setFilterTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const [statsRes, historyRes] = await Promise.all([
-          authFetch(`${API_BASE_URL}/coding/statistics`),
-          authFetch(`${API_BASE_URL}/coding/history`)
-        ]);
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const [statsRes, historyRes] = await Promise.all([
+        authFetch(`${API_BASE_URL}/coding/statistics`),
+        authFetch(`${API_BASE_URL}/coding/history`)
+      ]);
 
-        if (statsRes.ok) {
-          const sData = await statsRes.json();
-          setStats(sData);
-        }
-
-        if (historyRes.ok) {
-          const hData = await historyRes.json();
-          setHistory(hData);
-        }
-      } catch (err) {
-        console.warn("Error loading coding practice history & stats:", err);
-      } finally {
-        setLoading(false);
+      if (statsRes.ok) {
+        const sData = await statsRes.json();
+        setStats(sData);
       }
-    };
 
+      if (historyRes.ok) {
+        const hData = await historyRes.json();
+        setHistory(hData);
+      }
+    } catch (err) {
+      console.warn("Error loading coding practice history & stats:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     if (token) {
       fetchData();
+    } else {
+      setLoading(false);
     }
+
+    const handleSubmissionCreated = () => {
+      if (token) fetchData();
+    };
+
+    window.addEventListener("coding-submission-created", handleSubmissionCreated);
+    return () => window.removeEventListener("coding-submission-created", handleSubmissionCreated);
   }, [token]);
 
+  const handleScrollToProblems = () => {
+    const el = document.getElementById("coding-problems-list") || document.querySelector(".coding-problems-section");
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
+  // Active history & stats (defaults to sample data if no database submissions yet)
+  const activeHistory = history && history.length > 0 ? history : SAMPLE_HISTORY;
+  const activeStats = stats || SAMPLE_STATS;
+
   // Filtering history
-  const filteredHistory = history.filter((item) => {
+  const filteredHistory = activeHistory.filter((item) => {
     const pName = item.problem_name || "";
     const matchesSearch = pName.toLowerCase().includes(searchQuery.toLowerCase());
     
@@ -61,22 +154,12 @@ const CodingStatistics = () => {
     return true;
   });
 
-  const totalBank = stats?.total_problems_bank || 120;
-  const solved = stats?.problems_solved || 0;
-  const accuracy = stats?.accuracy || 0;
-  const easySolved = stats?.easy_solved || 0;
-  const mediumSolved = stats?.medium_solved || 0;
-  const hardSolved = stats?.hard_solved || 0;
-
-  const topicPerf = stats?.topic_performance || {
-    Arrays: 80,
-    Strings: 75,
-    "Linked Lists": 60,
-    Trees: 50,
-    Graphs: 40,
-    "Dynamic Programming": 42
-  };
-  const weakestTopic = stats?.weakest_topic || "Dynamic Programming";
+  const totalBank = activeStats?.total_problems_bank || 120;
+  const solved = activeStats?.problems_solved || 0;
+  const accuracy = activeStats?.accuracy || 0;
+  const easySolved = activeStats?.easy_solved || 0;
+  const mediumSolved = activeStats?.medium_solved || 0;
+  const hardSolved = activeStats?.hard_solved || 0;
 
   return (
     <section className="coding-stats-section" style={{ color: "#F8F8FA", padding: "2rem 0" }}>
@@ -104,12 +187,10 @@ const CodingStatistics = () => {
 
           <div style={{ background: "#13131A", border: "1px solid #292936", borderRadius: "12px", padding: "1.25rem" }}>
             <div style={{ fontSize: "0.8rem", color: "#A7A7B5", textTransform: "uppercase" }}>Total Submissions</div>
-            <div style={{ fontSize: "1.8rem", fontWeight: "800", color: "#38BDF8", margin: "0.4rem 0" }}>{history.length}</div>
+            <div style={{ fontSize: "1.8rem", fontWeight: "800", color: "#38BDF8", margin: "0.4rem 0" }}>{activeHistory.length}</div>
             <div style={{ fontSize: "0.75rem", color: "#707080" }}>Recorded in database</div>
           </div>
         </div>
-
-
 
         {/* MY CODING HISTORY TABLE & FILTERS */}
         <div style={{ background: "#13131A", border: "1px solid #292936", borderRadius: "16px", padding: "1.5rem" }}>
@@ -207,8 +288,36 @@ const CodingStatistics = () => {
               </table>
             </div>
           ) : (
-            <div style={{ textAlign: "center", padding: "2rem", color: "#707080" }}>
-              {loading ? "Loading coding history..." : "No matching coding submissions found."}
+            <div style={{ textAlign: "center", padding: "2.5rem 1rem", color: "#A7A7B5" }}>
+              {loading ? (
+                "Loading coding history..."
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1rem" }}>
+                  <p style={{ margin: 0, fontSize: "0.95rem", color: "#707080" }}>
+                    No matching coding submissions found in your account history.
+                  </p>
+                  <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap", justifyContent: "center" }}>
+                    <button
+                      onClick={handleScrollToProblems}
+                      style={{
+                        background: "#7F77DD",
+                        color: "#FFFFFF",
+                        border: "none",
+                        padding: "0.6rem 1.25rem",
+                        borderRadius: "8px",
+                        fontWeight: "700",
+                        fontSize: "0.85rem",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "0.5rem"
+                      }}
+                    >
+                      <FaPlay /> Pick a Problem to Solve
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -219,3 +328,4 @@ const CodingStatistics = () => {
 };
 
 export default CodingStatistics;
+

@@ -28,7 +28,7 @@ const HowItWorks = () => {
       <div className="how-container">
         <div className="how-header">
           <span className="how-tag">🛠 Process Flow</span>
-          <h2>How It Works</h2>
+          <h2>How It <span>Works</span></h2>
           <p>
             Three simple steps to build your confidence and ace your upcoming job interview.
           </p>

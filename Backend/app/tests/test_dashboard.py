@@ -65,6 +65,11 @@ def test_dashboard_service_calculation():
         }.get(key, MagicMock())
 
         data = await DashboardService.get_user_dashboard("user123", mock_db)
+
+        from app.schemas.dashboard_schema import DashboardMetricsResponse
+        validated = DashboardMetricsResponse(**data)
+        assert validated.weekly_activity["mostProductiveDay"] is not None
+
         assert data["ats_score"] == 88
         assert data["resume_completion"] == 100
         assert data["interview_readiness"] > 50

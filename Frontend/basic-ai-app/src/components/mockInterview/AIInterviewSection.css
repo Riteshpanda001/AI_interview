@@ -6,7 +6,7 @@
 
     padding:110px 8%;
 
-    background:#ffffff;
+    background:#12183B;
 }
 
 .ai-container{
@@ -51,7 +51,9 @@
 
     line-height:1.2;
 
-    color:#111827;
+    color:#ffffff;
+
+    font-weight:600;
 
     margin-bottom:25px;
 }
@@ -62,7 +64,7 @@
 
     line-height:1.9;
 
-    color:#6b7280;
+    color:#cbd5e1;
 
     margin-bottom:35px;
 }
@@ -84,7 +86,7 @@
 
     font-weight:500;
 
-    color:#111827;
+    color:#e2e8f0;
 }
 
 @media(max-width:1000px){
