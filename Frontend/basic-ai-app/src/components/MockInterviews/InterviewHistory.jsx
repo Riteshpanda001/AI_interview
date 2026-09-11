@@ -200,7 +200,7 @@ const InterviewHistory = ({ onStartNewSession }) => {
         <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", alignItems: "center" }}>
           <FaFilter style={{ color: "#7F77DD", marginRight: "0.4rem" }} />
           <span style={{ fontSize: "0.85rem", color: "#A7A7B5", marginRight: "0.4rem" }}>Category:</span>
-          {["all", "technical", "hr", "behavioral", "dsa", "company"].map((cat) => (
+          {["all", "technical", "hr", "behavioral"].map((cat) => (
             <button
               key={cat}
               onClick={() => setCategoryFilter(cat)}

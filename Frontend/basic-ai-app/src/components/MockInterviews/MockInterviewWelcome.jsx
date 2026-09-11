@@ -118,44 +118,56 @@ const MockInterviewWelcome = ({ onStartInterview, onViewHistory, onQuickPreset }
           <p>Launch a quick mock interview in one click with pre-configured settings</p>
         </div>
         <div className="presets-grid">
-          {PRESETS.map((preset) => (
-            <div
-              key={preset.id}
-              className="preset-card"
-              style={{ "--accent-color": preset.color }}
-              onClick={() => {
-                if (onQuickPreset) {
-                  onQuickPreset({
-                    role_target: preset.role_target,
-                    interview_type: preset.category,
-                    experience_level: "Mid Level",
-                    language: "English",
-                    duration: preset.duration,
-                    difficulty: preset.difficulty,
-                    prep_mode: preset.prep_mode || "role"
-                  });
-                } else {
-                  onStartInterview();
-                }
-              }}
-            >
-              <div className="preset-icon" style={{ background: `${preset.color}20`, color: preset.color }}>
-                {preset.icon}
-              </div>
-              <div className="preset-info">
-                <h3>{preset.title}</h3>
-                <p>{preset.desc}</p>
-                <div className="preset-meta">
-                  <span className="preset-tag">{preset.category.toUpperCase()}</span>
-                  <span className="preset-duration">{preset.duration} Mins</span>
+          {PRESETS.map((preset) => {
+            const handleLaunch = () => {
+              const presetData = {
+                role_target: preset.role_target,
+                interview_type: preset.category,
+                experience_level: "Mid Level",
+                language: "English",
+                duration: preset.duration,
+                difficulty: preset.difficulty,
+                prep_mode: preset.prep_mode || "role"
+              };
+              if (onQuickPreset) {
+                onQuickPreset(presetData);
+              } else {
+                onStartInterview(presetData);
+              }
+            };
+
+            return (
+              <div
+                key={preset.id}
+                className="preset-card"
+                style={{ "--accent-color": preset.color }}
+                onClick={handleLaunch}
+              >
+                <div className="preset-icon" style={{ background: `${preset.color}20`, color: preset.color }}>
+                  {preset.icon}
                 </div>
+                <div className="preset-info">
+                  <h3>{preset.title}</h3>
+                  <p>{preset.desc}</p>
+                  <div className="preset-meta">
+                    <span className="preset-tag">{preset.category.toUpperCase()}</span>
+                    <span className="preset-duration">{preset.duration} Mins</span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  className="preset-launch-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleLaunch();
+                  }}
+                >
+                  <span>Start</span>
+                  <FaArrowRight />
+                </button>
               </div>
-              <button className="preset-launch-btn">
-                <span>Start</span>
-                <FaArrowRight />
-              </button>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 

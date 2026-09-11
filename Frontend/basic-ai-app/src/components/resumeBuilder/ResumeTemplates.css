@@ -169,16 +169,16 @@
 }
 
 .templates-section-title {
-  font-size: 2.5rem;
-  font-weight: 600 !important;
-  color: #e0f2fe !important;
+  font-size: 3.0rem !important;
+  font-weight: 700 !important;
+  color: #ffffff !important;
   letter-spacing: -0.3px;
   margin-bottom: 16px;
 }
 
 .templates-section-title span {
-  background: linear-gradient(135deg, #38bdf8, #a855f7) !important;
+  background: linear-gradient(135deg, #22d3ee, #a855f7, #f43f5e) !important;
   -webkit-background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
-  font-weight: 600 !important;
+  font-weight: 700 !important;
 }

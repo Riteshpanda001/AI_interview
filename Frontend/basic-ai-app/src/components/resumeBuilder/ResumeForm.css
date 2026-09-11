@@ -217,14 +217,16 @@
 }
 
 .form-section .section-title {
+  font-size: 2.8rem !important;
   color: #ffedd5 !important;
-  font-weight: 600 !important;
+  font-weight: 700 !important;
   letter-spacing: -0.3px;
+  margin-bottom: 16px;
 }
 
 .form-section .section-title span {
-  background: linear-gradient(135deg, #E85D30, #f59e0b) !important;
+  background: linear-gradient(135deg, #ff6b35, #f59e0b) !important;
   -webkit-background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
-  font-weight: 600 !important;
+  font-weight: 700 !important;
 }

@@ -527,24 +527,24 @@ const CreateNewWorkspace = ({
           </span>
 
           {workspaceMode === "uploaded" ? (
-            <button className="toolbar-btn secondary-btn" onClick={() => setShowPolishModal(true)}>
+            <button className="toolbar-btn secondary-btn ai-assistant-btn" onClick={() => setShowPolishModal(true)}>
               ✨ AI Polish
             </button>
           ) : (
-            <button className="toolbar-btn secondary-btn" onClick={() => setShowAssistantModal(true)}>
+            <button className="toolbar-btn secondary-btn ai-assistant-btn" onClick={() => setShowAssistantModal(true)}>
               🤖 AI Assistant
             </button>
           )}
 
-          <button className="toolbar-btn secondary-btn" style={{ background: "linear-gradient(135deg, #10b981 0%, #059669 100%)", color: "#fff" }} onClick={() => setShowJobMatcherModal(true)}>
+          <button className="toolbar-btn secondary-btn job-matcher-btn" onClick={() => setShowJobMatcherModal(true)}>
             🎯 Job Matcher
           </button>
 
-          <button className="toolbar-btn secondary-btn" onClick={() => setShowAnalyticsModal(true)}>
+          <button className="toolbar-btn secondary-btn analytics-btn" onClick={() => setShowAnalyticsModal(true)}>
             📊 Analytics
           </button>
 
-          <button className="toolbar-btn secondary-btn" onClick={handleGenerateShare}>
+          <button className="toolbar-btn secondary-btn share-btn" onClick={handleGenerateShare}>
             🔗 Share
           </button>
 
@@ -563,9 +563,20 @@ const CreateNewWorkspace = ({
           <div className="workspace-pane left-form-pane">
             <div className="pane-scroll-area">
               
-              {/* 1. Personal Information */}
+              {/* 1. Professional Summary */}
               <div className="field-group-box">
-                <h5>👤 1. Personal Details</h5>
+                <h5>✍️ 1. Professional Summary</h5>
+                <textarea
+                  rows={3}
+                  placeholder="Describe your core strengths, experience, and achievements in concise 20–30 words..."
+                  value={resumeData.summary || ""}
+                  onChange={(e) => handleSummaryChange(e.target.value)}
+                />
+              </div>
+
+              {/* 2. Personal Information */}
+              <div className="field-group-box">
+                <h5>👤 2. Personal Details</h5>
                 <div className="flex-fields">
                   <input
                     type="text"
@@ -612,17 +623,6 @@ const CreateNewWorkspace = ({
                 </div>
               </div>
 
-              {/* 2. Professional Summary */}
-              <div className="field-group-box">
-                <h5>✍️ 2. Professional Summary</h5>
-                <textarea
-                  rows={3}
-                  placeholder="Describe your core strengths, experience, and achievements in concise 20–30 words..."
-                  value={resumeData.summary || ""}
-                  onChange={(e) => handleSummaryChange(e.target.value)}
-                />
-              </div>
-
               {/* 3. Technical Skills */}
               <div className="field-group-box">
                 <h5>🛠️ 3. Technical Skills</h5>
@@ -635,33 +635,7 @@ const CreateNewWorkspace = ({
                 />
               </div>
 
-              {/* Action Verbs Reference Helper */}
-              <div className="guide-card action-verbs-card" style={{ marginBottom: "1.5rem" }}>
-                <h5 style={{ margin: "0 0 0.5rem" }}>⚡ Action Verbs Helper</h5>
-                <div className="verb-tabs">
-                  {Object.keys(ACTION_VERBS).map((tab) => (
-                    <button
-                      key={tab}
-                      className={`verb-tab-btn ${activeVerbTab === tab ? "active" : ""}`}
-                      onClick={() => setActiveVerbTab(tab)}
-                    >
-                      {tab}
-                    </button>
-                  ))}
-                </div>
-                <div className="verbs-grid">
-                  {ACTION_VERBS[activeVerbTab].map((verb) => (
-                    <button
-                      key={verb}
-                      className="verb-badge-btn"
-                      onClick={() => copyToClipboard(verb)}
-                    >
-                      {verb}
-                    </button>
-                  ))}
-                </div>
-                {copiedVerb && <div className="toast-verb">Copied "{copiedVerb}"!</div>}
-              </div>
+
 
               {/* 4. Work Experience */}
               <div className="field-group-box">

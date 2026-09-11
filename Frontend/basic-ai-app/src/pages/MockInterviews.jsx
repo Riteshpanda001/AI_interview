@@ -71,10 +71,16 @@ const MockInterviews = () => {
   ====================================== */
 
   const handlePracticeNow = () => {
+    localStorage.removeItem("active_interview_session_id");
+    localStorage.removeItem("active_interview_role_target");
+    localStorage.removeItem("active_interview_type");
     setActivePage("setup");
   };
 
   const handleStartInterview = (data) => {
+    localStorage.removeItem("active_interview_session_id");
+    localStorage.removeItem("active_interview_role_target");
+    localStorage.removeItem("active_interview_type");
     setInterviewDetails(data);
     setInterviewStarted(true);
     setActivePage("room");

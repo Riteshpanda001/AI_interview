@@ -155,12 +155,101 @@
   gap: 6px;
 }
 
+.toolbar-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  user-select: none;
+}
+
+.toolbar-btn.secondary-btn {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  border: 1.5px solid #cbd5e1;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.toolbar-btn.secondary-btn:hover {
+  background: #f8fafc !important;
+  border-color: #94a3b8;
+  color: #0f172a !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.toolbar-btn.ai-assistant-btn {
+  background: #ffffff !important;
+  color: #6b21a8 !important;
+  border: 1.5px solid rgba(168, 85, 247, 0.5) !important;
+  font-weight: 700;
+  box-shadow: 0 4px 14px rgba(168, 85, 247, 0.15) !important;
+}
+
+.toolbar-btn.ai-assistant-btn:hover {
+  background: #faf5ff !important;
+  border-color: #9333ea !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(168, 85, 247, 0.25) !important;
+}
+
+.toolbar-btn.job-matcher-btn {
+  background: #ffffff !important;
+  color: #047857 !important;
+  border: 1.5px solid rgba(16, 185, 129, 0.5) !important;
+  font-weight: 700;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.15) !important;
+}
+
+.toolbar-btn.job-matcher-btn:hover {
+  background: #ecfdf5 !important;
+  border-color: #059669 !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(16, 185, 129, 0.25) !important;
+}
+
+.toolbar-btn.analytics-btn {
+  background: #ffffff !important;
+  color: #0369a1 !important;
+  border: 1.5px solid rgba(56, 189, 248, 0.5) !important;
+  font-weight: 700;
+  box-shadow: 0 4px 14px rgba(56, 189, 248, 0.15) !important;
+}
+
+.toolbar-btn.analytics-btn:hover {
+  background: #f0f9ff !important;
+  border-color: #0284c7 !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(56, 189, 248, 0.25) !important;
+}
+
+.toolbar-btn.share-btn {
+  background: #ffffff !important;
+  color: #b45309 !important;
+  border: 1.5px solid rgba(245, 158, 11, 0.5) !important;
+  font-weight: 700;
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.15) !important;
+}
+
+.toolbar-btn.share-btn:hover {
+  background: #fffbeb !important;
+  border-color: #d97706 !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(245, 158, 11, 0.25) !important;
+}
+
 .toolbar-btn.primary-download {
   background: linear-gradient(135deg, #6366f1, #4f46e5);
-  color: white;
+  color: white !important;
   border: none;
   padding: 10px 22px;
-  border-radius: 10px;
+  border-radius: 12px;
   font-size: 14px;
   font-weight: 700;
   cursor: pointer;
@@ -256,6 +345,9 @@
   max-width: 100% !important;
   margin: 0 !important;
   width: 100%;
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 20px !important;
 }
 
 .preview-sheet-area .section-header {

@@ -18,14 +18,29 @@
   box-shadow: 0 4px 15px rgba(168, 85, 247, 0.15);
 }
 
+.preview-section .section-title {
+  font-size: 2.8rem !important;
+  color: #d1fae5 !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.3px;
+  margin-bottom: 16px;
+}
+
+.preview-section .section-title span {
+  background: linear-gradient(135deg, #10b981, #06b6d4) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  font-weight: 700 !important;
+}
+
 .preview-container {
   max-width: 900px;
   margin: auto;
-  background: #1a224a !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
   border-radius: 20px !important;
   overflow: hidden !important;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08) !important;
 }
 
 .demo-preview-notice {
@@ -101,11 +116,11 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  background: #151c3d !important;
+  background: #ffffff !important;
   padding: 16px 20px;
   border: none !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
-  border-radius: 0 !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  border-radius: 20px 20px 0 0 !important;
   gap: 14px;
 }
 
@@ -200,13 +215,13 @@
   gap: 10px;
   font-size: 13.5px;
   font-weight: 700;
-  color: #e2e8f0 !important;
+  color: #1e293b !important;
 }
 
 .control-label {
   font-size: 13.5px;
   font-weight: 700;
-  color: #e2e8f0 !important;
+  color: #1e293b !important;
   white-space: nowrap;
 }
 
@@ -217,21 +232,22 @@
 }
 
 .ctrl-chip {
-  background: #1a224a !important;
-  border: 1px solid rgba(255, 255, 255, 0.15) !important;
-  color: #e2e8f0 !important;
+  background: #f8fafc !important;
+  border: 1.5px solid #cbd5e1 !important;
+  color: #334155 !important;
   padding: 6px 14px;
   border-radius: 8px;
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.15s ease;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .ctrl-chip:hover {
-  background: rgba(255, 255, 255, 0.08) !important;
-  border-color: rgba(168, 85, 247, 0.4) !important;
+  background: #ffffff !important;
+  border-color: #94a3b8 !important;
+  color: #0f172a !important;
 }
 
 .ctrl-chip.active {
@@ -239,7 +255,7 @@
   color: #ffffff !important;
   border-color: #a855f7 !important;
   font-weight: 700;
-  box-shadow: 0 2px 8px rgba(168, 85, 247, 0.4);
+  box-shadow: 0 2px 8px rgba(168, 85, 247, 0.35);
 }
 
 /* ==========================================

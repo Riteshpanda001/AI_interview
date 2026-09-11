@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import "./Register.css";
 import logo from "../assets/prenova_ai_logo.png";
@@ -267,14 +267,14 @@ const Register = () => {
 
         <div className="register-right">
           <div className="register-header">
-            <h2>Create Account</h2>
+            <h2>Create <span>Account</span></h2>
             <p className="register-subtitle">Get started with your free PreNova AI account</p>
           </div>
 
           {errorMsg && <div className="alert-message error">{errorMsg}</div>}
           {infoMsg && <div className="alert-message info">{infoMsg}</div>}
 
-          <form onSubmit={handleRegisterSubmit}>
+          <form onSubmit={handleRegisterSubmit} className="register-form">
             <div className="input-group">
               <label>Full Name</label>
               <input
@@ -318,6 +318,8 @@ const Register = () => {
                   <option value="">Select Gender</option>
                   <option value="Male">Male</option>
                   <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                  <option value="Prefer not to say">Prefer not to say</option>
                 </select>
               </div>
             </div>
@@ -386,11 +388,12 @@ const Register = () => {
               </p>
             )}
 
-            <p className="login-link">
-              Already have an account?
-              <a href="/login"> Login</a>
-            </p>
           </form>
+
+          <p className="login-link register-login-link">
+            Already have an account?
+            <Link to="/login" onClick={(e) => { e.preventDefault(); navigate("/login"); }}> Login</Link>
+          </p>
         </div>
       </div>
 

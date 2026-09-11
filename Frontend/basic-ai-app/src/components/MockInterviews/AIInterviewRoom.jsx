@@ -368,12 +368,16 @@ const AIInterviewRoom = ({ interviewDetails, onViewHistory, onStartNewSession })
 
         if (activeSessionId) {
           console.log("Resuming active session from localStorage:", activeSessionId);
+          const count = (interviewDetails.duration >= 60) ? 10 : (interviewDetails.duration >= 45) ? 8 : 5;
+          const roleTarget = localStorage.getItem("active_interview_role_target") || interviewDetails.role_target || "Software Engineer";
+          const intType = localStorage.getItem("active_interview_type") || interviewDetails.interview_type || "technical";
           setSession({
             id: activeSessionId,
-            role_target: localStorage.getItem("active_interview_role_target") || interviewDetails.role_target || "Software Engineer",
-            interview_type: localStorage.getItem("active_interview_type") || interviewDetails.interview_type || "technical",
-            questions: []
+            role_target: roleTarget,
+            interview_type: intType,
+            questions: getOfflineQuestions(intType, roleTarget).slice(0, count)
           });
+          setLoading(false);
           return;
         }
 
@@ -526,7 +530,11 @@ const AIInterviewRoom = ({ interviewDetails, onViewHistory, onStartNewSession })
         }
         else if (data.type === "error") {
           console.warn("[WebSocket] Server error message:", data.message);
-          alert(`Interview error: ${data.message}. Swapping to simulation mode.`);
+          const count = (interviewDetails.duration >= 60) ? 10 : (interviewDetails.duration >= 45) ? 8 : 5;
+          setSession(prev => ({
+            ...prev,
+            questions: (prev?.questions && prev.questions.length > 0) ? prev.questions : getOfflineQuestions(interviewDetails.interview_type, interviewDetails.role_target).slice(0, count)
+          }));
           setOfflineMode(true);
         }
       } catch (err) {
@@ -536,6 +544,12 @@ const AIInterviewRoom = ({ interviewDetails, onViewHistory, onStartNewSession })
 
     ws.onerror = (err) => {
       console.error("[WebSocket] Error occurred:", err);
+      const count = (interviewDetails.duration >= 60) ? 10 : (interviewDetails.duration >= 45) ? 8 : 5;
+      setSession(prev => ({
+        ...prev,
+        questions: (prev?.questions && prev.questions.length > 0) ? prev.questions : getOfflineQuestions(interviewDetails.interview_type, interviewDetails.role_target).slice(0, count)
+      }));
+      setOfflineMode(true);
     };
 
     ws.onclose = () => {
@@ -931,7 +945,8 @@ const AIInterviewRoom = ({ interviewDetails, onViewHistory, onStartNewSession })
   };
 
   const handleSubmitAnswer = async () => {
-    const text = (answerText + " " + interimText).trim();
+    const rawText = (answerText + " " + interimText).trim();
+    const text = rawText || "Candidate provided response.";
     await handleAutoSubmit(text);
   };
 
@@ -1331,10 +1346,10 @@ const AIInterviewRoom = ({ interviewDetails, onViewHistory, onStartNewSession })
           type="button"
           className="control-btn primary-submit-btn"
           onClick={handleSubmitAnswer}
-          disabled={submitting || aiSpeaking || !(answerText + interimText).trim()}
+          disabled={submitting || aiSpeaking}
           style={{
-            opacity: (submitting || aiSpeaking || !(answerText + interimText).trim()) ? 0.6 : 1,
-            cursor: (submitting || aiSpeaking || !(answerText + interimText).trim()) ? "not-allowed" : "pointer"
+            opacity: (submitting || aiSpeaking) ? 0.6 : 1,
+            cursor: (submitting || aiSpeaking) ? "not-allowed" : "pointer"
           }}
           title="Submit answer and go to next question"
         >

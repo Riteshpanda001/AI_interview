@@ -92,14 +92,15 @@
 }
 
 .faq-section .section-title {
-  color: #f3e8ff !important;
-  font-weight: 600 !important;
+  font-size: 2.8rem !important;
+  color: #fef08a !important;
+  font-weight: 700 !important;
   letter-spacing: -0.3px;
 }
 
 .faq-section .section-title span {
-  background: linear-gradient(135deg, #c084fc, #ec4899) !important;
+  background: linear-gradient(135deg, #a3e635, #10b981) !important;
   -webkit-background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
-  font-weight: 600 !important;
+  font-weight: 700 !important;
 }

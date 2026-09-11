@@ -3,7 +3,6 @@ import "./ResumeHowItWorks.css";
 
 const steps = [
   {
-    number: "01",
     icon: "👤",
     title: "Enter Your Details",
     description:
@@ -11,7 +10,6 @@ const steps = [
   },
 
   {
-    number: "02",
     icon: "🎨",
     title: "Choose Resume Template",
     description:
@@ -19,7 +17,6 @@ const steps = [
   },
 
   {
-    number: "03",
     icon: "🤖",
     title: "AI Optimizes Your Resume",
     description:
@@ -27,7 +24,6 @@ const steps = [
   },
 
   {
-    number: "04",
     icon: "📄",
     title: "Download & Apply",
     description:
@@ -61,10 +57,6 @@ const ResumeHowItWorks = () => {
         {steps.map((step, index) => (
 
           <div className="work-card" key={index}>
-
-            <div className="step-number">
-              {step.number}
-            </div>
 
             <div className="step-icon">
               {step.icon}

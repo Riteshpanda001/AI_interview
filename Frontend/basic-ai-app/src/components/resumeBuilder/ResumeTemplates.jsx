@@ -33,7 +33,7 @@ const templatesList = [
     tag: "Helsinki Style",
     desc: "A ultra-clean, minimalist Nordic style with charcoal tones, thin lines, and heavy emphasis on whitespace.",
     previewBg: "linear-gradient(to right, #1f2937, #4b5563)",
-    accentColor: "#1e293b"
+    accentColor: "#94a3b8"
   },
   {
     id: "milan",
