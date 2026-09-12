@@ -503,6 +503,59 @@
   display: none;
 }
 
+/* ── Personal Details Section ── */
+.personal-details-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4px 20px;
+  font-size: 13px;
+}
+
+.personal-detail-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.personal-detail-label {
+  font-weight: 700;
+  color: #0f172a;
+  white-space: nowrap;
+  min-width: 80px;
+  font-size: 12.5px;
+}
+
+.personal-detail-value {
+  color: #334155;
+  font-weight: 500;
+  font-size: 12.5px;
+  word-break: break-all;
+}
+
+/* ── Key Achievements Bullet ── */
+.achievement-bullet {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin-top: 3px;
+}
+
+.achievement-dot {
+  color: #000000;
+  font-size: 14px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* ── Language Tag ── */
+.language-tag {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
 .summary-text {
   font-size: 12.5px;
   color: #334155;

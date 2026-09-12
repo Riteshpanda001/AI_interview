@@ -329,7 +329,7 @@ const ResumePreview = ({ resumeData, selectedTemplate, setResumeData, isDemoMode
           ref={paperRef}
           className={`resume-paper ${selectedTemplate || "london"} density-${pageDensity} font-${fontSize}`}
         >
-          {/* Personal Details Header */}
+          {/* ── NAME / HEADER (centered top) ── */}
           <header className="resume-header centered-header">
             <h1 className="name">{personal?.name || "Your Full Name"}</h1>
             {personal?.role && <div className="header-job-title">{personal.role}</div>}
@@ -349,7 +349,8 @@ const ResumePreview = ({ resumeData, selectedTemplate, setResumeData, isDemoMode
 
           <div className="resume-body">
             <div className="main-col">
-              {/* 1. Professional Summary */}
+
+              {/* ── 1. PROFESSIONAL SUMMARY ── */}
               <section className="preview-sub-section">
                 <h3 className="section-heading">PROFESSIONAL SUMMARY</h3>
                 <p className="summary-text">
@@ -357,7 +358,68 @@ const ResumePreview = ({ resumeData, selectedTemplate, setResumeData, isDemoMode
                 </p>
               </section>
 
-              {/* 3. Education */}
+              {/* ── 2. PERSONAL DETAILS ── */}
+              <section className="preview-sub-section">
+                <h3 className="section-heading">PERSONAL DETAILS</h3>
+                <div className="personal-details-grid">
+                  {personal?.name && (
+                    <div className="personal-detail-row">
+                      <span className="personal-detail-label">Full Name:</span>
+                      <span className="personal-detail-value">{personal.name}</span>
+                    </div>
+                  )}
+                  {personal?.role && (
+                    <div className="personal-detail-row">
+                      <span className="personal-detail-label">Role / Title:</span>
+                      <span className="personal-detail-value">{personal.role}</span>
+                    </div>
+                  )}
+                  {personal?.phone && (
+                    <div className="personal-detail-row">
+                      <span className="personal-detail-label">Phone:</span>
+                      <span className="personal-detail-value">{personal.phone}</span>
+                    </div>
+                  )}
+                  {personal?.email && (
+                    <div className="personal-detail-row">
+                      <span className="personal-detail-label">Email:</span>
+                      <span className="personal-detail-value">{personal.email}</span>
+                    </div>
+                  )}
+                  {personal?.address && (
+                    <div className="personal-detail-row">
+                      <span className="personal-detail-label">Address:</span>
+                      <span className="personal-detail-value">{personal.address}</span>
+                    </div>
+                  )}
+                  {personal?.linkedin && (
+                    <div className="personal-detail-row">
+                      <span className="personal-detail-label">LinkedIn:</span>
+                      <span className="personal-detail-value">{personal.linkedin}</span>
+                    </div>
+                  )}
+                  {personal?.github && (
+                    <div className="personal-detail-row">
+                      <span className="personal-detail-label">GitHub:</span>
+                      <span className="personal-detail-value">{personal.github}</span>
+                    </div>
+                  )}
+                  {personal?.portfolio && (
+                    <div className="personal-detail-row">
+                      <span className="personal-detail-label">Portfolio:</span>
+                      <span className="personal-detail-value">{personal.portfolio}</span>
+                    </div>
+                  )}
+                  {(!personal || Object.values(personal || {}).every(v => !v)) && (
+                    <div className="personal-detail-row">
+                      <span className="personal-detail-label">Email:</span>
+                      <span className="personal-detail-value">yourname@email.com</span>
+                    </div>
+                  )}
+                </div>
+              </section>
+
+              {/* ── 3. EDUCATION ── */}
               <section className="preview-sub-section">
                 <h3 className="section-heading">EDUCATION</h3>
                 {((education && education.length > 0) ? education : [
@@ -377,7 +439,7 @@ const ResumePreview = ({ resumeData, selectedTemplate, setResumeData, isDemoMode
                 ))}
               </section>
 
-              {/* 4. Technical Skills */}
+              {/* ── 4. TECHNICAL SKILLS ── */}
               <section className="preview-sub-section">
                 <h3 className="section-heading">TECHNICAL SKILLS</h3>
                 <div className="preview-skills-grid-2col">
@@ -389,7 +451,7 @@ const ResumePreview = ({ resumeData, selectedTemplate, setResumeData, isDemoMode
                 </div>
               </section>
 
-              {/* 5. Work Experience */}
+              {/* ── 5. WORK EXPERIENCE ── */}
               <section className="preview-sub-section">
                 <h3 className="section-heading">WORK EXPERIENCE</h3>
                 {((experience && experience.length > 0) ? experience : [
@@ -414,7 +476,7 @@ const ResumePreview = ({ resumeData, selectedTemplate, setResumeData, isDemoMode
                 ))}
               </section>
 
-              {/* 6. Projects */}
+              {/* ── 6. PROJECTS ── */}
               <section className="preview-sub-section">
                 <h3 className="section-heading">PROJECTS</h3>
                 {((projects && projects.length > 0) ? projects : [
@@ -425,6 +487,9 @@ const ResumePreview = ({ resumeData, selectedTemplate, setResumeData, isDemoMode
                       <strong className="proj-title">{proj.name || "Project Title"}</strong>
                       {proj.skillsUsed && (
                         <span className="proj-skills-tag"> | {proj.skillsUsed}</span>
+                      )}
+                      {proj.duration && (
+                        <span className="exp-duration-right">{proj.duration}</span>
                       )}
                     </div>
                     {proj.link && (
@@ -447,40 +512,52 @@ const ResumePreview = ({ resumeData, selectedTemplate, setResumeData, isDemoMode
                 ))}
               </section>
 
-              {/* 7. Certifications */}
+              {/* ── 7. CERTIFICATIONS ── */}
               <section className="preview-sub-section">
                 <h3 className="section-heading">CERTIFICATIONS</h3>
                 {((certifications && certifications.length > 0) ? certifications : [
                   { name: "AWS Certified Solutions Architect", issuer: "Amazon Web Services", year: "2024" }
                 ]).map((cert, idx) => (
                   <div key={idx} className="preview-item">
-                    <strong className="cert-name">{cert.name || "Certification Name"}</strong>
-                    <div className="cert-sub-info">
-                      {[cert.issuer, cert.year].filter(Boolean).join(" | ")}
+                    <div className="preview-item-header">
+                      <strong className="cert-name">{cert.name || "Certification Name"}</strong>
+                      {cert.year && <span className="exp-duration-right">{cert.year}</span>}
                     </div>
+                    {cert.issuer && (
+                      <div className="cert-sub-info">{cert.issuer}</div>
+                    )}
                   </div>
                 ))}
               </section>
 
-              {/* 8. Key Achievements */}
+              {/* ── 8. KEY ACHIEVEMENTS ── */}
               <section className="preview-sub-section">
                 <h3 className="section-heading">KEY ACHIEVEMENTS</h3>
                 {((achievements && achievements.length > 0) ? achievements : [
                   { title: "First Place Winner", description: "Awarded top place in Annual Tech Hackathon 2024." }
                 ]).map((ach, idx) => (
-                  <div key={idx} className="bullet-point">
-                    {ach.title} {ach.description ? `: ${ach.description}` : ""}
+                  <div key={idx} className="bullet-point achievement-bullet">
+                    <span className="achievement-dot">▪</span>
+                    <span>
+                      {ach.title && <strong>{ach.title}</strong>}
+                      {ach.description ? `: ${ach.description}` : ""}
+                    </span>
                   </div>
                 ))}
               </section>
 
-              {/* 9. Languages */}
+              {/* ── 9. LANGUAGES ── */}
               <section className="preview-sub-section">
                 <h3 className="section-heading">LANGUAGES</h3>
                 <div className="languages-inline-list">
-                  {((languages && languages.length > 0) ? languages : ["English (Native)", "Spanish (Fluent)"]).join("  |  ")}
+                  {((languages && languages.length > 0) ? languages : ["English (Native)", "Hindi (Fluent)"]).map((lang, idx, arr) => (
+                    <span key={idx} className="language-tag">
+                      {lang}{idx < arr.length - 1 ? "  |  " : ""}
+                    </span>
+                  ))}
                 </div>
               </section>
+
             </div>
           </div>
         </div>

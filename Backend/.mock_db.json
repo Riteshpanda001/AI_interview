@@ -1201,7 +1201,7 @@
       "created_at": "2026-09-02T18:06:40.628719+00:00",
       "_id": "6a9865b08e4b39cfc8194a67"
     },
-    "6a98680181bc7964081e46c6": {
+    "6aa5a1bbfd26fac774139492": {
       "user_id": "test-user-ats-history-99",
       "resume_id": "res-1",
       "job_title": "Software Engineer",
@@ -1331,10 +1331,10 @@
       ],
       "detailed_feedback": "Candidate achieved a deterministic ATS match score of 52%. Skills match score is 25/25, with 1 matched skill(s) and 0 gap(s) identified.",
       "ai_engine": "Deterministic Matrix & Gemini Explanation Engine",
-      "created_at": "2026-09-02T18:16:33.285101+00:00",
-      "_id": "6a98680181bc7964081e46c6"
+      "created_at": "2026-09-12T19:02:19.548881+00:00",
+      "_id": "6aa5a1bbfd26fac774139492"
     },
-    "6a98680381bc7964081e46c8": {
+    "6aa5a1bcfd26fac774139494": {
       "user_id": "test-user-ats-history-99",
       "resume_id": "res-1",
       "job_title": "Frontend Engineer",
@@ -1464,8 +1464,8 @@
       ],
       "detailed_feedback": "Candidate achieved a deterministic ATS match score of 52%. Skills match score is 25/25, with 1 matched skill(s) and 0 gap(s) identified.",
       "ai_engine": "Deterministic Matrix & Gemini Explanation Engine",
-      "created_at": "2026-09-02T18:16:35.183581+00:00",
-      "_id": "6a98680381bc7964081e46c8"
+      "created_at": "2026-09-12T19:02:20.859310+00:00",
+      "_id": "6aa5a1bcfd26fac774139494"
     }
   },
   "activities": {
@@ -1588,6 +1588,30 @@
       },
       "created_at": "2026-09-02T18:16:35.190129+00:00",
       "_id": "6a98680381bc7964081e46c9"
+    },
+    "6aa5a1bbfd26fac774139493": {
+      "user_id": "test-user-ats-history-99",
+      "type": "ATS_ANALYZED",
+      "title": "\ud83d\udcc4 Resume Analyzed with ATS Engine",
+      "description": "Target Role: Software Engineer | ATS Score: 52%",
+      "metadata": {
+        "score": 52,
+        "job_title": "Software Engineer"
+      },
+      "created_at": "2026-09-12T19:02:19.551228+00:00",
+      "_id": "6aa5a1bbfd26fac774139493"
+    },
+    "6aa5a1bcfd26fac774139495": {
+      "user_id": "test-user-ats-history-99",
+      "type": "ATS_ANALYZED",
+      "title": "\ud83d\udcc4 Resume Analyzed with ATS Engine",
+      "description": "Target Role: Frontend Engineer | ATS Score: 52%",
+      "metadata": {
+        "score": 52,
+        "job_title": "Frontend Engineer"
+      },
+      "created_at": "2026-09-12T19:02:20.862831+00:00",
+      "_id": "6aa5a1bcfd26fac774139495"
     }
   }
 }
