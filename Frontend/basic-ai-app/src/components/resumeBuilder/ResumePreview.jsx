@@ -226,95 +226,98 @@ const ResumePreview = ({ resumeData, selectedTemplate, setResumeData, isDemoMode
       </div>
 
       <div className="preview-container">
-        {/* Actions Bar */}
-        <div className="preview-actions">
-          <div className="active-tpl-indicator">
-            Active Format: <span>{(selectedTemplate || "london").toUpperCase()} Layout</span>
-          </div>
-
-          <div className="action-buttons">
-            {!isDemoMode && (
-              <>
-                <button
-                  className="preview-action-btn primary"
-                  onClick={handleDownload}
-                  disabled={loading}
-                  title="Download Single-Page PDF"
-                >
-                  📥 Download PDF
-                </button>
-                <button
-                  className="preview-action-btn secondary"
-                  onClick={handleAIImprove}
-                  disabled={loading}
-                  title="Optimize Resume with AI"
-                >
-                  {loading ? "🤖 Optimizing..." : "🤖 AI Optimize"}
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-
-        {/* 1-Page Layout Optimizer Toolbar */}
-        <div className="one-page-toolbar">
-          <div className="one-page-controls-wrapper">
-            <div className="controls-row top-row">
-              <button 
-                className="autofit-btn" 
-                onClick={handleAutoFit}
-                title="Click to automatically adjust font size and line spacing to fit everything on 1 page"
-              >
-                ✨ Auto-Fit 1 Page
-              </button>
-
-              <div className="control-group">
-                <label className="control-label">Spacing:</label>
-                <div className="chip-group">
-                  <button 
-                    className={`ctrl-chip ${pageDensity === "compact" ? "active" : ""}`}
-                    onClick={() => setPageDensity("compact")}
-                  >
-                    Compact
-                  </button>
-                  <button 
-                    className={`ctrl-chip ${pageDensity === "normal" ? "active" : ""}`}
-                    onClick={() => setPageDensity("normal")}
-                  >
-                    Normal
-                  </button>
-                  <button 
-                    className={`ctrl-chip ${pageDensity === "spacious" ? "active" : ""}`}
-                    onClick={() => setPageDensity("spacious")}
-                  >
-                    Relaxed
-                  </button>
-                </div>
-              </div>
+        {/* Fixed / Sticky Controls Header */}
+        <div className="preview-header-sticky">
+          {/* Actions Bar */}
+          <div className="preview-actions">
+            <div className="active-tpl-indicator">
+              Active Format: <span>{(selectedTemplate || "london").toUpperCase()} Layout</span>
             </div>
 
-            <div className="controls-row bottom-row">
-              <div className="control-group">
-                <label className="control-label">Font Size:</label>
-                <div className="chip-group">
-                  <button 
-                    className={`ctrl-chip ${fontSize === "small" ? "active" : ""}`}
-                    onClick={() => setFontSize("small")}
+            <div className="action-buttons">
+              {!isDemoMode && (
+                <>
+                  <button
+                    className="preview-action-btn primary"
+                    onClick={handleDownload}
+                    disabled={loading}
+                    title="Download Single-Page PDF"
                   >
-                    Small
+                    📥 Download PDF
                   </button>
-                  <button 
-                    className={`ctrl-chip ${fontSize === "medium" ? "active" : ""}`}
-                    onClick={() => setFontSize("medium")}
+                  <button
+                    className="preview-action-btn secondary"
+                    onClick={handleAIImprove}
+                    disabled={loading}
+                    title="Optimize Resume with AI"
                   >
-                    Medium
+                    {loading ? "🤖 Optimizing..." : "🤖 AI Optimize"}
                   </button>
-                  <button 
-                    className={`ctrl-chip ${fontSize === "large" ? "active" : ""}`}
-                    onClick={() => setFontSize("large")}
-                  >
-                    Large
-                  </button>
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* 1-Page Layout Optimizer Toolbar */}
+          <div className="one-page-toolbar">
+            <div className="one-page-controls-wrapper">
+              <div className="controls-row top-row">
+                <button 
+                  className="autofit-btn" 
+                  onClick={handleAutoFit}
+                  title="Click to automatically adjust font size and line spacing to fit everything on 1 page"
+                >
+                  ✨ Auto-Fit 1 Page
+                </button>
+
+                <div className="control-group">
+                  <label className="control-label">Spacing:</label>
+                  <div className="chip-group">
+                    <button 
+                      className={`ctrl-chip ${pageDensity === "compact" ? "active" : ""}`}
+                      onClick={() => setPageDensity("compact")}
+                    >
+                      Compact
+                    </button>
+                    <button 
+                      className={`ctrl-chip ${pageDensity === "normal" ? "active" : ""}`}
+                      onClick={() => setPageDensity("normal")}
+                    >
+                      Normal
+                    </button>
+                    <button 
+                      className={`ctrl-chip ${pageDensity === "spacious" ? "active" : ""}`}
+                      onClick={() => setPageDensity("spacious")}
+                    >
+                      Relaxed
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="controls-row bottom-row">
+                <div className="control-group">
+                  <label className="control-label">Font Size:</label>
+                  <div className="chip-group">
+                    <button 
+                      className={`ctrl-chip ${fontSize === "small" ? "active" : ""}`}
+                      onClick={() => setFontSize("small")}
+                    >
+                      Small
+                    </button>
+                    <button 
+                      className={`ctrl-chip ${fontSize === "medium" ? "active" : ""}`}
+                      onClick={() => setFontSize("medium")}
+                    >
+                      Medium
+                    </button>
+                    <button 
+                      className={`ctrl-chip ${fontSize === "large" ? "active" : ""}`}
+                      onClick={() => setFontSize("large")}
+                    >
+                      Large
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -326,7 +329,7 @@ const ResumePreview = ({ resumeData, selectedTemplate, setResumeData, isDemoMode
           ref={paperRef}
           className={`resume-paper ${selectedTemplate || "london"} density-${pageDensity} font-${fontSize}`}
         >
-          {/* Header */}
+          {/* Personal Details Header */}
           <header className="resume-header centered-header">
             <h1 className="name">{personal?.name || "Your Full Name"}</h1>
             {personal?.role && <div className="header-job-title">{personal.role}</div>}
@@ -346,142 +349,138 @@ const ResumePreview = ({ resumeData, selectedTemplate, setResumeData, isDemoMode
 
           <div className="resume-body">
             <div className="main-col">
-              {/* 2. Professional Summary */}
-              {summary && (
-                <section className="preview-sub-section">
-                  <h3 className="section-heading">PROFESSIONAL SUMMARY</h3>
-                  <p className="summary-text">{summary}</p>
-                </section>
-              )}
+              {/* 1. Professional Summary */}
+              <section className="preview-sub-section">
+                <h3 className="section-heading">PROFESSIONAL SUMMARY</h3>
+                <p className="summary-text">
+                  {summary || "Results-driven professional with strong analytical skills, expertise in developing scalable web applications, and a proven track record of delivering modern digital solutions."}
+                </p>
+              </section>
 
-              {/* 3. Technical Skills */}
-              {skills && skills.length > 0 && (
-                <section className="preview-sub-section">
-                  <h3 className="section-heading">TECHNICAL SKILLS</h3>
-                  <div className="preview-skills-grid-2col">
-                    {skills.map((skill, idx) => (
-                      <div key={idx} className="preview-skill-grid-item">
-                        {skill}
+              {/* 3. Education */}
+              <section className="preview-sub-section">
+                <h3 className="section-heading">EDUCATION</h3>
+                {((education && education.length > 0) ? education : [
+                  { institution: "State University", degree: "B.S. in Computer Science", duration: "2021 – 2025" }
+                ]).map((edu, idx) => (
+                  <div key={idx} className="preview-edu-row">
+                    <div className="edu-left-info">
+                      <strong className="edu-institution">{edu.institution || "College / School Name"}</strong>
+                      <div className="edu-sub-details">
+                        {[edu.degree, edu.branch, edu.cgpa ? `CGPA/Percentage: ${edu.cgpa}` : null]
+                          .filter(Boolean)
+                          .join(" | ")}
                       </div>
-                    ))}
+                    </div>
+                    <div className="edu-right-duration">{edu.duration || "2021 – 2025"}</div>
                   </div>
-                </section>
-              )}
+                ))}
+              </section>
 
-              {/* 4. Work Experience */}
-              {experience && experience.length > 0 && (
-                <section className="preview-sub-section">
-                  <h3 className="section-heading">WORK EXPERIENCE</h3>
-                  {experience.map((exp, idx) => (
-                    <div key={idx} className="preview-item">
-                      <div className="preview-item-header">
-                        <strong className="company-name">{exp.company || "Company Name"}</strong>
-                        <span className="exp-duration-right">{exp.duration || "Jan 2024 – Present"}</span>
-                      </div>
-                      {exp.role && <div className="exp-job-title">{exp.role}</div>}
-                      {exp.details && (
-                        <div className="preview-item-desc">
-                          {exp.details.split("\n").map((line, lIdx) => (
-                            <div key={lIdx} className="bullet-point">
-                              {line.replace(/^[•\-\s]+/, "")}
-                            </div>
-                          ))}
-                        </div>
-                      )}
+              {/* 4. Technical Skills */}
+              <section className="preview-sub-section">
+                <h3 className="section-heading">TECHNICAL SKILLS</h3>
+                <div className="preview-skills-grid-2col">
+                  {((skills && skills.length > 0) ? skills : ["React.js", "JavaScript", "Node.js", "Python", "Git", "REST APIs"]).map((skill, idx) => (
+                    <div key={idx} className="preview-skill-grid-item">
+                      {skill}
                     </div>
                   ))}
-                </section>
-              )}
+                </div>
+              </section>
 
-              {/* 5. Projects */}
-              {projects && projects.length > 0 && (
-                <section className="preview-sub-section">
-                  <h3 className="section-heading">PROJECTS</h3>
-                  {projects.map((proj, idx) => (
-                    <div key={idx} className="preview-item">
-                      <div className="preview-project-inline-header">
-                        <strong className="proj-title">{proj.name || "Project Title"}</strong>
-                        {proj.skillsUsed && (
-                          <span className="proj-skills-tag"> | {proj.skillsUsed}</span>
-                        )}
+              {/* 5. Work Experience */}
+              <section className="preview-sub-section">
+                <h3 className="section-heading">WORK EXPERIENCE</h3>
+                {((experience && experience.length > 0) ? experience : [
+                  { company: "TechNova Solutions", role: "Software Engineer", duration: "Jan 2024 – Present", details: "Developed responsive web applications using React and Node.js.\nOptimized API endpoints to reduce page load times." }
+                ]).map((exp, idx) => (
+                  <div key={idx} className="preview-item">
+                    <div className="preview-item-header">
+                      <strong className="company-name">{exp.company || "Company Name"}</strong>
+                      <span className="exp-duration-right">{exp.duration || "Jan 2024 – Present"}</span>
+                    </div>
+                    {exp.role && <div className="exp-job-title">{exp.role}</div>}
+                    {exp.details && (
+                      <div className="preview-item-desc">
+                        {exp.details.split("\n").map((line, lIdx) => (
+                          <div key={lIdx} className="bullet-point">
+                            {line.replace(/^[•\-\s]+/, "")}
+                          </div>
+                        ))}
                       </div>
-                      {proj.link && (
-                        <div className="proj-sub-links">
-                          <a href={proj.link} target="_blank" rel="noopener noreferrer" className="proj-link-tag">
-                            🔗 {proj.link}
-                          </a>
-                        </div>
-                      )}
-                      {proj.description && (
-                        <div className="preview-item-desc">
-                          {proj.description.split("\n").map((line, lIdx) => (
-                            <div key={lIdx} className="bullet-point">
-                              {line.replace(/^[•\-\s]+/, "")}
-                            </div>
-                          ))}
-                        </div>
+                    )}
+                  </div>
+                ))}
+              </section>
+
+              {/* 6. Projects */}
+              <section className="preview-sub-section">
+                <h3 className="section-heading">PROJECTS</h3>
+                {((projects && projects.length > 0) ? projects : [
+                  { name: "PrepNova AI Platform", skillsUsed: "React, Node.js", description: "Built an AI-powered mock interview simulator with real-time feedback." }
+                ]).map((proj, idx) => (
+                  <div key={idx} className="preview-item">
+                    <div className="preview-project-inline-header">
+                      <strong className="proj-title">{proj.name || "Project Title"}</strong>
+                      {proj.skillsUsed && (
+                        <span className="proj-skills-tag"> | {proj.skillsUsed}</span>
                       )}
                     </div>
-                  ))}
-                </section>
-              )}
-
-              {/* 6. Education */}
-              {education && education.length > 0 && (
-                <section className="preview-sub-section">
-                  <h3 className="section-heading">EDUCATION</h3>
-                  {education.map((edu, idx) => (
-                    <div key={idx} className="preview-edu-row">
-                      <div className="edu-left-info">
-                        <strong className="edu-institution">{edu.institution || "College / School Name"}</strong>
-                        <div className="edu-sub-details">
-                          {[edu.degree, edu.branch, edu.cgpa ? `CGPA/Percentage: ${edu.cgpa}` : null]
-                            .filter(Boolean)
-                            .join(" | ")}
-                        </div>
+                    {proj.link && (
+                      <div className="proj-sub-links">
+                        <a href={proj.link} target="_blank" rel="noopener noreferrer" className="proj-link-tag">
+                          🔗 {proj.link}
+                        </a>
                       </div>
-                      <div className="edu-right-duration">{edu.duration || "2021 – 2025"}</div>
-                    </div>
-                  ))}
-                </section>
-              )}
+                    )}
+                    {proj.description && (
+                      <div className="preview-item-desc">
+                        {proj.description.split("\n").map((line, lIdx) => (
+                          <div key={lIdx} className="bullet-point">
+                            {line.replace(/^[•\-\s]+/, "")}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </section>
 
               {/* 7. Certifications */}
-              {certifications && certifications.length > 0 && (
-                <section className="preview-sub-section">
-                  <h3 className="section-heading">CERTIFICATIONS</h3>
-                  {certifications.map((cert, idx) => (
-                    <div key={idx} className="preview-item">
-                      <strong className="cert-name">{cert.name || "Certification Name"}</strong>
-                      <div className="cert-sub-info">
-                        {[cert.issuer, cert.year].filter(Boolean).join(" | ")}
-                      </div>
+              <section className="preview-sub-section">
+                <h3 className="section-heading">CERTIFICATIONS</h3>
+                {((certifications && certifications.length > 0) ? certifications : [
+                  { name: "AWS Certified Solutions Architect", issuer: "Amazon Web Services", year: "2024" }
+                ]).map((cert, idx) => (
+                  <div key={idx} className="preview-item">
+                    <strong className="cert-name">{cert.name || "Certification Name"}</strong>
+                    <div className="cert-sub-info">
+                      {[cert.issuer, cert.year].filter(Boolean).join(" | ")}
                     </div>
-                  ))}
-                </section>
-              )}
+                  </div>
+                ))}
+              </section>
 
               {/* 8. Key Achievements */}
-              {achievements && achievements.length > 0 && (
-                <section className="preview-sub-section">
-                  <h3 className="section-heading">KEY ACHIEVEMENTS</h3>
-                  {achievements.map((ach, idx) => (
-                    <div key={idx} className="bullet-point">
-                      {ach.title} {ach.description ? `: ${ach.description}` : ""}
-                    </div>
-                  ))}
-                </section>
-              )}
+              <section className="preview-sub-section">
+                <h3 className="section-heading">KEY ACHIEVEMENTS</h3>
+                {((achievements && achievements.length > 0) ? achievements : [
+                  { title: "First Place Winner", description: "Awarded top place in Annual Tech Hackathon 2024." }
+                ]).map((ach, idx) => (
+                  <div key={idx} className="bullet-point">
+                    {ach.title} {ach.description ? `: ${ach.description}` : ""}
+                  </div>
+                ))}
+              </section>
 
               {/* 9. Languages */}
-              {languages && languages.length > 0 && (
-                <section className="preview-sub-section">
-                  <h3 className="section-heading">LANGUAGES</h3>
-                  <div className="languages-inline-list">
-                    {languages.join("  |  ")}
-                  </div>
-                </section>
-              )}
+              <section className="preview-sub-section">
+                <h3 className="section-heading">LANGUAGES</h3>
+                <div className="languages-inline-list">
+                  {((languages && languages.length > 0) ? languages : ["English (Native)", "Spanish (Fluent)"]).join("  |  ")}
+                </div>
+              </section>
             </div>
           </div>
         </div>

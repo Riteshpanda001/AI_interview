@@ -327,10 +327,11 @@
 }
 
 .preview-sheet-area {
-  padding: 35px 25px !important;
+  padding: 0 !important;
   display: flex;
-  justify-content: center;
-  align-items: flex-start;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
 }
 
 /* Let the nested preview-section inside workspace look integrated */
@@ -345,9 +346,24 @@
   max-width: 100% !important;
   margin: 0 !important;
   width: 100%;
-  background: #ffffff !important;
-  border: 1px solid #e2e8f0 !important;
-  border-radius: 20px !important;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.preview-sheet-area .preview-header-sticky {
+  top: 0 !important;
+  width: 100% !important;
+  border-radius: 0 !important;
+  border-left: none !important;
+  border-right: none !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+}
+
+.preview-sheet-area .resume-paper {
+  margin: 30px auto 40px auto !important;
 }
 
 .preview-sheet-area .section-header {

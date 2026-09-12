@@ -623,9 +623,61 @@ const CreateNewWorkspace = ({
                 </div>
               </div>
 
-              {/* 3. Technical Skills */}
+              {/* 3. Education */}
               <div className="field-group-box">
-                <h5>🛠️ 3. Technical Skills</h5>
+                <div className="section-inline-title">
+                  <h5>🎓 3. Education</h5>
+                  <button className="small-add-btn" onClick={addEducation}>+ Add Education</button>
+                </div>
+                {resumeData.education?.map((edu, idx) => (
+                  <div key={idx} className="nested-field-card">
+                    <div className="nested-header">
+                      <span>Education ({edu.duration || '2021 – 2025'})</span>
+                      {resumeData.education.length > 1 && (
+                        <button className="small-del-btn" onClick={() => removeEducation(idx)}>Remove</button>
+                      )}
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Institution / College / School Name"
+                      value={edu.institution || ""}
+                      onChange={(e) => handleEducationChange(idx, "institution", e.target.value)}
+                    />
+                    <div className="input-row-half">
+                      <input
+                        type="text"
+                        placeholder="Degree (e.g. B.Tech / Intermediate / 10th)"
+                        value={edu.degree || ""}
+                        onChange={(e) => handleEducationChange(idx, "degree", e.target.value)}
+                      />
+                      <input
+                        type="text"
+                        placeholder="Branch / Stream (e.g. CSE / MPC / State Board)"
+                        value={edu.branch || ""}
+                        onChange={(e) => handleEducationChange(idx, "branch", e.target.value)}
+                      />
+                    </div>
+                    <div className="input-row-half">
+                      <input
+                        type="text"
+                        placeholder="CGPA / Percentage (e.g. 8.9 CGPA / 92%)"
+                        value={edu.cgpa || ""}
+                        onChange={(e) => handleEducationChange(idx, "cgpa", e.target.value)}
+                      />
+                      <input
+                        type="text"
+                        placeholder="Duration / Years (e.g. 2021 – 2025)"
+                        value={edu.duration || ""}
+                        onChange={(e) => handleEducationChange(idx, "duration", e.target.value)}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* 4. Technical Skills */}
+              <div className="field-group-box">
+                <h5>🛠️ 4. Technical Skills</h5>
                 <input
                   type="text"
                   className="full-width-field"
@@ -635,18 +687,16 @@ const CreateNewWorkspace = ({
                 />
               </div>
 
-
-
-              {/* 4. Work Experience */}
+              {/* 5. Work Experience */}
               <div className="field-group-box">
                 <div className="section-inline-title">
-                  <h5>💼 4. Work Experience</h5>
+                  <h5>💼 5. Work Experience</h5>
                   <button className="small-add-btn" onClick={addExperience}>+ Add Position</button>
                 </div>
                 {resumeData.experience?.map((exp, idx) => (
                   <div key={idx} className="nested-field-card">
                     <div className="nested-header">
-                      <span>Experience #{idx + 1}</span>
+                      <span>Experience ({exp.duration || '2021 – 2025'})</span>
                       {resumeData.experience.length > 1 && (
                         <button className="small-del-btn" onClick={() => removeExperience(idx)}>Remove</button>
                       )}
@@ -667,7 +717,7 @@ const CreateNewWorkspace = ({
                     </div>
                     <input
                       type="text"
-                      placeholder="Duration (e.g. 2022 - Present)"
+                      placeholder="Duration (e.g. 2021 – 2025)"
                       value={exp.duration || ""}
                       onChange={(e) => handleExperienceChange(idx, "duration", e.target.value)}
                     />
@@ -681,16 +731,16 @@ const CreateNewWorkspace = ({
                 ))}
               </div>
 
-              {/* 5. Projects */}
+              {/* 6. Projects */}
               <div className="field-group-box">
                 <div className="section-inline-title">
-                  <h5>🚀 5. Projects</h5>
+                  <h5>🚀 6. Projects</h5>
                   <button className="small-add-btn" onClick={addProject}>+ Add Project</button>
                 </div>
                 {resumeData.projects?.map((proj, idx) => (
                   <div key={idx} className="nested-field-card">
                     <div className="nested-header">
-                      <span>Project #{idx + 1}</span>
+                      <span>Project Details</span>
                       {resumeData.projects.length > 1 && (
                         <button className="small-del-btn" onClick={() => removeProject(idx)}>Remove</button>
                       )}
@@ -725,58 +775,6 @@ const CreateNewWorkspace = ({
                 ))}
               </div>
 
-              {/* 6. Education */}
-              <div className="field-group-box">
-                <div className="section-inline-title">
-                  <h5>🎓 6. Education</h5>
-                  <button className="small-add-btn" onClick={addEducation}>+ Add Education</button>
-                </div>
-                {resumeData.education?.map((edu, idx) => (
-                  <div key={idx} className="nested-field-card">
-                    <div className="nested-header">
-                      <span>Education #{idx + 1} (Graduation / Inter / Schooling)</span>
-                      {resumeData.education.length > 1 && (
-                        <button className="small-del-btn" onClick={() => removeEducation(idx)}>Remove</button>
-                      )}
-                    </div>
-                    <input
-                      type="text"
-                      placeholder="Institution / College / School Name"
-                      value={edu.institution || ""}
-                      onChange={(e) => handleEducationChange(idx, "institution", e.target.value)}
-                    />
-                    <div className="input-row-half">
-                      <input
-                        type="text"
-                        placeholder="Degree (e.g. B.Tech / Intermediate / 10th)"
-                        value={edu.degree || ""}
-                        onChange={(e) => handleEducationChange(idx, "degree", e.target.value)}
-                      />
-                      <input
-                        type="text"
-                        placeholder="Branch / Stream (e.g. CSE / MPC / State Board)"
-                        value={edu.branch || ""}
-                        onChange={(e) => handleEducationChange(idx, "branch", e.target.value)}
-                      />
-                    </div>
-                    <div className="input-row-half">
-                      <input
-                        type="text"
-                        placeholder="CGPA / Percentage (e.g. 8.9 CGPA / 92%)"
-                        value={edu.cgpa || ""}
-                        onChange={(e) => handleEducationChange(idx, "cgpa", e.target.value)}
-                      />
-                      <input
-                        type="text"
-                        placeholder="Duration / Years (e.g. 2020 - 2024)"
-                        value={edu.duration || ""}
-                        onChange={(e) => handleEducationChange(idx, "duration", e.target.value)}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-
               {/* 7. Certifications */}
               <div className="field-group-box">
                 <div className="section-inline-title">
@@ -786,7 +784,7 @@ const CreateNewWorkspace = ({
                 {(resumeData.certifications || []).map((cert, idx) => (
                   <div key={idx} className="nested-field-card">
                     <div className="nested-header">
-                      <span>Certification #{idx + 1}</span>
+                      <span>Certification ({cert.year || '2021 – 2025'})</span>
                       <button className="small-del-btn" onClick={() => removeCertification(idx)}>Remove</button>
                     </div>
                     <input
@@ -804,7 +802,7 @@ const CreateNewWorkspace = ({
                       />
                       <input
                         type="text"
-                        placeholder="Year (e.g. 2024)"
+                        placeholder="Year (e.g. 2021 – 2025)"
                         value={cert.year || ""}
                         onChange={(e) => handleCertificationChange(idx, "year", e.target.value)}
                       />
@@ -822,7 +820,7 @@ const CreateNewWorkspace = ({
                 {(resumeData.achievements || []).map((ach, idx) => (
                   <div key={idx} className="nested-field-card">
                     <div className="nested-header">
-                      <span>Achievement #{idx + 1}</span>
+                      <span>Achievement Details</span>
                       <button className="small-del-btn" onClick={() => removeAchievement(idx)}>Remove</button>
                     </div>
                     <input

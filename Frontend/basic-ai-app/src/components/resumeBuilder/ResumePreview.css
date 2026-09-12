@@ -39,8 +39,19 @@
   background: #ffffff !important;
   border: 1px solid #e2e8f0 !important;
   border-radius: 20px !important;
-  overflow: hidden !important;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08) !important;
+  position: relative;
+}
+
+.preview-header-sticky {
+  position: sticky;
+  top: 95px;
+  z-index: 900;
+  background: #ffffff !important;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+  border-bottom: 1px solid #e2e8f0;
 }
 
 .demo-preview-notice {
@@ -93,7 +104,8 @@
   padding: 20px 30px;
   border: none !important;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
-  border-radius: 0 !important;
+  border-top-left-radius: 20px !important;
+  border-top-right-radius: 20px !important;
   box-shadow: none !important;
 }
 
@@ -119,8 +131,6 @@
   background: #ffffff !important;
   padding: 16px 20px;
   border: none !important;
-  border-bottom: 1px solid #e2e8f0 !important;
-  border-radius: 20px 20px 0 0 !important;
   gap: 14px;
 }
 
@@ -419,9 +429,9 @@
 
 .resume-header.centered-header {
   text-align: center;
-  margin-bottom: 10px;
-  border-bottom: none;
-  padding-bottom: 0;
+  margin-bottom: 12px;
+  border-bottom: 1.5px solid #000000 !important;
+  padding-bottom: 8px;
 }
 
 .resume-header.centered-header .name {
@@ -481,12 +491,12 @@
 .section-heading {
   font-size: 13px;
   font-weight: 800;
-  color: #0f172a;
-  margin-bottom: 5px;
+  color: #000000 !important;
+  margin-bottom: 6px;
   text-transform: uppercase;
   letter-spacing: 0.6px;
-  padding-bottom: 0;
-  border-bottom: none;
+  padding-bottom: 3px;
+  border-bottom: 1.5px solid #000000 !important;
 }
 
 .section-divider {
