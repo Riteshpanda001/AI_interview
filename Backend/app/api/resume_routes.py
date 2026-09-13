@@ -8,7 +8,10 @@ from app.schemas.resume_schema import (
 from app.dependencies import get_current_active_user, get_db
 from app.services.resume_service import ResumeService
 from app.services.ats_service import ATSService
+from app.services.scoring_service import ScoringService
+from app.services.ai_service import AIService
 from app.utils.docx_exporter import DOCXExporter
+from app.utils.pdf_generator import ResumePDFGenerator
 
 
 router = APIRouter()
@@ -279,3 +282,82 @@ async def calculate_ats(
     return ATSService.calculate_real_ats_score(resume_data, resume_text)
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+# NEW ENDPOINTS — PDF Export, Resume Score, Cover Letter, Interview Tips
+# ─────────────────────────────────────────────────────────────────────────────
+
+@router.get("/{resume_id}/export/pdf")
+async def export_pdf(
+    resume_id: str,
+    current_user = Depends(get_current_active_user),
+    db = Depends(get_db)
+):
+    """
+    Generate and download a professional PDF version of a saved resume.
+    Uses ResumePDFGenerator (reportlab with raw PDF fallback).
+    """
+    user_id = str(current_user["_id"])
+    doc = await ResumeService.get_resume_by_id(resume_id, user_id, db)
+    resume_data = doc.get("parsed_content", {})
+    name = resume_data.get("personal", {}).get("name", "Resume").replace(" ", "_")
+    title = doc.get("title", f"{name}_Resume")
+
+    pdf_bytes = ResumePDFGenerator.generate_pdf(resume_data, title)
+
+    await ResumeService.log_access_event(resume_id, "download_pdf", {}, db)
+
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{title}.pdf"'}
+    )
+
+
+@router.post("/resume-score")
+async def get_resume_score(
+    payload: Dict[str, Any],
+    current_user = Depends(get_current_active_user)
+):
+    """
+    Get a full, multi-dimensional resume quality score using ScoringService.
+    Returns completeness, impact, keyword density, structure scores + overall grade.
+    """
+    resume_data = payload.get("resume_data", payload)
+    target_role = payload.get("target_role", "")
+    return ScoringService.get_full_resume_score(resume_data, target_role)
+
+
+@router.post("/cover-letter")
+async def generate_cover_letter(
+    payload: Dict[str, Any],
+    current_user = Depends(get_current_active_user)
+):
+    """
+    Generate a personalized AI cover letter from resume data and a job description.
+    Powered by AIService (Gemini/Groq with offline fallback).
+    """
+    resume_data = payload.get("resume_data", {})
+    job_description = payload.get("job_description", "")
+    target_role = payload.get("target_role", "")
+
+    if not resume_data:
+        raise HTTPException(status_code=400, detail="resume_data is required.")
+
+    return await AIService.generate_cover_letter(resume_data, job_description, target_role)
+
+
+@router.post("/interview-tips")
+async def generate_interview_tips(
+    payload: Dict[str, Any],
+    current_user = Depends(get_current_active_user)
+):
+    """
+    Generate personalized interview preparation tips based on the candidate's resume.
+    Returns technical topics, likely questions, behavioral tips, and strengths.
+    """
+    resume_data = payload.get("resume_data", {})
+
+    if not resume_data:
+        raise HTTPException(status_code=400, detail="resume_data is required.")
+
+    return await AIService.generate_interview_prep_tips(resume_data)

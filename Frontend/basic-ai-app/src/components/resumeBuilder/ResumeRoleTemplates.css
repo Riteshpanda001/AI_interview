@@ -139,10 +139,10 @@
 }
 
 .role-templates-section .section-title {
-  font-size: 2.8rem !important;
+  font-size: 3.2rem !important;
   color: #ffe4e6 !important;
-  font-weight: 700 !important;
-  letter-spacing: -0.3px;
+  font-weight: 600 !important;
+  letter-spacing: -0.5px;
   margin-bottom: 16px;
 }
 
@@ -150,5 +150,5 @@
   background: linear-gradient(135deg, #f43f5e, #a855f7) !important;
   -webkit-background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
-  font-weight: 700 !important;
+  font-weight: 600 !important;
 }

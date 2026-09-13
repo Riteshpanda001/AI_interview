@@ -609,10 +609,10 @@
 }
 
 .ats-score-section .section-title {
-  font-size: 2.8rem !important;
-  font-weight: 700 !important;
+  font-size: 3.2rem !important;
+  font-weight: 600 !important;
   color: #fae8ff !important;
-  letter-spacing: -0.3px;
+  letter-spacing: -0.5px;
   margin-bottom: 16px;
 }
 
@@ -620,7 +620,7 @@
   background: linear-gradient(135deg, #ec4899, #8b5cf6) !important;
   -webkit-background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
-  font-weight: 700 !important;
+  font-weight: 600 !important;
 }
 
 

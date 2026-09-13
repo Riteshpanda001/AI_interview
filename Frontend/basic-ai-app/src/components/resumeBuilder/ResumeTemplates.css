@@ -169,10 +169,10 @@
 }
 
 .templates-section-title {
-  font-size: 3.0rem !important;
-  font-weight: 700 !important;
+  font-size: 3.2rem !important;
+  font-weight: 600 !important;
   color: #ffffff !important;
-  letter-spacing: -0.3px;
+  letter-spacing: -0.5px;
   margin-bottom: 16px;
 }
 
@@ -180,5 +180,5 @@
   background: linear-gradient(135deg, #22d3ee, #a855f7, #f43f5e) !important;
   -webkit-background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
-  font-weight: 700 !important;
+  font-weight: 600 !important;
 }

@@ -20,6 +20,14 @@ const features = [
     actionText: "Check ATS Score ➔"
   },
   {
+    id: "job-matcher",
+    icon: "🔍",
+    title: "Job Matcher",
+    description:
+      "Paste any job description and instantly see how well your resume matches. Get a detailed gap analysis and tailoring suggestions.",
+    actionText: "Match My Resume ➔"
+  },
+  {
     id: "templates",
     icon: "📄",
     title: "Professional Templates",
@@ -53,7 +61,7 @@ const features = [
   }
 ];
 
-const ResumeFeatures = ({ onOpenAIGenerator, onScrollToTemplates, onOpenWorkspace }) => {
+const ResumeFeatures = ({ onOpenAIGenerator, onScrollToTemplates, onOpenWorkspace, onOpenJobMatcher }) => {
   const navigate = useNavigate();
 
   const handleCardClick = (featureId) => {
@@ -61,6 +69,12 @@ const ResumeFeatures = ({ onOpenAIGenerator, onScrollToTemplates, onOpenWorkspac
       if (onOpenAIGenerator) onOpenAIGenerator();
     } else if (featureId === "ats-score") {
       navigate("/ats-score");
+    } else if (featureId === "job-matcher") {
+      if (onOpenJobMatcher) {
+        onOpenJobMatcher();
+      } else if (onOpenWorkspace) {
+        onOpenWorkspace();
+      }
     } else if (featureId === "templates") {
       if (onScrollToTemplates) {
         onScrollToTemplates();
@@ -119,4 +133,4 @@ const ResumeFeatures = ({ onOpenAIGenerator, onScrollToTemplates, onOpenWorkspac
   );
 };
 
-export default ResumeFeatures;
+export default ResumeFeatures;

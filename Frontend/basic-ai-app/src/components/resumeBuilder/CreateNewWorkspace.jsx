@@ -389,8 +389,31 @@ const CreateNewWorkspace = ({
     setShareUrl(`${window.location.origin}/share/resume/demo-share-token-123`);
   };
 
-  // Isolated Resume Paper PDF Download/Print Handler
-  const handleDownloadPdfOnly = () => {
+  // Server-side PDF download (falls back to browser print if unavailable)
+  const handleDownloadPdfOnly = async () => {
+    // 1. Try server PDF endpoint first (produces a true PDF file)
+    if (currentResumeId) {
+      try {
+        const response = await authFetch(`http://localhost:8000/api/resume/${currentResumeId}/export/pdf`);
+        if (response.ok) {
+          const blob = await response.blob();
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          const name = resumeData?.personal?.name || "Resume";
+          link.href = url;
+          link.download = `${name.replace(/\s+/g, "_")}_Resume.pdf`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+          return;
+        }
+      } catch (err) {
+        console.warn("Server PDF endpoint unavailable, falling back to browser print:", err);
+      }
+    }
+
+    // 2. Browser print-to-PDF fallback (captures styled live preview)
     const paper = document.querySelector(".resume-paper");
     if (!paper) {
       window.print();
@@ -487,12 +510,13 @@ const CreateNewWorkspace = ({
                 window.close();
               }, 250);
             });
-          </script>
+          <\/script>
         </body>
       </html>
     `);
     printWindow.document.close();
   };
+
 
   // Real-time ATS checklists & scoring logic
   const hasSummary = resumeData.summary && resumeData.summary.length >= 60;

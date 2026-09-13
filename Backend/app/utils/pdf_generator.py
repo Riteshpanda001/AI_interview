@@ -204,3 +204,271 @@ startxref
 %%EOF
 """
         return content_stream.strip().encode('utf-8', errors='ignore')
+
+
+class ResumePDFGenerator:
+    """
+    Generates a professional, styled PDF version of a resume from structured resume_data.
+    Uses reportlab when available, falls back to a clean raw PDF stream.
+    """
+
+    @staticmethod
+    def generate_pdf(resume_data: Dict[str, Any], title: str = "Resume") -> bytes:
+        personal = resume_data.get("personal", {})
+        name = personal.get("name", "Candidate")
+        role = personal.get("role", "")
+        email = personal.get("email", "")
+        phone = personal.get("phone", "")
+        linkedin = personal.get("linkedin", "")
+        github = personal.get("github", "")
+        portfolio = personal.get("portfolio", "")
+        summary = resume_data.get("summary", "")
+        skills = resume_data.get("skills", [])
+        experience = resume_data.get("experience", [])
+        education = resume_data.get("education", [])
+        projects = resume_data.get("projects", [])
+        certifications = resume_data.get("certifications", [])
+
+        try:
+            from reportlab.lib.pagesizes import A4
+            from reportlab.lib import colors
+            from reportlab.platypus import (
+                SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, HRFlowable
+            )
+            from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+            from reportlab.lib.units import mm
+
+            buffer = io.BytesIO()
+            doc = SimpleDocTemplate(
+                buffer, pagesize=A4,
+                rightMargin=18 * mm, leftMargin=18 * mm,
+                topMargin=14 * mm, bottomMargin=14 * mm
+            )
+            styles = getSampleStyleSheet()
+
+            # ── Custom Styles ─────────────────────────────────────────────────
+            name_style = ParagraphStyle(
+                "ResumeName", parent=styles["Heading1"],
+                fontName="Helvetica-Bold", fontSize=22, leading=26,
+                textColor=colors.HexColor("#0f172a"), spaceAfter=2
+            )
+            role_style = ParagraphStyle(
+                "ResumeRole", parent=styles["Normal"],
+                fontName="Helvetica", fontSize=11,
+                textColor=colors.HexColor("#6366f1"), spaceAfter=4
+            )
+            contact_style = ParagraphStyle(
+                "ResumeContact", parent=styles["Normal"],
+                fontName="Helvetica", fontSize=9,
+                textColor=colors.HexColor("#475569"), spaceAfter=2
+            )
+            section_heading = ParagraphStyle(
+                "SectionHeading", parent=styles["Heading2"],
+                fontName="Helvetica-Bold", fontSize=11, leading=14,
+                textColor=colors.HexColor("#1e1b4b"),
+                spaceBefore=10, spaceAfter=4
+            )
+            body = ParagraphStyle(
+                "Body", parent=styles["Normal"],
+                fontName="Helvetica", fontSize=9.5, leading=14,
+                textColor=colors.HexColor("#334155")
+            )
+            bold_body = ParagraphStyle(
+                "BoldBody", parent=body,
+                fontName="Helvetica-Bold", fontSize=9.5,
+                textColor=colors.HexColor("#0f172a")
+            )
+            small = ParagraphStyle(
+                "Small", parent=body,
+                fontSize=8.5, textColor=colors.HexColor("#64748b")
+            )
+
+            divider_color = colors.HexColor("#6366f1")
+            story = []
+
+            # ── Header ────────────────────────────────────────────────────────
+            story.append(Paragraph(name, name_style))
+            if role:
+                story.append(Paragraph(role, role_style))
+
+            contact_parts = []
+            if email:
+                contact_parts.append(email)
+            if phone:
+                contact_parts.append(phone)
+            if linkedin:
+                contact_parts.append(linkedin)
+            if github:
+                contact_parts.append(github)
+            if portfolio:
+                contact_parts.append(portfolio)
+            if contact_parts:
+                story.append(Paragraph("  |  ".join(contact_parts), contact_style))
+
+            story.append(HRFlowable(width="100%", thickness=1.5, color=divider_color, spaceBefore=6, spaceAfter=8))
+
+            # ── Summary ───────────────────────────────────────────────────────
+            if summary:
+                story.append(Paragraph("PROFESSIONAL SUMMARY", section_heading))
+                story.append(HRFlowable(width="100%", thickness=0.5, color=colors.HexColor("#e2e8f0"), spaceAfter=5))
+                story.append(Paragraph(summary, body))
+                story.append(Spacer(1, 6))
+
+            # ── Skills ────────────────────────────────────────────────────────
+            if skills and isinstance(skills, list) and skills:
+                story.append(Paragraph("TECHNICAL SKILLS", section_heading))
+                story.append(HRFlowable(width="100%", thickness=0.5, color=colors.HexColor("#e2e8f0"), spaceAfter=5))
+                skills_str = "  •  ".join(skills)
+                story.append(Paragraph(skills_str, body))
+                story.append(Spacer(1, 6))
+
+            # ── Experience ────────────────────────────────────────────────────
+            if experience:
+                story.append(Paragraph("WORK EXPERIENCE", section_heading))
+                story.append(HRFlowable(width="100%", thickness=0.5, color=colors.HexColor("#e2e8f0"), spaceAfter=5))
+                for exp in experience:
+                    if not isinstance(exp, dict):
+                        continue
+                    exp_role = exp.get("role", "")
+                    company = exp.get("company", "")
+                    duration = exp.get("duration", "")
+                    details = exp.get("details", "")
+
+                    header_data = [[
+                        Paragraph(f"<b>{exp_role}</b> — {company}", bold_body),
+                        Paragraph(duration, small)
+                    ]]
+                    t = Table(header_data, colWidths=[380, 100])
+                    t.setStyle(TableStyle([
+                        ("ALIGN", (1, 0), (1, 0), "RIGHT"),
+                        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                        ("PADDING", (0, 0), (-1, -1), 0),
+                    ]))
+                    story.append(t)
+
+                    if details:
+                        for line in details.strip().split("\n"):
+                            line = line.strip()
+                            if line:
+                                bullet = "•" if not line.startswith("•") else ""
+                                story.append(Paragraph(f"{bullet} {line}".strip(), body))
+                    story.append(Spacer(1, 5))
+
+            # ── Education ─────────────────────────────────────────────────────
+            if education:
+                story.append(Paragraph("EDUCATION", section_heading))
+                story.append(HRFlowable(width="100%", thickness=0.5, color=colors.HexColor("#e2e8f0"), spaceAfter=5))
+                for edu in education:
+                    if not isinstance(edu, dict):
+                        continue
+                    institution = edu.get("institution", "")
+                    degree = edu.get("degree", "")
+                    duration = edu.get("duration", "")
+                    cgpa = edu.get("cgpa", "")
+                    line1 = f"<b>{institution}</b>"
+                    line2_parts = [degree]
+                    if cgpa:
+                        line2_parts.append(f"CGPA: {cgpa}")
+                    edu_data = [[
+                        Paragraph(line1, bold_body),
+                        Paragraph(duration, small)
+                    ]]
+                    t = Table(edu_data, colWidths=[380, 100])
+                    t.setStyle(TableStyle([
+                        ("ALIGN", (1, 0), (1, 0), "RIGHT"),
+                        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                        ("PADDING", (0, 0), (-1, -1), 0),
+                    ]))
+                    story.append(t)
+                    story.append(Paragraph(" | ".join(line2_parts), body))
+                    story.append(Spacer(1, 4))
+
+            # ── Projects ──────────────────────────────────────────────────────
+            if projects:
+                story.append(Paragraph("PROJECTS", section_heading))
+                story.append(HRFlowable(width="100%", thickness=0.5, color=colors.HexColor("#e2e8f0"), spaceAfter=5))
+                for proj in projects:
+                    if not isinstance(proj, dict):
+                        continue
+                    proj_name = proj.get("name", "")
+                    desc = proj.get("description", "")
+                    if proj_name:
+                        story.append(Paragraph(f"<b>{proj_name}</b>", bold_body))
+                    if desc:
+                        story.append(Paragraph(desc, body))
+                    story.append(Spacer(1, 4))
+
+            # ── Certifications ────────────────────────────────────────────────
+            if certifications and isinstance(certifications, list) and certifications:
+                story.append(Paragraph("CERTIFICATIONS", section_heading))
+                story.append(HRFlowable(width="100%", thickness=0.5, color=colors.HexColor("#e2e8f0"), spaceAfter=5))
+                for cert in certifications:
+                    if isinstance(cert, dict):
+                        cert_title = cert.get("title", str(cert))
+                        issuer = cert.get("issuer", "")
+                        year = cert.get("year", "")
+                        line = cert_title
+                        if issuer:
+                            line += f" — {issuer}"
+                        if year:
+                            line += f" ({year})"
+                        story.append(Paragraph(f"• {line}", body))
+                    else:
+                        story.append(Paragraph(f"• {cert}", body))
+
+            doc.build(story)
+            return buffer.getvalue()
+
+        except Exception as e:
+            print(f"[ResumePDFGenerator] ReportLab unavailable, building fallback PDF: {e}")
+            return ResumePDFGenerator._build_fallback_pdf(resume_data)
+
+    @staticmethod
+    def _build_fallback_pdf(resume_data: Dict[str, Any]) -> bytes:
+        """Generates a valid minimal PDF 1.4 stream when reportlab is not installed."""
+        personal = resume_data.get("personal", {})
+        name = personal.get("name", "Candidate")[:40]
+        role = personal.get("role", "")[:40]
+        email = personal.get("email", "")[:50]
+        summary = (resume_data.get("summary", ""))[:120]
+        skills = ", ".join(resume_data.get("skills", [])[:10])[:100]
+
+        lines = []
+        if role:
+            lines.append(f"Role: {role}")
+        if email:
+            lines.append(f"Email: {email}")
+        if summary:
+            lines.append(f"Summary: {summary}")
+        if skills:
+            lines.append(f"Skills: {skills}")
+
+        body_stream = f"BT\n/F1 18 Tf 40 780 Td ({name}) Tj\n"
+        y = 750
+        for line in lines:
+            body_stream += f"/F2 10 Tf 0 0 Td 40 {y} Td ({line[:80]}) Tj\n"
+            y -= 18
+        body_stream += "ET\n"
+
+        pdf = f"""%PDF-1.4
+1 0 obj <</Type /Catalog /Pages 2 0 R>> endobj
+2 0 obj <</Type /Pages /Kids [3 0 R] /Count 1>> endobj
+3 0 obj <</Type /Page /Parent 2 0 R /Resources 4 0 R /MediaBox [0 0 595 842] /Contents 5 0 R>> endobj
+4 0 obj <</Font <</F1 <</Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold>> /F2 <</Type /Font /Subtype /Type1 /BaseFont /Helvetica>>>>>> endobj
+5 0 obj <</Length {len(body_stream)}>>
+stream
+{body_stream}endstream
+endobj
+xref
+0 6
+0000000000 65535 f
+0000000009 00000 n
+0000000058 00000 n
+0000000115 00000 n
+0000000206 00000 n
+0000000340 00000 n
+trailer <</Size 6 /Root 1 0 R>>
+startxref
+500
+%%EOF"""
+        return pdf.encode("utf-8", errors="ignore")

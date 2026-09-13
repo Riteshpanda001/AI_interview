@@ -336,6 +336,11 @@ const ResumeBuilder = () => {
                 setIsWorkspaceActive(true);
               }, "/resume-builder");
             }}
+            onOpenJobMatcher={() => {
+              requireAuth(() => {
+                setShowJobMatcherModal(true);
+              }, "/resume-builder");
+            }}
           />
 
           {/* How It Works */}
