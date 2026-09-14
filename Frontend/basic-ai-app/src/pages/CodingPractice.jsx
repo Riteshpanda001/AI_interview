@@ -52,10 +52,15 @@ const CodingPractice = () => {
     }
   };
 
-  const handleSolveDailyChallenge = () => {
-    // Find Binary Search in database
-    const dailyProb = PROBLEMS.find((p) => p.id === "arr-binary-search") || PROBLEMS[0];
-    handleSelectProblem(dailyProb);
+  const handleSolveDailyChallenge = (challengeProblem) => {
+    // challengeProblem is passed directly from DailyChallenge component
+    // (the live API object). Fall back to searching PROBLEMS if not provided.
+    if (challengeProblem && challengeProblem.id) {
+      handleSelectProblem(challengeProblem);
+    } else {
+      const dailyProb = PROBLEMS.find((p) => p.id === "arr-binary-search") || PROBLEMS[0];
+      handleSelectProblem(dailyProb);
+    }
   };
 
   return (

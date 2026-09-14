@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
+import useRequireAuth from "../../hooks/useRequireAuth";
 import "./AICodingAssistant.css";
 
 const API_BASE_URL = "http://localhost:8000/api";
@@ -64,7 +65,9 @@ class Solution {
 };
 
 const AICodingAssistant = ({ selectedProblem }) => {
-  const { authFetch } = useAuth();
+  const { authFetch, user } = useAuth();
+  const { requireAuth } = useRequireAuth();
+  const isLoggedIn = !!user;
   const [language, setLanguage] = useState("python");
   const [code, setCode] = useState(STARTER_TEMPLATES.python);
   const [activeTab, setActiveTab] = useState("results"); // "results" | "histograms" | "history"
@@ -74,7 +77,42 @@ const AICodingAssistant = ({ selectedProblem }) => {
   const [historyLoading, setHistoryLoading] = useState(false);
   const [copyWarning, setCopyWarning] = useState("");
 
-  const problemId = selectedProblem?.id || "two-sum";
+  const problemSlug = selectedProblem?.id || "two-sum";
+  // resolvedProblemId holds the real MongoDB _id once resolved from the slug
+  const [resolvedProblemId, setResolvedProblemId] = useState(null);
+
+  // ── Resolve slug → MongoDB _id whenever the selected problem changes ──
+  useEffect(() => {
+    const resolveProblemId = async () => {
+      // If already a MongoDB ObjectId (24-char hex), use directly
+      if (/^[a-f0-9]{24}$/i.test(problemSlug)) {
+        setResolvedProblemId(problemSlug);
+        return;
+      }
+      try {
+        const res = await authFetch(`${API_BASE_URL}/coding/problems`);
+        if (res.ok) {
+          const problems = await res.json();
+          // Match by slug field or id field
+          const match = problems.find(
+            (p) => p.slug === problemSlug || p.id === problemSlug || p._id === problemSlug
+          );
+          if (match) {
+            setResolvedProblemId(match._id || match.id);
+          } else {
+            // No match found — fall back to slug as-is
+            setResolvedProblemId(problemSlug);
+          }
+        } else {
+          setResolvedProblemId(problemSlug);
+        }
+      } catch {
+        // Offline — fall back to slug
+        setResolvedProblemId(problemSlug);
+      }
+    };
+    resolveProblemId();
+  }, [problemSlug]);
 
   useEffect(() => {
     if (selectedProblem) {
@@ -92,8 +130,10 @@ const AICodingAssistant = ({ selectedProblem }) => {
 
   const fetchSubmissionHistory = async () => {
     setHistoryLoading(true);
+    // Use resolved MongoDB _id; fall back to slug while resolution is pending
+    const idToUse = resolvedProblemId || problemSlug;
     try {
-      const res = await authFetch(`${API_BASE_URL}/coding/problems/${problemId}/submissions`);
+      const res = await authFetch(`${API_BASE_URL}/coding/problems/${idToUse}/submissions`);
       if (res.ok) {
         const historyData = await res.json();
         setSubmissionHistory(historyData || []);
@@ -136,9 +176,11 @@ const AICodingAssistant = ({ selectedProblem }) => {
   const handleRunAndSubmit = async () => {
     setLoading(true);
     setActiveTab("results");
+    // Use resolved MongoDB _id; fall back to slug if not yet resolved
+    const idToUse = resolvedProblemId || problemSlug;
 
     try {
-      const response = await authFetch(`${API_BASE_URL}/coding/problems/${problemId}/submit`, {
+      const response = await authFetch(`${API_BASE_URL}/coding/problems/${idToUse}/submit`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -189,6 +231,24 @@ const AICodingAssistant = ({ selectedProblem }) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // ── Auth-Guard Wrappers (mirrors ResumePreview handleDownloadClick pattern) ──
+
+  // Guard for Submit: requires login before running code against the sandbox
+  const handleSubmitClick = () => {
+    requireAuth(
+      () => handleRunAndSubmit(),
+      "/coding-practice"
+    );
+  };
+
+  // Guard for History: requires login to view personal submission history
+  const handleHistoryClick = () => {
+    requireAuth(
+      () => fetchSubmissionHistory(),
+      "/coding-practice"
+    );
   };
 
   const handleClear = () => {
@@ -248,6 +308,23 @@ const AICodingAssistant = ({ selectedProblem }) => {
             <button className="editor-reset-btn" onClick={handleClear}>Reset Code</button>
           </div>
           
+          {/* Guest-mode info banner */}
+          {!isLoggedIn && (
+            <div style={{
+              background: "linear-gradient(135deg, #ede9fe 0%, #f5f3ff 100%)",
+              border: "1.5px solid #c4b5fd",
+              color: "#5b21b6",
+              padding: "10px 14px",
+              fontSize: "12.5px",
+              fontWeight: "600",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px"
+            }}>
+              🔒 <span><strong>Login required</strong> to execute code against the sandbox and save your submission history.</span>
+            </div>
+          )}
+
           {copyWarning && (
             <div className="copy-paste-warning-banner" style={{ background: "#fef2f2", border: "1px solid #fecaca", color: "#991b1b", padding: "8px 14px", fontSize: "13px", fontWeight: "700", textAlign: "center" }}>
               {copyWarning}
@@ -265,7 +342,7 @@ const AICodingAssistant = ({ selectedProblem }) => {
             spellCheck="false"
           />
           <div className="editor-footer">
-            <button className="run-code-btn" onClick={handleRunAndSubmit} disabled={loading}>
+            <button className="run-code-btn" onClick={handleSubmitClick} disabled={loading}>
               {loading ? "⚙️ Compiling & Executing..." : "▶️ Execute & Submit Code"}
             </button>
           </div>
@@ -295,7 +372,7 @@ const AICodingAssistant = ({ selectedProblem }) => {
               📈 Performance Percentiles
             </button>
             <button
-              onClick={() => { setActiveTab("history"); fetchSubmissionHistory(); }}
+              onClick={() => { setActiveTab("history"); handleHistoryClick(); }}
               style={{
                 flex: 1, padding: "12px 10px", border: "none", background: activeTab === "history" ? "#ffffff" : "transparent",
                 color: activeTab === "history" ? "#7c3aed" : "#64748b", fontWeight: "700", fontSize: "13px", cursor: "pointer",
@@ -421,7 +498,7 @@ const AICodingAssistant = ({ selectedProblem }) => {
               <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                   <h4 style={{ margin: 0, color: "#1e293b", fontSize: "14px" }}>💾 Submission Attempt History</h4>
-                  <button onClick={fetchSubmissionHistory} style={{ background: "transparent", border: "none", color: "#7c3aed", fontSize: "12px", cursor: "pointer", fontWeight: "700" }}>Refresh 🔄</button>
+                  <button onClick={handleHistoryClick} style={{ background: "transparent", border: "none", color: "#7c3aed", fontSize: "12px", cursor: "pointer", fontWeight: "700" }}>Refresh 🔄</button>
                 </div>
 
                 {historyLoading ? (

@@ -1,7 +1,10 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import "./HiringProcess.css";
 
-const HIRING_PROCESS_DATA = {
+const API_BASE_URL = "http://localhost:8000/api";
+
+// Fallback static data for offline / unseeded DB
+const STATIC_HIRING = {
   Google: [
     { title: "Resume Selection", desc: "AI-optimized resume filter seeking quantifiable achievements and project impact." },
     { title: "Phone Screen", desc: "45-minute technical coding round covering linear structures or basic recursion." },
@@ -30,59 +33,78 @@ const HIRING_PROCESS_DATA = {
     { title: "Hiring Board Review", desc: "Independent engineering directors review feedback reports to approve hires." },
     { title: "Compensation & Offer", desc: "Coordinate base, equity details, target starting dates, and signing sheets." }
   ],
-  Netflix: [
-    { title: "Recruiter Call", desc: "Check core experience, motivations, and cultural expectations." },
-    { title: "Technical Screen", desc: "1-2 high-level coding or system questions with senior infrastructure leads." },
-    { title: "Onsite Loop", desc: "2 System Architecture rounds + 2 Coding/LLD rounds + 2 Cultural fit chats." },
-    { title: "Feedback Debrief", desc: "Immediate decision round. Focuses on consensus among the panel." },
-    { title: "Executive Sign-Off", desc: "Engineering VP and HR director review compensation parameters for sign-off." }
-  ],
-  Apple: [
-    { title: "Initial Screen", desc: "Verify strong specialization in systems, hardware, or target application layers." },
-    { title: "Technical Screen", desc: "Detailed technical discussion or coding round testing low-level design." },
-    { title: "Onsite Loop", desc: "4-5 rounds of intense technical deep-dives, hardware/software interactions, and design." },
-    { title: "Director Interview", desc: "Final fit round evaluating product alignment and vision." },
-    { title: "Hiring Offer", desc: "Determine standard tiers, equity components, and coordinate offer details." }
-  ],
-  TCS: [
-    { title: "Online NQT Exam", desc: "National Qualifier Test assessing Numerical, Verbal, Logical, and Basic Coding." },
-    { title: "Technical Round", desc: "Face-to-face round assessing academic projects, OOPs, DBMS, SQL, and simple algorithms." },
-    { title: "Managerial Round", desc: "Case-study and behavioral questions assessing flexibility and pressure handling." },
-    { title: "HR Round", desc: "Document verifications, shifts agreement, relocate guidelines, and salary package explanations." }
-  ],
-  Infosys: [
-    { title: "Aptitude / Coding Screening", desc: "Logical reasoning, mathematical aptitude, and fundamental programming tests." },
-    { title: "Technical Interview", desc: "Evaluation of programming fundamentals (Java/Python/C++), projects, and SQL queries." },
-    { title: "HR Interview", desc: "General communication check, relocation preferences, and formal compensation details." }
-  ]
 };
 
+const getDefaultSteps = (companyName) =>
+  STATIC_HIRING[companyName] || [
+    { title: "Resume Screening", desc: "Initial evaluation of your profile, projects, and technical background." },
+    { title: "Online Assessment", desc: "Coding and aptitude evaluation to shortlist candidates." },
+    { title: "Technical Rounds", desc: "DSA, system design, and core CS concept evaluation." },
+    { title: "HR & Offer", desc: "Behavioral discussion, compensation, and onboarding details." }
+  ];
+
 const HiringProcess = ({ companyName }) => {
-  const steps = HIRING_PROCESS_DATA[companyName] || HIRING_PROCESS_DATA.Google;
+  const [steps, setSteps]       = useState(getDefaultSteps(companyName));
+  const [isLive, setIsLive]     = useState(false);
+  const [loading, setLoading]   = useState(true);
+
+  useEffect(() => {
+    setSteps(getDefaultSteps(companyName));
+    setIsLive(false);
+
+    const fetchProfile = async () => {
+      setLoading(true);
+      try {
+        const slug = companyName.toLowerCase().trim().replace(/\s+/g, "-");
+        const res = await fetch(`${API_BASE_URL}/company/${slug}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data.hiring_process) && data.hiring_process.length > 0) {
+            setSteps(data.hiring_process);
+            setIsLive(true);
+          }
+        }
+      } catch (err) {
+        console.warn("HiringProcess API fallback:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, [companyName]);
 
   return (
     <section className="hiring-process-section">
       <div className="hiring-process-container">
-        
+
         <div className="section-header-mini">
           <span className="section-mini-tag">⏳ Hiring Funnel</span>
-          <h2 className="hiring-process-title">The hiring process at <span>{companyName}</span></h2>
+          <h2 className="hiring-process-title">
+            The hiring process at <span>{companyName}</span>
+          </h2>
           <p>Navigate the official pipeline steps from initial resume screening to the final compensation discussions.</p>
         </div>
 
-        <div className="process-timeline-flow">
-          {steps.map((step, idx) => (
-            <div className="process-step-node" key={idx}>
-              <div className="step-counter-bubble">
-                <span>{idx + 1}</span>
+        {loading ? (
+          <div style={{ textAlign: "center", padding: "40px", color: "#64748b" }}>
+            Loading hiring process...
+          </div>
+        ) : (
+          <div className="process-timeline-flow">
+            {steps.map((step, idx) => (
+              <div className="process-step-node" key={idx}>
+                <div className="step-counter-bubble">
+                  <span>{idx + 1}</span>
+                </div>
+                <div className="step-content-box card">
+                  <h4>{step.title}</h4>
+                  <p>{step.desc || step.details || step.description}</p>
+                </div>
               </div>
-              <div className="step-content-box card">
-                <h4>{step.title}</h4>
-                <p>{step.desc}</p>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
 
       </div>
     </section>

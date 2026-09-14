@@ -324,6 +324,21 @@ const ResumePreview = ({ resumeData, selectedTemplate, setResumeData, isDemoMode
           </div>
         </div>
 
+        {/* ── Overflow Warning Banner ── */}
+        {isOverflowing && (
+          <div className="overflow-warning-banner">
+            <span className="overflow-warning-icon">⚠️</span>
+            <span className="overflow-warning-text">
+              Content is overflowing the 1-page limit. Use{" "}
+              <strong>Auto-Fit</strong> or reduce{" "}
+              <strong>Font Size / Spacing</strong> above to fit everything on a single page.
+            </span>
+            <button className="overflow-autofit-btn" onClick={handleAutoFit}>
+              ✨ Auto-Fix Now
+            </button>
+          </div>
+        )}
+
         {/* Paper Sheet Simulator */}
         <div 
           ref={paperRef}
@@ -333,17 +348,84 @@ const ResumePreview = ({ resumeData, selectedTemplate, setResumeData, isDemoMode
           <header className="resume-header centered-header">
             <h1 className="name">{personal?.name || "Your Full Name"}</h1>
             {personal?.role && <div className="header-job-title">{personal.role}</div>}
-            {personal?.address && <div className="header-address-line">{personal.address}</div>}
+            {personal?.address && <div className="header-address-line">📍 {personal.address}</div>}
             <div className="contact-info centered-contact">
-              {[
-                personal?.phone,
-                personal?.email,
-                personal?.linkedin ? `LinkedIn: ${personal.linkedin}` : null,
-                personal?.github ? `GitHub: ${personal.github}` : null,
-                personal?.portfolio ? `Portfolio: ${personal.portfolio}` : null
-              ]
-                .filter(Boolean)
-                .join("  |  ")}
+              {/* Phone */}
+              {personal?.phone && (
+                <span className="contact-chip">
+                  <span className="contact-icon">📞</span>
+                  <span className="contact-text">{personal.phone}</span>
+                </span>
+              )}
+              {/* Email */}
+              {personal?.email && (
+                <>
+                  {personal?.phone && <span className="contact-sep">·</span>}
+                  <span className="contact-chip">
+                    <span className="contact-icon">✉️</span>
+                    <a href={`mailto:${personal.email}`} className="contact-link">{personal.email}</a>
+                  </span>
+                </>
+              )}
+              {/* LinkedIn */}
+              {personal?.linkedin && (
+                <>
+                  <span className="contact-sep">·</span>
+                  <span className="contact-chip">
+                    <span className="contact-icon">🔗</span>
+                    <a
+                      href={personal.linkedin.startsWith("http") ? personal.linkedin : `https://${personal.linkedin}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="contact-link"
+                    >
+                      {personal.linkedin.replace(/^https?:\/\/(www\.)?/, "")}
+                    </a>
+                  </span>
+                </>
+              )}
+              {/* GitHub */}
+              {personal?.github && (
+                <>
+                  <span className="contact-sep">·</span>
+                  <span className="contact-chip">
+                    <span className="contact-icon">🐙</span>
+                    <a
+                      href={personal.github.startsWith("http") ? personal.github : `https://${personal.github}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="contact-link"
+                    >
+                      {personal.github.replace(/^https?:\/\/(www\.)?/, "")}
+                    </a>
+                  </span>
+                </>
+              )}
+              {/* Portfolio / Website */}
+              {(personal?.portfolio || personal?.website) && (
+                <>
+                  <span className="contact-sep">·</span>
+                  <span className="contact-chip">
+                    <span className="contact-icon">🌐</span>
+                    <a
+                      href={
+                        (personal.portfolio || personal.website).startsWith("http")
+                          ? (personal.portfolio || personal.website)
+                          : `https://${personal.portfolio || personal.website}`
+                      }
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="contact-link"
+                    >
+                      {(personal.portfolio || personal.website).replace(/^https?:\/\/(www\.)?/, "")}
+                    </a>
+                  </span>
+                </>
+              )}
+              {/* Fallback placeholder when no contact info is entered */}
+              {!personal?.phone && !personal?.email && !personal?.linkedin && !personal?.github && !personal?.portfolio && (
+                <span className="contact-placeholder">yourname@email.com  ·  +1 (555) 000-0000</span>
+              )}
             </div>
           </header>
 

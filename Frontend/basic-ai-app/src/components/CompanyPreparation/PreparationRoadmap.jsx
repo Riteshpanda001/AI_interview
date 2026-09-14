@@ -1,96 +1,109 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import "./PreparationRoadmap.css";
 
-const PreparationRoadmap = ({ companyName }) => {
-  const isServiceCompany = companyName === "TCS" || companyName === "Infosys";
+const API_BASE_URL = "http://localhost:8000/api";
 
-  const weeks = isServiceCompany 
-    ? [
-        {
-          week: "Week 1",
-          goal: "Aptitude & General Reasoning",
-          focus: "Quantitative calculations, logical deductions, coding patterns, and speed puzzles.",
-          actions: ["Practice 3 mock aptitude sets", "Solve basic array logic problems", "Review basic syntax structure"]
-        },
-        {
-          week: "Week 2",
-          goal: "Core Coding and SQL Foundations",
-          focus: "Fundamental linear structures, primary sorting logics, and essential SQL query writing.",
-          actions: ["Solve 15 Easy recursion/array questions", "Learn JOINs, GROUP BY, and aggregate queries", "Review standard database schemas"]
-        },
-        {
-          week: "Week 3",
-          goal: "Academic Projects & CS Fundamentals",
-          focus: "Deep dive into your university projects, OOPs definitions, and Operating System constructs.",
-          actions: ["Draft 30-second descriptions for each project", "Revise inheritance, polymorphism, and encapsulation", "Review basic network layers"]
-        },
-        {
-          week: "Week 4",
-          goal: "Mock Interviews & Soft Skills",
-          focus: "Simulating face-to-face panels, HR negotiations, and body language alignment.",
-          actions: ["Perform 2 AI Mock HR rounds", "Practice standard questions like 'Tell me about yourself'", "Draft formal resume files"]
+const SERVICE_COMPANIES = ["TCS", "Infosys", "Wipro", "Accenture", "Capgemini", "HCL"];
+
+const SERVICE_ROADMAP = [
+  { week: "Week 1", goal: "Aptitude & General Reasoning", focus: "Quantitative calculations, logical deductions, coding patterns, and speed puzzles.", actions: ["Practice 3 mock aptitude sets", "Solve basic array logic problems", "Review basic syntax structure"] },
+  { week: "Week 2", goal: "Core Coding and SQL Foundations", focus: "Fundamental linear structures, primary sorting logics, and essential SQL query writing.", actions: ["Solve 15 Easy recursion/array questions", "Learn JOINs, GROUP BY, and aggregate queries", "Review standard database schemas"] },
+  { week: "Week 3", goal: "Academic Projects & CS Fundamentals", focus: "Deep dive into your university projects, OOPs definitions, and Operating System constructs.", actions: ["Draft 30-second descriptions for each project", "Revise inheritance, polymorphism, and encapsulation", "Review basic network layers"] },
+  { week: "Week 4", goal: "Mock Interviews & Soft Skills", focus: "Simulating face-to-face panels, HR negotiations, and body language alignment.", actions: ["Perform 2 AI Mock HR rounds", "Practice standard questions like 'Tell me about yourself'", "Draft formal resume files"] }
+];
+
+const PRODUCT_ROADMAP = [
+  { week: "Week 1", goal: "Core DSA Patterns", focus: "Array intervals, Sliding window, Hash Map lookups, and fast stack logic patterns.", actions: ["Solve 15 Medium sliding window problems", "Practice 10 Prefix sum and two-pointer scenarios", "Review optimal runtime models"] },
+  { week: "Week 2", goal: "Advanced Data Structures", focus: "Graphs navigation (DFS/BFS), Tree structures, BST searches, and Binary Searches.", actions: ["Implement custom BST traversals", "Solve 10 Graph pathfinding problems", "Solve 10 Binary Search optimization questions"] },
+  { week: "Week 3", goal: "System Design Foundations", focus: "Database selection, load balancers, caching strategies, and HLD/LLD patterns.", actions: ["Read microservices and API gateway structures", "Practice designing TinyURL or WhatsApp block structures", "Compare SQL vs NoSQL DB performance"] },
+  { week: "Week 4", goal: "Mock Loop & Core Values", focus: "Timed coding simulations, STAR-based behavioral scenarios, and company culture fits.", actions: ["Execute 3 mock technical rounds on PrepNova", "Deep dive into company core leadership principles", "Optimize code dry-run speeds"] }
+];
+
+const getDefaultRoadmap = (companyName) =>
+  SERVICE_COMPANIES.includes(companyName) ? SERVICE_ROADMAP : PRODUCT_ROADMAP;
+
+const PreparationRoadmap = ({ companyName }) => {
+  const [weeks, setWeeks]     = useState(getDefaultRoadmap(companyName));
+  const [isLive, setIsLive]   = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setWeeks(getDefaultRoadmap(companyName));
+    setIsLive(false);
+
+    const fetchProfile = async () => {
+      setLoading(true);
+      try {
+        const slug = companyName.toLowerCase().trim().replace(/\s+/g, "-");
+        const res = await fetch(`${API_BASE_URL}/company/${slug}`);
+        if (res.ok) {
+          const data = await res.json();
+          // prep_roadmap field from DB
+          const roadmap = data.prep_roadmap || data.personalized_prep_plan;
+          if (Array.isArray(roadmap) && roadmap.length > 0) {
+            // Normalize DB shape → { week, goal, focus, actions[] }
+            const normalized = roadmap.map((item) => ({
+              week: item.week,
+              goal: item.goal || item.focus || "",
+              focus: item.focus || item.goal || "",
+              actions: item.actions || item.tasks || []
+            }));
+            setWeeks(normalized);
+            setIsLive(true);
+          }
         }
-      ]
-    : [
-        {
-          week: "Week 1",
-          goal: "Core DSA Patterns",
-          focus: "Array intervals, Sliding window, Hash Map lookups, and fast stack logic patterns.",
-          actions: ["Solve 15 Medium sliding window problems", "Practice 10 Prefix sum and two-pointer scenarios", "Review optimal runtime models"]
-        },
-        {
-          week: "Week 2",
-          goal: "Advanced Data Structures",
-          focus: "Graphs navigation (DFS/BFS), Tree structures, BST searches, and Binary Searches.",
-          actions: ["Implement custom BST traversals", "Solve 10 Graph pathfinding problems", "Solve 10 Binary Search optimization questions"]
-        },
-        {
-          week: "Week 3",
-          goal: "System Design Foundations",
-          focus: "Database selection, load balancers, caching strategies, and HLD/LLD patterns.",
-          actions: ["Read microservices and API gateway structures", "Practice designing TinyURL or WhatsApp block structures", "Compare SQL vs NoSQL DB performance"]
-        },
-        {
-          week: "Week 4",
-          goal: "Mock Loop & Core Values",
-          focus: "Timed coding simulations, STAR-based behavioral scenarios, and company culture fits.",
-          actions: ["Execute 3 mock technical rounds on PrepNova", "Deep dive into company core leadership principles", "Optimize code dry-run speeds"]
-        }
-      ];
+      } catch (err) {
+        console.warn("PreparationRoadmap API fallback:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, [companyName]);
 
   return (
     <section className="prep-roadmap-section">
       <div className="prep-roadmap-container">
-        
+
         <div className="section-header-mini">
           <span className="section-mini-tag">🗓️ Prep Timeline</span>
           <h2 className="roadmap-title">4-Week <span>Custom Roadmap</span></h2>
-          <p>An interactive, week-by-week blueprint customized specifically for the recruitment criteria of {companyName}.</p>
+          <p>
+            An interactive, week-by-week blueprint customized specifically for the
+            recruitment criteria of {companyName}.
+          </p>
         </div>
 
-        <div className="roadmap-grid-timeline">
-          {weeks.map((item, idx) => (
-            <div className="roadmap-week-card card" key={idx}>
-              <div className="week-badge-row">
-                <span className="week-label-tag">{item.week}</span>
-                <span className="week-goal-title">{item.goal}</span>
+        {loading ? (
+          <div style={{ textAlign: "center", padding: "40px", color: "#64748b" }}>
+            Loading preparation roadmap...
+          </div>
+        ) : (
+          <div className="roadmap-grid-timeline">
+            {weeks.map((item, idx) => (
+              <div className="roadmap-week-card card" key={idx}>
+                <div className="week-badge-row">
+                  <span className="week-label-tag">{item.week}</span>
+                  <span className="week-goal-title">{item.goal}</span>
+                </div>
+                <p className="week-focus-para">{item.focus}</p>
+
+                <div className="week-checklist">
+                  <strong>Weekly Checklist:</strong>
+                  <ul>
+                    {(item.actions || []).map((act, i) => (
+                      <li key={i}>
+                        <span className="checkbox-dot">○</span>
+                        {act}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
-              <p className="week-focus-para">{item.focus}</p>
-              
-              <div className="week-checklist">
-                <strong>Weekly Checklist:</strong>
-                <ul>
-                  {item.actions.map((act, i) => (
-                    <li key={i}>
-                      <span className="checkbox-dot">○</span>
-                      {act}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
 
       </div>
     </section>
