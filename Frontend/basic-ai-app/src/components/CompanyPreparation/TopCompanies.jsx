@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./TopCompanies.css";
 
-const API_BASE_URL = "http://localhost:8000/api";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api";
 
 const DEFAULT_COMPANIES = [
   { name: "Google", logo: "/logos/google.png", type: "Product", color: "#4285F4" },

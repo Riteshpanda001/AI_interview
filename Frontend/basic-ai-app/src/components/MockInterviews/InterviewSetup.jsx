@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { FaPlay, FaGraduationCap, FaNetworkWired, FaBriefcase, FaUpload, FaSpinner, FaFileAlt, FaBullseye } from "react-icons/fa";
 import { useAuth } from "../../context/AuthContext";
+import { API_BASE_URL } from "../../utils/apiConfig";
 import "./InterviewSetup.css";
 
 const InterviewSetup = ({ onStartInterview }) => {
@@ -34,7 +35,7 @@ const InterviewSetup = ({ onStartInterview }) => {
     formData.append("file", file);
 
     try {
-      const response = await authFetch("http://localhost:8000/api/resume/upload", {
+      const response = await authFetch(`${API_BASE_URL}/resume/upload`, {
         method: "POST",
         body: formData,
       });

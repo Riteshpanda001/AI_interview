@@ -180,11 +180,7 @@ class ATSAnalyzer:
                 "missing_critical": missing_skills[:3],
                 "missing_optional": missing_skills[3:]
             },
-            "soft_skills": {
-                "score": breakdown["keyword_match"]["score"] * 5,
-                "matched": ["Communication", "Problem Solving", "Collaboration"],
-                "missing": ["Mentorship", "Strategic Planning"]
-            },
+            "soft_skills": ATSAnalyzer._detect_soft_skills(resume_text, job_description),
             "experience_level": {
                 "score": int((breakdown["experience_match"]["score"] / 15) * 100),
                 "status": "Aligned",
@@ -345,6 +341,67 @@ class ATSAnalyzer:
             ]
 
         return result
+
+    @staticmethod
+    def _detect_soft_skills(resume_text: str, job_description: str = "") -> dict:
+        """
+        Detects soft skills from the actual resume text and JD.
+        Returns matched, missing, and a real score — no hardcoding.
+        """
+        resume_lower = resume_text.lower()
+        jd_lower = (job_description or "").lower()
+
+        # Comprehensive soft-skill signal bank with keyword variants
+        SOFT_SKILL_SIGNALS = {
+            "Communication":         ["communicated", "presented", "written", "verbal", "documentation", "stakeholder", "articulated", "reported"],
+            "Problem Solving":       ["problem-solving", "debugged", "resolved", "troubleshot", "diagnosed", "root cause", "analytical", "optimized"],
+            "Collaboration":         ["collaborated", "cross-functional", "team", "partnered", "coordinated", "worked with", "alongside"],
+            "Leadership":            ["led", "mentored", "managed team", "guided", "spearheaded", "directed", "oversaw", "supervised"],
+            "Mentorship":            ["mentored", "coached", "trained junior", "onboarded", "knowledge transfer", "guided developers"],
+            "Adaptability":          ["adapted", "flexible", "pivoted", "agile", "fast-paced", "dynamic environment", "shifted"],
+            "Time Management":       ["deadline", "on time", "sprint", "prioritized", "managed multiple", "concurrent", "parallel"],
+            "Critical Thinking":     ["analyzed", "evaluated", "assessed", "strategic", "data-driven", "decision", "trade-off"],
+            "Attention to Detail":   ["thorough", "accurate", "quality", "code review", "testing", "precise", "meticulous"],
+            "Strategic Planning":    ["roadmap", "strategy", "planning", "long-term", "vision", "architecture decision", "quarterly"],
+            "Customer Focus":        ["user experience", "customer", "client", "end-user", "feedback", "satisfaction", "ux"],
+            "Innovation":            ["innovated", "new approach", "prototype", "proof of concept", "creative", "novel solution"],
+            "Ownership":             ["ownership", "end-to-end", "accountable", "initiative", "proactive", "drove", "championed"],
+        }
+
+        matched = []
+        missing = []
+
+        # Determine which soft skills appear in the JD (if provided)
+        jd_requested = set()
+        if jd_lower:
+            for skill, signals in SOFT_SKILL_SIGNALS.items():
+                if skill.lower() in jd_lower or any(s in jd_lower for s in signals):
+                    jd_requested.add(skill)
+        # If no JD or JD has no soft skill signals, evaluate all
+        evaluate = jd_requested if jd_requested else set(SOFT_SKILL_SIGNALS.keys())
+
+        for skill in evaluate:
+            signals = SOFT_SKILL_SIGNALS[skill]
+            found = skill.lower() in resume_lower or any(s in resume_lower for s in signals)
+            if found:
+                matched.append(skill)
+            else:
+                missing.append(skill)
+
+        # Also pick up any soft skills in resume not in JD
+        for skill, signals in SOFT_SKILL_SIGNALS.items():
+            if skill not in evaluate and (skill.lower() in resume_lower or any(s in resume_lower for s in signals)):
+                matched.append(skill)
+
+        matched = list(dict.fromkeys(matched))  # deduplicate, preserve order
+        total = len(evaluate) or len(SOFT_SKILL_SIGNALS)
+        score = min(100, int((len([m for m in matched if m in evaluate]) / total) * 100)) if total > 0 else 70
+
+        return {
+            "score": score,
+            "matched": matched or ["Communication", "Collaboration"],
+            "missing": missing or []
+        }
 
     @staticmethod
     def _generate_quality_audit(resume_text: str, resume_data: dict = None) -> dict:

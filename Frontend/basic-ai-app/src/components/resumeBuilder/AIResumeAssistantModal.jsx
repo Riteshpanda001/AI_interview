@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "./AIResumeAssistantModal.css";
+import { API_BASE_URL } from "../../utils/apiConfig";
 
 const QUICK_PROMPTS = [
   { id: "improve_summary", label: "✨ Improve my summary", action: "improve_summary" },
@@ -32,7 +33,7 @@ const AIResumeAssistantModal = ({ isOpen, onClose, resumeData, onApplyAssistantR
     };
 
     try {
-      const res = await authFetch("http://localhost:8000/api/resume/assistant", {
+      const res = await authFetch(`${API_BASE_URL}/resume/assistant`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)

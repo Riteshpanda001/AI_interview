@@ -5,6 +5,7 @@ import AIResumeAssistantModal from "./AIResumeAssistantModal";
 import BeforeAfterComparisonModal from "./BeforeAfterComparisonModal";
 import JobMatcherModal from "./JobMatcherModal";
 import { useAuth } from "../../context/AuthContext";
+import { API_BASE_URL } from "../../utils/apiConfig";
 import "./CreateNewWorkspace.css";
 
 const ACTION_VERBS = {
@@ -57,7 +58,7 @@ const CreateNewWorkspace = ({
     setShowVersionModal(true);
     if (currentResumeId) {
       try {
-        const res = await authFetch(`http://localhost:8000/api/resume/${currentResumeId}/versions`);
+        const res = await authFetch(`${API_BASE_URL}/resume/${currentResumeId}/versions`);
         if (res.ok) {
           const list = await res.json();
           setVersions(list);
@@ -78,7 +79,7 @@ const CreateNewWorkspace = ({
   const handleRestoreVersion = async (ver) => {
     if (currentResumeId && ver._id) {
       try {
-        const res = await authFetch(`http://localhost:8000/api/resume/${currentResumeId}/restore-version?version_id=${ver._id}`, { method: "POST" });
+        const res = await authFetch(`${API_BASE_URL}/resume/${currentResumeId}/restore-version?version_id=${ver._id}`, { method: "POST" });
         if (res.ok) {
           const restored = await res.json();
           const targetData = restored.parsed_content || restored.resume_data || ver.resume_data;
@@ -103,7 +104,7 @@ const CreateNewWorkspace = ({
   const handleDownloadDocx = async () => {
     if (currentResumeId) {
       try {
-        const response = await authFetch(`http://localhost:8000/api/resume/${currentResumeId}/export/docx`);
+        const response = await authFetch(`${API_BASE_URL}/resume/${currentResumeId}/export/docx`);
         if (response.ok) {
           const blob = await response.blob();
           const url = URL.createObjectURL(blob);
@@ -345,7 +346,7 @@ const CreateNewWorkspace = ({
   const handleAIPolishSummary = async () => {
     setSaveStatus("saving");
     try {
-      const res = await authFetch("http://localhost:8000/api/resume/optimize", {
+      const res = await authFetch(`${API_BASE_URL}/resume/optimize`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -374,7 +375,7 @@ const CreateNewWorkspace = ({
     setShowShareModal(true);
     if (currentResumeId) {
       try {
-        const res = await authFetch(`http://localhost:8000/api/resume/${currentResumeId}/share`, {
+        const res = await authFetch(`${API_BASE_URL}/resume/${currentResumeId}/share`, {
           method: "POST",
         });
         if (res.ok) {
@@ -394,7 +395,7 @@ const CreateNewWorkspace = ({
     // 1. Try server PDF endpoint first (produces a true PDF file)
     if (currentResumeId) {
       try {
-        const response = await authFetch(`http://localhost:8000/api/resume/${currentResumeId}/export/pdf`);
+        const response = await authFetch(`${API_BASE_URL}/resume/${currentResumeId}/export/pdf`);
         if (response.ok) {
           const blob = await response.blob();
           const url = URL.createObjectURL(blob);

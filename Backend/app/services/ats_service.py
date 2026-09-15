@@ -152,7 +152,7 @@ class ATSService:
         else:
             extracted_text = content_bytes.decode("utf-8", errors="ignore")
 
-        if not extracted_text.trim():
+        if not extracted_text.strip():
             extracted_text = "Software Engineer with experience in cloud applications and full stack systems."
 
         # Perform simple extraction of skills/responsibilities

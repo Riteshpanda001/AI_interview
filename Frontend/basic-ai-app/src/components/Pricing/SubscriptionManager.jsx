@@ -3,7 +3,7 @@ import "./SubscriptionManager.css";
 import { useAuth } from "../../context/AuthContext";
 import InvoiceModal from "./InvoiceModal";
 
-const API_BASE_URL = "http://localhost:8000/api";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api";
 
 const SubscriptionManager = ({ onUpgradeClick }) => {
   const { authFetch, user, fetchCurrentUser } = useAuth();

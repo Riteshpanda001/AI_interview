@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
+import { API_BASE_URL } from "../../utils/apiConfig";
 import "./JobMatcherModal.css";
 
 const JobMatcherModal = ({
@@ -30,7 +31,7 @@ const JobMatcherModal = ({
     setOptimizedAlert(false);
 
     try {
-      const res = await authFetch("http://localhost:8000/api/resume/job-match", {
+      const res = await authFetch(`${API_BASE_URL}/resume/job-match`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

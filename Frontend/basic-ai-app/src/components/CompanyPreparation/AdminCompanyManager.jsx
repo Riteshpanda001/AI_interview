@@ -3,7 +3,7 @@ import { useAuth } from "../../context/AuthContext";
 import { FaTimes, FaPlus, FaTrash, FaEdit, FaDatabase, FaSave, FaCheckCircle, FaSpinner } from "react-icons/fa";
 import "./AdminCompanyManager.css";
 
-const API_BASE_URL = "http://localhost:8000/api";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api";
 
 const AdminCompanyManager = ({ isOpen, onClose, onRefreshData }) => {
   const { authFetch } = useAuth();

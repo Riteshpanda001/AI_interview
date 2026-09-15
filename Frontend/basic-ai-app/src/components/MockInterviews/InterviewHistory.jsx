@@ -3,7 +3,7 @@ import { useAuth } from "../../context/AuthContext";
 import { FaCalendarAlt, FaCheckDouble, FaTimes, FaChartLine, FaTrophy, FaArrowUp, FaPlay, FaFilter, FaFilePdf, FaEye, FaMicrophone } from "react-icons/fa";
 import "./InterviewHistory.css";
 
-const API_BASE_URL = "http://localhost:8000/api";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api";
 
 const InterviewHistory = ({ onStartNewSession }) => {
   const { token, authFetch } = useAuth();

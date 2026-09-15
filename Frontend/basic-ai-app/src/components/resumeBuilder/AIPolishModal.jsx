@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
+import { API_BASE_URL } from "../../utils/apiConfig";
 import "./AIGeneratorModal.css";
 import "./AIPolishModal.css";
 
@@ -56,7 +57,7 @@ const AIPolishModal = ({ isOpen, onClose, resumeData, setResumeData, onSaveResum
         .filter(f => selectedFeatures.includes(f.id))
         .map(f => f.title);
 
-      const res = await authFetch("http://localhost:8000/api/resume/optimize", {
+      const res = await authFetch(`${API_BASE_URL}/resume/optimize`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -84,7 +85,7 @@ const AIPolishModal = ({ isOpen, onClose, resumeData, setResumeData, onSaveResum
       // Calculate real ATS score on polished data
       let realScore = 95;
       try {
-        const atsRes = await authFetch("http://localhost:8000/api/resume/calculate-ats", {
+        const atsRes = await authFetch(`${API_BASE_URL}/resume/calculate-ats`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ resume_data: polishedData })

@@ -6,7 +6,7 @@ import Footer from "../components/Footer";
 import upiQrCode from "../assets/upi_qr_code.png";
 import "./PayUpiQr.css";
 
-const API_BASE_URL = "http://localhost:8000/api";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api";
 
 const PayUpiQr = () => {
   const { user, authFetch, fetchCurrentUser, loading } = useAuth();
@@ -136,7 +136,6 @@ const PayUpiQr = () => {
                     </div>
                     <div className="pay-upi-qr-details">
                       <p className="pay-upi-merchant">Ritesh kumar Panda</p>
-                      <p className="pay-upi-id">UPI ID: <span>riteshkumarpanda044@okaxis</span></p>
                       <p className="pay-upi-instruction">Scan to pay with any UPI app (GPay, PhonePe, Paytm, BHIM, etc.)</p>
                     </div>
                   </div>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import "./InterviewReadinessCard.css";
+import { API_BASE_URL } from "../../utils/apiConfig";
 
 // Computes a local readiness estimate from the resumeData prop.
 // Used when: no resumeId yet, or the backend API is unavailable.
@@ -96,7 +97,7 @@ const InterviewReadinessCard = ({ resumeId, resumeData, authFetch }) => {
     if (!resumeId || !authFetch) return;
     setLoading(true);
     try {
-      const res = await authFetch(`http://localhost:8000/api/resume/${resumeId}/readiness`);
+      const res = await authFetch(`${API_BASE_URL}/resume/${resumeId}/readiness`);
       if (res.ok) {
         const data = await res.json();
         setReadiness({ ...data, _fromApi: true });

@@ -4,7 +4,7 @@ import "./CheckoutModal.css";
 import { useAuth } from "../../context/AuthContext";
 import upiQrCode from "../../assets/upi_qr_code.png";
 
-const API_BASE_URL = "http://localhost:8000/api";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api";
 
 const CheckoutModal = ({ isOpen, onClose, selectedPlan, billingCycle, onPaymentSuccess }) => {
   const { user, authFetch, fetchCurrentUser } = useAuth();

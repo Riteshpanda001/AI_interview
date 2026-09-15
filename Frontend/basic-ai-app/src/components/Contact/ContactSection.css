@@ -997,3 +997,160 @@ margin-bottom:10px;
   font-size: 15px;
   line-height: 1.7;
 }
+
+/* ==========================================
+   SOCIAL MEDIA LINKS CARD
+========================================== */
+.social-links-card {
+  background: #1a224a;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 22px;
+  padding: 24px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+}
+
+.social-links-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 4px 0;
+}
+
+.social-links-sub {
+  font-size: 13px;
+  color: #94a3b8;
+  margin: 0 0 18px 0;
+}
+
+.social-links-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.social-link-btn {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.25s ease;
+  border: 1px solid transparent;
+}
+
+.social-link-btn.linkedin {
+  background: rgba(10, 102, 194, 0.15);
+  color: #60a5fa;
+  border-color: rgba(10, 102, 194, 0.3);
+}
+.social-link-btn.linkedin:hover {
+  background: rgba(10, 102, 194, 0.3);
+  border-color: #3b82f6;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(10, 102, 194, 0.25);
+}
+
+.social-link-btn.github {
+  background: rgba(255, 255, 255, 0.07);
+  color: #e2e8f0;
+  border-color: rgba(255, 255, 255, 0.15);
+}
+.social-link-btn.github:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.35);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+}
+
+.social-link-btn.twitter {
+  background: rgba(29, 161, 242, 0.12);
+  color: #38bdf8;
+  border-color: rgba(29, 161, 242, 0.25);
+}
+.social-link-btn.twitter:hover {
+  background: rgba(29, 161, 242, 0.25);
+  border-color: #0ea5e9;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(29, 161, 242, 0.2);
+}
+
+.social-link-btn.instagram {
+  background: rgba(228, 64, 95, 0.12);
+  color: #f472b6;
+  border-color: rgba(228, 64, 95, 0.25);
+}
+.social-link-btn.instagram:hover {
+  background: rgba(228, 64, 95, 0.25);
+  border-color: #ec4899;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(228, 64, 95, 0.2);
+}
+
+/* ==========================================
+   GOOGLE MAPS EMBED SECTION
+========================================== */
+.contact-map-section {
+  position: relative;
+  z-index: 2;
+  margin-top: 80px;
+}
+
+.contact-map-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.contact-map-badge {
+  display: inline-block;
+  padding: 8px 20px;
+  border-radius: 999px;
+  background: rgba(124, 58, 237, 0.18);
+  color: #c084fc;
+  border: 1px solid rgba(168, 85, 247, 0.35);
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 14px;
+}
+
+.contact-map-header h3 {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin-bottom: 8px;
+  letter-spacing: -0.5px;
+}
+
+.contact-map-header h3 span {
+  background: linear-gradient(135deg, #a855f7, #c084fc);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.contact-map-header p {
+  font-size: 15px;
+  color: #94a3b8;
+}
+
+.contact-map-wrapper {
+  border-radius: 22px;
+  overflow: hidden;
+  border: 1px solid rgba(168, 85, 247, 0.25);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(168, 85, 247, 0.1);
+  transition: box-shadow 0.3s ease;
+}
+
+.contact-map-wrapper:hover {
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.5), 0 0 30px rgba(168, 85, 247, 0.2);
+}
+
+@media (max-width: 600px) {
+  .social-links-row {
+    grid-template-columns: 1fr;
+  }
+  .contact-map-header h3 {
+    font-size: 1.5rem;
+  }
+}

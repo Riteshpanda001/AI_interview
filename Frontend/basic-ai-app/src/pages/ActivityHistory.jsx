@@ -5,7 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import { FaFileAlt, FaCode, FaMicrophone, FaBuilding, FaCheckCircle, FaSync, FaFilter } from "react-icons/fa";
 import "./DashboardPage.css";
 
-const API_BASE_URL = "http://localhost:8000/api";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api";
 
 const ActivityHistory = () => {
   const { user, token, authFetch } = useAuth();

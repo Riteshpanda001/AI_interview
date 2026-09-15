@@ -4,7 +4,7 @@ import { FaMicrophone, FaChevronRight, FaTrophy, FaRobot, FaPlay, FaPause, FaSpi
 import InterviewHistory from "./InterviewHistory";
 import "./AIInterviewRoom.css";
 
-const API_BASE_URL = "http://localhost:8000/api";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api";
 
 const AIInterviewRoom = ({ interviewDetails, onViewHistory, onStartNewSession }) => {
   const { user, token, authFetch } = useAuth();
@@ -431,7 +431,9 @@ const AIInterviewRoom = ({ interviewDetails, onViewHistory, onStartNewSession })
     if (loading || !session || offlineMode || !token) return;
     if (session.id === "offline-session-123") return;
 
-    const wsUrl = `ws://localhost:8000/ws/interview/${session.id}`;
+    const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    const wsHost = import.meta.env.VITE_WS_HOST || "localhost:8000";
+    const wsUrl = `${wsProtocol}//${wsHost}/ws/interview/${session.id}`;
     console.log("[WebSocket] Connecting to:", wsUrl);
     const ws = new WebSocket(wsUrl);
     wsRef.current = ws;

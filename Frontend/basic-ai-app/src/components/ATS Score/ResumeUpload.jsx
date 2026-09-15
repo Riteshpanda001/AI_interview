@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./ResumeUpload.css";
 import { useAuth } from "../../context/AuthContext";
+import { API_BASE_URL } from "../../utils/apiConfig";
 
 const SAMPLE_JDS = [
   {
@@ -121,7 +122,7 @@ const ResumeUpload = ({
     formData.append("file", selectedFile);
 
     try {
-      const response = await authFetch("http://localhost:8000/api/resume/upload", {
+      const response = await authFetch(`${API_BASE_URL}/resume/upload`, {
         method: "POST",
         body: formData
       });
@@ -206,7 +207,7 @@ const ResumeUpload = ({
     formData.append("file", selectedJd);
 
     try {
-      const res = await authFetch("http://localhost:8000/api/ats/parse-jd", {
+      const res = await authFetch(`${API_BASE_URL}/ats/parse-jd`, {
         method: "POST",
         body: formData
       });
