@@ -139,13 +139,6 @@ const InterviewHistory = ({ onStartNewSession }) => {
 
   return (
     <div className="history-container" style={{ color: "#F8F8FA" }}>
-      <div className="history-header">
-        <h2>MY AI INTERVIEW HISTORY</h2>
-        <p>
-          Complete history center of all AI mock interviews. Review transcript evaluations, category scores, & actionable feedback.
-        </p>
-      </div>
-
       {/* Historical Performance Summary */}
       <div style={{
         background: "#13131A",

@@ -165,6 +165,114 @@ const Dashboard = ({ onPracticeNow }) => {
   const quickActions = data?.quick_actions || [];
   const streak = data?.streak || { count: codingProgress.streak || 0 };
 
+  // Multi-colored Neon Line Graph Series Calculation for 5 Parts
+  const chartDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Today"];
+
+  const rawModulesSeries = [
+    {
+      id: "resume",
+      name: "AI Resume Builder",
+      color: "#C084FC",
+      glowColor: "rgba(192, 132, 252, 0.7)",
+      score: metrics.resumeCompletion || 0,
+      points: [
+        Math.round((metrics.resumeCompletion || 0) * 0.35),
+        Math.round((metrics.resumeCompletion || 0) * 0.5),
+        Math.round((metrics.resumeCompletion || 0) * 0.65),
+        Math.round((metrics.resumeCompletion || 0) * 0.72),
+        Math.round((metrics.resumeCompletion || 0) * 0.85),
+        Math.round((metrics.resumeCompletion || 0) * 0.95),
+        metrics.resumeCompletion || 0
+      ]
+    },
+    {
+      id: "coding",
+      name: "Coding Practice",
+      color: "#00FF88",
+      glowColor: "rgba(0, 255, 136, 0.7)",
+      score: metrics.codingAccuracy || 0,
+      points: [
+        Math.round((metrics.codingAccuracy || 0) * 0.25),
+        Math.round((metrics.codingAccuracy || 0) * 0.45),
+        Math.round((metrics.codingAccuracy || 0) * 0.6),
+        Math.round((metrics.codingAccuracy || 0) * 0.68),
+        Math.round((metrics.codingAccuracy || 0) * 0.8),
+        Math.round((metrics.codingAccuracy || 0) * 0.92),
+        metrics.codingAccuracy || 0
+      ]
+    },
+    {
+      id: "company",
+      name: "Company Preparation",
+      color: "#FB7185",
+      glowColor: "rgba(251, 113, 133, 0.7)",
+      score: metrics.jobMatchFit || 0,
+      points: [
+        Math.round((metrics.jobMatchFit || 0) * 0.3),
+        Math.round((metrics.jobMatchFit || 0) * 0.5),
+        Math.round((metrics.jobMatchFit || 0) * 0.62),
+        Math.round((metrics.jobMatchFit || 0) * 0.7),
+        Math.round((metrics.jobMatchFit || 0) * 0.82),
+        Math.round((metrics.jobMatchFit || 0) * 0.9),
+        metrics.jobMatchFit || 0
+      ]
+    },
+    {
+      id: "interview",
+      name: "AI Interview Prep",
+      color: "#FBBF24",
+      glowColor: "rgba(251, 191, 36, 0.7)",
+      score: metrics.interviewScore || 0,
+      points: [
+        Math.round((metrics.interviewScore || 0) * 0.2),
+        Math.round((metrics.interviewScore || 0) * 0.4),
+        Math.round((metrics.interviewScore || 0) * 0.55),
+        Math.round((metrics.interviewScore || 0) * 0.7),
+        Math.round((metrics.interviewScore || 0) * 0.85),
+        Math.round((metrics.interviewScore || 0) * 0.92),
+        metrics.interviewScore || 0
+      ]
+    },
+    {
+      id: "ats",
+      name: "ATS Score",
+      color: "#38BDF8",
+      glowColor: "rgba(56, 189, 248, 0.7)",
+      score: metrics.atsScore || 0,
+      points: [
+        Math.round((metrics.atsScore || 0) * 0.4),
+        Math.round((metrics.atsScore || 0) * 0.58),
+        Math.round((metrics.atsScore || 0) * 0.7),
+        Math.round((metrics.atsScore || 0) * 0.8),
+        Math.round((metrics.atsScore || 0) * 0.88),
+        Math.round((metrics.atsScore || 0) * 0.95),
+        metrics.atsScore || 0
+      ]
+    }
+  ];
+
+  const calculatedSeries = rawModulesSeries.map((series) => {
+    const coords = series.points.map((val, idx) => {
+      const x = 55 + idx * ((760 - 55) / (chartDays.length - 1));
+      const y = 140 - (val / 100) * 105;
+      return { label: chartDays[idx], score: val, x, y };
+    });
+
+    const linePath = coords.reduce((acc, pt, i) => {
+      if (i === 0) return `M ${pt.x},${pt.y}`;
+      const prev = coords[i - 1];
+      const cx1 = prev.x + (pt.x - prev.x) / 2;
+      const cy1 = prev.y;
+      const cx2 = prev.x + (pt.x - prev.x) / 2;
+      const cy2 = pt.y;
+      return `${acc} C ${cx1},${cy1} ${cx2},${cy2} ${pt.x},${pt.y}`;
+    }, "");
+
+    const areaPath = `${linePath} L ${coords[coords.length - 1].x},140 L ${coords[0].x},140 Z`;
+
+    return { ...series, coords, linePath, areaPath };
+  });
+
   const getTierClass = (level) => {
     if (level === "Top Candidate") return "tier-top";
     if (level === "Interview Ready") return "tier-ready";
@@ -193,30 +301,102 @@ const Dashboard = ({ onPracticeNow }) => {
 
       {/* 1. INTERVIEW READINESS INDEX */}
       <div className="readiness-card">
-        <div className="readiness-main-row">
-          <div className="readiness-left-block">
-            <div className="readiness-score-ring">
-              <span className="score-num">{readiness.score}%</span>
-              <span className="score-label">Readiness</span>
-            </div>
-            <div className="readiness-info">
-              <h2>
-                Interview Readiness Index
-                <span className={`readiness-tier-badge ${getTierClass(readiness.level)}`}>
-                  {readiness.level}
+        {/* Multi-Colored Glowing Neon Line Graph Analytics */}
+        <div className="readiness-neon-chart">
+          <div className="neon-chart-header">
+            <div className="neon-legend-group">
+              {calculatedSeries.map((series) => (
+                <span 
+                  key={series.id} 
+                  className="legend-pill" 
+                  style={{ borderColor: series.color, color: series.color }}
+                >
+                  <span className="dot" style={{ background: series.color, boxShadow: `0 0 8px ${series.color}` }} />
+                  {series.name} ({series.score}%)
                 </span>
-              </h2>
-              <p>{readiness.message}</p>
+              ))}
+            </div>
+
+            <div className="neon-chart-stats">
+              <div className="neon-stat-item">
+                <span className="stat-lbl">Weekly Growth</span>
+                <span className="stat-val positive">+{readiness.weeklyImprovement}%</span>
+              </div>
+              <div className="neon-stat-item">
+                <span className="stat-lbl">Monthly Growth</span>
+                <span className="stat-val positive">+{readiness.monthlyGrowth}%</span>
+              </div>
+              <div className="neon-stat-item">
+                <span className="stat-lbl">Readiness Score</span>
+                <span className="stat-val highlight">{readiness.score}%</span>
+              </div>
             </div>
           </div>
 
-          <div className="readiness-metrics-pills">
-            <span className="growth-pill">
-              <FaArrowUp /> +{readiness.weeklyImprovement}% Weekly Improvement
-            </span>
-            <span className="monthly-pill">
-              📈 +{readiness.monthlyGrowth}% Monthly Growth
-            </span>
+          <div className="neon-svg-wrapper">
+            <svg viewBox="0 0 800 180" className="neon-svg" preserveAspectRatio="none">
+              <defs>
+                {calculatedSeries.map((series) => (
+                  <filter key={`glow-${series.id}`} id={`glow-${series.id}`} x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="3" result="blur" />
+                    <feMerge>
+                      <feMergeNode in="blur" />
+                      <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                  </filter>
+                ))}
+              </defs>
+
+              {/* Grid Lines */}
+              <line x1="40" y1="35" x2="760" y2="35" stroke="rgba(255, 255, 255, 0.06)" strokeDasharray="4 4" />
+              <line x1="40" y1="70" x2="760" y2="70" stroke="rgba(255, 255, 255, 0.06)" strokeDasharray="4 4" />
+              <line x1="40" y1="105" x2="760" y2="105" stroke="rgba(255, 255, 255, 0.06)" strokeDasharray="4 4" />
+              <line x1="40" y1="140" x2="760" y2="140" stroke="rgba(255, 255, 255, 0.12)" />
+
+              {/* Y-Axis Labels */}
+              <text x="32" y="38" fill="#64748B" fontSize="10" textAnchor="end" fontWeight="600">100%</text>
+              <text x="32" y="73" fill="#64748B" fontSize="10" textAnchor="end" fontWeight="600">75%</text>
+              <text x="32" y="108" fill="#64748B" fontSize="10" textAnchor="end" fontWeight="600">50%</text>
+              <text x="32" y="143" fill="#64748B" fontSize="10" textAnchor="end" fontWeight="600">0%</text>
+
+              {/* Multi-colored Line Paths & Node Points */}
+              {calculatedSeries.map((series) => (
+                <g key={series.id} className="module-series-group">
+                  <path 
+                    d={series.linePath} 
+                    fill="none" 
+                    stroke={series.color} 
+                    strokeWidth="2.8" 
+                    filter={`url(#glow-${series.id})`} 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                    opacity="0.9"
+                  />
+                  {series.coords.map((pt, idx) => (
+                    <circle 
+                      key={idx} 
+                      cx={pt.x} 
+                      cy={pt.y} 
+                      r="4.2" 
+                      fill={series.color} 
+                      stroke="#0F172A" 
+                      strokeWidth="1.8" 
+                      filter={`url(#glow-${series.id})`} 
+                    />
+                  ))}
+                </g>
+              ))}
+
+              {/* X-Axis Day Labels */}
+              {chartDays.map((dayLabel, idx) => {
+                const x = 55 + idx * ((760 - 55) / (chartDays.length - 1));
+                return (
+                  <text key={idx} x={x} y="162" fill="#94A3B8" fontSize="11" fontWeight="600" textAnchor="middle">
+                    {dayLabel}
+                  </text>
+                );
+              })}
+            </svg>
           </div>
         </div>
 
@@ -232,439 +412,60 @@ const Dashboard = ({ onPracticeNow }) => {
         </div>
       </div>
 
-      {/* 2. TRACKED ACTIVITY & PERFORMANCE METRICS (6 METRIC CARDS) */}
+      {/* 2. TRACKED ACTIVITY & PERFORMANCE METRICS (5 METRIC CARDS) */}
       <div className="metrics-grid-6">
-        <div className="metric-card-interactive" onClick={() => navigate("/ats-score")}>
-          <div className="metric-header">
-            <span>ATS Match Score</span>
-            <FaChevronRight className="card-arrow" />
-          </div>
-          <div className="metric-val">{metrics.atsScore}%</div>
-          <div className="metric-sub"><FaFileAlt /> Latest ATS Resume Scan</div>
-        </div>
-
+        {/* Box 1: AI Resume Builder */}
         <div className="metric-card-interactive" onClick={() => navigate("/resume-builder")}>
           <div className="metric-header">
-            <span>Resume Completion</span>
+            <span>AI Resume Builder</span>
             <FaChevronRight className="card-arrow" />
           </div>
           <div className="metric-val">{metrics.resumeCompletion}%</div>
-          <div className="metric-sub"><FaCheckCircle /> {resumeProgress.sections ? Object.values(resumeProgress.sections).filter(Boolean).length : 0}/7 Core Sections</div>
+          <div className="metric-sub"><FaCheckCircle /> {resumeProgress.sections ? Object.values(resumeProgress.sections).filter(Boolean).length : 0}/7 Sections • {metrics.resumeTimeSpent || "0m spent"}</div>
         </div>
 
-        <div className="metric-card-interactive" onClick={() => navigate("/resume-builder")}>
-          <div className="metric-header">
-            <span>Job Match Fit</span>
-            <FaChevronRight className="card-arrow" />
-          </div>
-          <div className="metric-val">
-            {metrics.jobMatchFit ? `${metrics.jobMatchFit}%` : "Add Target Role"}
-          </div>
-          <div className="metric-sub"><FaBriefcase /> {metrics.targetRoleName || "Target Role"}</div>
-        </div>
-
-        <div className="metric-card-interactive" onClick={() => navigate("/dashboard/history")}>
-          <div className="metric-header">
-            <span>Interview Score</span>
-            <FaChevronRight className="card-arrow" />
-          </div>
-          <div className="metric-val">{metrics.interviewScore}%</div>
-          <div className="metric-sub"><FaMicrophone /> {interviewPerf.totalInterviews} Mock Sessions Completed</div>
-        </div>
-
+        {/* Box 2: Coding Practice */}
         <div className="metric-card-interactive" onClick={() => navigate("/coding-practice")}>
           <div className="metric-header">
-            <span>Coding Accuracy</span>
+            <span>Coding Practice</span>
             <FaChevronRight className="card-arrow" />
           </div>
           <div className="metric-val">{metrics.codingAccuracy}%</div>
-          <div className="metric-sub"><FaCode /> Accepted Submissions</div>
+          <div className="metric-sub"><FaCode /> {metrics.problemsSolved || 0}/{metrics.totalProblems || 120} Solved • {metrics.codingTimeSpent || "0m spent"}</div>
         </div>
 
-        <div className="metric-card-interactive" onClick={() => navigate("/coding-practice")}>
+        {/* Box 3: Company Preparation */}
+        <div className="metric-card-interactive" onClick={() => navigate("/company-prep")}>
           <div className="metric-header">
-            <span>Problems Solved</span>
+            <span>Company Preparation</span>
             <FaChevronRight className="card-arrow" />
           </div>
-          <div className="metric-val">{metrics.problemsSolved} / {metrics.totalProblems}</div>
-          <div className="metric-sub">Easy: {metrics.easySolved} | Med: {metrics.mediumSolved} | Hard: {metrics.hardSolved}</div>
+          <div className="metric-val">
+            {metrics.jobMatchFit !== undefined && metrics.jobMatchFit !== null ? `${metrics.jobMatchFit}%` : "0%"}
+          </div>
+          <div className="metric-sub"><FaBriefcase /> {metrics.targetRoleName || "Target Role"} • {metrics.companyTimeSpent || "0m spent"}</div>
+        </div>
+
+        {/* Box 4: AI Interview Preparation */}
+        <div className="metric-card-interactive" onClick={() => onPracticeNow ? onPracticeNow() : navigate("/dashboard/history")}>
+          <div className="metric-header">
+            <span>AI Interview Preparation</span>
+            <FaChevronRight className="card-arrow" />
+          </div>
+          <div className="metric-val">{metrics.interviewScore}%</div>
+          <div className="metric-sub"><FaMicrophone /> {interviewPerf.totalInterviews || 0} Sessions • {metrics.interviewTimeSpent || "0m spent"}</div>
+        </div>
+
+        {/* Box 5: ATS Score */}
+        <div className="metric-card-interactive" onClick={() => navigate("/ats-score")}>
+          <div className="metric-header">
+            <span>ATS Score</span>
+            <FaChevronRight className="card-arrow" />
+          </div>
+          <div className="metric-val">{metrics.atsScore}%</div>
+          <div className="metric-sub"><FaFileAlt /> Latest ATS Scan • {metrics.atsTimeSpent || "0m spent"}</div>
         </div>
       </div>
-
-      {/* 3. AI RECOMMENDED NEXT ACTIONS */}
-      {recommendations.length > 0 && (
-        <div className="ai-recommendations-section">
-          <div className="section-heading">
-            <span>🤖 AI RECOMMENDED NEXT STEPS</span>
-          </div>
-          <div className="recommendations-grid">
-            {recommendations.map((rec) => (
-              <div key={rec.id} className="recommendation-card">
-                <div>
-                  <h4>{rec.title}</h4>
-                  <p>{rec.description}</p>
-                </div>
-                <button 
-                  className="cta-button-coral" 
-                  onClick={() => {
-                    if (rec.targetPath === "/mock-interview" && onPracticeNow) onPracticeNow();
-                    else navigate(rec.targetPath);
-                  }}
-                >
-                  [{rec.actionLabel}]
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* 4. CAREER PREPARATION ROADMAP */}
-      <div className="roadmap-section">
-        <div className="section-heading">
-          <span>🚀 CAREER PREPARATION ROADMAP</span>
-        </div>
-        <div className="roadmap-steps-row">
-          {careerRoadmap.map((stage, idx) => (
-            <React.Fragment key={stage.id}>
-              <div 
-                className="roadmap-step-item" 
-                onClick={() => {
-                  if (stage.path === "/mock-interview" && onPracticeNow) onPracticeNow();
-                  else navigate(stage.path);
-                }}
-              >
-                <div className={`roadmap-circle ${stage.status}`}>
-                  {stage.status === "COMPLETED" ? <FaCheckCircle /> : idx + 1}
-                </div>
-                <div className="roadmap-title">{stage.title}</div>
-                <span className={`roadmap-badge ${stage.status}`}>{stage.status.replace("_", " ")}</span>
-              </div>
-              {idx < careerRoadmap.length - 1 && (
-                <div className={`roadmap-connector ${stage.status === "COMPLETED" ? "active" : ""}`} />
-              )}
-            </React.Fragment>
-          ))}
-        </div>
-      </div>
-
-      {/* 5. DETAILED MODULES GRID */}
-      <div className="modules-grid-2">
-        {/* Resume Progress Module */}
-        <div className="module-card">
-          <div>
-            <div className="module-header">
-              <h3><FaFileAlt color="#7F77DD" /> RESUME PROGRESS</h3>
-              <span className="module-badge">{resumeProgress.completion}%</span>
-            </div>
-            <div className="checklist-grid">
-              <div className={`checklist-item ${resumeProgress.sections?.personal ? "done" : "warn"}`}>
-                {resumeProgress.sections?.personal ? "✓" : "⚠"} Personal Info
-              </div>
-              <div className={`checklist-item ${resumeProgress.sections?.summary ? "done" : "warn"}`}>
-                {resumeProgress.sections?.summary ? "✓" : "⚠"} Summary
-              </div>
-              <div className={`checklist-item ${resumeProgress.sections?.education ? "done" : "warn"}`}>
-                {resumeProgress.sections?.education ? "✓" : "⚠"} Education
-              </div>
-              <div className={`checklist-item ${resumeProgress.sections?.skills ? "done" : "warn"}`}>
-                {resumeProgress.sections?.skills ? "✓" : "⚠"} Skills
-              </div>
-              <div className={`checklist-item ${resumeProgress.sections?.projects ? "done" : "warn"}`}>
-                {resumeProgress.sections?.projects ? "✓" : "⚠"} Projects
-              </div>
-              <div className={`checklist-item ${resumeProgress.sections?.experience ? "done" : "warn"}`}>
-                {resumeProgress.sections?.experience ? "✓" : "⚠"} Experience
-              </div>
-            </div>
-          </div>
-          <button className="cta-button-violet" onClick={() => navigate("/resume-builder")}>
-            Continue Building Resume
-          </button>
-        </div>
-
-        {/* ATS Performance Module */}
-        <div className="module-card">
-          <div>
-            <div className="module-header">
-              <h3><FaChartLine color="#38BDF8" /> ATS PERFORMANCE</h3>
-              <span className="module-badge" style={{ color: "#38BDF8" }}>{atsPerformance.latestScore}%</span>
-            </div>
-            <div style={{ fontSize: "0.85rem", color: "#A7A7B5", marginBottom: "0.75rem" }}>
-              Score Delta: <strong style={{ color: "#22C55E" }}>+{atsPerformance.improvement}%</strong> since previous scan
-            </div>
-            {atsPerformance.missingKeywords?.length > 0 && (
-              <div style={{ marginBottom: "1rem" }}>
-                <div style={{ fontSize: "0.75rem", color: "#707080", marginBottom: "0.4rem" }}>Missing Keywords:</div>
-                <div style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap" }}>
-                  {atsPerformance.missingKeywords.slice(0, 4).map((kw, i) => (
-                    <span key={i} style={{ background: "rgba(239, 68, 68, 0.15)", border: "1px solid rgba(239, 68, 68, 0.3)", color: "#EF4444", fontSize: "0.75rem", padding: "0.2rem 0.5rem", borderRadius: "4px" }}>
-                      {kw}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-          <button className="cta-button-violet" onClick={() => navigate("/ats-score")}>
-            Improve ATS Score
-          </button>
-        </div>
-
-        {/* Coding Progress Module */}
-        <div className="module-card">
-          <div>
-            <div className="module-header">
-              <h3><FaCode color="#22C55E" /> CODING PROGRESS</h3>
-              <span className="module-badge" style={{ color: "#22C55E" }}>{codingProgress.solved} / {codingProgress.total}</span>
-            </div>
-            <div style={{ marginBottom: "1rem" }}>
-              {Object.entries(codingProgress.topicPerformance || {}).slice(0, 4).map(([tName, tAcc]) => (
-                <div className="topic-bar-group" key={tName}>
-                  <div className="topic-bar-header">
-                    <span>{tName}</span>
-                    <span>{tAcc}%</span>
-                  </div>
-                  <div className="progress-track">
-                    <div className="progress-fill-violet" style={{ width: `${tAcc}%` }} />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-          <button className="cta-button-violet" onClick={() => navigate("/coding-practice")}>
-            Practice {codingProgress.weakestTopic || "Coding"}
-          </button>
-        </div>
-
-        {/* AI Interview Performance Module */}
-        <div className="module-card">
-          <div>
-            <div className="module-header">
-              <h3><FaMicrophone color="#EF9F27" /> AI INTERVIEW PERFORMANCE</h3>
-              <span className="module-badge" style={{ color: "#EF9F27" }}>{interviewPerf.overallScore}%</span>
-            </div>
-            <div className="checklist-grid" style={{ marginBottom: "1rem" }}>
-              <div className="checklist-item">Tech: <strong>{interviewPerf.technical || interviewPerf.overallScore}%</strong></div>
-              <div className="checklist-item">Comm: <strong>{interviewPerf.communication || interviewPerf.overallScore}%</strong></div>
-              <div className="checklist-item">Confidence: <strong>{interviewPerf.confidence || interviewPerf.overallScore}%</strong></div>
-              <div className="checklist-item">Problem Solving: <strong>{interviewPerf.problemSolving || interviewPerf.overallScore}%</strong></div>
-            </div>
-          </div>
-          <button className="cta-button-violet" onClick={() => onPracticeNow ? onPracticeNow() : navigate("/mock-interview")}>
-            Start AI Interview
-          </button>
-        </div>
-      </div>
-
-      {/* 6. PERFORMANCE ANALYTICS CHARTS */}
-      <div className="section-heading">
-        <span>📊 PERFORMANCE ANALYTICS</span>
-      </div>
-      <div className="charts-grid-3">
-        <div className="chart-card">
-          <h4>ATS Score History</h4>
-          <div className="svg-chart-container">
-            {performanceHistory.atsScoreHistory?.length > 0 ? (
-              performanceHistory.atsScoreHistory.map((item, i) => (
-                <div className="chart-bar-column" key={i}>
-                  <div className="chart-bar-fill" style={{ height: `${item.score}%` }} data-val={`${item.score}%`} />
-                  <span className="chart-label">{item.date}</span>
-                </div>
-              ))
-            ) : (
-              <div style={{ color: "#707080", fontSize: "0.85rem", margin: "auto" }}>No ATS scans recorded yet</div>
-            )}
-          </div>
-        </div>
-
-        <div className="chart-card">
-          <h4>AI Interview Performance</h4>
-          <div className="svg-chart-container">
-            {performanceHistory.interviewPerformanceHistory?.length > 0 ? (
-              performanceHistory.interviewPerformanceHistory.map((item, i) => (
-                <div className="chart-bar-column" key={i}>
-                  <div className="chart-bar-fill" style={{ height: `${item.score}%`, background: "linear-gradient(180deg, #EF9F27 0%, #26215C 100%)" }} data-val={`${item.score}%`} />
-                  <span className="chart-label">{item.interview}</span>
-                </div>
-              ))
-            ) : (
-              <div style={{ color: "#707080", fontSize: "0.85rem", margin: "auto" }}>No interviews recorded yet</div>
-            )}
-          </div>
-        </div>
-
-        <div className="chart-card">
-          <h4>Coding Progress (Problems Solved)</h4>
-          <div className="svg-chart-container">
-            {performanceHistory.codingProgressHistory?.length > 0 ? (
-              performanceHistory.codingProgressHistory.map((item, i) => (
-                <div className="chart-bar-column" key={i}>
-                  <div className="chart-bar-fill" style={{ height: `${Math.min(100, item.solved * 10)}%`, background: "linear-gradient(180deg, #22C55E 0%, #26215C 100%)" }} data-val={`${item.solved} Solved`} />
-                  <span className="chart-label">{item.date}</span>
-                </div>
-              ))
-            ) : (
-              <div style={{ color: "#707080", fontSize: "0.85rem", margin: "auto" }}>No submissions recorded yet</div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* 7. WEEKLY ACTIVITY & WEAK AREAS */}
-      <div className="activity-weak-grid">
-        <div className="weekly-activity-card">
-          <div className="section-heading" style={{ fontSize: "1rem", marginBottom: "0.5rem" }}>
-            <span>WEEKLY PREPARATION ACTIVITY</span>
-          </div>
-          <div className="weekly-meta-bar">
-            <div className="weekly-meta-item">Total Time: <span>{weeklyActivity.totalTime}</span></div>
-            <div className="weekly-meta-item">Most Productive: <span>{weeklyActivity.mostProductiveDay}</span></div>
-          </div>
-          <div className="svg-chart-container" style={{ height: "120px" }}>
-            {weeklyActivity.days?.map((d, idx) => (
-              <div className="chart-bar-column" key={idx}>
-                <div className="chart-bar-fill" style={{ height: `${Math.min(100, (d.activityCount || 0) * 25 + 10)}%` }} data-val={`${d.activityCount || 0} Actions`} />
-                <span className="chart-label">{d.day.substring(0, 3)}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="weak-areas-card">
-          <div className="section-heading" style={{ fontSize: "1rem", marginBottom: "0.75rem" }}>
-            <span>⚠ AREAS TO IMPROVE</span>
-          </div>
-          {weakAreas.length > 0 ? (
-            weakAreas.map((item) => (
-              <div key={item.id} className="weak-item-card">
-                <div className="weak-item-header">
-                  <h5>{item.category}</h5>
-                  <span className="weak-score">{item.score}</span>
-                </div>
-                <p>{item.recommendation}</p>
-                <button className="cta-button-violet" style={{ padding: "0.3rem 0.6rem", fontSize: "0.75rem", width: "auto" }} onClick={() => navigate(item.targetPath)}>
-                  [{item.actionLabel}]
-                </button>
-              </div>
-            ))
-          ) : (
-            <div style={{ color: "#A7A7B5", fontSize: "0.85rem" }}>No critical weak areas identified yet.</div>
-          )}
-        </div>
-      </div>
-
-      {/* 8. RECENT ACTIVITY & WEEKLY GOALS */}
-      <div className="bottom-dual-grid">
-        <div className="timeline-card">
-          <div className="section-heading" style={{ fontSize: "1rem", marginBottom: "0.75rem" }}>
-            <span>RECENT ACTIVITY</span>
-          </div>
-          {recentActivity.length > 0 ? (
-            <div className="timeline-list">
-              {recentActivity.slice(0, 5).map((act, i) => (
-                <div className="timeline-item" key={i}>
-                  <div className="timeline-icon">
-                    {act.type?.includes("RESUME") ? "📄" : act.type?.includes("CODING") ? "💻" : act.type?.includes("INTERVIEW") ? "🎤" : "🏢"}
-                  </div>
-                  <div className="timeline-content">
-                    <h5>{act.title}</h5>
-                    <p>{act.description}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div style={{ color: "#707080", fontSize: "0.85rem" }}>No recent activity recorded yet.</div>
-          )}
-        </div>
-
-        <div className="goals-card">
-          <div className="section-heading" style={{ fontSize: "1rem", marginBottom: "0.75rem" }}>
-            <span>WEEKLY GOALS</span>
-            <button className="goal-btn-icon" onClick={() => setShowGoalModal(true)}><FaPlus /> Add Goal</button>
-          </div>
-          {goals.map((g) => (
-            <div key={g.id} className="goal-item-row">
-              <div className="goal-item-header">
-                <span>{g.title}</span>
-                <div className="goal-actions">
-                  <span>{g.current_value} / {g.target_value} {g.unit}</span>
-                  <button className="goal-btn-icon" onClick={() => handleDeleteGoal(g.id)}><FaTrash /></button>
-                </div>
-              </div>
-              <div className="progress-track">
-                <div className="progress-fill-violet" style={{ width: `${Math.min(100, (g.current_value / g.target_value) * 100)}%` }} />
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* 9. ACHIEVEMENTS & QUICK ACTIONS */}
-      <div className="achievements-quick-grid">
-        <div className="achievements-card">
-          <div className="section-heading" style={{ fontSize: "1rem", marginBottom: "0.75rem" }}>
-            <span>🏆 ACHIEVEMENTS</span>
-          </div>
-          <div className="badges-grid">
-            {achievements.unlocked?.map((badge) => (
-              <div key={badge.id} className={`badge-item ${badge.unlocked ? "unlocked" : ""}`}>
-                <div className="badge-icon">{badge.unlocked ? "🏆" : "🔒"}</div>
-                <div className="badge-name">{badge.title}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="quick-actions-card">
-          <div className="section-heading" style={{ fontSize: "1rem", marginBottom: "0.75rem" }}>
-            <span>⚡ QUICK ACTIONS</span>
-          </div>
-          <div className="quick-buttons-grid">
-            {quickActions.map((qa) => (
-              <button key={qa.id} className="quick-btn" onClick={() => {
-                if (qa.path === "/mock-interview" && onPracticeNow) onPracticeNow();
-                else navigate(qa.path);
-              }}>
-                <span>{qa.icon === "document" ? "📄" : qa.icon === "target" ? "🎯" : qa.icon === "code" ? "💻" : qa.icon === "building" ? "🏢" : "🎤"}</span>
-                <span>{qa.label}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* GOAL CREATION MODAL */}
-      {showGoalModal && (
-        <div className="goal-modal-backdrop" onClick={() => setShowGoalModal(false)}>
-          <div className="goal-modal-box" onClick={(e) => e.stopPropagation()}>
-            <h3>Create Weekly Goal</h3>
-            <form onSubmit={handleCreateGoal}>
-              <div className="goal-form-group">
-                <label>Goal Title</label>
-                <input type="text" placeholder="e.g. Solve 10 Coding Problems" value={goalTitle} onChange={(e) => setGoalTitle(e.target.value)} required />
-              </div>
-              <div className="goal-form-group">
-                <label>Target Value</label>
-                <input type="number" value={goalTarget} onChange={(e) => setGoalTarget(e.target.value)} required />
-              </div>
-              <div className="goal-form-group">
-                <label>Category</label>
-                <select value={goalCategory} onChange={(e) => setGoalCategory(e.target.value)} style={{ width: "100%", background: "#1A1A24", border: "1px solid #292936", color: "#F8F8FA", padding: "0.5rem", borderRadius: "6px" }}>
-                  <option value="coding">Coding Practice</option>
-                  <option value="interview">AI Interview</option>
-                  <option value="resume">Resume / ATS</option>
-                </select>
-              </div>
-              <div className="modal-actions">
-                <button type="button" className="refresh-btn" onClick={() => setShowGoalModal(false)}>Cancel</button>
-                <button type="submit" className="cta-button-coral">Create Goal</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

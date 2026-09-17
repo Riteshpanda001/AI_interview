@@ -18,6 +18,7 @@ class DashboardService:
 
         resume_exists = False
         resume_completion = 0
+        completed_sections = 0
         resume_sections_status = {
             "personal": False,
             "summary": False,
@@ -608,27 +609,40 @@ class DashboardService:
             {"id": "qa-interview", "label": "Start AI Interview", "path": "/mock-interview", "icon": "mic"}
         ]
 
+        job_match_fit = company_preparation_score if company_docs else 0
+        target_role_name = company_docs[0].get("company", "Target Role") if company_docs else "Target Role"
+        final_ats_score = ats_score if ats_records else 0
+        final_resume_completion = resume_completion if (resume_exists and completed_sections > 0) else 0
+        final_interview_score = interview_performance_score if int_results else 0
+        final_coding_accuracy = coding_accuracy if total_submissions > 0 else 0
+
+        resume_time_mins = int(round(final_resume_completion * 0.25)) if final_resume_completion > 0 else 0
+        coding_time_mins = int(round(problems_solved_count * 15)) if problems_solved_count > 0 else 0
+        company_time_mins = int(round(companies_explored_count * 10)) if companies_explored_count > 0 else 0
+        interview_time_mins = int(round(total_interviews * 20)) if total_interviews > 0 else 0
+        ats_time_mins = int(round(len(ats_records) * 5)) if ats_records else 0
+
         # ----------------------------------------------------
         # 16. FINAL RESPONSE AGGREGATION payload
         # ----------------------------------------------------
         return {
             # Backward compatibility fields
             "total_interviews": total_interviews,
-            "average_score": round(interview_performance_score / 10, 1),
+            "average_score": round(final_interview_score / 10, 1),
             "skills_progress": {
-                "Technical Depth": float(avg_technical or interview_performance_score or 75),
-                "Communication": float(avg_communication or 75),
-                "Problem Solving": float(avg_problem_solving or coding_performance or 75)
+                "Technical Depth": float(avg_technical or final_interview_score or 0),
+                "Communication": float(avg_communication or 0),
+                "Problem Solving": float(avg_problem_solving or final_coding_accuracy or 0)
             },
             "recent_activity": recent_activity_timeline,
             "last_updated": datetime.now(timezone.utc),
 
             # Core Metric Summary Cards
-            "ats_score": ats_score,
-            "resume_completion": resume_completion,
-            "job_match_score": job_match_fit or 0,
-            "interview_score": interview_performance_score,
-            "coding_score": coding_performance,
+            "ats_score": final_ats_score,
+            "resume_completion": final_resume_completion,
+            "job_match_score": job_match_fit,
+            "interview_score": final_interview_score,
+            "coding_score": final_coding_accuracy,
             "questions_attempted": total_submissions if total_submissions > 0 else 0,
             "questions_correct": problems_solved_count,
             "strong_skills": strong_skills,
@@ -648,12 +662,17 @@ class DashboardService:
                 "message": readiness_message
             },
             "metrics": {
-                "atsScore": ats_score,
-                "resumeCompletion": resume_completion,
+                "atsScore": final_ats_score,
+                "atsTimeSpent": f"{ats_time_mins}m spent" if ats_time_mins > 0 else "0m spent",
+                "resumeCompletion": final_resume_completion,
+                "resumeTimeSpent": f"{resume_time_mins}m spent" if resume_time_mins > 0 else "0m spent",
                 "jobMatchFit": job_match_fit,
+                "companyTimeSpent": f"{company_time_mins}m spent" if company_time_mins > 0 else "0m spent",
                 "targetRoleName": target_role_name,
-                "interviewScore": interview_performance_score,
-                "codingAccuracy": coding_accuracy,
+                "interviewScore": final_interview_score,
+                "interviewTimeSpent": f"{interview_time_mins}m spent" if interview_time_mins > 0 else "0m spent",
+                "codingAccuracy": final_coding_accuracy,
+                "codingTimeSpent": f"{coding_time_mins}m spent" if coding_time_mins > 0 else "0m spent",
                 "problemsSolved": problems_solved_count,
                 "totalProblems": total_problems_in_bank,
                 "easySolved": easy_solved,

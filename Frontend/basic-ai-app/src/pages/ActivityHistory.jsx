@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import { useAuth } from "../context/AuthContext";
 import { FaFileAlt, FaCode, FaMicrophone, FaBuilding, FaCheckCircle, FaSync, FaFilter } from "react-icons/fa";
@@ -10,10 +10,20 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000
 const ActivityHistory = () => {
   const { user, token, authFetch } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const queryFilter = new URLSearchParams(location.search).get("filter") || "all";
 
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filterType, setFilterType] = useState("all");
+  const [filterType, setFilterType] = useState(queryFilter);
+
+  useEffect(() => {
+    const filterFromUrl = new URLSearchParams(location.search).get("filter");
+    if (filterFromUrl) {
+      setFilterType(filterFromUrl);
+    }
+  }, [location.search]);
 
   const fetchActivities = async () => {
     try {
@@ -69,6 +79,33 @@ const ActivityHistory = () => {
     return groups;
   };
 
+  const filterTitles = {
+    all: "Complete User Activity Timeline",
+    resume: "AI Resume Builder History",
+    ats: "ATS Score History",
+    coding: "Coding Practice History",
+    company: "Company Preparation History",
+    interview: "AI Interview Preparations History"
+  };
+
+  const filterSubtitles = {
+    all: "Real-time log of all preparation events across Resume, ATS, Coding, Company, & AI Interviews.",
+    resume: "Historical record of all created, edited, and generated resume versions.",
+    ats: "Scan history and breakdown of previous ATS score analyses.",
+    coding: "Submission timeline for solved coding practice problems.",
+    company: "Progress tracking for company-specific interview preparation target lists.",
+    interview: "Complete archive of completed AI mock interview sessions and performance scores."
+  };
+
+  const filterLabels = {
+    all: "All Activities",
+    resume: "AI Resume Builder",
+    ats: "ATS Score",
+    coding: "Coding Practice",
+    company: "Company Preparation",
+    interview: "AI Interview Preparations"
+  };
+
   const grouped = groupActivitiesByDate(filteredActivities);
 
   return (
@@ -78,8 +115,8 @@ const ActivityHistory = () => {
       <main className="dashboard-main">
         <header className="dashboard-topbar">
           <div className="topbar-left">
-            <h1 className="topbar-title">Complete User Activity Timeline</h1>
-            <p className="topbar-subtitle">Real-time log of all preparation events across Resume, ATS, Coding, Company, & AI Interviews.</p>
+            <h1 className="topbar-title">{filterTitles[filterType] || filterTitles.all}</h1>
+            <p className="topbar-subtitle">{filterSubtitles[filterType] || filterSubtitles.all}</p>
           </div>
           <div className="topbar-right">
             <div 
@@ -109,11 +146,10 @@ const ActivityHistory = () => {
                     borderRadius: "8px",
                     fontSize: "0.85rem",
                     fontWeight: "600",
-                    cursor: "pointer",
-                    textTransform: "capitalize"
+                    cursor: "pointer"
                   }}
                 >
-                  {type === "all" ? "All Activities" : type}
+                  {filterLabels[type] || type}
                 </button>
               ))}
             </div>

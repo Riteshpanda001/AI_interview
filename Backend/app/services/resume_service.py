@@ -21,14 +21,29 @@ class ResumeService:
             if "_id" in doc:
                 doc["_id"] = str(doc["_id"])
             doc["id"] = str(doc.get("_id", ""))
-            if "title" not in doc:
-                doc["title"] = doc.get("filename", "Untitled Resume")
-            if "selected_template" not in doc:
-                doc["selected_template"] = "london"
+            if "title" not in doc or not doc.get("title"):
+                doc["title"] = doc.get("filename") or "Untitled Resume"
+            tmpl = doc.get("selected_template", "Modern Executive")
+            doc["template"] = tmpl.title() if tmpl else "Modern Executive"
             parsed = doc.get("parsed_content") or doc.get("resume_data") or {}
             doc["parsed_content"] = parsed
+            
+            sections_status = {
+                "personal": bool(parsed.get("personal", {}).get("name") or parsed.get("personal", {}).get("email")),
+                "summary": bool(parsed.get("summary")),
+                "education": bool(parsed.get("education")),
+                "skills": bool(parsed.get("skills")),
+                "projects": bool(parsed.get("projects")),
+                "experience": bool(parsed.get("experience")),
+                "certifications": bool(parsed.get("certifications"))
+            }
+            completed_count = sum(1 for status in sections_status.values() if status)
+            doc["sections_complete"] = f"{completed_count}/7"
+            doc["completion_score"] = int(round((completed_count / 7) * 100)) if completed_count > 0 else 0
             if "ats_score" not in doc or doc["ats_score"] in [85, 88]:
-                doc["ats_score"] = ATSService.calculate_real_ats_score(parsed)["ats_score"]
+                calc_ats = ATSService.calculate_real_ats_score(parsed)["ats_score"]
+                doc["ats_score"] = max(calc_ats, doc["completion_score"])
+            doc["updated_at"] = doc.get("updated_at") or doc.get("created_at") or datetime.now(timezone.utc).isoformat()
             resumes.append(doc)
         return resumes
 

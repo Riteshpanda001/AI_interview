@@ -17,6 +17,7 @@ from app.utils.pdf_generator import ResumePDFGenerator
 router = APIRouter()
 
 @router.get("/list")
+@router.get("/history")
 async def list_resumes(
     current_user = Depends(get_current_active_user),
     db = Depends(get_db)

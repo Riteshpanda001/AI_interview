@@ -860,11 +860,11 @@ const CompanyQuestions = ({ companyName = "Google" }) => {
                     className={`navbar-profile-pill icon-only${profileOpen ? " open" : ""}`}
                     onClick={() => setProfileOpen((prev) => !prev)}
                     style={{
-                      padding: "3px",
+                      padding: "0",
                       borderRadius: "50%",
-                      background: "#ffffff",
-                      border: "2px solid #e9d5ff",
-                      boxShadow: "0 4px 14px rgba(124, 58, 237, 0.35)",
+                      background: "transparent",
+                      border: "none",
+                      boxShadow: "none",
                       cursor: "pointer",
                       outline: "none"
                     }}

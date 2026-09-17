@@ -6,9 +6,9 @@ import "./Sidebar.css";
 
 const NAV_ITEMS = [
   {
-    id: "resume-builder",
+    id: "resume-history",
     label: "AI Resume Builder",
-    path: "/resume-builder",
+    path: "/dashboard?section=resume-history",
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
@@ -20,9 +20,9 @@ const NAV_ITEMS = [
     ),
   },
   {
-    id: "coding-practice",
+    id: "coding-history",
     label: "Coding Practice",
-    path: "/coding-practice",
+    path: "/dashboard?section=coding-history",
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
         <polyline points="16 18 22 12 16 6" />
@@ -31,9 +31,9 @@ const NAV_ITEMS = [
     ),
   },
   {
-    id: "company-preparation",
+    id: "company-history",
     label: "Company Preparation",
-    path: "/company-preparation",
+    path: "/dashboard?section=company-history",
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M3 21h18"/>
@@ -46,9 +46,9 @@ const NAV_ITEMS = [
     ),
   },
   {
-    id: "mock-interview",
+    id: "interview-history",
     label: "AI Interview Preparations",
-    path: "/mock-interview",
+    path: "/dashboard?section=interview-history",
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/>
@@ -58,36 +58,13 @@ const NAV_ITEMS = [
     ),
   },
   {
-    id: "ats-score",
+    id: "ats-history",
     label: "ATS Score",
-    path: "/ats-score",
+    path: "/dashboard?section=ats-history",
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="12" cy="12" r="10"/>
         <path d="m9 12 2 2 4-4"/>
-      </svg>
-    ),
-  },
-  {
-    id: "interview-history",
-    label: "Interview History",
-    path: "/dashboard/history",
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-        <polyline points="12 8 12 12 14 14" />
-        <path d="M3.05 11a9 9 0 1 0 .5-4" />
-        <polyline points="3 3 3 8 8 8" />
-      </svg>
-    ),
-  },
-  {
-    id: "activity-history",
-    label: "Activity History",
-    path: "/activity-history",
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="10" />
-        <polyline points="12 6 12 12 16 14" />
       </svg>
     ),
   },

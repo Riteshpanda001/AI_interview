@@ -328,11 +328,12 @@
 }
 
 .navbar-profile-pill.icon-only {
-  padding: 3px;
+  padding: 0;
   border-radius: 50%;
-  background: #ffffff;
-  border: 2px solid #e9d5ff;
-  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.15);
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  backdrop-filter: none;
 }
 
 .navbar-profile-pill:hover,
@@ -344,10 +345,16 @@
 
 .navbar-profile-pill.icon-only:hover,
 .navbar-profile-pill.icon-only.open {
-  border-color: #7c3aed;
-  background: #ffffff;
+  border: none;
+  background: transparent;
   transform: scale(1.06);
-  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.35);
+  box-shadow: none;
+}
+
+.navbar-profile-pill.icon-only:hover .navbar-avatar,
+.navbar-profile-pill.icon-only.open .navbar-avatar {
+  border-color: #a855f7;
+  box-shadow: 0 0 14px rgba(168, 85, 247, 0.5);
 }
 
 /* Avatar circle */

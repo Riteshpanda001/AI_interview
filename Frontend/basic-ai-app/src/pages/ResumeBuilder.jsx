@@ -74,6 +74,38 @@ const ResumeBuilder = () => {
   const [progress, setProgress] = useState(0);
   const [fileName, setFileName] = useState("");
 
+  React.useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const resumeId = searchParams.get("id");
+    const editParam = searchParams.get("edit");
+    const modeParam = searchParams.get("mode");
+
+    if (resumeId || editParam === "true" || modeParam === "edit") {
+      setIsWorkspaceActive(true);
+      if (resumeId) {
+        setCurrentResumeId(resumeId);
+        fetchResumeDetails(resumeId);
+      }
+    }
+  }, []);
+
+  const fetchResumeDetails = async (rId) => {
+    try {
+      const res = await authFetch(`${API_BASE_URL}/resumes/${rId}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.resume_data || data.parsed_content) {
+          setResumeData(data.resume_data || data.parsed_content);
+        }
+        if (data.selected_template) {
+          setSelectedTemplate(data.selected_template);
+        }
+      }
+    } catch (err) {
+      console.warn("Could not fetch resume details, displaying workspace editor:", err);
+    }
+  };
+
   const handleScrollToTemplates = () => {
     const section = document.getElementById("resume-templates-section");
     if (section) {
