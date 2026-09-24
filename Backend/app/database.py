@@ -345,34 +345,52 @@ class DatabaseManager:
         self.db = None
         self.redis_client: aioredis.Redis = None
         self.offline_mode = False
+        self._redis_real: bool = False  # True only when connected to a real Redis server
+
+    @property
+    def is_redis_real(self) -> bool:
+        """Returns True if connected to a real Redis server, False if using in-memory fallback."""
+        return self._redis_real
 
     async def connect_to_databases(self):
         # 1. MongoDB Connection
         try:
             self.mongo_client = AsyncIOMotorClient(settings.MONGODB_URL, serverSelectionTimeoutMS=2000)
-            # Ping to verify
             await self.mongo_client.admin.command('ping')
             self.db = self.mongo_client[settings.DATABASE_NAME]
-            print("Connected to MongoDB database successfully.")
+            print("[DB] ✅ Connected to MongoDB database successfully.")
         except Exception as e:
-            print(f"MongoDB connection failed: {e}. Swapping to In-Memory Mock Database.")
+            print(f"[DB] ❌ MongoDB connection failed: {e}. Swapping to In-Memory Mock Database.")
             self.db = MockDatabase()
             self.offline_mode = True
 
         # 2. Redis Connection
+        redis_required = str(getattr(settings, "REDIS_REQUIRED", "false")).lower() == "true"
         redis_url = settings.REDIS_URL.replace("localhost", "127.0.0.1")
         try:
             self.redis_client = aioredis.from_url(
-                redis_url, 
-                encoding="utf-8", 
+                redis_url,
+                encoding="utf-8",
                 decode_responses=True,
                 socket_timeout=1.0
             )
-            # Ping to verify
             await self.redis_client.ping()
-            print("Connected to Redis cache successfully.")
-        except Exception:
-            print("[REDIS] External Redis server not active. Using Embedded In-Memory Cache.")
+            self._redis_real = True
+            print("[REDIS] ✅ Connected to Redis cache server successfully.")
+        except Exception as redis_err:
+            self._redis_real = False
+            if redis_required:
+                print(
+                    f"[REDIS] ❌ ERROR — Redis is REQUIRED (REDIS_REQUIRED=true) but connection failed: {redis_err}\n"
+                    "         OTP, rate-limiting, and session blacklist will NOT work correctly.\n"
+                    "         Start Redis: docker run -d -p 6379:6379 redis\n"
+                    "         Or install Redis locally and start it before launching the backend."
+                )
+            else:
+                print(
+                    "[REDIS] ⚠️  External Redis server not active. Using Embedded In-Memory Cache.\n"
+                    "         To use real Redis set REDIS_REQUIRED=true in .env and start Redis."
+                )
             self.redis_client = MockRedis()
             self.offline_mode = True
 
@@ -381,6 +399,6 @@ class DatabaseManager:
             self.mongo_client.close()
         if self.redis_client:
             await self.redis_client.close()
-        print("Closed database connections.")
+        print("[DB] Closed database connections.")
 
 db_manager = DatabaseManager()

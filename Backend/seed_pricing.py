@@ -1,13 +1,27 @@
-DEFAULT_PLANS = [
+"""
+Pricing Seed Script — PreNova AI
+Run from the Backend/ directory:  python seed_pricing.py
+"""
+import asyncio
+from datetime import datetime, timezone
+from motor.motor_asyncio import AsyncIOMotorClient
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+MONGODB_URL = os.getenv("MONGODB_URL", "mongodb://localhost:27017")
+DATABASE_NAME = os.getenv("DATABASE_NAME", "ai_interview_prep")
+
+PRICING_PLANS = [
     {
-        "id": "plan_free",
         "name": "Free Trial",
         "slug": "free",
-        "plan_type": "free",
         "description": "Get started with AI-powered interview preparation. No credit card required.",
         "price_monthly": 0,
         "price_yearly": 0,
         "currency": "INR",
+        "billing_period": "monthly",
         "display_price_monthly": "Rs.0",
         "display_price_yearly": "Rs.0",
         "yearly_note": "",
@@ -21,16 +35,18 @@ DEFAULT_PLANS = [
         "popular": False,
         "active": True,
         "display_order": 1,
+        "plan_type": "free",
+        "created_at": datetime.now(timezone.utc),
+        "updated_at": datetime.now(timezone.utc),
     },
     {
-        "id": "plan_pro",
         "name": "Pro",
         "slug": "pro",
-        "plan_type": "pro",
         "description": "Unlimited AI interviews, advanced analytics, and company-specific preparation.",
         "price_monthly": 499,
         "price_yearly": 399,
         "currency": "INR",
+        "billing_period": "monthly",
         "display_price_monthly": "Rs.499",
         "display_price_yearly": "Rs.399",
         "yearly_note": "Billed annually (Rs.4,788/yr)",
@@ -47,16 +63,18 @@ DEFAULT_PLANS = [
         "popular": True,
         "active": True,
         "display_order": 2,
+        "plan_type": "pro",
+        "created_at": datetime.now(timezone.utc),
+        "updated_at": datetime.now(timezone.utc),
     },
     {
-        "id": "plan_premium",
         "name": "Premium",
         "slug": "premium",
-        "plan_type": "premium",
         "description": "Everything in Pro plus AI career roadmap, resume templates, and exclusive interview sets.",
         "price_monthly": 999,
         "price_yearly": 799,
         "currency": "INR",
+        "billing_period": "monthly",
         "display_price_monthly": "Rs.999",
         "display_price_yearly": "Rs.799",
         "yearly_note": "Billed annually (Rs.9,588/yr)",
@@ -66,29 +84,34 @@ DEFAULT_PLANS = [
             "Exclusive Interview Question Sets",
             "Premium Resume Templates",
             "Skill Gap Analysis Reports",
+            "1-on-1 AI Coaching Sessions",
             "Priority 24/7 Support",
             "Early Access to New Features",
         ],
         "popular": False,
         "active": True,
         "display_order": 3,
+        "plan_type": "premium",
+        "created_at": datetime.now(timezone.utc),
+        "updated_at": datetime.now(timezone.utc),
     },
 ]
 
 
-class PricingService:
-    @staticmethod
-    async def get_plans(db) -> list:
-        try:
-            cursor = db["pricing"].find({"active": True})
-            plans = await cursor.to_list(length=100)
-            if plans:
-                for plan in plans:
-                    plan["id"] = str(plan["_id"])
-                plans.sort(key=lambda p: p.get("display_order", 99))
-                return plans
-        except Exception as e:
-            print(f"[PricingService] Error fetching plans from DB: {e}")
-        # Fallback — return hardcoded defaults so the UI is never blank
-        print("[PricingService] Returning default pricing plans (DB collection empty or unavailable).")
-        return DEFAULT_PLANS
+async def seed_pricing():
+    client = AsyncIOMotorClient(MONGODB_URL, serverSelectionTimeoutMS=5000)
+    db = client[DATABASE_NAME]
+
+    existing = await db["pricing"].count_documents({})
+    if existing > 0:
+        print(f"[PRICING SEED] {existing} plan(s) already exist - skipping seed.")
+        client.close()
+        return
+
+    result = await db["pricing"].insert_many(PRICING_PLANS)
+    print(f"[PRICING SEED] Inserted {len(result.inserted_ids)} pricing plans into MongoDB.")
+    client.close()
+
+
+if __name__ == "__main__":
+    asyncio.run(seed_pricing())

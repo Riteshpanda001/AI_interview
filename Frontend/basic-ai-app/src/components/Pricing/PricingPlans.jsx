@@ -1,75 +1,77 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./PricingPlans.css";
 import CheckoutModal from "./CheckoutModal";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api";
+
+// Format a raw plan from the API into the shape this component needs
+const normalizePlan = (plan) => ({
+  id: plan.id || plan._id || plan.slug,
+  name: plan.name,
+  slug: plan.slug || plan.plan_type || plan.name?.toLowerCase(),
+  plan_type: plan.plan_type || plan.slug || "free",
+  priceMonthly: plan.display_price_monthly || `₹${plan.price_monthly ?? 0}`,
+  priceYearly: plan.display_price_yearly || `₹${plan.price_yearly ?? 0}`,
+  period: "/month",
+  yearlyPeriod: "/month",
+  note: plan.yearly_note || "",
+  features: plan.features || [],
+  button:
+    plan.plan_type === "free" || plan.slug === "free"
+      ? "Start Free Trial"
+      : `Choose ${plan.name}`,
+  popular: plan.popular || false,
+  display_order: plan.display_order ?? 99,
+});
+
 const PricingPlans = ({ onPaymentCompleted }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  const [billingCycle, setBillingCycle] = useState("monthly"); // 'monthly' or 'yearly'
+  const [billingCycle, setBillingCycle] = useState("monthly");
   const [selectedPlanForCheckout, setSelectedPlanForCheckout] = useState(null);
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
 
-  const plans = [
-    {
-      name: "Free Trial",
-      priceMonthly: "₹0",
-      priceYearly: "₹0",
-      period: "/month",
-      yearlyPeriod: "/month",
-      note: "No card required",
-      features: [
-        "1 AI Mock Interview",
-        "Basic ATS Resume Analysis",
-        "Basic Performance Analytics",
-        "Limited Company Questions",
-      ],
-      button: "Start Free Trial",
-      popular: false,
-    },
-    {
-      name: "Pro",
-      priceMonthly: "₹499",
-      priceYearly: "₹399",
-      period: "/month",
-      yearlyPeriod: "/month",
-      note: "Billed annually (₹4,788/yr)",
-      features: [
-        "Unlimited AI Interviews",
-        "Advanced ATS Analysis",
-        "Company-Specific Preparation",
-        "Performance Dashboard",
-        "Interview History",
-      ],
-      button: "Choose Pro",
-      popular: true,
-    },
-    {
-      name: "Premium",
-      priceMonthly: "₹999",
-      priceYearly: "₹799",
-      period: "/month",
-      yearlyPeriod: "/month",
-      note: "Billed annually (₹9,588/yr)",
-      features: [
-        "Everything in Pro",
-        "AI Career Roadmap",
-        "Priority Support",
-        "Resume Templates",
-        "Exclusive Interview Sets",
-      ],
-      button: "Choose Premium",
-      popular: false,
-    },
-  ];
+  const [plans, setPlans] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Load pricing plans from backend
+  useEffect(() => {
+    const fetchPlans = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const res = await fetch(`${API_BASE_URL}/pricing/`);
+        if (!res.ok) {
+          throw new Error(`Pricing API returned ${res.status}`);
+        }
+        const data = await res.json();
+        if (!Array.isArray(data) || data.length === 0) {
+          throw new Error("No pricing plans returned from server");
+        }
+        const normalized = data.map(normalizePlan).sort(
+          (a, b) => a.display_order - b.display_order
+        );
+        setPlans(normalized);
+      } catch (err) {
+        console.error("[PricingPlans] Failed to load plans:", err);
+        setError(err.message || "Could not load pricing plans. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPlans();
+  }, []);
 
   const handleChoosePlan = (plan) => {
-    if (plan.name === "Free" || plan.name === "Free Trial") {
-      if (!user) {
-        navigate("/register");
-      }
+    const isFree =
+      plan.plan_type === "free" || plan.slug === "free" || plan.name === "Free Trial";
+    if (isFree) {
+      if (!user) navigate("/register");
       return;
     }
 
@@ -83,6 +85,62 @@ const PricingPlans = ({ onPaymentCompleted }) => {
   };
 
   const currentPlan = (user?.plan_type || "free").toLowerCase();
+
+  if (loading) {
+    return (
+      <section className="pricing-plans-section">
+        <div className="pricing-plans-header">
+          <span className="pricing-plans-tag">💰 Pricing Plans</span>
+          <h2>
+            Choose the Perfect <span>Plan for You</span>
+          </h2>
+        </div>
+        <div className="pricing-loading-state">
+          <div className="pricing-spinner" />
+          <p>Loading pricing plans…</p>
+        </div>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="pricing-plans-section">
+        <div className="pricing-plans-header">
+          <span className="pricing-plans-tag">💰 Pricing Plans</span>
+          <h2>
+            Choose the Perfect <span>Plan for You</span>
+          </h2>
+        </div>
+        <div className="pricing-error-state">
+          <span className="pricing-error-icon">⚠️</span>
+          <p className="pricing-error-message">{error}</p>
+          <button
+            className="plans-action-btn"
+            onClick={() => window.location.reload()}
+          >
+            Try Again
+          </button>
+        </div>
+      </section>
+    );
+  }
+
+  if (plans.length === 0) {
+    return (
+      <section className="pricing-plans-section">
+        <div className="pricing-plans-header">
+          <span className="pricing-plans-tag">💰 Pricing Plans</span>
+          <h2>
+            Choose the Perfect <span>Plan for You</span>
+          </h2>
+        </div>
+        <div className="pricing-empty-state">
+          <p>No pricing plans available at this time. Please check back later.</p>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="pricing-plans-section">
@@ -99,12 +157,14 @@ const PricingPlans = ({ onPaymentCompleted }) => {
         {/* Billing Cycle Toggle */}
         <div className="billing-toggle-container">
           <button
+            id="billing-toggle-monthly"
             className={`toggle-btn ${billingCycle === "monthly" ? "active" : ""}`}
             onClick={() => setBillingCycle("monthly")}
           >
             Monthly
           </button>
           <button
+            id="billing-toggle-yearly"
             className={`toggle-btn ${billingCycle === "yearly" ? "active" : ""}`}
             onClick={() => setBillingCycle("yearly")}
           >
@@ -115,18 +175,29 @@ const PricingPlans = ({ onPaymentCompleted }) => {
       </div>
 
       <div className="pricing-plans-grid">
-        {plans.map((plan, index) => {
+        {plans.map((plan) => {
           const isYearly = billingCycle === "yearly";
           const currentPrice = isYearly ? plan.priceYearly : plan.priceMonthly;
           const currentPeriod = isYearly ? plan.yearlyPeriod : plan.period;
-          const isCurrentPlan = currentPlan === plan.name.toLowerCase() || (plan.name === "Free Trial" && currentPlan === "free");
+          const isFree =
+            plan.plan_type === "free" || plan.slug === "free" || plan.name === "Free Trial";
+          const isCurrentPlan =
+            currentPlan === plan.plan_type ||
+            currentPlan === plan.slug ||
+            (isFree && currentPlan === "free");
 
           return (
             <div
-              className={`pricing-plans-card ${plan.popular ? "popular" : ""}`}
-              key={index}
+              id={`pricing-card-${plan.slug || plan.id}`}
+              className={`pricing-plans-card ${plan.popular ? "popular" : ""} ${isCurrentPlan ? "current-plan" : ""}`}
+              key={plan.id}
             >
-              {plan.popular && <div className="plans-popular-badge">Most Popular</div>}
+              {plan.popular && (
+                <div className="plans-popular-badge">Most Popular</div>
+              )}
+              {isCurrentPlan && !plan.popular && (
+                <div className="plans-current-badge">Your Plan</div>
+              )}
 
               <h3>{plan.name}</h3>
 
@@ -135,7 +206,7 @@ const PricingPlans = ({ onPaymentCompleted }) => {
                 <span className="period">{currentPeriod}</span>
               </div>
 
-              {isYearly && plan.name !== "Free" && plan.name !== "Free Trial" ? (
+              {isYearly && !isFree ? (
                 <div className="billing-note">{plan.note}</div>
               ) : (
                 <div className="billing-note-placeholder">&nbsp;</div>
@@ -150,12 +221,16 @@ const PricingPlans = ({ onPaymentCompleted }) => {
               </ul>
 
               <button
-                className={`plans-action-btn ${plan.popular ? "popular-btn" : ""} ${isCurrentPlan ? "current-plan-btn" : ""}`}
+                id={`btn-choose-plan-${plan.slug || plan.id}`}
+                className={`plans-action-btn ${plan.popular ? "popular-btn" : ""} ${
+                  isCurrentPlan ? "current-plan-btn" : ""
+                }`}
                 onClick={() => handleChoosePlan(plan)}
-                disabled={isCurrentPlan && plan.name === "Free Trial"}
+                disabled={isFree && isCurrentPlan}
+                aria-label={`Choose ${plan.name} plan`}
               >
                 {isCurrentPlan
-                  ? plan.name === "Free Trial"
+                  ? isFree
                     ? "Current Active Plan"
                     : "Pay to Activate / Renew"
                   : plan.button}
@@ -164,8 +239,6 @@ const PricingPlans = ({ onPaymentCompleted }) => {
           );
         })}
       </div>
-
-
 
       {/* Checkout Modal */}
       <CheckoutModal
@@ -182,4 +255,3 @@ const PricingPlans = ({ onPaymentCompleted }) => {
 };
 
 export default PricingPlans;
-

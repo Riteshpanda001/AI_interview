@@ -83,6 +83,7 @@ const CompanyHistory = () => {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="history-search-input"
+          style={{ width: "320px" }}
         />
         <button className="history-cta-btn" onClick={() => navigate("/company-preparation")}>
           <FaPlus /> Explore Companies

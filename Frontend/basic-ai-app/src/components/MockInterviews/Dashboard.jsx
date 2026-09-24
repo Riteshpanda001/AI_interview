@@ -435,7 +435,7 @@ const Dashboard = ({ onPracticeNow }) => {
         </div>
 
         {/* Box 3: Company Preparation */}
-        <div className="metric-card-interactive" onClick={() => navigate("/company-prep")}>
+        <div className="metric-card-interactive" onClick={() => navigate("/company-preparation")}>
           <div className="metric-header">
             <span>Company Preparation</span>
             <FaChevronRight className="card-arrow" />
@@ -447,7 +447,7 @@ const Dashboard = ({ onPracticeNow }) => {
         </div>
 
         {/* Box 4: AI Interview Preparation */}
-        <div className="metric-card-interactive" onClick={() => onPracticeNow ? onPracticeNow() : navigate("/dashboard/history")}>
+        <div className="metric-card-interactive" onClick={() => onPracticeNow ? onPracticeNow() : navigate("/dashboard?section=interview-history")}>
           <div className="metric-header">
             <span>AI Interview Preparation</span>
             <FaChevronRight className="card-arrow" />

@@ -1,0 +1,204 @@
+/* NotFound.css — 404 Page Styles */
+
+.notfound-shell {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0d0d13;
+  position: relative;
+  overflow: hidden;
+  font-family: "Inter", "Segoe UI", sans-serif;
+  padding: 2rem;
+}
+
+/* Background glow orbs */
+.notfound-glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(120px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.glow-1 {
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(127, 119, 221, 0.18) 0%, transparent 70%);
+  top: -150px;
+  left: -150px;
+}
+
+.glow-2 {
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.12) 0%, transparent 70%);
+  bottom: -100px;
+  right: -100px;
+}
+
+/* Card */
+.notfound-card {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  max-width: 560px;
+  width: 100%;
+  background: rgba(19, 19, 26, 0.9);
+  border: 1px solid rgba(127, 119, 221, 0.25);
+  border-radius: 24px;
+  padding: 3.5rem 3rem;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 8px 48px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(127, 119, 221, 0.1);
+}
+
+/* 404 number */
+.notfound-code {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  margin-bottom: 1.5rem;
+}
+
+.digit {
+  font-size: clamp(5rem, 14vw, 9rem);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  background: linear-gradient(135deg, #7f77dd 0%, #38bdf8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  user-select: none;
+  animation: floatNum 3s ease-in-out infinite;
+}
+
+.digit-0 {
+  position: relative;
+  animation-delay: 0.5s;
+}
+
+.orbit {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 90%;
+  height: 90%;
+  border: 2px dashed rgba(127, 119, 221, 0.4);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  animation: spinOrbit 6s linear infinite;
+}
+
+@keyframes floatNum {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-10px); }
+}
+
+@keyframes spinOrbit {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to   { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Text */
+.notfound-title {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #f8f8fa;
+  margin: 0 0 0.75rem 0;
+}
+
+.notfound-subtitle {
+  font-size: 1rem;
+  color: #a7a7b5;
+  line-height: 1.7;
+  margin: 0 0 2rem 0;
+}
+
+/* Action buttons */
+.notfound-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+
+.notfound-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.75rem;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+  border: none;
+  outline: none;
+  min-width: 160px;
+}
+
+.notfound-btn:hover {
+  transform: translateY(-2px);
+}
+
+.notfound-btn:active {
+  transform: translateY(0);
+}
+
+.notfound-btn-primary {
+  background: linear-gradient(135deg, #7f77dd 0%, #38bdf8 100%);
+  color: #fff;
+  box-shadow: 0 4px 20px rgba(127, 119, 221, 0.35);
+}
+
+.notfound-btn-primary:hover {
+  box-shadow: 0 8px 28px rgba(127, 119, 221, 0.5);
+}
+
+.notfound-btn-secondary {
+  background: rgba(255, 255, 255, 0.05);
+  color: #a7a7b5;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.notfound-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #f8f8fa;
+}
+
+/* Hint text */
+.notfound-hint {
+  font-size: 0.85rem;
+  color: #5a5a72;
+}
+
+.notfound-link {
+  color: #7f77dd;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: rgba(127, 119, 221, 0.4);
+  transition: color 0.15s;
+}
+
+.notfound-link:hover {
+  color: #38bdf8;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .notfound-card {
+    padding: 2.5rem 1.5rem;
+  }
+
+  .notfound-actions {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .notfound-btn {
+    width: 100%;
+  }
+}

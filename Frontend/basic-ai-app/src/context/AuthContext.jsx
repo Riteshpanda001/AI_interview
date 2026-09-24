@@ -88,22 +88,11 @@ export const AuthProvider = ({ children }) => {
     return response;
   };
 
-  // Fetch current user details
+  // Fetch current user details from the real backend
   const fetchCurrentUser = async (authToken) => {
-    if (authToken === "mock-access-token-12345") {
-      const mockUser = {
-        email: "simulated@prepnova.ai",
-        full_name: "Simulated PrepNova Candidate",
-        role: "User",
-        plan_type: "free",
-        target_role: "Software Engineer",
-        experience_level: "Mid Level",
-        bio: "AI Interview enthusiast",
-        created_at: new Date().toISOString(),
-      };
-      setUser(mockUser);
+    if (!authToken) {
       setLoading(false);
-      return mockUser;
+      return null;
     }
 
     try {
@@ -122,20 +111,6 @@ export const AuthProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const loginSimulated = () => {
-    saveTokens("mock-access-token-12345", "mock-refresh-token-12345");
-    setUser({
-      email: "simulated@prepnova.ai",
-      full_name: "Simulated PrepNova Candidate",
-      role: "User",
-      plan_type: "free",
-      target_role: "Software Engineer",
-      experience_level: "Mid Level",
-      bio: "AI Interview enthusiast",
-      created_at: new Date().toISOString(),
-    });
   };
 
   useEffect(() => {
@@ -446,7 +421,7 @@ export const AuthProvider = ({ children }) => {
   // Logout Endpoint & Session Cleanup
   const logout = async () => {
     try {
-      if (token && token !== "mock-access-token-12345") {
+      if (token) {
         await fetch(`${API_BASE_URL}/auth/logout`, {
           method: "POST",
           headers: { Authorization: `Bearer ${token}` },
@@ -699,7 +674,6 @@ export const AuthProvider = ({ children }) => {
         verifyOtp,
         login,
         googleLogin,
-        loginSimulated,
         refreshToken,
         updateProfile,
         forgotPassword,

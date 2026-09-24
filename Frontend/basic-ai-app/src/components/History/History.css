@@ -66,8 +66,10 @@
   padding: 0.55rem 1rem;
   border-radius: 8px;
   font-size: 0.88rem;
-  width: 280px;
+  width: 320px;
+  max-width: 100%;
   outline: none;
+  transition: border-color 0.2s ease;
 }
 
 .history-search-input:focus {

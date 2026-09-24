@@ -22,6 +22,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import PayUpiQr from "./pages/PayUpiQr";
 import ActivityHistory from "./pages/ActivityHistory";
 import ProtectedRoute from "./components/ProtectedRoute";
+import NotFound from "./pages/NotFound";
 
 function ScrollToTop() {
   const { pathname, hash } = useLocation();
@@ -113,6 +114,8 @@ function App() {
             </ProtectedRoute>
           }
         />
+        {/* 404 Fallback */}
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </>
   );

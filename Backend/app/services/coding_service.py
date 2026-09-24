@@ -247,10 +247,22 @@ class CodingService:
             doc["problem_name"] = p_info.get("title", f"Problem #{pid[:6]}")
             doc["difficulty"] = p_info.get("difficulty", "Medium")
             doc["category"] = p_info.get("category", "General")
-            if "created_at" in doc and hasattr(doc["created_at"], "isoformat"):
-                doc["created_at"] = doc["created_at"].isoformat()
-            result.append(doc)
         return result
+
+    @staticmethod
+    async def delete_user_submission(user_id: str, submission_id: str, db) -> bool:
+        query = {"user_id": str(user_id)}
+        try:
+            query["_id"] = ObjectId(submission_id)
+        except Exception:
+            query["_id"] = submission_id
+        res = await db["coding_submissions"].delete_one(query)
+        return res.deleted_count > 0
+
+    @staticmethod
+    async def clear_all_user_submissions(user_id: str, db) -> int:
+        res = await db["coding_submissions"].delete_many({"user_id": str(user_id)})
+        return res.deleted_count
 
     @staticmethod
     async def get_user_coding_statistics(user_id: str, db) -> dict:

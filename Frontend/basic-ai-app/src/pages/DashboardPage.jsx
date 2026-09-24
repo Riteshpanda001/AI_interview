@@ -205,6 +205,12 @@ const SidebarInner = ({ onNav, section, onLogout }) => {
 
   const NAV = [
     {
+      id: "dashboard",
+      label: "Dashboard Overview",
+      path: "/dashboard",
+      icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>,
+    },
+    {
       id: "resume-history",
       label: "AI Resume Builder",
       path: "/dashboard?section=resume-history",
@@ -238,7 +244,7 @@ const SidebarInner = ({ onNav, section, onLogout }) => {
 
   return (
     <aside className="sidebar">
-      <div className="sidebar-header-title-block" style={{ padding: "20px 20px 14px" }}>
+      <div className="sidebar-header-title-block" onClick={() => onNav({ id: "dashboard" })} style={{ padding: "20px 20px 14px", cursor: "pointer" }}>
         <h2 style={{
           fontSize: "26px",
           fontWeight: "700",

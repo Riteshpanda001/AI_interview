@@ -53,13 +53,33 @@ async def seed_admin_user():
                 }}
             )
 
+async def seed_pricing_plans():
+    """Seed default pricing plans if the pricing collection is empty."""
+    from app.services.pricing_service import DEFAULT_PLANS
+    db = db_manager.db
+    if db is not None:
+        existing = await db["pricing"].count_documents({})
+        if existing == 0:
+            from datetime import datetime, timezone
+            plans = [{**p, "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)} for p in DEFAULT_PLANS if p.get("id", "").startswith("plan_")]
+            if plans:
+                await db["pricing"].insert_many(plans)
+                print(f"[SEED] Pricing plans seeded: {len(plans)} plans added.")
+            else:
+                print("[SEED] Pricing plans already available via defaults.")
+
+
 @asynccontextmanager
+
 async def lifespan(app: FastAPI):
     # Startup: Connect to DBs
     await db_manager.connect_to_databases()
     
     # Seed admin user
     await seed_admin_user()
+
+    # Seed pricing plans if collection is empty
+    await seed_pricing_plans()
     
     # Create static directories if they don't exist
     for sub in ["uploads", "resumes", "reports", "avatars", "audio"]:
@@ -72,6 +92,7 @@ async def lifespan(app: FastAPI):
     yield
     # Shutdown: Close DBs
     await db_manager.close_database_connections()
+
 
 
 def _print_smtp_status():

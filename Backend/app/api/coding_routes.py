@@ -51,6 +51,25 @@ async def get_coding_history(
     user_id = str(current_user["_id"])
     return await CodingService.get_user_all_submissions(user_id, db)
 
+@router.delete("/history/{submission_id}")
+async def delete_coding_submission(
+    submission_id: str,
+    current_user = Depends(get_current_active_user),
+    db = Depends(get_db)
+):
+    user_id = str(current_user["_id"])
+    deleted = await CodingService.delete_user_submission(user_id, submission_id, db)
+    return {"message": "Submission deleted", "deleted": deleted}
+
+@router.delete("/history")
+async def clear_all_coding_history(
+    current_user = Depends(get_current_active_user),
+    db = Depends(get_db)
+):
+    user_id = str(current_user["_id"])
+    count = await CodingService.clear_all_user_submissions(user_id, db)
+    return {"message": f"Cleared {count} coding submissions", "count": count}
+
 @router.get("/statistics")
 async def get_coding_statistics(
     current_user = Depends(get_current_active_user),
