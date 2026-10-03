@@ -358,9 +358,21 @@ class DatabaseManager:
             self.mongo_client = AsyncIOMotorClient(settings.MONGODB_URL, serverSelectionTimeoutMS=2000)
             await self.mongo_client.admin.command('ping')
             self.db = self.mongo_client[settings.DATABASE_NAME]
-            print("[DB] ✅ Connected to MongoDB database successfully.")
+            print("[DB] [OK] Connected to MongoDB database successfully.")
+            
+            # Create MongoDB unique indexes safely
+            try:
+                await self.db["users"].create_index("email_normalized", unique=True, sparse=True)
+                await self.db["users"].create_index("phone_normalized", unique=True, sparse=True)
+                await self.db["users"].create_index("google_id", unique=True, sparse=True)
+                await self.db["pending_registrations"].create_index("email_normalized", unique=True, sparse=True)
+                await self.db["pending_registrations"].create_index("phone_normalized", unique=True, sparse=True)
+                await self.db["pending_registrations"].create_index("verification_link_hash", unique=True, sparse=True)
+                print("[DB] [OK] MongoDB unique indexes verified/created.")
+            except Exception as idx_err:
+                print(f"[DB] [WARN] MongoDB index creation warning: {idx_err}")
         except Exception as e:
-            print(f"[DB] ❌ MongoDB connection failed: {e}. Swapping to In-Memory Mock Database.")
+            print(f"[DB] [WARN] MongoDB connection failed: {e}. Swapping to In-Memory Mock Database.")
             self.db = MockDatabase()
             self.offline_mode = True
 
@@ -376,19 +388,19 @@ class DatabaseManager:
             )
             await self.redis_client.ping()
             self._redis_real = True
-            print("[REDIS] ✅ Connected to Redis cache server successfully.")
+            print("[REDIS] [OK] Connected to Redis cache server successfully.")
         except Exception as redis_err:
             self._redis_real = False
             if redis_required:
                 print(
-                    f"[REDIS] ❌ ERROR — Redis is REQUIRED (REDIS_REQUIRED=true) but connection failed: {redis_err}\n"
+                    f"[REDIS] [ERROR] Redis is REQUIRED (REDIS_REQUIRED=true) but connection failed: {redis_err}\n"
                     "         OTP, rate-limiting, and session blacklist will NOT work correctly.\n"
                     "         Start Redis: docker run -d -p 6379:6379 redis\n"
                     "         Or install Redis locally and start it before launching the backend."
                 )
             else:
                 print(
-                    "[REDIS] ⚠️  External Redis server not active. Using Embedded In-Memory Cache.\n"
+                    "[REDIS] [WARN] External Redis server not active. Using Embedded In-Memory Cache.\n"
                     "         To use real Redis set REDIS_REQUIRED=true in .env and start Redis."
                 )
             self.redis_client = MockRedis()

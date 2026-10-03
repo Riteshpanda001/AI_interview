@@ -373,14 +373,24 @@
 }
 
 /* Section Common Styling */
-.section-heading {
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: #F8F8FA;
-  margin-bottom: 1rem;
+.prenova-dashboard .section-heading {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #F8F8FA !important;
+  margin-bottom: 1.25rem;
+  margin-top: 1.5rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  text-transform: uppercase;
+  letter-spacing: 0.75px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+  padding-bottom: 0.5rem;
+}
+
+.prenova-dashboard .section-heading span {
+  color: #F8F8FA !important;
+  font-weight: 800;
 }
 
 /* 2. Performance Metric Cards Grid */
@@ -870,11 +880,16 @@
   }
 }
 
-.timeline-card, .goals-card {
+.timeline-card, .goals-card, .weekly-activity-card {
   background: #13131A;
   border: 1px solid #292936;
   border-radius: 16px;
   padding: 1.5rem;
+}
+
+.goals-card .section-heading,
+.weekly-activity-card .section-heading {
+  margin-top: 0 !important;
 }
 
 .timeline-list {
@@ -949,18 +964,23 @@
 
 .add-goal-btn {
   background: rgba(127, 119, 221, 0.15);
-  color: #7F77DD;
+  color: #8E85EF;
   border: 1px dashed #7F77DD;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  width: 100%;
+  padding: 0.35rem 0.85rem;
+  border-radius: 20px;
   font-size: 0.85rem;
   font-weight: 700;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: all 0.2s ease;
 }
 
 .add-goal-btn:hover {
-  background: rgba(127, 119, 221, 0.25);
+  background: rgba(127, 119, 221, 0.3);
+  color: #FFFFFF;
+  border-color: #9B94EE;
 }
 
 /* 9. Achievements & Quick Actions */

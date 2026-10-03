@@ -716,7 +716,7 @@ const Profile = () => {
                         <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", width: "100%" }}>
                           <input
                             type="tel"
-                            placeholder="e.g. +91 98765 43210"
+                            placeholder="Enter mobile number"
                             value={mfaPhoneNum}
                             onChange={(e) => setMfaPhoneNum(e.target.value)}
                             style={{

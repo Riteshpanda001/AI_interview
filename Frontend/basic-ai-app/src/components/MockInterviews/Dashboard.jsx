@@ -18,7 +18,12 @@ import {
   FaChevronRight, 
   FaMicrophone, 
   FaBuilding, 
-  FaInfoCircle
+  FaInfoCircle,
+  FaStar,
+  FaHistory,
+  FaGraduationCap,
+  FaBullseye,
+  FaCheckDouble
 } from "react-icons/fa";
 import "./Dashboard.css";
 
@@ -32,17 +37,19 @@ const Dashboard = ({ onPracticeNow }) => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [refreshing, setRefreshing] = useState(false);
-  const [showGoalModal, setShowGoalModal] = useState(false);
+  const [syncState, setSyncState] = useState("idle"); // 'idle' | 'syncing' | 'synced'
+  const [lastSyncedTime, setLastSyncedTime] = useState(null);
+  const [chartTimeRange, setChartTimeRange] = useState("7d"); // '7d' | '30d' | '90d' | 'all'
 
-  // Goal Form State
+  // Goal Form Modal State
+  const [showGoalModal, setShowGoalModal] = useState(false);
   const [goalTitle, setGoalTitle] = useState("");
   const [goalTarget, setGoalTarget] = useState("10");
   const [goalCategory, setGoalCategory] = useState("coding");
 
   const fetchDashboard = async (isManualRefresh = false) => {
     try {
-      if (isManualRefresh) setRefreshing(true);
+      if (isManualRefresh) setSyncState("syncing");
       else setLoading(true);
       setError(null);
 
@@ -50,15 +57,39 @@ const Dashboard = ({ onPracticeNow }) => {
       if (response.ok) {
         const resData = await response.json();
         setData(resData);
+        setLastSyncedTime(new Date());
+        if (isManualRefresh) {
+          setSyncState("synced");
+          setTimeout(() => setSyncState("idle"), 3000);
+        }
       } else {
-        throw new Error("Failed to load dashboard metrics");
+        if (response.status === 401) {
+          setError("Authentication failed. Please log in again.");
+        } else if (response.status === 403) {
+          setError("You do not have permission to perform this action.");
+        } else if (response.status === 429) {
+          setError("Too many requests. Please wait and try again.");
+        } else if (response.status >= 500) {
+          setError("Something went wrong on the server. Please try again.");
+        } else {
+          setError(`Failed to load dashboard metrics (HTTP ${response.status}).`);
+        }
       }
     } catch (err) {
       console.warn("Dashboard fetch error:", err);
-      setError("Unable to connect to backend server.");
+      const isNetErr =
+        err?.name === "TypeError" ||
+        err?.message?.toLowerCase().includes("fetch") ||
+        err?.message?.toLowerCase().includes("network");
+
+      if (isNetErr) {
+        setError("Unable to connect to backend server. Please make sure the backend is running on http://localhost:8000.");
+      } else {
+        setError(err.message || "Failed to load dashboard metrics.");
+      }
+      setSyncState("idle");
     } finally {
       setLoading(false);
-      setRefreshing(false);
     }
   };
 
@@ -96,6 +127,24 @@ const Dashboard = ({ onPracticeNow }) => {
     }
   };
 
+  const handleToggleGoalComplete = async (goal) => {
+    try {
+      const resp = await authFetch(`${API_BASE_URL}/dashboard/goals/${goal.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          completed: !goal.completed,
+          current_value: !goal.completed ? goal.target_value : 0
+        })
+      });
+      if (resp.ok) {
+        fetchDashboard(true);
+      }
+    } catch (err) {
+      console.error("Error updating goal:", err);
+    }
+  };
+
   const handleDeleteGoal = async (goalId) => {
     try {
       const resp = await authFetch(`${API_BASE_URL}/dashboard/goals/${goalId}`, {
@@ -109,17 +158,46 @@ const Dashboard = ({ onPracticeNow }) => {
     }
   };
 
+  // Loading Skeleton State
   if (loading) {
     return (
       <div className="prenova-dashboard">
-        <div style={{ display: "flex", gap: "1rem", flexDirection: "column" }}>
+        <div style={{ display: "flex", gap: "1.25rem", flexDirection: "column" }}>
           <div className="skeleton-box" style={{ height: "140px", width: "100%" }} />
           <div className="metrics-grid-6">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="skeleton-box" style={{ height: "100px" }} />
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="skeleton-box" style={{ height: "120px" }} />
             ))}
           </div>
+          <div className="skeleton-box" style={{ height: "260px", width: "100%" }} />
           <div className="skeleton-box" style={{ height: "200px", width: "100%" }} />
+        </div>
+      </div>
+    );
+  }
+
+  // Error Banner State
+  if (error && !data) {
+    return (
+      <div className="prenova-dashboard">
+        <div className="error-banner-container" style={{
+          background: "rgba(239, 68, 68, 0.1)",
+          border: "1px solid rgba(239, 68, 68, 0.3)",
+          borderRadius: "16px",
+          padding: "2rem",
+          textAlign: "center",
+          margin: "2rem 0"
+        }}>
+          <FaExclamationTriangle style={{ fontSize: "2.5rem", color: "#EF4444", marginBottom: "1rem" }} />
+          <h3 style={{ color: "#F8F8FA", margin: "0 0 0.5rem 0" }}>Dashboard Data Unavailable</h3>
+          <p style={{ color: "#A7A7B5", margin: "0 0 1.5rem 0" }}>{error}</p>
+          <button 
+            className="refresh-btn"
+            onClick={() => fetchDashboard(true)}
+            style={{ margin: "0 auto" }}
+          >
+            <FaSync /> Retry Syncing
+          </button>
         </div>
       </div>
     );
@@ -132,14 +210,15 @@ const Dashboard = ({ onPracticeNow }) => {
     weeklyImprovement: data?.weekly_improvement || 0,
     monthlyGrowth: data?.monthly_improvement || 0,
     hasSufficientData: (data?.interview_readiness || 0) > 0,
-    message: "Complete more preparation activities to generate your Interview Readiness Index."
+    message: "Complete more preparation activities to generate your Interview Readiness Index.",
+    breakdown: { ats: 0, resume: 0, coding: 0, interview: 0, company: 0, consistency: 0 }
   };
 
   const metrics = data?.metrics || {
     atsScore: data?.ats_score || 0,
     resumeCompletion: data?.resume_completion || 0,
     jobMatchFit: data?.job_match_score || 0,
-    targetRoleName: "Add Target Role",
+    targetRoleName: "Target Role",
     interviewScore: data?.interview_score || 0,
     codingAccuracy: data?.coding_score || 0,
     problemsSolved: data?.questions_correct || 0,
@@ -149,23 +228,45 @@ const Dashboard = ({ onPracticeNow }) => {
     hardSolved: 0
   };
 
+  const overview = data?.overview || {
+    resume: { score: metrics.resumeCompletion, status: metrics.resumeCompletion >= 90 ? "Completed" : metrics.resumeCompletion > 0 ? "In Progress" : "Not Started" },
+    ats: { score: metrics.atsScore, status: metrics.atsScore >= 80 ? "Completed" : metrics.atsScore > 0 ? "In Progress" : "Not Started" },
+    coding: { score: metrics.codingAccuracy, status: metrics.problemsSolved >= 20 ? "Completed" : metrics.problemsSolved > 0 ? "In Progress" : "Not Started" },
+    interview: { score: metrics.interviewScore, status: metrics.interviewScore > 0 ? "In Progress" : "Not Started" },
+    company: { score: metrics.jobMatchFit, status: metrics.jobMatchFit > 0 ? "In Progress" : "Not Started" }
+  };
+
+  const skillsList = data?.skills || [];
+  const statistics = data?.statistics || {
+    resumes_created: data?.resume_progress?.versionsCount || 0,
+    ats_analyses: data?.ats_performance?.latestScore ? 1 : 0,
+    problems_solved: metrics.problemsSolved,
+    mock_interviews: data?.total_interviews || 0,
+    companies_prepared: data?.company_preparation?.companiesExplored || 0,
+    total_prep_time: data?.weekly_activity?.totalTime || "0h 0m",
+    current_streak: data?.streak?.count || 0,
+    goals_completed: (data?.goals || []).filter(g => g.completed).length
+  };
+
   const recommendations = data?.recommendations || [];
   const careerRoadmap = data?.career_roadmap || [];
   const resumeProgress = data?.resume_progress || { completion: metrics.resumeCompletion, sections: {} };
   const atsPerformance = data?.ats_performance || { latestScore: metrics.atsScore, previousScore: 0, improvement: 0, missingKeywords: [] };
-  const codingProgress = data?.coding_progress || { solved: metrics.problemsSolved, total: 120, accuracy: metrics.codingAccuracy, streak: 0, topicPerformance: {} };
+  const codingProgress = data?.coding_progress || { solved: metrics.problemsSolved, total: 120, accuracy: metrics.codingAccuracy, streak: 0, topicPerformance: {}, weakestTopic: "Dynamic Programming" };
   const companyPrep = data?.company_preparation || { companiesExplored: 0, questionsPracticed: 0, companyList: [] };
-  const interviewPerf = data?.interview_performance || { overallScore: metrics.interviewScore, totalInterviews: data?.total_interviews || 0, lastInterview: "None" };
+  const interviewPerf = data?.interview_performance || { overallScore: metrics.interviewScore, technical: 0, communication: 0, confidence: 0, problemSolving: 0, totalInterviews: data?.total_interviews || 0, lastInterview: "None" };
   const performanceHistory = data?.performance_history || { atsScoreHistory: [], interviewPerformanceHistory: [], codingProgressHistory: [] };
   const weeklyActivity = data?.weekly_activity || { days: [], totalTime: "0h 0m", mostProductiveDay: "N/A" };
-  const weakAreas = data?.weak_areas || [];
   const recentActivity = data?.recent_activity || [];
   const goals = data?.goals || [];
   const achievements = data?.achievements || { unlocked: [], nextAchievement: null };
   const quickActions = data?.quick_actions || [];
-  const streak = data?.streak || { count: codingProgress.streak || 0 };
+  const streak = data?.streak || { count: codingProgress.streak || 0, activeToday: false };
 
-  // Multi-colored Neon Line Graph Series Calculation for 5 Parts
+  // Determine if User is brand new (zero activity)
+  const isNewUser = !readiness.hasSufficientData && metrics.problemsSolved === 0 && (interviewPerf.totalInterviews || 0) === 0 && (metrics.atsScore || 0) === 0;
+
+  // Multi-colored Neon Line Graph Series Calculation for 5 Modules
   const chartDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Today"];
 
   const rawModulesSeries = [
@@ -173,7 +274,6 @@ const Dashboard = ({ onPracticeNow }) => {
       id: "resume",
       name: "AI Resume Builder",
       color: "#C084FC",
-      glowColor: "rgba(192, 132, 252, 0.7)",
       score: metrics.resumeCompletion || 0,
       points: [
         Math.round((metrics.resumeCompletion || 0) * 0.35),
@@ -189,7 +289,6 @@ const Dashboard = ({ onPracticeNow }) => {
       id: "coding",
       name: "Coding Practice",
       color: "#00FF88",
-      glowColor: "rgba(0, 255, 136, 0.7)",
       score: metrics.codingAccuracy || 0,
       points: [
         Math.round((metrics.codingAccuracy || 0) * 0.25),
@@ -205,7 +304,6 @@ const Dashboard = ({ onPracticeNow }) => {
       id: "company",
       name: "Company Preparation",
       color: "#FB7185",
-      glowColor: "rgba(251, 113, 133, 0.7)",
       score: metrics.jobMatchFit || 0,
       points: [
         Math.round((metrics.jobMatchFit || 0) * 0.3),
@@ -221,7 +319,6 @@ const Dashboard = ({ onPracticeNow }) => {
       id: "interview",
       name: "AI Interview Prep",
       color: "#FBBF24",
-      glowColor: "rgba(251, 191, 36, 0.7)",
       score: metrics.interviewScore || 0,
       points: [
         Math.round((metrics.interviewScore || 0) * 0.2),
@@ -237,7 +334,6 @@ const Dashboard = ({ onPracticeNow }) => {
       id: "ats",
       name: "ATS Score",
       color: "#38BDF8",
-      glowColor: "rgba(56, 189, 248, 0.7)",
       score: metrics.atsScore || 0,
       points: [
         Math.round((metrics.atsScore || 0) * 0.4),
@@ -268,9 +364,7 @@ const Dashboard = ({ onPracticeNow }) => {
       return `${acc} C ${cx1},${cy1} ${cx2},${cy2} ${pt.x},${pt.y}`;
     }, "");
 
-    const areaPath = `${linePath} L ${coords[coords.length - 1].x},140 L ${coords[0].x},140 Z`;
-
-    return { ...series, coords, linePath, areaPath };
+    return { ...series, coords, linePath };
   });
 
   const getTierClass = (level) => {
@@ -283,24 +377,87 @@ const Dashboard = ({ onPracticeNow }) => {
 
   return (
     <div className="prenova-dashboard">
-      {/* Top Header & Refresh Control */}
+      {/* 1. DASHBOARD HEADER */}
       <div className="dashboard-header-bar">
         <div className="dashboard-title-group">
-          <h1>Career Preparation Dashboard</h1>
+          <h1>Welcome back, {user?.full_name?.split(" ")[0] || "Candidate"}! 👋</h1>
           <p>Real-time analytics aggregated across all PreNova AI preparation modules.</p>
         </div>
+
         <div className="dashboard-actions-group">
-          <div className="streak-pill-badge">
-            <FaFire /> {streak.count || 0} Day Streak
+          {/* Streak Badge */}
+          <div className="streak-pill-badge" title="Consecutive days with preparation activity">
+            <FaFire style={{ color: "#EF9F27" }} />
+            <span>{streak.count || 0} Day Streak</span>
           </div>
-          <button className="refresh-btn" onClick={() => fetchDashboard(true)} disabled={refreshing}>
-            <FaSync className={refreshing ? "spin" : ""} /> {refreshing ? "Refreshing..." : "Sync Data"}
+
+          {/* Active Today Indicator */}
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "0.4rem",
+            fontSize: "0.8rem",
+            fontWeight: "600",
+            color: streak.activeToday ? "#22C55E" : "#A7A7B5",
+            background: "#1A1A24",
+            padding: "0.4rem 0.75rem",
+            borderRadius: "20px",
+            border: "1px solid #292936"
+          }}>
+            <span style={{
+              width: "8px",
+              height: "8px",
+              borderRadius: "50%",
+              background: streak.activeToday ? "#22C55E" : "#707080",
+              boxShadow: streak.activeToday ? "0 0 8px #22C55E" : "none"
+            }} />
+            {streak.activeToday ? "Active Today" : "Inactive Today"}
+          </div>
+
+          {/* Functional Sync Data Button */}
+          <button 
+            className="refresh-btn"
+            onClick={() => fetchDashboard(true)}
+            disabled={syncState === "syncing"}
+          >
+            <FaSync className={syncState === "syncing" ? "fa-spin" : ""} />
+            {syncState === "syncing" ? "Syncing..." : syncState === "synced" ? "Updated just now" : "Sync Data"}
           </button>
         </div>
       </div>
 
-      {/* 1. INTERVIEW READINESS INDEX */}
+
+
+      {/* 2. INTERVIEW READINESS INDEX */}
       <div className="readiness-card">
+        <div className="readiness-main-row" style={{ marginBottom: "1.25rem" }}>
+          <div className="readiness-left-block">
+            <div className="readiness-score-ring">
+              <span className="score-num">{readiness.score}%</span>
+              <span className="score-label">Readiness</span>
+            </div>
+
+            <div className="readiness-info">
+              <h2>
+                Interview Readiness Index
+                <span className={`readiness-tier-badge ${getTierClass(readiness.level)}`}>
+                  {readiness.level}
+                </span>
+              </h2>
+              <p>{readiness.message}</p>
+            </div>
+          </div>
+
+          <div className="readiness-metrics-pills">
+            <div className="growth-pill">
+              <FaArrowUp /> +{readiness.weeklyImprovement}% Weekly
+            </div>
+            <div className="monthly-pill">
+              <FaChartLine /> +{readiness.monthlyGrowth}% Monthly
+            </div>
+          </div>
+        </div>
+
         {/* Multi-Colored Glowing Neon Line Graph Analytics */}
         <div className="readiness-neon-chart">
           <div className="neon-chart-header">
@@ -319,14 +476,6 @@ const Dashboard = ({ onPracticeNow }) => {
 
             <div className="neon-chart-stats">
               <div className="neon-stat-item">
-                <span className="stat-lbl">Weekly Growth</span>
-                <span className="stat-val positive">+{readiness.weeklyImprovement}%</span>
-              </div>
-              <div className="neon-stat-item">
-                <span className="stat-lbl">Monthly Growth</span>
-                <span className="stat-val positive">+{readiness.monthlyGrowth}%</span>
-              </div>
-              <div className="neon-stat-item">
                 <span className="stat-lbl">Readiness Score</span>
                 <span className="stat-val highlight">{readiness.score}%</span>
               </div>
@@ -334,7 +483,7 @@ const Dashboard = ({ onPracticeNow }) => {
           </div>
 
           <div className="neon-svg-wrapper">
-            <svg viewBox="0 0 800 180" className="neon-svg" preserveAspectRatio="none">
+            <svg viewBox="0 0 800 170" className="neon-svg" preserveAspectRatio="none">
               <defs>
                 {calculatedSeries.map((series) => (
                   <filter key={`glow-${series.id}`} id={`glow-${series.id}`} x="-20%" y="-20%" width="140%" height="140%">
@@ -391,7 +540,7 @@ const Dashboard = ({ onPracticeNow }) => {
               {chartDays.map((dayLabel, idx) => {
                 const x = 55 + idx * ((760 - 55) / (chartDays.length - 1));
                 return (
-                  <text key={idx} x={x} y="162" fill="#94A3B8" fontSize="11" fontWeight="600" textAnchor="middle">
+                  <text key={idx} x={x} y="160" fill="#94A3B8" fontSize="11" fontWeight="600" textAnchor="middle">
                     {dayLabel}
                   </text>
                 );
@@ -402,8 +551,8 @@ const Dashboard = ({ onPracticeNow }) => {
 
         <div className="formula-tooltip-bar">
           <FaInfoCircle />
-          <span>Dynamic Score Formula:</span>
-          <span className="formula-tag">ATS (20%)</span>
+          <span>IRI Formula Component Weights:</span>
+          <span className="formula-tag">ATS Scan (20%)</span>
           <span className="formula-tag">Resume (15%)</span>
           <span className="formula-tag">Coding (20%)</span>
           <span className="formula-tag">AI Interview (25%)</span>
@@ -412,60 +561,344 @@ const Dashboard = ({ onPracticeNow }) => {
         </div>
       </div>
 
-      {/* 2. TRACKED ACTIVITY & PERFORMANCE METRICS (5 METRIC CARDS) */}
+      {/* 3. PREPARATION OVERVIEW METRIC CARDS (5 METRICS) */}
+      <div className="section-heading">
+        <span>Preparation Overview & Module Metrics</span>
+      </div>
+
       <div className="metrics-grid-6">
         {/* Box 1: AI Resume Builder */}
         <div className="metric-card-interactive" onClick={() => navigate("/resume-builder")}>
           <div className="metric-header">
             <span>AI Resume Builder</span>
-            <FaChevronRight className="card-arrow" />
+            <span className="roadmap-badge IN_PROGRESS">{overview.resume?.status || "In Progress"}</span>
           </div>
           <div className="metric-val">{metrics.resumeCompletion}%</div>
-          <div className="metric-sub"><FaCheckCircle /> {resumeProgress.sections ? Object.values(resumeProgress.sections).filter(Boolean).length : 0}/7 Sections • {metrics.resumeTimeSpent || "0m spent"}</div>
+          <div className="metric-sub">
+            <FaCheckCircle /> {resumeProgress.sections ? Object.values(resumeProgress.sections).filter(Boolean).length : 0}/7 Sections • {metrics.resumeTimeSpent || "0m spent"}
+          </div>
+          <div style={{ marginTop: "0.75rem", fontSize: "0.8rem", color: "#7F77DD", fontWeight: "700", display: "flex", alignItems: "center", gap: "0.3rem" }}>
+            Open Resume Builder <FaChevronRight className="card-arrow" />
+          </div>
         </div>
 
-        {/* Box 2: Coding Practice */}
-        <div className="metric-card-interactive" onClick={() => navigate("/coding-practice")}>
-          <div className="metric-header">
-            <span>Coding Practice</span>
-            <FaChevronRight className="card-arrow" />
-          </div>
-          <div className="metric-val">{metrics.codingAccuracy}%</div>
-          <div className="metric-sub"><FaCode /> {metrics.problemsSolved || 0}/{metrics.totalProblems || 120} Solved • {metrics.codingTimeSpent || "0m spent"}</div>
-        </div>
-
-        {/* Box 3: Company Preparation */}
-        <div className="metric-card-interactive" onClick={() => navigate("/company-preparation")}>
-          <div className="metric-header">
-            <span>Company Preparation</span>
-            <FaChevronRight className="card-arrow" />
-          </div>
-          <div className="metric-val">
-            {metrics.jobMatchFit !== undefined && metrics.jobMatchFit !== null ? `${metrics.jobMatchFit}%` : "0%"}
-          </div>
-          <div className="metric-sub"><FaBriefcase /> {metrics.targetRoleName || "Target Role"} • {metrics.companyTimeSpent || "0m spent"}</div>
-        </div>
-
-        {/* Box 4: AI Interview Preparation */}
-        <div className="metric-card-interactive" onClick={() => onPracticeNow ? onPracticeNow() : navigate("/dashboard?section=interview-history")}>
-          <div className="metric-header">
-            <span>AI Interview Preparation</span>
-            <FaChevronRight className="card-arrow" />
-          </div>
-          <div className="metric-val">{metrics.interviewScore}%</div>
-          <div className="metric-sub"><FaMicrophone /> {interviewPerf.totalInterviews || 0} Sessions • {metrics.interviewTimeSpent || "0m spent"}</div>
-        </div>
-
-        {/* Box 5: ATS Score */}
+        {/* Box 2: ATS Score */}
         <div className="metric-card-interactive" onClick={() => navigate("/ats-score")}>
           <div className="metric-header">
             <span>ATS Score</span>
-            <FaChevronRight className="card-arrow" />
+            <span className="roadmap-badge IN_PROGRESS">{overview.ats?.status || "In Progress"}</span>
           </div>
           <div className="metric-val">{metrics.atsScore}%</div>
-          <div className="metric-sub"><FaFileAlt /> Latest ATS Scan • {metrics.atsTimeSpent || "0m spent"}</div>
+          <div className="metric-sub">
+            <FaFileAlt /> Latest Scan {atsPerformance.improvement ? `(${atsPerformance.improvement >= 0 ? '+' : ''}${atsPerformance.improvement}%)` : ''} • {metrics.atsTimeSpent || "0m spent"}
+          </div>
+          <div style={{ marginTop: "0.75rem", fontSize: "0.8rem", color: "#38BDF8", fontWeight: "700", display: "flex", alignItems: "center", gap: "0.3rem" }}>
+            Analyze Resume <FaChevronRight className="card-arrow" />
+          </div>
+        </div>
+
+        {/* Box 3: Coding Practice */}
+        <div className="metric-card-interactive" onClick={() => navigate("/coding-practice")}>
+          <div className="metric-header">
+            <span>Coding Practice</span>
+            <span className="roadmap-badge IN_PROGRESS">{overview.coding?.status || "In Progress"}</span>
+          </div>
+          <div className="metric-val">{metrics.codingAccuracy}%</div>
+          <div className="metric-sub">
+            <FaCode /> {metrics.problemsSolved || 0}/{metrics.totalProblems || 120} Solved • {metrics.codingTimeSpent || "0m spent"}
+          </div>
+          <div style={{ marginTop: "0.75rem", fontSize: "0.8rem", color: "#00FF88", fontWeight: "700", display: "flex", alignItems: "center", gap: "0.3rem" }}>
+            Practice Coding <FaChevronRight className="card-arrow" />
+          </div>
+        </div>
+
+        {/* Box 4: AI Mock Interview */}
+        <div className="metric-card-interactive" onClick={() => onPracticeNow ? onPracticeNow() : navigate("/dashboard?section=interview-history")}>
+          <div className="metric-header">
+            <span>AI Mock Interview</span>
+            <span className="roadmap-badge IN_PROGRESS">{overview.interview?.status || "In Progress"}</span>
+          </div>
+          <div className="metric-val">{metrics.interviewScore}%</div>
+          <div className="metric-sub">
+            <FaMicrophone /> {interviewPerf.totalInterviews || 0} Sessions • {metrics.interviewTimeSpent || "0m spent"}
+          </div>
+          <div style={{ marginTop: "0.75rem", fontSize: "0.8rem", color: "#FBBF24", fontWeight: "700", display: "flex", alignItems: "center", gap: "0.3rem" }}>
+            Start AI Interview <FaChevronRight className="card-arrow" />
+          </div>
+        </div>
+
+        {/* Box 5: Company Preparation */}
+        <div className="metric-card-interactive" onClick={() => navigate("/company-preparation")}>
+          <div className="metric-header">
+            <span>Company Preparation</span>
+            <span className="roadmap-badge IN_PROGRESS">{overview.company?.status || "In Progress"}</span>
+          </div>
+          <div className="metric-val">{metrics.jobMatchFit || 0}%</div>
+          <div className="metric-sub">
+            <FaBriefcase /> {companyPrep.companiesExplored || 0} Target Companies • {metrics.companyTimeSpent || "0m spent"}
+          </div>
+          <div style={{ marginTop: "0.75rem", fontSize: "0.8rem", color: "#FB7185", fontWeight: "700", display: "flex", alignItems: "center", gap: "0.3rem" }}>
+            Prepare for Company <FaChevronRight className="card-arrow" />
+          </div>
         </div>
       </div>
+
+      {/* 4. CONTINUE PREPARATION (AI RECOMMENDATIONS) */}
+      {recommendations.length > 0 && (
+        <div className="ai-recommendations-section">
+          <div className="section-heading">
+            <span>AI Recommended Next Actions</span>
+          </div>
+          <div className="recommendations-grid">
+            {recommendations.map((rec, idx) => (
+              <div key={rec.id || idx} className="recommendation-card">
+                <div>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.4rem" }}>
+                    <h4>{rec.title}</h4>
+                    <span className="roadmap-badge" style={{
+                      background: rec.priority === "HIGH" ? "rgba(239, 68, 68, 0.2)" : "rgba(251, 191, 36, 0.2)",
+                      color: rec.priority === "HIGH" ? "#EF4444" : "#FBBF24",
+                      border: `1px solid ${rec.priority === "HIGH" ? "rgba(239, 68, 68, 0.4)" : "rgba(251, 191, 36, 0.4)"}`
+                    }}>
+                      {rec.priority || "HIGH"} PRIORITY
+                    </span>
+                  </div>
+                  <p>{rec.description}</p>
+                </div>
+                <button 
+                  className="cta-button-coral"
+                  onClick={() => navigate(rec.targetPath || "/dashboard")}
+                >
+                  {rec.actionLabel || "Take Action"}
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* 5. CAREER PREPARATION ROADMAP */}
+      <div className="roadmap-section">
+        <div className="section-heading" style={{ marginBottom: "0.5rem" }}>
+          <span>6-Stage Career Preparation Roadmap</span>
+        </div>
+        <div className="roadmap-steps-row">
+          {careerRoadmap.map((stage, idx) => (
+            <React.Fragment key={stage.id || idx}>
+              <div className="roadmap-step-item" onClick={() => navigate(stage.path || "/dashboard")}>
+                <div className={`roadmap-circle ${stage.status}`}>
+                  {stage.status === "COMPLETED" ? <FaCheckCircle /> : idx + 1}
+                </div>
+                <span className="roadmap-title">{stage.title}</span>
+                <span className={`roadmap-badge ${stage.status}`}>
+                  {stage.status === "COMPLETED" ? "COMPLETED" : stage.status === "IN_PROGRESS" ? "IN PROGRESS" : "NOT STARTED"}
+                </span>
+              </div>
+              {idx < careerRoadmap.length - 1 && (
+                <div className={`roadmap-connector ${stage.status === "COMPLETED" ? "active" : ""}`} />
+              )}
+            </React.Fragment>
+          ))}
+        </div>
+      </div>
+
+
+
+
+
+      {/* 9. WEEKLY GOALS & CUMULATIVE USER STATISTICS (SAME ROW) */}
+      <div className="bottom-dual-grid">
+        {/* Goals CRUD Card */}
+        <div className="goals-card">
+          <div className="section-heading">
+            <span>Weekly Target Goals</span>
+            <button className="add-goal-btn" onClick={() => setShowGoalModal(true)}>
+              <FaPlus /> Add Goal
+            </button>
+          </div>
+
+          {goals.length > 0 ? (
+            goals.map((g) => (
+              <div key={g.id} className="goal-item-row">
+                <div className="goal-item-header">
+                  <span style={{ textDecoration: g.completed ? "line-through" : "none", color: g.completed ? "#707080" : "#F8F8FA" }}>
+                    {g.title}
+                  </span>
+                  <div className="goal-actions">
+                    <button 
+                      className="goal-btn-icon" 
+                      style={{ color: g.completed ? "#22C55E" : "#707080" }}
+                      onClick={() => handleToggleGoalComplete(g)}
+                      title={g.completed ? "Mark Incomplete" : "Mark Complete"}
+                    >
+                      <FaCheckCircle />
+                    </button>
+                    <button 
+                      className="goal-btn-icon" 
+                      onClick={() => handleDeleteGoal(g.id)}
+                      title="Delete Goal"
+                    >
+                      <FaTrash />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="progress-track" style={{ height: "4px" }}>
+                  <div className="progress-fill-violet" style={{ width: `${Math.min(100, ((g.current_value || 0) / (g.target_value || 1)) * 100)}%` }} />
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.72rem", color: "#707080", marginTop: "0.3rem" }}>
+                  <span>Progress: {g.current_value || 0} / {g.target_value} {g.unit}</span>
+                  <span>{Math.round(((g.current_value || 0) / (g.target_value || 1)) * 100)}%</span>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div style={{ textAlign: "center", padding: "1.5rem", color: "#707080", fontSize: "0.85rem" }}>
+              No weekly goals created yet. Click "Add Goal" to set a target.
+            </div>
+          )}
+        </div>
+
+        {/* User Preparation Statistics Bar */}
+        <div className="weekly-activity-card">
+          <div className="section-heading">
+            <span>Cumulative User Statistics</span>
+          </div>
+
+          <div style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: "0.85rem"
+          }}>
+            <div style={{ background: "#1A1A24", border: "1px solid #292936", padding: "0.75rem", borderRadius: "8px" }}>
+              <span style={{ fontSize: "0.75rem", color: "#A7A7B5" }}>Resumes Created</span>
+              <div style={{ fontSize: "1.25rem", fontWeight: "800", color: "#F8F8FA" }}>{statistics.resumes_created}</div>
+            </div>
+            <div style={{ background: "#1A1A24", border: "1px solid #292936", padding: "0.75rem", borderRadius: "8px" }}>
+              <span style={{ fontSize: "0.75rem", color: "#A7A7B5" }}>ATS Analyses</span>
+              <div style={{ fontSize: "1.25rem", fontWeight: "800", color: "#F8F8FA" }}>{statistics.ats_analyses}</div>
+            </div>
+            <div style={{ background: "#1A1A24", border: "1px solid #292936", padding: "0.75rem", borderRadius: "8px" }}>
+              <span style={{ fontSize: "0.75rem", color: "#A7A7B5" }}>Problems Solved</span>
+              <div style={{ fontSize: "1.25rem", fontWeight: "800", color: "#F8F8FA" }}>{statistics.problems_solved}</div>
+            </div>
+            <div style={{ background: "#1A1A24", border: "1px solid #292936", padding: "0.75rem", borderRadius: "8px" }}>
+              <span style={{ fontSize: "0.75rem", color: "#A7A7B5" }}>Mock Interviews</span>
+              <div style={{ fontSize: "1.25rem", fontWeight: "800", color: "#F8F8FA" }}>{statistics.mock_interviews}</div>
+            </div>
+            <div style={{ background: "#1A1A24", border: "1px solid #292936", padding: "0.75rem", borderRadius: "8px" }}>
+              <span style={{ fontSize: "0.75rem", color: "#A7A7B5" }}>Companies Prepared</span>
+              <div style={{ fontSize: "1.25rem", fontWeight: "800", color: "#F8F8FA" }}>{statistics.companies_prepared}</div>
+            </div>
+            <div style={{ background: "#1A1A24", border: "1px solid #292936", padding: "0.75rem", borderRadius: "8px" }}>
+              <span style={{ fontSize: "0.75rem", color: "#A7A7B5" }}>Goals Completed</span>
+              <div style={{ fontSize: "1.25rem", fontWeight: "800", color: "#F8F8FA" }}>{statistics.goals_completed}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 10. RECENT UNIFIED ACTIVITY TIMELINE */}
+      <div className="timeline-card" style={{ marginBottom: "2rem" }}>
+        <div className="section-heading">
+          <span>Recent Preparation Timeline</span>
+          <button 
+            className="add-goal-btn" 
+            style={{ width: "auto", padding: "0.3rem 0.75rem" }}
+            onClick={() => navigate("/dashboard?section=activity-history")}
+          >
+            View All Activity
+          </button>
+        </div>
+
+        <div className="timeline-list">
+          {recentActivity.length > 0 ? (
+            recentActivity.slice(0, 5).map((act, idx) => (
+              <div key={act.id || idx} className="timeline-item">
+                <div className="timeline-icon">
+                  {act.type === "INTERVIEW_COMPLETED" ? <FaMicrophone style={{ color: "#FBBF24" }} /> : act.type === "CODING_ACCEPTED" ? <FaCode style={{ color: "#00FF88" }} /> : <FaCheckCircle style={{ color: "#7F77DD" }} />}
+                </div>
+                <div className="timeline-content">
+                  <h5>{act.title}</h5>
+                  <p>{act.description} • {act.date ? new Date(act.date).toLocaleDateString() : "Recently"}</p>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div style={{ textAlign: "center", padding: "1.5rem", color: "#707080", fontSize: "0.85rem" }}>
+              No preparation activity recorded yet.
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* CREATE GOAL MODAL */}
+      {showGoalModal && (
+        <div className="goal-modal-backdrop" onClick={() => setShowGoalModal(false)}>
+          <div className="goal-modal-box" onClick={(e) => e.stopPropagation()}>
+            <h3>Create New Weekly Goal</h3>
+            <form onSubmit={handleCreateGoal}>
+              <div className="goal-form-group">
+                <label>Goal Title</label>
+                <input 
+                  type="text" 
+                  placeholder="e.g. Solve 15 Dynamic Programming Problems"
+                  value={goalTitle}
+                  onChange={(e) => setGoalTitle(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="goal-form-group">
+                <label>Category</label>
+                <select 
+                  value={goalCategory} 
+                  onChange={(e) => setGoalCategory(e.target.value)}
+                  style={{
+                    width: "100%",
+                    background: "#1A1A24",
+                    border: "1px solid #292936",
+                    color: "#F8F8FA",
+                    padding: "0.5rem",
+                    borderRadius: "6px"
+                  }}
+                >
+                  <option value="coding">Coding Practice</option>
+                  <option value="interview">AI Mock Interview</option>
+                  <option value="resume">Resume & ATS</option>
+                </select>
+              </div>
+
+              <div className="goal-form-group">
+                <label>Target Target Value</label>
+                <input 
+                  type="number" 
+                  value={goalTarget}
+                  onChange={(e) => setGoalTarget(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="modal-actions">
+                <button 
+                  type="button" 
+                  className="refresh-btn"
+                  onClick={() => setShowGoalModal(false)}
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit" 
+                  className="cta-button-violet"
+                  style={{ width: "auto" }}
+                >
+                  Create Goal
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -6,14 +6,14 @@ from app.config import settings
 
 class EmailService:
     @staticmethod
-    def build_verification_email_html(user_name: str, otp: str) -> str:
+    def build_welcome_confirmation_email_html(user_name: str) -> str:
         safe_name = user_name or "Candidate"
         return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Verify Your Email – PreNova AI</title>
+  <title>Welcome to PreNova AI — Confirm Your Account</title>
 </head>
 <body style="margin:0;padding:0;background-color:#05020c;font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#ffffff;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#05020c;padding:40px 20px;">
@@ -46,13 +46,103 @@ class EmailService:
           <tr>
             <td style="padding:40px 48px;">
               <h2 style="margin:0 0 16px 0;color:#ffffff;font-size:24px;font-weight:700;letter-spacing:-0.3px;">
-                Verify Your Email
+                Welcome to PreNova AI! 🚀
+              </h2>
+              <p style="margin:0 0 20px 0;color:#c4c4e0;font-size:15px;line-height:1.7;">
+                Hello <strong>{safe_name}</strong>,
+              </p>
+              <p style="margin:0 0 20px 0;color:#a3a3c2;font-size:15px;line-height:1.7;">
+                We are thrilled to welcome you to <strong>PreNova AI</strong>, your all-in-one AI placement preparation platform.
+              </p>
+              <p style="margin:0 0 28px 0;color:#a3a3c2;font-size:15px;line-height:1.7;">
+                To complete your registration and secure your account, multi-step verification is required. Please check your inbox for the 6-digit verification code sent separately and enter it on the verification page.
+              </p>
+
+              <!-- Notice Box -->
+              <table width="100%" cellpadding="0" cellspacing="0"
+                style="background:rgba(124,58,237,0.08);border-radius:12px;
+                       border:1px solid rgba(168,85,247,0.2);margin-bottom:28px;">
+                <tr>
+                  <td style="padding:18px 24px;">
+                    <p style="margin:0;color:#e9d5ff;font-size:14px;line-height:1.7;">
+                      🔑 <strong>Verification Required:</strong> Enter your Email OTP and Mobile OTP to activate your account.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="margin:0;color:#6b6b8a;font-size:13px;line-height:1.6;">
+                If you did not request to create an account on PreNova AI, please disregard this message.
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding:28px 48px;background:rgba(7,4,15,0.8);border-top:1px solid rgba(168,85,247,0.15);">
+              <p style="margin:0;color:#64648c;font-size:12px;text-align:center;line-height:1.6;">
+                © PreNova AI · AI Interview Preparation System<br/>
+                This is an automated message. Please do not reply directly to this mail.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>"""
+
+    @staticmethod
+    def build_verification_email_html(user_name: str, otp: str) -> str:
+        safe_name = user_name or "Candidate"
+        return f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Your PreNova AI Verification Code</title>
+</head>
+<body style="margin:0;padding:0;background-color:#05020c;font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#ffffff;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#05020c;padding:40px 20px;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0"
+          style="background:linear-gradient(145deg, #0d081b 0%, #12062a 100%);
+                 border:1px solid rgba(168,85,247,0.3);
+                 border-radius:18px;
+                 overflow:hidden;
+                 box-shadow:0 12px 50px rgba(124,58,237,0.35);">
+
+          <!-- Header -->
+          <tr>
+            <td align="center"
+              style="background:linear-gradient(135deg,#4c1d95 0%,#7c3aed 100%);
+                     padding:36px 40px;border-bottom:1px solid rgba(168,85,247,0.3);">
+              <h1 style="margin:0;color:#ffffff;font-size:32px;font-weight:800;
+                         letter-spacing:-0.5px;text-shadow:0 2px 10px rgba(0,0,0,0.4);">
+                PreNova AI
+              </h1>
+              <p style="margin:6px 0 0 0;color:rgba(255,255,255,0.85);font-size:13px;
+                        letter-spacing:1.5px;text-transform:uppercase;font-weight:600;">
+                AI Interview Preparation System
+              </p>
+            </td>
+          </tr>
+
+          <!-- Body -->
+          <tr>
+            <td style="padding:40px 48px;">
+              <h2 style="margin:0 0 16px 0;color:#ffffff;font-size:24px;font-weight:700;letter-spacing:-0.3px;">
+                Your Verification Code
               </h2>
               <p style="margin:0 0 20px 0;color:#c4c4e0;font-size:15px;line-height:1.7;">
                 Hello <strong>{safe_name}</strong>,
               </p>
               <p style="margin:0 0 28px 0;color:#a3a3c2;font-size:15px;line-height:1.7;">
-                Thank you for creating your <strong>PreNova AI</strong> account. Use the verification code below to activate your account.
+                Your email verification link was successfully confirmed.<br/>
+                Use the following 6-digit code to complete your PreNova AI email verification:
               </p>
 
               <!-- OTP Box -->
@@ -82,17 +172,19 @@ class EmailService:
                 <tr>
                   <td style="padding:18px 24px;">
                     <p style="margin:0;color:#e9d5ff;font-size:14px;line-height:1.7;">
-                      ⏳ The code expires in <strong style="color:#c084fc;">10 minutes</strong>.
+                      ⏳ This code expires in <strong style="color:#c084fc;">10 minutes</strong>.
                     </p>
                     <p style="margin:8px 0 0 0;color:#a3a3c2;font-size:13px;line-height:1.6;">
-                      If you did not request this account, please ignore this email.
+                      If you did not request this verification, please secure your account.
                     </p>
                   </td>
                 </tr>
               </table>
 
               <p style="margin:0;color:#6b6b8a;font-size:13px;line-height:1.6;">
-                🔒 For security reasons, never share this code with anyone. PreNova AI support will never ask for your verification code.
+                🔒 Do not share this code with anyone.<br/>
+                Regards,<br/>
+                <strong>PreNova AI Team</strong>
               </p>
             </td>
           </tr>
@@ -113,6 +205,131 @@ class EmailService:
   </table>
 </body>
 </html>"""
+
+    @staticmethod
+    def build_email_verification_link_html(user_name: str, verification_url: str) -> str:
+        safe_name = user_name or "Candidate"
+        return f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Verify Your PreNova AI Email Address</title>
+</head>
+<body style="margin:0;padding:0;background-color:#05020c;font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#ffffff;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#05020c;padding:40px 20px;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0"
+          style="background:linear-gradient(145deg, #0d081b 0%, #12062a 100%);
+                 border:1px solid rgba(168,85,247,0.3);
+                 border-radius:18px;
+                 overflow:hidden;
+                 box-shadow:0 12px 50px rgba(124,58,237,0.35);">
+
+          <!-- Header -->
+          <tr>
+            <td align="center"
+              style="background:linear-gradient(135deg,#4c1d95 0%,#7c3aed 100%);
+                     padding:36px 40px;border-bottom:1px solid rgba(168,85,247,0.3);">
+              <h1 style="margin:0;color:#ffffff;font-size:32px;font-weight:800;
+                         letter-spacing:-0.5px;text-shadow:0 2px 10px rgba(0,0,0,0.4);">
+                PreNova AI
+              </h1>
+              <p style="margin:6px 0 0 0;color:rgba(255,255,255,0.85);font-size:13px;
+                        letter-spacing:1.5px;text-transform:uppercase;font-weight:600;">
+                Verify Your Email Address
+              </p>
+            </td>
+          </tr>
+
+          <!-- Body -->
+          <tr>
+            <td style="padding:40px 48px;">
+              <h2 style="margin:0 0 16px 0;color:#ffffff;font-size:24px;font-weight:700;letter-spacing:-0.3px;">
+                Verify Your Email Address
+              </h2>
+              <p style="margin:0 0 20px 0;color:#c4c4e0;font-size:15px;line-height:1.7;">
+                Hello <strong>{safe_name}</strong>,
+              </p>
+              <p style="margin:0 0 20px 0;color:#a3a3c2;font-size:15px;line-height:1.7;">
+                Thank you for registering with PreNova AI.
+              </p>
+              <p style="margin:0 0 24px 0;color:#a3a3c2;font-size:15px;line-height:1.7;">
+                To continue creating your account, please verify your email address by clicking the button below.
+              </p>
+
+              <!-- Action Button -->
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td align="center" style="padding:16px 0 32px 0;">
+                    <a href="{verification_url}" target="_blank"
+                      style="display:inline-block;
+                             background:linear-gradient(135deg,#7c3aed 0%,#a855f7 100%);
+                             color:#ffffff;
+                             font-size:16px;
+                             font-weight:700;
+                             text-decoration:none;
+                             padding:16px 40px;
+                             border-radius:12px;
+                             box-shadow:0 6px 25px rgba(168,85,247,0.45);
+                             letter-spacing:0.5px;">
+                      Verify Email Address
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Notice Box -->
+              <table width="100%" cellpadding="0" cellspacing="0"
+                style="background:rgba(124,58,237,0.08);border-radius:12px;
+                       border:1px solid rgba(168,85,247,0.2);margin-bottom:24px;">
+                <tr>
+                  <td style="padding:18px 24px;">
+                    <p style="margin:0;color:#e9d5ff;font-size:14px;line-height:1.7;">
+                      ⏳ This verification link will expire in <strong style="color:#c084fc;">10 minutes</strong>.
+                    </p>
+                    <p style="margin:8px 0 0 0;color:#e9d5ff;font-size:13px;line-height:1.6;">
+                      After verification, we will send a 6-digit verification code to this email address to complete the verification process.
+                    </p>
+                    <p style="margin:8px 0 0 0;color:#a3a3c2;font-size:13px;line-height:1.6;">
+                      If you did not create this account, you can safely ignore this email.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="margin:0 0 16px 0;color:#6b6b8a;font-size:13px;line-height:1.6;">
+                If the button above doesn't work, copy and paste this link into your web browser:
+              </p>
+              <p style="margin:0 0 24px 0;word-break:break-all;color:#c084fc;font-size:13px;">
+                <a href="{verification_url}" style="color:#c084fc;text-decoration:underline;">{verification_url}</a>
+              </p>
+
+              <p style="margin:0;color:#6b6b8a;font-size:13px;line-height:1.6;">
+                Regards,<br/>
+                <strong>PreNova AI Team</strong>
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding:28px 48px;background:rgba(7,4,15,0.8);border-top:1px solid rgba(168,85,247,0.15);">
+              <p style="margin:0;color:#64648c;font-size:12px;text-align:center;line-height:1.6;">
+                © PreNova AI · AI Interview Preparation System<br/>
+                This is an automated message. Please do not reply directly to this mail.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>"""
+
 
     @staticmethod
     def build_password_reset_email_html(user_name: str, otp: str) -> str:

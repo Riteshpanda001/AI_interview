@@ -28,7 +28,11 @@ const CodingHistory = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState("year"); // "year" | "month"
+  const [selectedYear, setSelectedYear] = useState(2026);
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedDifficultyFilter, setSelectedDifficultyFilter] = useState("all");
+
+  const availableYears = [2026, 2027, 2028, 2029, 2030];
 
   const fetchCodingData = async () => {
     try {
@@ -117,6 +121,18 @@ const CodingHistory = () => {
 
   // Heatmap Data (12 Months representation)
   const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  
+  const yearSubmissions = submissions.filter((s) => {
+    const dateStr = s.created_at || s.submitted_at;
+    if (!dateStr) return false;
+    return new Date(dateStr).getFullYear() === selectedYear;
+  });
+
+  const monthSubmissionsForSelectedMonth = yearSubmissions.filter((s) => {
+    const dateStr = s.created_at || s.submitted_at;
+    if (!dateStr) return false;
+    return new Date(dateStr).getMonth() === selectedMonth;
+  });
   
   // Filtered Submissions for Table
   const filteredSubmissions = submissions.filter(
@@ -307,26 +323,53 @@ const CodingHistory = () => {
 
       {/* 3. SUBMISSIONS HEATMAP / MONTHLY LINE CHART */}
       <div className="heatmap-card">
-        <div className="heatmap-header-row" style={{ alignItems: "flex-start" }}>
+        <div className="heatmap-header-row" style={{ alignItems: "center" }}>
           {viewMode === "year" ? (
-            <div className="heatmap-title-text">
-              {submissions.length} Submissions in Year 2026
+            <div className="heatmap-title-text" style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+              <span>{yearSubmissions.length} Submissions in</span>
+              <select 
+                className="month-select-dropdown"
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(Number(e.target.value))}
+                title="Select Year"
+              >
+                {availableYears.map((yr) => (
+                  <option key={yr} value={yr}>Year {yr}</option>
+                ))}
+              </select>
             </div>
           ) : (
-            <div style={{ flex: 1, textAlign: "center" }}>
+            <div style={{ flex: 1, display: "flex", alignItems: "center", gap: "0.75rem" }}>
               <div className="monthly-chart-title">
-                Monthly Problem Solved: ({
-                  submissions.filter((s) => {
-                    const dateStr = s.created_at || s.submitted_at;
-                    if (!dateStr) return false;
-                    return new Date(dateStr).getMonth() === selectedMonth;
-                  }).length
-                })
+                Monthly Problem Solved: ({monthSubmissionsForSelectedMonth.length}) - {months[selectedMonth]}
               </div>
+              <select 
+                className="month-select-dropdown"
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(Number(e.target.value))}
+                title="Select Year"
+              >
+                {availableYears.map((yr) => (
+                  <option key={yr} value={yr}>Year {yr}</option>
+                ))}
+              </select>
             </div>
           )}
 
-          <div className="heatmap-header-right" style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "0.6rem" }}>
+          <div className="heatmap-header-right" style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
+            {viewMode === "month" && (
+              <select 
+                className="month-select-dropdown"
+                value={selectedMonth}
+                onChange={(e) => setSelectedMonth(Number(e.target.value))}
+                title="Select Month"
+              >
+                {months.map((mName, mIdx) => (
+                  <option key={mIdx} value={mIdx}>{mName}</option>
+                ))}
+              </select>
+            )}
+
             <div className="heatmap-toggle-btns">
               <button 
                 className={`toggle-btn ${viewMode === "year" ? "active" : ""}`}
@@ -341,76 +384,60 @@ const CodingHistory = () => {
                 Month
               </button>
             </div>
-
-            {viewMode === "month" && (
-              <select 
-                className="month-select-dropdown"
-                value={selectedMonth}
-                onChange={(e) => setSelectedMonth(Number(e.target.value))}
-              >
-                {months.map((mName, mIdx) => (
-                  <option key={mIdx} value={mIdx}>{mName}</option>
-                ))}
-              </select>
-            )}
           </div>
         </div>
 
         <div className="heatmap-grid-scroll">
-          {viewMode === "year" ? (
-            <div className="heatmap-months-flex">
-              {months.map((mName, mIdx) => {
-                const monthSubmissions = submissions.filter((s) => {
-                  const dateStr = s.created_at || s.submitted_at;
-                  if (!dateStr) return false;
-                  return new Date(dateStr).getMonth() === mIdx;
-                });
+              {viewMode === "year" ? (
+                <div className="heatmap-months-flex">
+                  {months.map((mName, mIdx) => {
+                    const monthSubmissions = yearSubmissions.filter((s) => {
+                      const dateStr = s.created_at || s.submitted_at;
+                      if (!dateStr) return false;
+                      return new Date(dateStr).getMonth() === mIdx;
+                    });
 
-                return (
-                  <div key={mIdx} className="heatmap-month-column">
-                    <div className="heatmap-month-label">{mName.substring(0, 3)}</div>
-                    <div className="heatmap-squares-matrix">
-                      {Array.from({ length: 16 }).map((_, sqIdx) => {
-                        let levelClass = "heatmap-level-0";
-                        let countText = 0;
+                    return (
+                      <div key={mIdx} className="heatmap-month-column">
+                        <div className="heatmap-month-label">{mName.substring(0, 3)}</div>
+                        <div className="heatmap-squares-matrix">
+                          {Array.from({ length: 16 }).map((_, sqIdx) => {
+                            let levelClass = "heatmap-level-0";
+                            let countText = 0;
 
-                        if (monthSubmissions.length > 0 && sqIdx < Math.min(16, monthSubmissions.length)) {
-                          countText = monthSubmissions.length;
-                          levelClass = countText > 5 ? "heatmap-level-3" : countText > 2 ? "heatmap-level-2" : "heatmap-level-1";
-                        }
+                            if (monthSubmissions.length > 0 && sqIdx < Math.min(16, monthSubmissions.length)) {
+                              countText = monthSubmissions.length;
+                              levelClass = countText > 5 ? "heatmap-level-3" : countText > 2 ? "heatmap-level-2" : "heatmap-level-1";
+                            }
 
-                        return (
-                          <div
-                            key={sqIdx}
-                            className={`heatmap-square ${levelClass}`}
-                            title={`${mName}: ${countText} submission${countText === 1 ? "" : "s"}`}
-                          />
-                        );
-                      })}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="monthly-chart-box" style={{ width: "100%", padding: "0.5rem 0" }}>
-              {(() => {
-                const daysInMonth = new Date(2026, selectedMonth + 1, 0).getDate();
-                const monthSubmissions = submissions.filter((s) => {
-                  const dateStr = s.created_at || s.submitted_at;
-                  if (!dateStr) return false;
-                  return new Date(dateStr).getMonth() === selectedMonth;
-                });
+                            return (
+                              <div
+                                key={sqIdx}
+                                className={`heatmap-square ${levelClass}`}
+                                title={`${mName} ${selectedYear}: ${countText} submission${countText === 1 ? "" : "s"}`}
+                              />
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="monthly-chart-box" style={{ width: "100%", padding: "0.5rem 0" }}>
+                  {(() => {
+                    const daysInMonth = new Date(selectedYear, selectedMonth + 1, 0).getDate();
+                    const monthSubmissions = monthSubmissionsForSelectedMonth;
 
-                // Calculate daily counts for days 1..daysInMonth
-                const dailyData = Array.from({ length: daysInMonth }).map((_, dIdx) => {
-                  const dayNum = dIdx + 1;
-                  const count = monthSubmissions.filter((s) => {
-                    const dateStr = s.created_at || s.submitted_at;
-                    return dateStr && new Date(dateStr).getDate() === dayNum;
-                  }).length;
-                  return { day: dayNum, count };
-                });
+                    // Calculate daily counts for days 1..daysInMonth
+                    const dailyData = Array.from({ length: daysInMonth }).map((_, dIdx) => {
+                      const dayNum = dIdx + 1;
+                      const count = monthSubmissions.filter((s) => {
+                        const dateStr = s.created_at || s.submitted_at;
+                        return dateStr && new Date(dateStr).getDate() === dayNum;
+                      }).length;
+                      return { day: dayNum, count };
+                    });
 
                 const maxY = Math.max(6, ...dailyData.map(d => d.count));
                 const chartLeft = 45;

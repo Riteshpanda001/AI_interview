@@ -25,6 +25,7 @@ def test_phase5_complete_resume_ats_workflow():
         mock_db = {
             "users": users_col,
             "otps": MagicMock(find_one=AsyncMock(return_value=None), insert_one=AsyncMock(), delete_many=AsyncMock()),
+            "pending_registrations": MagicMock(find_one=AsyncMock(return_value=None), delete_many=AsyncMock(), insert_one=AsyncMock(), update_one=AsyncMock()),
             "sessions": MagicMock(insert_one=AsyncMock(return_value=MagicMock(inserted_id="sess_123"))),
             "refresh_tokens": MagicMock(insert_one=AsyncMock(), find_one=AsyncMock(return_value=None)),
             "resumes": resumes_col,
@@ -35,7 +36,8 @@ def test_phase5_complete_resume_ats_workflow():
 
         # Step 1: Register User
         with patch("app.services.otp_service.OTPService.send_otp", new_callable=AsyncMock) as mock_send_otp, \
-             patch("app.services.otp_service.OTPService.verify_otp", new_callable=AsyncMock) as mock_verify_otp:
+             patch("app.services.otp_service.OTPService.verify_otp", new_callable=AsyncMock) as mock_verify_otp, \
+             patch("app.services.email_service.EmailService.send_email", new_callable=AsyncMock) as mock_send_email:
 
             mock_send_otp.return_value = "654321"
             mock_verify_otp.return_value = True
@@ -43,7 +45,8 @@ def test_phase5_complete_resume_ats_workflow():
             reg_req = UserRegisterRequest(
                 email="candidate.ats@prepnova.ai",
                 password="SecurePassword123!",
-                full_name="ATS Candidate"
+                full_name="ATS Candidate",
+                phone="+919876543210"
             )
             reg_res = await AuthService.register_user(reg_req, mock_db)
             assert reg_res["success"] is True

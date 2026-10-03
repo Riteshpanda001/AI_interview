@@ -24,6 +24,7 @@ def test_register_and_verify_otp_flow():
         mock_db = {
             "users": users_collection,
             "otps": MagicMock(find_one=AsyncMock(return_value=None), insert_one=AsyncMock(), delete_many=AsyncMock()),
+            "pending_registrations": MagicMock(find_one=AsyncMock(return_value=None), delete_many=AsyncMock(), insert_one=AsyncMock(), update_one=AsyncMock()),
             "sessions": MagicMock(insert_one=AsyncMock(return_value=MagicMock(inserted_id="sess_123"))),
             "refresh_tokens": MagicMock(insert_one=AsyncMock(), find_one=AsyncMock(return_value=None)),
             "audit_logs": MagicMock(insert_one=AsyncMock()),
@@ -42,15 +43,29 @@ def test_register_and_verify_otp_flow():
             request = UserRegisterRequest(
                 email="newuser@example.com",
                 password="SecurePassword123!",
-                full_name="New User"
+                full_name="New User",
+                phone="+919876543210"
             )
 
             reg_res = await AuthService.register_user(request, mock_db)
             assert reg_res["success"] is True
-            assert "Registration successful" in reg_res["message"]
+            assert "Registration started" in reg_res["message"]
+            mock_send_email.assert_called_once()
+
+            # 2. Verify Email Link (which generates and sends OTP)
+            mock_db["pending_registrations"].find_one = AsyncMock(return_value={
+                "_id": "pending_123",
+                "email": "newuser@example.com",
+                "full_name": "New User",
+                "phone": "+919876543210",
+                "verification_link_used": False,
+                "verification_link_expires_at": None
+            })
+            link_res = await AuthService.verify_email_link("dummy_token", db=mock_db)
+            assert link_res["require_otp"] is True
             mock_send_otp.assert_called_once_with("newuser@example.com", purpose="email_verification", user_name="New User", req=None)
 
-            # 2. Verify OTP
+            # 3. Verify OTP
             users_collection.find_one = AsyncMock(return_value={
                 "_id": "507f1f77bcf86cd799439011",
                 "email": "newuser@example.com",
@@ -60,8 +75,7 @@ def test_register_and_verify_otp_flow():
             })
 
             token_res = await AuthService.verify_user_otp("newuser@example.com", "123456", db=mock_db)
-            assert "access_token" in token_res
-            assert "refresh_token" in token_res
+            assert "require_mobile_otp" in token_res or "access_token" in token_res
             mock_verify_otp.assert_called_once_with("newuser@example.com", "123456", purpose="email_verification", req=None)
 
     asyncio.run(run_test())

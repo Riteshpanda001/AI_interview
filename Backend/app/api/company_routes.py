@@ -37,18 +37,13 @@ class CompanyTipSaveRequest(BaseModel):
 async def list_companies(db = Depends(get_db)):
     return await CompanyService.get_all_companies(db)
 
-@router.get("/{slug}")
-async def get_company_profile(slug: str, db = Depends(get_db)):
-    return await CompanyService.get_company_by_slug(slug, db)
-
-@router.get("/{slug}/questions")
-async def get_company_questions(
-    slug: str,
-    category: Optional[str] = "all",
-    role: Optional[str] = "all",
+@router.get("/overview")
+async def get_user_company_overview(
+    current_user = Depends(get_current_active_user),
     db = Depends(get_db)
 ):
-    return await CompanyService.get_company_questions(slug, category, db, role=role)
+    user_id = str(current_user["_id"])
+    return await CompanyService.get_user_company_overview(user_id, db)
 
 @router.get("/history")
 async def get_user_company_history(
@@ -57,6 +52,10 @@ async def get_user_company_history(
 ):
     user_id = str(current_user["_id"])
     return await CompanyService.get_user_company_history(user_id, db)
+
+@router.get("/{slug}")
+async def get_company_profile(slug: str, db = Depends(get_db)):
+    return await CompanyService.get_company_by_slug(slug, db)
 
 @router.post("/{slug}/reset-progress")
 async def reset_user_company_progress(

@@ -90,7 +90,7 @@ class OTPService:
             subject = "✉️ Confirm Your New Email Address – PreNova AI"
             html_content = EmailService.build_verification_email_html(user_name, otp_code)
         else:
-            subject = "🔐 Verify Your Email – PreNova AI"
+            subject = "Your PreNova AI Verification Code"
             html_content = EmailService.build_verification_email_html(user_name, otp_code)
 
         email_sent = await EmailService.send_email(clean_email, subject, html_content)
@@ -289,6 +289,54 @@ class OTPService:
         db = db_manager.db
         now = datetime.now(timezone.utc)
 
+        if db is not None:
+            pending = await db["pending_registrations"].find_one({"phone_normalized": clean_phone})
+            if pending and pending.get("email_verified"):
+                from app.services.user_service import UserService
+                from app.services.auth_service import AuthService
+                from app.constants import ROLE_USER, PLAN_FREE
+
+                user_doc = await UserService.create_user(
+                    email=pending["email"],
+                    full_name=pending["full_name"],
+                    password_hash=pending["hashed_password"],
+                    provider="email",
+                    phone=pending["phone"],
+                    gender=pending.get("gender"),
+                    is_verified=True,
+                    db=db
+                )
+                user_id_str = str(user_doc["_id"])
+                await db["users"].update_one(
+                    {"_id": user_doc["_id"]},
+                    {"$set": {
+                        "phone_normalized": pending["phone_normalized"],
+                        "email_normalized": pending["email_normalized"],
+                        "phone_verified": True,
+                        "email_verified": True,
+                        "account_status": "active",
+                        "phone_verified_at": now
+                    }}
+                )
+                await db["pending_registrations"].delete_one({"_id": pending["_id"]})
+
+                session_id = await AuthService.create_session(user_id_str, req=req, db=db)
+                tokens = await AuthService._issue_token_pair(user_id_str, session_id=session_id, db=db)
+
+                await AuditLogService.log_event("EVENT_PHONE_VERIFIED", email=pending["email"], user_id=user_id_str, status="SUCCESS", req=req, db=db)
+                await AuditLogService.log_event("EVENT_USER_REGISTERED", email=pending["email"], user_id=user_id_str, status="SUCCESS", req=req, db=db)
+
+                return {
+                    "access_token": tokens["access_token"],
+                    "refresh_token": tokens["refresh_token"],
+                    "token_type": "bearer",
+                    "role": user_doc.get("role", ROLE_USER),
+                    "plan_type": user_doc.get("plan_type", PLAN_FREE),
+                    "is_verified": True,
+                    "phone_verified": True,
+                    "message": "Mobile number verified and account activated successfully!"
+                }
+
         if db is not None and user_id:
             try:
                 query = {"_id": ObjectId(user_id)}
@@ -299,6 +347,7 @@ class OTPService:
                 query,
                 {"$set": {
                     "phone": clean_phone,
+                    "phone_normalized": clean_phone,
                     "phone_verified": True,
                     "phone_verified_at": now,
                     "updated_at": now

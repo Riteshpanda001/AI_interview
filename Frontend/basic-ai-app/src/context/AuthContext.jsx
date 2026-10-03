@@ -4,6 +4,119 @@ import { API_BASE_URL } from "../utils/apiConfig";
 
 const AuthContext = createContext(null);
 
+export class AuthError extends Error {
+  constructor(message, status = 0, code = null, isNetworkError = false) {
+    super(message);
+    this.name = "AuthError";
+    this.status = status;
+    this.code = code;
+    this.isNetworkError = isNetworkError;
+  }
+}
+
+export const extractErrorMessage = (data, defaultMsg = null) => {
+  if (!data) return defaultMsg;
+  if (typeof data.detail === "string" && data.detail.trim()) {
+    return data.detail;
+  }
+  if (Array.isArray(data.detail) && data.detail.length > 0) {
+    const firstErr = data.detail[0];
+    if (typeof firstErr === "string") return firstErr;
+    if (firstErr && typeof firstErr.msg === "string") return firstErr.msg;
+  }
+  if (typeof data.detail === "object" && data.detail !== null) {
+    if (typeof data.detail.msg === "string") return data.detail.msg;
+    if (typeof data.detail.message === "string") return data.detail.message;
+  }
+  if (typeof data.message === "string" && data.message.trim()) {
+    return data.message;
+  }
+  if (typeof data.error === "string" && data.error.trim()) {
+    return data.error;
+  }
+  return defaultMsg;
+};
+
+export const handleApiError = async (response) => {
+  const status = response.status;
+  let data = null;
+  try {
+    data = await response.json();
+  } catch (e) {
+    // Body is not JSON
+  }
+
+  const extractedMsg = extractErrorMessage(data, null);
+  const code = data?.code || data?.status || null;
+
+  let message = "";
+
+  switch (status) {
+    case 400:
+      message = extractedMsg || "Invalid request. Please check your details.";
+      break;
+    case 401:
+      message = extractedMsg || "Authentication failed. Please log in again.";
+      break;
+    case 403:
+      message = extractedMsg || "You do not have permission to perform this action.";
+      break;
+    case 409:
+      if (extractedMsg) {
+        message = extractedMsg;
+      } else if (code === "EMAIL_ALREADY_REGISTERED") {
+        message = "An account with this email already exists.";
+      } else if (code === "PHONE_ALREADY_REGISTERED") {
+        message = "This mobile number is already registered.";
+      } else {
+        message = "An account with these details already exists.";
+      }
+      break;
+    case 422:
+      message = extractedMsg || "Please enter valid information.";
+      break;
+    case 429:
+      message = "Too many requests. Please wait and try again.";
+      break;
+    case 500:
+      message = "Something went wrong on the server. Please try again.";
+      break;
+    case 503:
+      message = "The service is temporarily unavailable. Please try again later.";
+      break;
+    default:
+      message = extractedMsg || `Request failed with status code ${status}.`;
+  }
+
+  throw new AuthError(message, status, code, false);
+};
+
+export const catchNetworkError = (error, defaultMsg = "Operation failed.") => {
+  if (error instanceof AuthError) {
+    throw error;
+  }
+
+  const isNetworkFailure =
+    (error?.name === "TypeError" &&
+      (error?.message?.toLowerCase().includes("fetch") ||
+       error?.message?.toLowerCase().includes("networkerror") ||
+       error?.message?.toLowerCase().includes("network error") ||
+       error?.message?.toLowerCase().includes("failed to fetch"))) ||
+    error?.message === "Failed to fetch" ||
+    error?.message?.includes("ECONNREFUSED");
+
+  if (isNetworkFailure) {
+    throw new AuthError(
+      "Unable to connect to backend server. Please make sure the backend is running on http://localhost:8000.",
+      0,
+      "NETWORK_ERROR",
+      true
+    );
+  }
+
+  throw new AuthError(error?.message || defaultMsg, 0, null, false);
+};
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem("access_token") || null);
@@ -23,11 +136,24 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Helper: Clear tokens from state & localStorage
+  // Helper: Clear tokens and ALL user/session state from localStorage & sessionStorage
   const clearTokens = () => {
     localStorage.removeItem("access_token");
     localStorage.removeItem("token");
     localStorage.removeItem("refresh_token");
+    localStorage.removeItem("active_interview_session_id");
+    localStorage.removeItem("active_interview_role_target");
+    localStorage.removeItem("active_interview_type");
+    localStorage.removeItem("mock_setup_prefill");
+    localStorage.removeItem("active_resume_data");
+    localStorage.removeItem("user_solved_problem_ids");
+    localStorage.removeItem("coding_problems_solved");
+    localStorage.removeItem("company_dsa_solved_ids");
+    try {
+      sessionStorage.clear();
+    } catch (e) {
+      // Ignore
+    }
     setToken(null);
     setRefreshTokenStr(null);
     setUser(null);
@@ -63,32 +189,56 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Helper to check if URL is a public auth endpoint that should not receive Bearer tokens
+  const isPublicAuthEndpoint = (urlStr) => {
+    if (!urlStr) return false;
+    const publicPaths = [
+      "/auth/register",
+      "/auth/login",
+      "/auth/google",
+      "/auth/check-registration",
+      "/auth/check-email",
+      "/auth/forgot-password",
+      "/auth/verify-otp",
+      "/auth/resend-otp",
+      "/auth/verify-email-link",
+      "/auth/resend-verification-email",
+      "/auth/reset-password",
+      "/auth/verify-password-reset-otp",
+      "/auth/send-mobile-otp",
+      "/auth/verify-mobile-otp",
+      "/auth/verify-mfa-login"
+    ];
+    return publicPaths.some((p) => urlStr.includes(p));
+  };
+
   // Authenticated Fetch Wrapper with Automatic Token Renewal on 401
   const authFetch = async (url, options = {}) => {
-    let currentToken = localStorage.getItem("access_token") || localStorage.getItem("token");
+    const isPublic = isPublicAuthEndpoint(url);
+    let currentToken = isPublic ? null : (localStorage.getItem("access_token") || localStorage.getItem("token"));
 
     const headers = {
       ...(options.headers || {}),
       ...(currentToken ? { Authorization: `Bearer ${currentToken}` } : {}),
     };
 
-    let response = await fetch(url, { ...options, headers });
+    let response = await fetch(url, { ...options, headers, credentials: options.credentials || "include" });
 
-    if (response.status === 401) {
+    if (response.status === 401 && !isPublic) {
       const newToken = await refreshToken();
       if (newToken) {
         const retryHeaders = {
           ...(options.headers || {}),
           Authorization: `Bearer ${newToken}`,
         };
-        response = await fetch(url, { ...options, headers: retryHeaders });
+        response = await fetch(url, { ...options, headers: retryHeaders, credentials: options.credentials || "include" });
       }
     }
 
     return response;
   };
 
-  // Fetch current user details from the real backend
+  // Fetch current user details from backend
   const fetchCurrentUser = async (authToken) => {
     if (!authToken) {
       setLoading(false);
@@ -107,6 +257,7 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (error) {
       console.error("Error fetching current user:", error);
+      clearTokens();
       return null;
     } finally {
       setLoading(false);
@@ -130,12 +281,31 @@ export const AuthProvider = ({ children }) => {
         body: JSON.stringify({ email }),
       });
 
-      if (!response.ok) throw new Error("Failed to check email");
+      if (!response.ok) {
+        await handleApiError(response);
+      }
       const data = await response.json();
       return data.exists;
     } catch (error) {
-      console.error("Check email error:", error);
-      throw error;
+      catchNetworkError(error, "Failed to check email");
+    }
+  };
+
+  // Check registration status
+  const checkRegistration = async (email, phone) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/check-registration`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, phone }),
+      });
+
+      if (!response.ok) {
+        await handleApiError(response);
+      }
+      return await response.json();
+    } catch (error) {
+      catchNetworkError(error, "Registration check failed");
     }
   };
 
@@ -155,14 +325,12 @@ export const AuthProvider = ({ children }) => {
         }),
       });
 
-      const data = await response.json();
       if (!response.ok) {
-        throw new Error(data.detail || "Registration failed");
+        await handleApiError(response);
       }
-      return data;
+      return await response.json();
     } catch (error) {
-      console.error("Registration error:", error);
-      throw error;
+      catchNetworkError(error, "Registration failed");
     }
   };
 
@@ -175,14 +343,12 @@ export const AuthProvider = ({ children }) => {
         body: JSON.stringify({ email, purpose }),
       });
 
-      const data = await response.json();
       if (!response.ok) {
-        throw new Error(data.detail || "Failed to resend verification code");
+        await handleApiError(response);
       }
-      return data;
+      return await response.json();
     } catch (error) {
-      console.error("Resend OTP error:", error);
-      throw error;
+      catchNetworkError(error, "Failed to resend verification code");
     }
   };
 
@@ -195,17 +361,57 @@ export const AuthProvider = ({ children }) => {
         body: JSON.stringify({ email, otp, purpose }),
       });
 
-      const data = await response.json();
       if (!response.ok) {
-        throw new Error(data.detail || "OTP verification failed");
+        await handleApiError(response);
       }
 
+      const data = await response.json();
       saveTokens(data.access_token, data.refresh_token);
       const userObj = await fetchCurrentUser(data.access_token);
       return { ...data, user: userObj };
     } catch (error) {
-      console.error("OTP verification error:", error);
-      throw error;
+      catchNetworkError(error, "OTP verification failed");
+    }
+  };
+
+  // Verify Email Link
+  const verifyEmailLink = async (linkToken) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/verify-email-link`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token: linkToken }),
+      });
+
+      if (!response.ok) {
+        await handleApiError(response);
+      }
+
+      const data = await response.json();
+      if (data.access_token && data.refresh_token) {
+        saveTokens(data.access_token, data.refresh_token);
+      }
+      return data;
+    } catch (error) {
+      catchNetworkError(error, "Email link verification failed");
+    }
+  };
+
+  // Resend Verification Email Link
+  const resendVerificationLink = async (email) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/resend-verification-email`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+
+      if (!response.ok) {
+        await handleApiError(response);
+      }
+      return await response.json();
+    } catch (error) {
+      catchNetworkError(error, "Failed to resend verification link");
     }
   };
 
@@ -218,13 +424,11 @@ export const AuthProvider = ({ children }) => {
         body: JSON.stringify({ email, password }),
       });
 
-      const data = await response.json();
       if (!response.ok) {
-        if (response.status === 403) {
-          throw { status: 403, message: data.detail || "Verify your email first." };
-        }
-        throw new Error(data.detail || "Login failed");
+        await handleApiError(response);
       }
+
+      const data = await response.json();
 
       if (data.require_otp) {
         return data;
@@ -234,31 +438,33 @@ export const AuthProvider = ({ children }) => {
       const userObj = await fetchCurrentUser(data.access_token);
       return { ...data, user: userObj };
     } catch (error) {
-      console.error("Login error:", error);
-      throw error;
+      catchNetworkError(error, "Login failed");
     }
   };
 
   // Google Login
-  const googleLogin = async (credential) => {
+  const googleLogin = async (credential, phone = null, otp = null) => {
     try {
       const response = await fetch(`${API_BASE_URL}/auth/google`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ credential }),
+        body: JSON.stringify({ credential, phone, otp }),
       });
 
-      const data = await response.json();
       if (!response.ok) {
-        throw new Error(data.detail || "Google authentication failed");
+        await handleApiError(response);
       }
 
-      saveTokens(data.access_token, data.refresh_token);
-      const userObj = await fetchCurrentUser(data.access_token);
-      return { ...data, user: userObj };
+      const data = await response.json();
+
+      if (data.access_token) {
+        saveTokens(data.access_token, data.refresh_token);
+        const userObj = await fetchCurrentUser(data.access_token);
+        return { ...data, user: userObj };
+      }
+      return data;
     } catch (error) {
-      console.error("Google login error:", error);
-      throw error;
+      catchNetworkError(error, "Google authentication failed");
     }
   };
 
@@ -271,16 +477,15 @@ export const AuthProvider = ({ children }) => {
         body: JSON.stringify(updateData),
       });
 
-      const data = await response.json();
       if (!response.ok) {
-        throw new Error(data.detail || "Failed to update profile");
+        await handleApiError(response);
       }
 
+      const data = await response.json();
       setUser(data);
       return data;
     } catch (error) {
-      console.error("Update profile error:", error);
-      throw error;
+      catchNetworkError(error, "Failed to update profile");
     }
   };
 
@@ -297,14 +502,12 @@ export const AuthProvider = ({ children }) => {
         }),
       });
 
-      const data = await response.json();
       if (!response.ok) {
-        throw new Error(data.detail || "Failed to change password");
+        await handleApiError(response);
       }
-      return data;
+      return await response.json();
     } catch (error) {
-      console.error("Change password error:", error);
-      throw error;
+      catchNetworkError(error, "Failed to change password");
     }
   };
 
@@ -317,14 +520,12 @@ export const AuthProvider = ({ children }) => {
         body: JSON.stringify({ email }),
       });
 
-      const data = await response.json();
       if (!response.ok) {
-        throw new Error(data.detail || "Forgot password request failed");
+        await handleApiError(response);
       }
-      return data;
+      return await response.json();
     } catch (error) {
-      console.error("Forgot password error:", error);
-      throw error;
+      catchNetworkError(error, "Forgot password request failed");
     }
   };
 
@@ -337,14 +538,12 @@ export const AuthProvider = ({ children }) => {
         body: JSON.stringify({ email, otp, purpose: "password_reset" }),
       });
 
-      const data = await response.json();
       if (!response.ok) {
-        throw new Error(data.detail || "Invalid or expired recovery code.");
+        await handleApiError(response);
       }
-      return data;
+      return await response.json();
     } catch (error) {
-      console.error("Verify password reset OTP error:", error);
-      throw error;
+      catchNetworkError(error, "Verify password reset OTP error");
     }
   };
 
@@ -363,14 +562,12 @@ export const AuthProvider = ({ children }) => {
         }),
       });
 
-      const data = await response.json();
       if (!response.ok) {
-        throw new Error(data.detail || "Reset password failed");
+        await handleApiError(response);
       }
-      return data;
+      return await response.json();
     } catch (error) {
-      console.error("Reset password error:", error);
-      throw error;
+      catchNetworkError(error, "Reset password failed");
     }
   };
 
@@ -383,14 +580,12 @@ export const AuthProvider = ({ children }) => {
         body: JSON.stringify({ phone }),
       });
 
-      const data = await response.json();
       if (!response.ok) {
-        throw new Error(data.detail || "Failed to send mobile verification SMS");
+        await handleApiError(response);
       }
-      return data;
+      return await response.json();
     } catch (error) {
-      console.error("Send mobile OTP error:", error);
-      throw error;
+      catchNetworkError(error, "Failed to send mobile verification SMS");
     }
   };
 
@@ -403,9 +598,15 @@ export const AuthProvider = ({ children }) => {
         body: JSON.stringify({ phone, otp }),
       });
 
-      const data = await response.json();
       if (!response.ok) {
-        throw new Error(data.detail || "SMS verification code invalid");
+        await handleApiError(response);
+      }
+
+      const data = await response.json();
+      if (data.access_token) {
+        saveTokens(data.access_token, data.refresh_token);
+        const userObj = await fetchCurrentUser(data.access_token);
+        return { ...data, user: userObj };
       }
 
       if (user) {
@@ -413,18 +614,19 @@ export const AuthProvider = ({ children }) => {
       }
       return data;
     } catch (error) {
-      console.error("Verify mobile OTP error:", error);
-      throw error;
+      catchNetworkError(error, "SMS verification code invalid");
     }
   };
 
-  // Logout Endpoint & Session Cleanup
+  // Logout Endpoint & Complete Session Cleanup
   const logout = async () => {
     try {
-      if (token) {
+      const currentToken = localStorage.getItem("access_token") || localStorage.getItem("token");
+      if (currentToken) {
         await fetch(`${API_BASE_URL}/auth/logout`, {
           method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${currentToken}` },
+          credentials: "include",
         });
       }
     } catch (err) {
@@ -438,7 +640,7 @@ export const AuthProvider = ({ children }) => {
   const getSessions = async () => {
     try {
       const response = await authFetch(`${API_BASE_URL}/users/sessions`);
-      if (!response.ok) throw new Error("Failed to fetch sessions");
+      if (!response.ok) await handleApiError(response);
       return await response.json();
     } catch (error) {
       console.error("Fetch sessions error:", error);
@@ -451,11 +653,10 @@ export const AuthProvider = ({ children }) => {
       const response = await authFetch(`${API_BASE_URL}/users/sessions/${sessionId}`, {
         method: "DELETE",
       });
-      if (!response.ok) throw new Error("Failed to revoke session");
+      if (!response.ok) await handleApiError(response);
       return await response.json();
     } catch (error) {
-      console.error("Revoke session error:", error);
-      throw error;
+      catchNetworkError(error, "Failed to revoke session");
     }
   };
 
@@ -464,11 +665,10 @@ export const AuthProvider = ({ children }) => {
       const response = await authFetch(`${API_BASE_URL}/users/sessions/revoke-others`, {
         method: "POST",
       });
-      if (!response.ok) throw new Error("Failed to revoke other sessions");
+      if (!response.ok) await handleApiError(response);
       return await response.json();
     } catch (error) {
-      console.error("Revoke other sessions error:", error);
-      throw error;
+      catchNetworkError(error, "Failed to revoke other sessions");
     }
   };
 
@@ -476,7 +676,7 @@ export const AuthProvider = ({ children }) => {
   const getLoginActivity = async () => {
     try {
       const response = await authFetch(`${API_BASE_URL}/users/login-activity`);
-      if (!response.ok) throw new Error("Failed to fetch login activity");
+      if (!response.ok) await handleApiError(response);
       return await response.json();
     } catch (error) {
       console.error("Fetch login activity error:", error);
@@ -493,16 +693,15 @@ export const AuthProvider = ({ children }) => {
         body: JSON.stringify({ password }),
       });
 
-      const data = await response.json();
       if (!response.ok) {
-        throw new Error(data.detail || "Account deletion failed");
+        await handleApiError(response);
       }
 
+      const data = await response.json();
       clearTokens();
       return data;
     } catch (error) {
-      console.error("Delete account error:", error);
-      throw error;
+      catchNetworkError(error, "Account deletion failed");
     }
   };
 
@@ -514,14 +713,13 @@ export const AuthProvider = ({ children }) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ new_email: newEmail, password }),
       });
-      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error(data.detail || "Failed to send email verification code.");
+        await handleApiError(response);
       }
-      return data;
+      return await response.json();
     } catch (error) {
-      console.error("Request email change error:", error);
-      throw error;
+      catchNetworkError(error, "Failed to send email verification code.");
     }
   };
 
@@ -533,16 +731,17 @@ export const AuthProvider = ({ children }) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ new_email: newEmail, otp }),
       });
-      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error(data.detail || "Failed to verify email change.");
+        await handleApiError(response);
       }
+
+      const data = await response.json();
       const currentToken = localStorage.getItem("access_token") || localStorage.getItem("token");
       await fetchCurrentUser(currentToken);
       return data;
     } catch (error) {
-      console.error("Verify email change error:", error);
-      throw error;
+      catchNetworkError(error, "Failed to verify email change.");
     }
   };
 
@@ -550,11 +749,10 @@ export const AuthProvider = ({ children }) => {
   const getMfaStatus = async () => {
     try {
       const response = await authFetch(`${API_BASE_URL}/auth/mfa/status`);
-      if (!response.ok) throw new Error("Failed to fetch MFA status");
+      if (!response.ok) await handleApiError(response);
       return await response.json();
     } catch (error) {
-      console.error("Get MFA status error:", error);
-      throw error;
+      catchNetworkError(error, "Failed to fetch MFA status");
     }
   };
 
@@ -564,14 +762,13 @@ export const AuthProvider = ({ children }) => {
       const response = await authFetch(`${API_BASE_URL}/auth/mfa/setup-totp`, {
         method: "POST",
       });
-      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error(data.detail || "Failed to initiate TOTP setup");
+        await handleApiError(response);
       }
-      return data;
+      return await response.json();
     } catch (error) {
-      console.error("Setup TOTP error:", error);
-      throw error;
+      catchNetworkError(error, "Failed to initiate TOTP setup");
     }
   };
 
@@ -583,17 +780,18 @@ export const AuthProvider = ({ children }) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ code }),
       });
-      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error(data.detail || "Failed to verify and enable TOTP");
+        await handleApiError(response);
       }
+
+      const data = await response.json();
       if (user) {
         setUser({ ...user, mfa_totp_enabled: true });
       }
       return data;
     } catch (error) {
-      console.error("Enable TOTP error:", error);
-      throw error;
+      catchNetworkError(error, "Failed to verify and enable TOTP");
     }
   };
 
@@ -605,17 +803,18 @@ export const AuthProvider = ({ children }) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ code }),
       });
-      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error(data.detail || "Failed to disable TOTP");
+        await handleApiError(response);
       }
+
+      const data = await response.json();
       if (user) {
         setUser({ ...user, mfa_totp_enabled: false });
       }
       return data;
     } catch (error) {
-      console.error("Disable TOTP error:", error);
-      throw error;
+      catchNetworkError(error, "Failed to disable TOTP");
     }
   };
 
@@ -627,17 +826,18 @@ export const AuthProvider = ({ children }) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ enabled }),
       });
-      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error(data.detail || "Failed to toggle Phone OTP MFA");
+        await handleApiError(response);
       }
+
+      const data = await response.json();
       if (user) {
         setUser({ ...user, mfa_phone_enabled: enabled });
       }
       return data;
     } catch (error) {
-      console.error("Toggle Phone MFA error:", error);
-      throw error;
+      catchNetworkError(error, "Failed to toggle Phone OTP MFA");
     }
   };
 
@@ -649,16 +849,17 @@ export const AuthProvider = ({ children }) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, otp, mfa_type: mfaType }),
       });
-      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error(data.detail || "MFA login verification failed");
+        await handleApiError(response);
       }
+
+      const data = await response.json();
       saveTokens(data.access_token, data.refresh_token);
       const userObj = await fetchCurrentUser(data.access_token);
       return { ...data, user: userObj };
     } catch (error) {
-      console.error("Verify MFA Login error:", error);
-      throw error;
+      catchNetworkError(error, "MFA login verification failed");
     }
   };
 
@@ -669,9 +870,12 @@ export const AuthProvider = ({ children }) => {
         token,
         loading,
         checkEmail,
+        checkRegistration,
         register,
         resendOtp,
         verifyOtp,
+        verifyEmailLink,
+        resendVerificationLink,
         login,
         googleLogin,
         refreshToken,
@@ -711,3 +915,4 @@ export const useAuth = () => {
   }
   return context;
 };
+

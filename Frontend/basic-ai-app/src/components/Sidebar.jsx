@@ -33,7 +33,7 @@ const NAV_ITEMS = [
   {
     id: "company-history",
     label: "Company Preparation",
-    path: "/dashboard?section=company-history",
+    path: "/company-preparation",
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M3 21h18"/>
@@ -75,7 +75,13 @@ const Sidebar = () => {
   const location = useLocation();
   const { user, logout } = useAuth();
 
-  const isActive = (path) => location.pathname === path;
+  const isActive = (path) => {
+    if (!path) return false;
+    if (path.includes("?")) {
+      return (location.pathname + location.search) === path;
+    }
+    return location.pathname === path;
+  };
 
   const handleLogout = () => {
     logout();

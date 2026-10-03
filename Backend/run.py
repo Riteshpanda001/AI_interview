@@ -1,6 +1,13 @@
+import sys
 import uvicorn
 from dotenv import load_dotenv
 import os
+
+# Ensure UTF-8 output encoding on Windows consoles
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 
 # Load environment variables from .env file
 load_dotenv()

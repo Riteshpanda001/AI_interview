@@ -8,7 +8,9 @@ from app.schemas.auth_schema import (
     RequestEmailChangeRequest, VerifyEmailChangeRequest,
     SendMobileOTPRequest, VerifyMobileOTPRequest,
     MFAStatusResponse, SetupTOTPResponse, EnableTOTPRequest,
-    DisableTOTPRequest, TogglePhoneMFARequest, VerifyMFALoginRequest
+    DisableTOTPRequest, TogglePhoneMFARequest, VerifyMFALoginRequest,
+    CheckRegistrationRequest, CheckRegistrationResponse,
+    VerifyEmailLinkRequest, ResendVerificationLinkRequest
 )
 from app.dependencies import get_db, oauth2_scheme, get_current_user, get_current_active_user
 from app.services.auth_service import AuthService
@@ -45,6 +47,10 @@ async def check_email(request: EmailCheckRequest, db = Depends(get_db)):
     user = await db["users"].find_one({"email": request.email.lower().strip()})
     return {"exists": user is not None}
 
+@router.post("/check-registration", response_model=CheckRegistrationResponse)
+async def check_registration(request: CheckRegistrationRequest, http_request: Request, db = Depends(get_db)):
+    return await AuthService.check_registration(request.email, request.phone, db, req=http_request)
+
 @router.post("/register", response_model=OTPResponse, status_code=status.HTTP_201_CREATED)
 async def register(request: UserRegisterRequest, http_request: Request, db = Depends(get_db)):
     result = await AuthService.register_user(request, db, req=http_request)
@@ -54,6 +60,16 @@ async def register(request: UserRegisterRequest, http_request: Request, db = Dep
 async def resend_otp(request: ResendOTPRequest, http_request: Request, db = Depends(get_db)):
     purpose = request.purpose or "email_verification"
     return await AuthService.resend_user_otp(request.email, purpose=purpose, db=db, req=http_request)
+
+@router.post("/resend-verification-email", response_model=OTPResponse)
+async def resend_verification_email(request: ResendVerificationLinkRequest, http_request: Request, db = Depends(get_db)):
+    return await AuthService.resend_verification_email(request.email, db=db, req=http_request)
+
+@router.post("/verify-email-link", response_model=TokenResponse)
+async def verify_email_link(request: VerifyEmailLinkRequest, http_request: Request, response: Response, db = Depends(get_db)):
+    token_details = await AuthService.verify_email_link(request.token, db=db, req=http_request)
+    _set_auth_cookies(response, token_details)
+    return token_details
 
 @router.post("/login", response_model=TokenResponse)
 async def login(request: UserLoginRequest, http_request: Request, response: Response, db = Depends(get_db)):
@@ -69,7 +85,7 @@ async def google_login(request: GoogleAuthRequest, http_request: Request, respon
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Google ID token credential is required."
         )
-    token_details = await AuthService.google_login(token_str, db, req=http_request)
+    token_details = await AuthService.google_login(token_str, phone=request.phone, otp=request.otp, db=db, req=http_request)
     _set_auth_cookies(response, token_details)
     return token_details
 
@@ -129,9 +145,11 @@ async def send_mobile_otp(request: SendMobileOTPRequest, http_request: Request, 
     return {"success": True, "message": f"Verification SMS sent to {request.phone}"}
 
 @router.post("/verify-mobile-otp")
-async def verify_mobile_otp(request: VerifyMobileOTPRequest, http_request: Request, db = Depends(get_db)):
+async def verify_mobile_otp(request: VerifyMobileOTPRequest, http_request: Request, response: Response, db = Depends(get_db)):
     from app.services.otp_service import OTPService
-    return await OTPService.verify_mobile_otp(request.phone, request.otp, req=http_request)
+    result = await OTPService.verify_mobile_otp(request.phone, request.otp, req=http_request)
+    _set_auth_cookies(response, result)
+    return result
 
 
 @router.post("/request-email-change")

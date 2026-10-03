@@ -123,14 +123,93 @@ class AuthService:
             )
 
     @staticmethod
+    async def check_registration(email: str, phone: str, db, req=None) -> dict:
+        from app.services.sms_service import normalize_phone_number
+        clean_email = email.lower().strip()
+        clean_phone = normalize_phone_number(phone)
+
+        email_user = await UserService.find_by_email(clean_email, db)
+        phone_user = await UserService.find_by_phone(clean_phone, db)
+
+        # CASE 1: Both email and phone are completely new
+        if not email_user and not phone_user:
+            return {
+                "status": "NEW_USER",
+                "message": "Email and mobile number are available for registration.",
+                "email": clean_email,
+                "phone": clean_phone
+            }
+
+        # CASE 4 / CROSS-ACCOUNT CONFLICT: Both exist
+        if email_user and phone_user:
+            email_user_id = str(email_user.get("_id") or email_user.get("id"))
+            phone_user_id = str(phone_user.get("_id") or phone_user.get("id"))
+            if email_user_id == phone_user_id:
+                await AuditLogService.log_event("EVENT_EXISTING_ACCOUNT_DETECTED", email=clean_email, user_id=email_user_id, status="DETECTED", req=req, db=db)
+                return {
+                    "status": "EXISTING_ACCOUNT",
+                    "message": "This email and mobile number are already registered with PreNova AI.",
+                    "email": clean_email,
+                    "phone": clean_phone
+                }
+            else:
+                await AuditLogService.log_event("EVENT_IDENTITY_CONFLICT", email=clean_email, status="CONFLICT", details={"phone": clean_phone}, req=req, db=db)
+                return {
+                    "status": "IDENTITY_CONFLICT",
+                    "message": "The email and mobile number cannot be combined because they are already associated with existing accounts.",
+                    "email": clean_email,
+                    "phone": clean_phone
+                }
+
+        # CASE 2: Email exists, phone is new
+        if email_user and not phone_user:
+            user_id = str(email_user.get("_id") or email_user.get("id"))
+            await AuditLogService.log_event("EVENT_DUPLICATE_EMAIL", email=clean_email, user_id=user_id, status="DUPLICATE", req=req, db=db)
+            return {
+                "status": "EMAIL_ALREADY_REGISTERED",
+                "message": "This email is already associated with an account. Please log in or use another email.",
+                "email": clean_email,
+                "phone": clean_phone
+            }
+
+        # CASE 3: Phone exists, email is new
+        if not email_user and phone_user:
+            user_id = str(phone_user.get("_id") or phone_user.get("id"))
+            await AuditLogService.log_event("EVENT_DUPLICATE_PHONE", email=clean_email, user_id=user_id, status="DUPLICATE", details={"phone": clean_phone}, req=req, db=db)
+            return {
+                "status": "PHONE_ALREADY_REGISTERED",
+                "message": "This mobile number is already associated with an account. Please use another mobile number.",
+                "email": clean_email,
+                "phone": clean_phone
+            }
+
+        return {
+            "status": "NEW_USER",
+            "message": "Email and mobile number are available for registration.",
+            "email": clean_email,
+            "phone": clean_phone
+        }
+
+    @staticmethod
     async def register_user(request: UserRegisterRequest, db, req=None) -> dict:
+        import secrets
+        import hashlib
+        from app.config import settings
+        from app.services.sms_service import normalize_phone_number
         clean_email = request.email.lower().strip()
         clean_name = request.full_name.strip()
+        clean_phone = normalize_phone_number(request.phone)
 
         if not clean_name or len(clean_name) < 3:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Full name must be at least 3 characters long."
+            )
+
+        if not clean_phone or len(clean_phone) < 10:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Valid mobile number is required."
             )
 
         if request.confirm_password and request.password != request.confirm_password:
@@ -141,32 +220,68 @@ class AuthService:
 
         AuthService.validate_password_complexity(request.password)
 
-        existing_user = await UserService.find_by_email(clean_email, db)
-        if existing_user:
+        check_res = await AuthService.check_registration(clean_email, clean_phone, db, req=req)
+        if check_res["status"] != "NEW_USER":
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="An account with this email address is already registered."
+                status_code=status.HTTP_409_CONFLICT,
+                detail=check_res["message"]
             )
 
         hashed_password = AuthService.get_password_hash(request.password)
-        
-        user_doc = await UserService.create_user(
-            email=clean_email,
-            full_name=clean_name,
-            password_hash=hashed_password,
-            provider="email",
-            phone=request.phone,
-            gender=request.gender,
-            is_verified=False,
-            db=db
-        )
-        
-        await OTPService.send_otp(clean_email, purpose="email_verification", user_name=clean_name, req=req)
-        await AuditLogService.log_event("EVENT_USER_REGISTERED", email=clean_email, user_id=str(user_doc.get("_id", "")), req=req, db=db)
-        
+        now = datetime.now(timezone.utc)
+
+        # Generate cryptographically secure verification link token & hash
+        raw_link_token = secrets.token_urlsafe(32)
+        link_token_hash = hashlib.sha256(raw_link_token.encode("utf-8")).hexdigest()
+        link_expires_at = now + timedelta(minutes=10)
+
+        pending_doc = {
+            "email": clean_email,
+            "email_normalized": clean_email,
+            "phone": clean_phone,
+            "phone_normalized": clean_phone,
+            "full_name": clean_name,
+            "hashed_password": hashed_password,
+            "gender": request.gender,
+            "account_status": "PENDING",
+            "email_verified": False,
+            "email_otp_verified": False,
+            "email_link_verified": False,
+            "phone_verified": False,
+            "verification_link_hash": link_token_hash,
+            "verification_link_expires_at": link_expires_at,
+            "verification_link_created_at": now,
+            "verification_link_used": False,
+            "created_at": now,
+            "expires_at": now + timedelta(hours=1)
+        }
+
+        if db is not None:
+            await db["pending_registrations"].delete_many({"email_normalized": clean_email})
+            await db["pending_registrations"].insert_one(pending_doc)
+
+        # EMAIL 1: Send Verification Link Email ONLY (Do NOT send OTP during registration)
+        frontend_url = getattr(settings, "FRONTEND_URL", "http://localhost:5173").rstrip("/")
+        verification_url = f"{frontend_url}/verify-email?token={raw_link_token}"
+        link_email_html = EmailService.build_email_verification_link_html(clean_name, verification_url)
+        email_sent = await EmailService.send_email(clean_email, "Verify your PreNova AI email address", link_email_html)
+
+        if not email_sent:
+            if db is not None:
+                await db["pending_registrations"].delete_many({"email_normalized": clean_email})
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Unable to send verification email. Please try again."
+            )
+
+        await AuditLogService.log_event("REGISTRATION_STARTED", email=clean_email, status="SUCCESS", req=req, db=db)
+        await AuditLogService.log_event("EMAIL_VERIFICATION_EMAIL_SENT", email=clean_email, status="SUCCESS", req=req, db=db)
+
         return {
             "success": True,
-            "message": "Registration successful! A 6-digit verification code has been sent to your email."
+            "status": "NEW_USER",
+            "email": clean_email,
+            "message": "Registration started! A verification link email has been sent to your email address."
         }
 
     @staticmethod
@@ -329,7 +444,6 @@ class AuthService:
         if mfa_totp_enabled or mfa_phone_enabled:
             mfa_type = "totp" if mfa_totp_enabled else "phone"
             if mfa_phone_enabled and user.get("phone"):
-                # Automatically send SMS OTP
                 try:
                     await OTPService.send_mobile_otp(user.get("phone"), user_id=user_id_str, req=req)
                 except Exception as e:
@@ -365,10 +479,15 @@ class AuthService:
         }
 
     @staticmethod
-    async def google_login(id_token: str, db, req = None) -> dict:
+    async def google_login(id_token: str, phone: str = None, otp: str = None, db = None, req = None) -> dict:
+        from app.services.sms_service import normalize_phone_number
+        if db is None and phone is not None and not isinstance(phone, str):
+            db = phone
+            phone = None
+
         google_profile = await GoogleAuthService.verify_google_token(id_token)
         google_id = google_profile.get("google_id")
-        email = google_profile.get("email")
+        email = google_profile.get("email", "").lower().strip()
         name = google_profile.get("name")
         picture = google_profile.get("picture")
 
@@ -395,23 +514,64 @@ class AuthService:
                 update_data["profile_picture"] = picture
                 update_data["avatar_url"] = picture
 
-            await db["users"].update_one(
-                {"_id": user["_id"]},
-                {"$set": update_data}
-            )
-            user = await db["users"].find_one({"_id": user["_id"]})
+            if db is not None:
+                await db["users"].update_one(
+                    {"_id": user["_id"]},
+                    {"$set": update_data}
+                )
+                user = await db["users"].find_one({"_id": user["_id"]})
         else:
+            # New Google Registration - requires mobile verification
+            clean_phone = normalize_phone_number(phone) if phone else None
+            if not clean_phone:
+                return {
+                    "access_token": None,
+                    "refresh_token": None,
+                    "require_mobile": True,
+                    "email": email,
+                    "message": "Please enter your mobile number to complete Google Registration."
+                }
+
+            # Check if mobile already exists on another account
+            phone_user = await UserService.find_by_phone(clean_phone, db)
+            if phone_user:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="This mobile number is already associated with an existing account."
+                )
+
+            if not otp:
+                # Send Mobile OTP
+                await OTPService.send_mobile_otp(clean_phone, req=req)
+                return {
+                    "access_token": None,
+                    "refresh_token": None,
+                    "require_mobile_otp": True,
+                    "email": email,
+                    "phone": clean_phone,
+                    "message": "Verification code sent to your mobile number."
+                }
+
+            # Verify Mobile OTP for Google Registration
+            is_valid = await OTPService.verify_otp(clean_phone, otp, purpose="mobile_verification", req=req)
+            if not is_valid:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Invalid or expired SMS verification code."
+                )
+
             user = await UserService.create_user(
                 email=email,
                 full_name=name,
                 provider="google",
                 google_id=google_id,
                 profile_picture=picture,
+                phone=clean_phone,
                 is_verified=True,
                 db=db
             )
 
-        user_id_str = str(user["_id"])
+        user_id_str = str(user["_id"]) if isinstance(user, dict) and "_id" in user else "dev_id"
         session_id = await AuthService.create_session(user_id_str, req=req, db=db)
         tokens = await AuthService._issue_token_pair(user_id_str, session_id=session_id, db=db)
 
@@ -422,19 +582,90 @@ class AuthService:
             "access_token": tokens["access_token"],
             "refresh_token": tokens["refresh_token"],
             "token_type": "bearer",
-            "role": user.get("role", ROLE_USER),
-            "plan_type": user.get("plan_type", PLAN_FREE),
+            "role": user.get("role", ROLE_USER) if isinstance(user, dict) else ROLE_USER,
+            "plan_type": user.get("plan_type", PLAN_FREE) if isinstance(user, dict) else PLAN_FREE,
             "is_verified": True
         }
 
     @staticmethod
     async def resend_user_otp(email: str, purpose: str = "email_verification", db: Any = None, req = None) -> dict:
         clean_email = email.lower().strip()
+
+        # Check pending registration first
+        if db is not None and purpose == "email_verification":
+            pending = await db["pending_registrations"].find_one({"email_normalized": clean_email})
+            if pending and not pending.get("email_link_verified", False):
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Please verify your email address by clicking the link sent to your email before requesting a verification code."
+                )
+
         user = await UserService.find_by_email(clean_email, db)
         user_name = user.get("full_name", "") if user else ""
+        if not user_name and db is not None:
+            pending = await db["pending_registrations"].find_one({"email_normalized": clean_email})
+            if pending:
+                user_name = pending.get("full_name", "")
 
         await OTPService.resend_otp(clean_email, purpose=purpose, user_name=user_name, req=req)
+        await AuditLogService.log_event("EMAIL_OTP_SENT", email=clean_email, status="SUCCESS", req=req, db=db)
         return {"success": True, "message": f"Verification code re-sent to {clean_email}"}
+
+    @staticmethod
+    async def resend_verification_email(email: str, db: Any = None, req = None) -> dict:
+        import secrets
+        import hashlib
+        from app.config import settings
+
+        clean_email = email.lower().strip()
+        now = datetime.now(timezone.utc)
+
+        if db is None:
+            raise HTTPException(status_code=500, detail="Database connection unavailable.")
+
+        pending = await db["pending_registrations"].find_one({"email_normalized": clean_email})
+        if not pending:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Pending registration not found. Please register again."
+            )
+
+        # 60-second cooldown check
+        created_at = _ensure_utc(pending.get("verification_link_created_at"))
+        if created_at and (now - created_at).total_seconds() < 60:
+            wait_sec = int(60 - (now - created_at).total_seconds())
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail=f"Please wait {wait_sec} seconds before requesting another verification link."
+            )
+
+        raw_link_token = secrets.token_urlsafe(32)
+        link_token_hash = hashlib.sha256(raw_link_token.encode("utf-8")).hexdigest()
+        link_expires_at = now + timedelta(minutes=10)
+
+        await db["pending_registrations"].update_one(
+            {"_id": pending["_id"]},
+            {"$set": {
+                "verification_link_hash": link_token_hash,
+                "verification_link_expires_at": link_expires_at,
+                "verification_link_created_at": now,
+                "verification_link_used": False
+            }}
+        )
+
+        frontend_url = getattr(settings, "FRONTEND_URL", "http://localhost:5173").rstrip("/")
+        verification_url = f"{frontend_url}/verify-email?token={raw_link_token}"
+        link_email_html = EmailService.build_email_verification_link_html(pending.get("full_name", ""), verification_url)
+        email_sent = await EmailService.send_email(clean_email, "Verify your PreNova AI email address", link_email_html)
+
+        if not email_sent:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Unable to send verification email. Please try again."
+            )
+
+        await AuditLogService.log_event("EMAIL_VERIFICATION_EMAIL_SENT", email=clean_email, status="SUCCESS", req=req, db=db)
+        return {"success": True, "message": f"Verification link re-sent to {clean_email}"}
 
     @staticmethod
     async def verify_user_otp(email: str, otp: str, purpose: str = "email_verification", db: Any = None, req = None) -> dict:
@@ -445,14 +676,69 @@ class AuthService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Invalid or expired OTP code."
             )
-            
+
+        # Check pending registration first
+        if db is not None:
+            pending = await db["pending_registrations"].find_one({"email_normalized": clean_email})
+            if pending:
+                await db["pending_registrations"].update_one(
+                    {"_id": pending["_id"]},
+                    {"$set": {"email_otp_verified": True}}
+                )
+                await AuditLogService.log_event("EMAIL_OTP_VERIFIED", email=clean_email, status="SUCCESS", req=req, db=db)
+
+                # Re-fetch updated pending document
+                updated_pending = await db["pending_registrations"].find_one({"_id": pending["_id"]})
+                clean_phone = updated_pending.get("phone")
+                is_link_verified = updated_pending.get("email_link_verified", False)
+
+                if is_link_verified:
+                    # BOTH Email verification mechanisms succeeded!
+                    await db["pending_registrations"].update_one(
+                        {"_id": pending["_id"]},
+                        {"$set": {"email_verified": True}}
+                    )
+                    await AuditLogService.log_event("EMAIL_VERIFIED", email=clean_email, status="SUCCESS", req=req, db=db)
+
+                    await OTPService.send_mobile_otp(clean_phone, req=req)
+                    await AuditLogService.log_event("MOBILE_OTP_SENT", email=clean_email, status="SUCCESS", details={"phone": clean_phone}, req=req, db=db)
+
+                    return {
+                        "access_token": None,
+                        "refresh_token": None,
+                        "token_type": "bearer",
+                        "require_mobile_otp": True,
+                        "email_otp_verified": True,
+                        "email_link_verified": True,
+                        "email_verified": True,
+                        "phone_verified": False,
+                        "email": clean_email,
+                        "phone": clean_phone,
+                        "message": "Email verified! A 6-digit verification code has been sent to your mobile number."
+                    }
+                else:
+                    # OTP verified, link verification pending
+                    return {
+                        "access_token": None,
+                        "refresh_token": None,
+                        "token_type": "bearer",
+                        "require_email_link": True,
+                        "email_otp_verified": True,
+                        "email_link_verified": False,
+                        "email_verified": False,
+                        "phone_verified": False,
+                        "email": clean_email,
+                        "phone": clean_phone,
+                        "message": "OTP verified successfully. Please click the verification link sent to your email to complete email verification."
+                    }
+
         user = await UserService.find_by_email(clean_email, db)
         if not user:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="User account not found. Please register again."
+                detail="User account or pending registration not found. Please register again."
             )
-            
+
         await UserService.mark_user_verified(clean_email, db)
         user = await UserService.find_by_email(clean_email, db)
         user_id_str = str(user["_id"])
@@ -460,7 +746,7 @@ class AuthService:
         session_id = await AuthService.create_session(user_id_str, req=req, db=db)
         tokens = await AuthService._issue_token_pair(user_id_str, session_id=session_id, db=db)
 
-        await AuditLogService.log_event("EVENT_USER_VERIFIED", email=clean_email, user_id=user_id_str, status="SUCCESS", req=req, db=db)
+        await AuditLogService.log_event("USER_REGISTERED", email=clean_email, user_id=user_id_str, status="SUCCESS", req=req, db=db)
         return {
             "access_token": tokens["access_token"],
             "refresh_token": tokens["refresh_token"],
@@ -468,6 +754,85 @@ class AuthService:
             "role": user.get("role", ROLE_USER),
             "plan_type": user.get("plan_type", PLAN_FREE),
             "is_verified": True
+        }
+
+    @staticmethod
+    async def verify_email_link(token: str, db: Any = None, req = None) -> dict:
+        import hashlib
+        if not token or not token.strip():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Verification token is required."
+            )
+
+        if db is None:
+            raise HTTPException(status_code=500, detail="Database connection unavailable.")
+
+        clean_token = token.strip()
+        token_hash = hashlib.sha256(clean_token.encode("utf-8")).hexdigest()
+        now = datetime.now(timezone.utc)
+
+        pending = await db["pending_registrations"].find_one({
+            "verification_link_hash": token_hash
+        })
+
+        if not pending:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid verification link. Please request a new verification link."
+            )
+
+        if pending.get("verification_link_used"):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Verification link has already been used."
+            )
+
+        expires_at = _ensure_utc(pending.get("verification_link_expires_at"))
+        if expires_at and now > expires_at:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Verification link expired."
+            )
+
+        # Mark link as used and email_link_verified = True
+        await db["pending_registrations"].update_one(
+            {"_id": pending["_id"]},
+            {"$set": {
+                "verification_link_used": True,
+                "email_link_verified": True
+            }}
+        )
+
+        clean_email = pending["email"]
+        clean_phone = pending["phone"]
+        user_name = pending.get("full_name", "")
+        await AuditLogService.log_event("EMAIL_VERIFICATION_LINK_CLICKED", email=clean_email, status="SUCCESS", req=req, db=db)
+
+        # Generate NEW 6-digit OTP and send OTP email ONLY AFTER link is clicked
+        try:
+            await OTPService.send_otp(clean_email, purpose="email_verification", user_name=user_name, req=req)
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Unable to send verification code. Please try again."
+            )
+
+        await AuditLogService.log_event("EMAIL_OTP_SENT", email=clean_email, status="SUCCESS", req=req, db=db)
+
+        return {
+            "success": True,
+            "access_token": None,
+            "refresh_token": None,
+            "token_type": "bearer",
+            "require_otp": True,
+            "email_otp_verified": False,
+            "email_link_verified": True,
+            "email_verified": False,
+            "phone_verified": False,
+            "email": clean_email,
+            "phone": clean_phone,
+            "message": "Verification link confirmed! A 6-digit verification code has been sent to your email."
         }
 
     @staticmethod

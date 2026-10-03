@@ -1,4 +1,4 @@
-import jwt
+from jose import jwt, JWTError
 import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Dict, Any, Optional

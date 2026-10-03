@@ -40,7 +40,7 @@ class CodeSandbox:
         total_runtime_ms = 0
         total_memory_kb = 0
 
-        with tempfile.TemporaryDirectory() as temp_dir:
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as temp_dir:
             if "python" in lang_lower:
                 file_path = os.path.join(temp_dir, "solution.py")
                 harness_code = CodeSandbox._build_python_harness(submitted_code)

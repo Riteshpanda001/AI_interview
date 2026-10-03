@@ -28,6 +28,9 @@ def test_e2e_register_otp_and_login_flow():
         mock_db = MagicMock()
         mock_db["users"].find_one = AsyncMock(return_value=None)
         mock_db["users"].insert_one = AsyncMock(return_value=MagicMock(inserted_id="user_e2e_101"))
+        mock_db["pending_registrations"].find_one = AsyncMock(return_value=None)
+        mock_db["pending_registrations"].delete_many = AsyncMock()
+        mock_db["pending_registrations"].insert_one = AsyncMock()
         mock_db["otp_codes"].update_one = AsyncMock()
         mock_db["login_activity"].insert_one = AsyncMock()
         mock_db["sessions"].insert_one = AsyncMock(return_value=MagicMock(inserted_id="sess_101"))
@@ -38,7 +41,8 @@ def test_e2e_register_otp_and_login_flow():
             full_name="E2E Tester",
             email="e2e_candidate@prepnova.ai",
             password="SecurePassword123!",
-            confirm_password="SecurePassword123!"
+            confirm_password="SecurePassword123!",
+            phone="+919876543210"
         )
 
         with patch("app.services.email_service.EmailService.send_email", new=AsyncMock(return_value=True)):

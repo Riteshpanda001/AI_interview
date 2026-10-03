@@ -1,12 +1,22 @@
 from pydantic import BaseModel, EmailStr, Field
 from typing import Optional
 
+class CheckRegistrationRequest(BaseModel):
+    email: EmailStr
+    phone: str = Field(..., min_length=10)
+
+class CheckRegistrationResponse(BaseModel):
+    status: str
+    message: str
+    email: Optional[str] = None
+    phone: Optional[str] = None
+
 class UserRegisterRequest(BaseModel):
     email: EmailStr
     password: str = Field(..., min_length=8)
     confirm_password: Optional[str] = None
     full_name: str = Field(..., min_length=3)
-    phone: Optional[str] = None
+    phone: str = Field(..., min_length=10)
     gender: Optional[str] = None
 
 class UserLoginRequest(BaseModel):
@@ -16,6 +26,8 @@ class UserLoginRequest(BaseModel):
 class GoogleAuthRequest(BaseModel):
     id_token: Optional[str] = None
     credential: Optional[str] = None
+    phone: Optional[str] = None
+    otp: Optional[str] = None
 
 class TokenResponse(BaseModel):
     access_token: Optional[str] = None
@@ -24,9 +36,19 @@ class TokenResponse(BaseModel):
     role: Optional[str] = None
     plan_type: Optional[str] = None
     require_otp: Optional[bool] = False
+    require_mobile_otp: Optional[bool] = False
+    require_mobile: Optional[bool] = False
+    require_email_link: Optional[bool] = False
     is_verified: Optional[bool] = True
+    email_otp_verified: Optional[bool] = False
+    email_link_verified: Optional[bool] = False
+    email_verified: Optional[bool] = False
+    phone_verified: Optional[bool] = False
+    account_status: Optional[str] = None
+    status: Optional[str] = None
     message: Optional[str] = None
     email: Optional[str] = None
+    phone: Optional[str] = None
 
 class RefreshTokenRequest(BaseModel):
     refresh_token: str
@@ -34,6 +56,12 @@ class RefreshTokenRequest(BaseModel):
 class ResendOTPRequest(BaseModel):
     email: EmailStr
     purpose: Optional[str] = "email_verification"
+
+class VerifyEmailLinkRequest(BaseModel):
+    token: str
+
+class ResendVerificationLinkRequest(BaseModel):
+    email: EmailStr
 
 class OTPVerifyRequest(BaseModel):
     email: EmailStr

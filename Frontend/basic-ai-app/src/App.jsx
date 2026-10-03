@@ -7,6 +7,7 @@ import Register from "./pages/Register";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import VerifyOTP from "./pages/VerifyOTP";
+import VerifyEmail from "./pages/VerifyEmail";
 import DashboardPage from "./pages/DashboardPage";
 import MockInterview from "./pages/MockInterview";
 import MockInterviews from "./pages/MockInterviews";
@@ -60,6 +61,7 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/verify-otp" element={<VerifyOTP />} />
+        <Route path="/verify-email" element={<VerifyEmail />} />
         <Route path="/share/resume/:shareToken" element={<SharedResumePage />} />
         <Route path="/pricing" element={<Pricing />} />
         <Route path="/contact" element={<Contact />} />
@@ -69,7 +71,14 @@ function App() {
         <Route path="/mock-interviews" element={<MockInterviews />} />
         <Route path="/resume-builder" element={<ResumeBuilder />} />
         <Route path="/coding-practice" element={<CodingPractice />} />
-        <Route path="/company-preparation" element={<CompanyPreparation />} />
+        <Route
+          path="/company-preparation"
+          element={
+            <ProtectedRoute>
+              <CompanyPreparation />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/ats-score" element={<ATSScore />} />
         <Route path="/resume-upload" element={<ATSScore />} />
 

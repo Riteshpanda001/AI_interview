@@ -164,9 +164,10 @@ const SidebarWithState = ({ section, setSection }) => {
 
   const handleNav = (item) => {
     if (typeof item === "string") {
-      if (item.includes("resume-history")) setSection("resume-history");
+      if (item.includes("company-preparation")) navigate("/company-preparation");
+      else if (item.includes("resume-history")) setSection("resume-history");
       else if (item.includes("coding-history")) setSection("coding-history");
-      else if (item.includes("company-history")) setSection("company-history");
+      else if (item.includes("company-history")) navigate("/company-preparation");
       else if (item.includes("interview-history")) setSection("interview-history");
       else if (item.includes("ats-history")) setSection("ats-history");
       else if (item.includes("activity-history")) setSection("activity-history");
@@ -176,7 +177,11 @@ const SidebarWithState = ({ section, setSection }) => {
       else navigate(item);
       return;
     }
-    if (item.id) {
+    if (item.path && item.path.includes("company-preparation")) {
+      navigate("/company-preparation");
+      return;
+    }
+    if (item.id && item.id !== "company-history") {
       setSection(item.id);
     } else if (item.path) {
       navigate(item.path);
@@ -225,7 +230,7 @@ const SidebarInner = ({ onNav, section, onLogout }) => {
     {
       id: "company-history",
       label: "Company Preparation",
-      path: "/dashboard?section=company-history",
+      path: "/company-preparation",
       icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-3"/><path d="M9 9h1"/><path d="M9 13h1"/><path d="M9 17h1"/></svg>,
     },
     {

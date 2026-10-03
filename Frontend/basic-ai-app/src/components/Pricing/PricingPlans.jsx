@@ -26,6 +26,77 @@ const normalizePlan = (plan) => ({
   display_order: plan.display_order ?? 99,
 });
 
+const FALLBACK_PLANS = [
+  {
+    id: "plan_free",
+    name: "Free Trial",
+    slug: "free",
+    plan_type: "free",
+    priceMonthly: "₹0",
+    priceYearly: "₹0",
+    period: "/month",
+    yearlyPeriod: "/month",
+    note: "",
+    features: [
+      "1 AI Mock Interview per month",
+      "Basic ATS Resume Analysis",
+      "Basic Performance Analytics",
+      "Limited Company Questions (10/company)",
+      "Community Support",
+    ],
+    button: "Start Free Trial",
+    popular: false,
+    display_order: 1,
+  },
+  {
+    id: "plan_pro",
+    name: "Pro",
+    slug: "pro",
+    plan_type: "pro",
+    priceMonthly: "₹499",
+    priceYearly: "₹399",
+    period: "/month",
+    yearlyPeriod: "/month",
+    note: "Billed annually (₹4,788/yr)",
+    features: [
+      "Unlimited AI Mock Interviews",
+      "Advanced ATS Resume Analysis",
+      "Company-Specific Preparation",
+      "Full Performance Dashboard",
+      "Interview History & Analytics",
+      "AI Resume Enhancement",
+      "Coding Practice (All Levels)",
+      "Priority Email Support",
+    ],
+    button: "Choose Pro",
+    popular: true,
+    display_order: 2,
+  },
+  {
+    id: "plan_premium",
+    name: "Premium",
+    slug: "premium",
+    plan_type: "premium",
+    priceMonthly: "₹999",
+    priceYearly: "₹799",
+    period: "/month",
+    yearlyPeriod: "/month",
+    note: "Billed annually (₹9,588/yr)",
+    features: [
+      "Everything in Pro",
+      "AI Career Roadmap Generator",
+      "Exclusive Interview Question Sets",
+      "Premium Resume Templates",
+      "Skill Gap Analysis Reports",
+      "Priority 24/7 Support",
+      "Early Access to New Features",
+    ],
+    button: "Choose Premium",
+    popular: false,
+    display_order: 3,
+  },
+];
+
 const PricingPlans = ({ onPaymentCompleted }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -38,33 +109,33 @@ const PricingPlans = ({ onPaymentCompleted }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const loadPricingPlans = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await fetch(`${API_BASE_URL}/pricing/`);
+      if (!res.ok) {
+        throw new Error(`Pricing API returned ${res.status}`);
+      }
+      const data = await res.json();
+      if (!Array.isArray(data) || data.length === 0) {
+        throw new Error("No pricing plans returned from server");
+      }
+      const normalized = data.map(normalizePlan).sort(
+        (a, b) => a.display_order - b.display_order
+      );
+      setPlans(normalized);
+    } catch (err) {
+      console.warn("[PricingPlans] Server fetch failed, using fallback plans:", err);
+      setPlans(FALLBACK_PLANS);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Load pricing plans from backend
   useEffect(() => {
-    const fetchPlans = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const res = await fetch(`${API_BASE_URL}/pricing/`);
-        if (!res.ok) {
-          throw new Error(`Pricing API returned ${res.status}`);
-        }
-        const data = await res.json();
-        if (!Array.isArray(data) || data.length === 0) {
-          throw new Error("No pricing plans returned from server");
-        }
-        const normalized = data.map(normalizePlan).sort(
-          (a, b) => a.display_order - b.display_order
-        );
-        setPlans(normalized);
-      } catch (err) {
-        console.error("[PricingPlans] Failed to load plans:", err);
-        setError(err.message || "Could not load pricing plans. Please try again.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchPlans();
+    loadPricingPlans();
   }, []);
 
   const handleChoosePlan = (plan) => {
@@ -117,7 +188,7 @@ const PricingPlans = ({ onPaymentCompleted }) => {
           <p className="pricing-error-message">{error}</p>
           <button
             className="plans-action-btn"
-            onClick={() => window.location.reload()}
+            onClick={loadPricingPlans}
           >
             Try Again
           </button>

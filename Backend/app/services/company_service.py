@@ -134,6 +134,60 @@ class CompanyService:
         }
 
     @staticmethod
+    async def get_user_company_overview(user_id: str, db) -> dict:
+        cursor = db["user_company_progress"].find({"user_id": str(user_id)}).sort("updated_at", -1)
+        progress_docs = await cursor.to_list(length=100)
+
+        all_companies = await CompanyService.get_all_companies(db)
+        comp_map = {c.get("slug", "").lower(): c for c in all_companies}
+
+        total_questions_solved = 0
+        total_pct_sum = 0
+        target_companies = []
+
+        for doc in progress_docs:
+            slug = doc.get("company_slug", "").lower()
+            completed_qs = doc.get("completed_question_ids", [])
+            comp_info = comp_map.get(slug, {})
+            
+            created_at = doc.get("updated_at") or doc.get("created_at")
+            updated_str = created_at.isoformat() if hasattr(created_at, "isoformat") else str(created_at)
+
+            all_qs = await CompanyService.get_company_questions(slug, "all", db)
+            total = len(all_qs) if all_qs else 10
+            solved_count = len(completed_qs)
+            pct = int((solved_count / max(1, total)) * 100)
+            
+            total_questions_solved += solved_count
+            total_pct_sum += pct
+
+            status = "Completed" if pct >= 100 else ("In Progress" if pct > 0 else "Not Started")
+
+            target_companies.append({
+                "id": str(doc.get("_id", "")),
+                "company_name": comp_info.get("name", slug.title()),
+                "slug": slug,
+                "progress_percentage": min(100, pct),
+                "questions_completed": solved_count,
+                "total_questions": total,
+                "last_activity": updated_str,
+                "status": status,
+                "topics_covered": comp_info.get("industry", "DSA & Core CS")
+            })
+
+        companies_preparing_count = len(target_companies)
+        companies_explored_count = max(len(all_companies), companies_preparing_count)
+        avg_progress = int(round(total_pct_sum / max(1, companies_preparing_count))) if companies_preparing_count > 0 else 0
+
+        return {
+            "companies_explored": companies_explored_count,
+            "companies_preparing": companies_preparing_count,
+            "questions_completed": total_questions_solved,
+            "average_progress": avg_progress,
+            "target_companies": target_companies
+        }
+
+    @staticmethod
     async def get_user_company_history(user_id: str, db) -> list:
         cursor = db["user_company_progress"].find({"user_id": str(user_id)}).sort("updated_at", -1)
         progress_docs = await cursor.to_list(length=100)

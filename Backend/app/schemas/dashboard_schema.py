@@ -55,6 +55,8 @@ class DashboardMetricsResponse(BaseModel):
 
     # Detailed structured blocks
     readiness: Optional[Dict[str, Any]] = None
+    overview: Optional[Dict[str, Any]] = None
+    skills: List[Dict[str, Any]] = Field(default_factory=list)
     metrics: Optional[Dict[str, Any]] = None
     resume_progress: Optional[Dict[str, Any]] = None
     ats_performance: Optional[Dict[str, Any]] = None
@@ -70,6 +72,7 @@ class DashboardMetricsResponse(BaseModel):
     achievements: Dict[str, Any] = Field(default_factory=dict)
     quick_actions: List[Dict[str, Any]] = Field(default_factory=list)
     streak: Optional[Dict[str, Any]] = None
+    statistics: Dict[str, Any] = Field(default_factory=dict)
 
     model_config = ConfigDict(populate_by_name=True)
 

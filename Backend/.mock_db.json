@@ -1,0 +1,388 @@
+{
+  "ats_analyses": {
+    "6ac142f3bf6e10c8d1d974e2": {
+      "user_id": "test-user-ats-history-99",
+      "resume_id": "res-1",
+      "job_title": "Software Engineer",
+      "target_company": "",
+      "target_location": "",
+      "experience_level_target": "Mid Level",
+      "job_description": "Python SDE",
+      "score": 52,
+      "category_breakdown": {
+        "skills_match": {
+          "score": 25,
+          "max": 25,
+          "weight": "25%"
+        },
+        "keyword_match": {
+          "score": 20,
+          "max": 20,
+          "weight": "20%"
+        },
+        "experience_match": {
+          "score": 0,
+          "max": 15,
+          "weight": "15%"
+        },
+        "projects_match": {
+          "score": 0,
+          "max": 10,
+          "weight": "10%"
+        },
+        "education": {
+          "score": 0,
+          "max": 10,
+          "weight": "10%"
+        },
+        "resume_structure": {
+          "score": 2,
+          "max": 10,
+          "weight": "10%"
+        },
+        "job_relevance": {
+          "score": 5,
+          "max": 10,
+          "weight": "10%"
+        }
+      },
+      "matched_skills": [
+        "Python"
+      ],
+      "missing_skills": [],
+      "resume_quality_audit": {
+        "quality_score": 50,
+        "extracted_sections": {
+          "name": true,
+          "contact_information": false,
+          "skills": true,
+          "work_experience": false,
+          "projects": false,
+          "education": false,
+          "certifications": false,
+          "languages": false,
+          "links": false
+        },
+        "missing_sections": [
+          "Contact Information",
+          "Work Experience",
+          "Projects",
+          "Education",
+          "Certifications",
+          "Languages",
+          "Links"
+        ],
+        "improvement_suggestions": [
+          "Add a Certifications section (e.g. AWS Certified, Meta React Developer) to stand out.",
+          "Add GitHub, LinkedIn, or Portfolio URLs to improve candidate credibility.",
+          "Specify multilingual proficiency or spoken languages.",
+          "Include quantified impact metrics (e.g. 'Improved performance by 30%') in your work experience."
+        ]
+      },
+      "hard_skills": {
+        "score": 100,
+        "matched": [
+          "Python"
+        ],
+        "missing_critical": [],
+        "missing_optional": []
+      },
+      "soft_skills": {
+        "score": 0,
+        "matched": [
+          "Communication",
+          "Collaboration"
+        ],
+        "missing": [
+          "Customer Focus",
+          "Mentorship",
+          "Communication",
+          "Leadership",
+          "Time Management",
+          "Attention to Detail",
+          "Strategic Planning",
+          "Problem Solving",
+          "Collaboration",
+          "Innovation",
+          "Adaptability",
+          "Ownership",
+          "Critical Thinking"
+        ]
+      },
+      "experience_level": {
+        "score": 0,
+        "status": "Aligned",
+        "details": "Work history matches technical expectations for Mid Level tier."
+      },
+      "impact_quantification": {
+        "score": 0,
+        "details": "Experience evaluation highlights quantitative metrics and active verb density."
+      },
+      "tailored_bullet_suggestions": [
+        {
+          "original": "Built web application components and REST APIs.",
+          "tailored": "Architected high-performance web APIs incorporating Docker, improving response times by 35%.",
+          "target_keyword": "REST APIs"
+        }
+      ],
+      "interview_questions": [
+        {
+          "id": "q1",
+          "category": "Technical Gap",
+          "question": "How would you approach learning and deploying system scaling in our tech stack?",
+          "sample_answer_key": "Demonstrate technical adaptability, documentation review, and hands-on proof-of-concept building.",
+          "target_gap": "System Scaling"
+        }
+      ],
+      "recommendations": [
+        "Quantify experience with impact metrics.",
+        "Ensure project descriptions highlight modern cloud architecture."
+      ],
+      "detailed_feedback": "Candidate achieved a deterministic ATS match score of 52%. Skills match score is 25/25, with 1 matched skill(s) and 0 gap(s) identified.",
+      "ai_engine": "Deterministic Matrix & Gemini Explanation Engine",
+      "created_at": "2026-10-03T18:01:23.212722+00:00",
+      "_id": "6ac142f3bf6e10c8d1d974e2"
+    },
+    "6ac142f5bf6e10c8d1d974e4": {
+      "user_id": "test-user-ats-history-99",
+      "resume_id": "res-1",
+      "job_title": "Frontend Engineer",
+      "target_company": "",
+      "target_location": "",
+      "experience_level_target": "Mid Level",
+      "job_description": "React SDE",
+      "score": 52,
+      "category_breakdown": {
+        "skills_match": {
+          "score": 25,
+          "max": 25,
+          "weight": "25%"
+        },
+        "keyword_match": {
+          "score": 20,
+          "max": 20,
+          "weight": "20%"
+        },
+        "experience_match": {
+          "score": 0,
+          "max": 15,
+          "weight": "15%"
+        },
+        "projects_match": {
+          "score": 0,
+          "max": 10,
+          "weight": "10%"
+        },
+        "education": {
+          "score": 0,
+          "max": 10,
+          "weight": "10%"
+        },
+        "resume_structure": {
+          "score": 2,
+          "max": 10,
+          "weight": "10%"
+        },
+        "job_relevance": {
+          "score": 5,
+          "max": 10,
+          "weight": "10%"
+        }
+      },
+      "matched_skills": [
+        "React"
+      ],
+      "missing_skills": [],
+      "resume_quality_audit": {
+        "quality_score": 50,
+        "extracted_sections": {
+          "name": true,
+          "contact_information": false,
+          "skills": true,
+          "work_experience": false,
+          "projects": false,
+          "education": false,
+          "certifications": false,
+          "languages": false,
+          "links": false
+        },
+        "missing_sections": [
+          "Contact Information",
+          "Work Experience",
+          "Projects",
+          "Education",
+          "Certifications",
+          "Languages",
+          "Links"
+        ],
+        "improvement_suggestions": [
+          "Add a Certifications section (e.g. AWS Certified, Meta React Developer) to stand out.",
+          "Add GitHub, LinkedIn, or Portfolio URLs to improve candidate credibility.",
+          "Specify multilingual proficiency or spoken languages.",
+          "Include quantified impact metrics (e.g. 'Improved performance by 30%') in your work experience."
+        ]
+      },
+      "hard_skills": {
+        "score": 100,
+        "matched": [
+          "React"
+        ],
+        "missing_critical": [],
+        "missing_optional": []
+      },
+      "soft_skills": {
+        "score": 0,
+        "matched": [
+          "Communication",
+          "Collaboration"
+        ],
+        "missing": [
+          "Customer Focus",
+          "Mentorship",
+          "Communication",
+          "Leadership",
+          "Time Management",
+          "Attention to Detail",
+          "Strategic Planning",
+          "Problem Solving",
+          "Collaboration",
+          "Innovation",
+          "Adaptability",
+          "Ownership",
+          "Critical Thinking"
+        ]
+      },
+      "experience_level": {
+        "score": 0,
+        "status": "Aligned",
+        "details": "Work history matches technical expectations for Mid Level tier."
+      },
+      "impact_quantification": {
+        "score": 0,
+        "details": "Experience evaluation highlights quantitative metrics and active verb density."
+      },
+      "tailored_bullet_suggestions": [
+        {
+          "original": "Built web application components and REST APIs.",
+          "tailored": "Architected high-performance web APIs incorporating Docker, improving response times by 35%.",
+          "target_keyword": "REST APIs"
+        }
+      ],
+      "interview_questions": [
+        {
+          "id": "q1",
+          "category": "Technical Gap",
+          "question": "How would you approach learning and deploying system scaling in our tech stack?",
+          "sample_answer_key": "Demonstrate technical adaptability, documentation review, and hands-on proof-of-concept building.",
+          "target_gap": "System Scaling"
+        }
+      ],
+      "recommendations": [
+        "Quantify experience with impact metrics.",
+        "Ensure project descriptions highlight modern cloud architecture."
+      ],
+      "detailed_feedback": "Candidate achieved a deterministic ATS match score of 52%. Skills match score is 25/25, with 1 matched skill(s) and 0 gap(s) identified.",
+      "ai_engine": "Deterministic Matrix & Gemini Explanation Engine",
+      "created_at": "2026-10-03T18:01:25.222341+00:00",
+      "_id": "6ac142f5bf6e10c8d1d974e4"
+    }
+  },
+  "activities": {
+    "6ac13db74c98cdb0deb12498": {
+      "user_id": "test-user-ats-history-99",
+      "type": "ATS_ANALYZED",
+      "title": "\ud83d\udcc4 Resume Analyzed with ATS Engine",
+      "description": "Target Role: Software Engineer | ATS Score: 52%",
+      "metadata": {
+        "score": 52,
+        "job_title": "Software Engineer"
+      },
+      "created_at": "2026-10-03T17:39:03.797325+00:00",
+      "_id": "6ac13db74c98cdb0deb12498"
+    },
+    "6ac13db74c98cdb0deb1249a": {
+      "user_id": "test-user-ats-history-99",
+      "type": "ATS_ANALYZED",
+      "title": "\ud83d\udcc4 Resume Analyzed with ATS Engine",
+      "description": "Target Role: Frontend Engineer | ATS Score: 52%",
+      "metadata": {
+        "score": 52,
+        "job_title": "Frontend Engineer"
+      },
+      "created_at": "2026-10-03T17:39:03.800601+00:00",
+      "_id": "6ac13db74c98cdb0deb1249a"
+    },
+    "6ac13f4e769853c279591fb1": {
+      "user_id": "test-user-ats-history-99",
+      "type": "ATS_ANALYZED",
+      "title": "\ud83d\udcc4 Resume Analyzed with ATS Engine",
+      "description": "Target Role: Software Engineer | ATS Score: 52%",
+      "metadata": {
+        "score": 52,
+        "job_title": "Software Engineer"
+      },
+      "created_at": "2026-10-03T17:45:50.024050+00:00",
+      "_id": "6ac13f4e769853c279591fb1"
+    },
+    "6ac13f51769853c279591fb3": {
+      "user_id": "test-user-ats-history-99",
+      "type": "ATS_ANALYZED",
+      "title": "\ud83d\udcc4 Resume Analyzed with ATS Engine",
+      "description": "Target Role: Frontend Engineer | ATS Score: 52%",
+      "metadata": {
+        "score": 52,
+        "job_title": "Frontend Engineer"
+      },
+      "created_at": "2026-10-03T17:45:53.496942+00:00",
+      "_id": "6ac13f51769853c279591fb3"
+    },
+    "6ac140718b8430b5505437c0": {
+      "user_id": "test-user-ats-history-99",
+      "type": "ATS_ANALYZED",
+      "title": "\ud83d\udcc4 Resume Analyzed with ATS Engine",
+      "description": "Target Role: Software Engineer | ATS Score: 52%",
+      "metadata": {
+        "score": 52,
+        "job_title": "Software Engineer"
+      },
+      "created_at": "2026-10-03T17:50:41.704540+00:00",
+      "_id": "6ac140718b8430b5505437c0"
+    },
+    "6ac140728b8430b5505437c2": {
+      "user_id": "test-user-ats-history-99",
+      "type": "ATS_ANALYZED",
+      "title": "\ud83d\udcc4 Resume Analyzed with ATS Engine",
+      "description": "Target Role: Frontend Engineer | ATS Score: 52%",
+      "metadata": {
+        "score": 52,
+        "job_title": "Frontend Engineer"
+      },
+      "created_at": "2026-10-03T17:50:42.603691+00:00",
+      "_id": "6ac140728b8430b5505437c2"
+    },
+    "6ac142f3bf6e10c8d1d974e3": {
+      "user_id": "test-user-ats-history-99",
+      "type": "ATS_ANALYZED",
+      "title": "\ud83d\udcc4 Resume Analyzed with ATS Engine",
+      "description": "Target Role: Software Engineer | ATS Score: 52%",
+      "metadata": {
+        "score": 52,
+        "job_title": "Software Engineer"
+      },
+      "created_at": "2026-10-03T18:01:23.214306+00:00",
+      "_id": "6ac142f3bf6e10c8d1d974e3"
+    },
+    "6ac142f5bf6e10c8d1d974e5": {
+      "user_id": "test-user-ats-history-99",
+      "type": "ATS_ANALYZED",
+      "title": "\ud83d\udcc4 Resume Analyzed with ATS Engine",
+      "description": "Target Role: Frontend Engineer | ATS Score: 52%",
+      "metadata": {
+        "score": 52,
+        "job_title": "Frontend Engineer"
+      },
+      "created_at": "2026-10-03T18:01:25.223986+00:00",
+      "_id": "6ac142f5bf6e10c8d1d974e5"
+    }
+  }
+}
