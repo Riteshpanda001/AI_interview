@@ -164,29 +164,16 @@ def test_full_new_verification_flow_e2e():
             otp_code = otp_match.group(0)
 
             otp_res = await AuthService.verify_user_otp("e2e_user@gmail.com", otp_code, purpose="email_verification", db=mock_db)
-            assert otp_res["require_mobile_otp"] is True
+            assert "access_token" in otp_res
             assert otp_res["email_verified"] is True
-            assert len(sent_sms) == 1
-            print("[E2E STEP 4 PASSED] Email OTP verified -> Email fully verified & Mobile OTP SMS sent.")
+            assert otp_res["is_verified"] is True
+            print("[E2E STEP 4 PASSED] Email OTP verified -> Account activated directly without mobile OTP requirement.")
 
-            # STEP 5: Mobile OTP verification
-            sms_text = sent_sms[0]["message"]
-            sms_otp_match = re.search(r'\b\d{6}\b', sms_text)
-            sms_otp_code = sms_otp_match.group(0) if sms_otp_match else "123456"
-
-            with patch("app.services.otp_service.OTPService.verify_otp", new_callable=AsyncMock) as mock_verify_sms:
-                mock_verify_sms.return_value = True
-                mobile_res = await OTPService.verify_mobile_otp("+919988776655", sms_otp_code)
-                assert "access_token" in mobile_res
-                assert mobile_res["phone_verified"] is True
-
-                active_user = await mock_db["users"].find_one({"email_normalized": "e2e_user@gmail.com"})
-                assert active_user is not None
-                assert active_user["account_status"] == "active"
-                assert active_user["is_verified"] is True
-                assert active_user["phone_verified"] is True
-
-            print("[E2E STEP 5 PASSED] Mobile OTP verified -> Account status ACTIVE, JWT access token issued!")
+            active_user = await mock_db["users"].find_one({"email_normalized": "e2e_user@gmail.com"})
+            assert active_user is not None
+            assert active_user["account_status"] == "active"
+            assert active_user["is_verified"] is True
+            print("[E2E STEP 5 PASSED] Account status ACTIVE, JWT access token issued!")
             print("==================================================")
             print("END-TO-END WORKFLOW COMPLETED SUCCESSFULLY!")
             print("==================================================")

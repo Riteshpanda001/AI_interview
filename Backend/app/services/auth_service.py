@@ -1,4 +1,5 @@
 import uuid
+import asyncio
 from typing import Any, Optional, Dict
 from fastapi import HTTPException, status
 import bcrypt
@@ -258,6 +259,8 @@ class AuthService:
 
         if db is not None:
             await db["pending_registrations"].delete_many({"email_normalized": clean_email})
+            if clean_phone:
+                await db["pending_registrations"].delete_many({"phone_normalized": clean_phone})
             await db["pending_registrations"].insert_one(pending_doc)
 
         # EMAIL 1: Send Verification Link Email ONLY (Do NOT send OTP during registration)
@@ -269,6 +272,8 @@ class AuthService:
         if not email_sent:
             if db is not None:
                 await db["pending_registrations"].delete_many({"email_normalized": clean_email})
+                if clean_phone:
+                    await db["pending_registrations"].delete_many({"phone_normalized": clean_phone})
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                 detail="Unable to send verification email. Please try again."
@@ -521,45 +526,8 @@ class AuthService:
                 )
                 user = await db["users"].find_one({"_id": user["_id"]})
         else:
-            # New Google Registration - requires mobile verification
+            # New Google Registration - directly create user and activate account
             clean_phone = normalize_phone_number(phone) if phone else None
-            if not clean_phone:
-                return {
-                    "access_token": None,
-                    "refresh_token": None,
-                    "require_mobile": True,
-                    "email": email,
-                    "message": "Please enter your mobile number to complete Google Registration."
-                }
-
-            # Check if mobile already exists on another account
-            phone_user = await UserService.find_by_phone(clean_phone, db)
-            if phone_user:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="This mobile number is already associated with an existing account."
-                )
-
-            if not otp:
-                # Send Mobile OTP
-                await OTPService.send_mobile_otp(clean_phone, req=req)
-                return {
-                    "access_token": None,
-                    "refresh_token": None,
-                    "require_mobile_otp": True,
-                    "email": email,
-                    "phone": clean_phone,
-                    "message": "Verification code sent to your mobile number."
-                }
-
-            # Verify Mobile OTP for Google Registration
-            is_valid = await OTPService.verify_otp(clean_phone, otp, purpose="mobile_verification", req=req)
-            if not is_valid:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Invalid or expired SMS verification code."
-                )
-
             user = await UserService.create_user(
                 email=email,
                 full_name=name,
@@ -669,7 +637,89 @@ class AuthService:
 
     @staticmethod
     async def verify_user_otp(email: str, otp: str, purpose: str = "email_verification", db: Any = None, req = None) -> dict:
+        from app.services.user_service import UserService
+        from app.constants import ROLE_USER, PLAN_FREE
         clean_email = email.lower().strip()
+
+        # 1. If user is already active in users collection, return login tokens directly
+        if db is not None:
+            existing_user = await UserService.find_by_email(clean_email, db)
+            if existing_user and (existing_user.get("is_verified") or existing_user.get("is_active")):
+                user_id_str = str(existing_user["_id"])
+                session_id = await AuthService.create_session(user_id_str, req=req, db=db)
+                tokens = await AuthService._issue_token_pair(user_id_str, session_id=session_id, db=db)
+                return {
+                    "access_token": tokens["access_token"],
+                    "refresh_token": tokens["refresh_token"],
+                    "token_type": "bearer",
+                    "role": existing_user.get("role", ROLE_USER),
+                    "plan_type": existing_user.get("plan_type", PLAN_FREE),
+                    "is_verified": True,
+                    "email_otp_verified": True,
+                    "email_link_verified": True,
+                    "email_verified": True,
+                    "phone_verified": True,
+                    "email": clean_email,
+                    "message": "Account is already active. Logged in successfully!"
+                }
+
+        # 2. Check pending registration
+        pending = None
+        if db is not None:
+            pending = await db["pending_registrations"].find_one({"email_normalized": clean_email})
+
+        # 3. If pending record was already link-verified AND otp-verified (from a previous session/step)
+        if pending and pending.get("email_link_verified") and pending.get("email_otp_verified"):
+            now = datetime.now(timezone.utc)
+            user_doc = await UserService.create_user(
+                email=pending["email"],
+                full_name=pending["full_name"],
+                password_hash=pending["hashed_password"],
+                provider="email",
+                phone=pending.get("phone"),
+                gender=pending.get("gender"),
+                is_verified=True,
+                db=db
+            )
+            user_id_str = str(user_doc["_id"])
+            upd_op = db["users"].update_one(
+                {"_id": user_doc["_id"]},
+                {"$set": {
+                    "phone_normalized": pending.get("phone_normalized"),
+                    "email_normalized": pending.get("email_normalized"),
+                    "email_verified": True,
+                    "account_status": "active",
+                    "email_verified_at": now
+                }}
+            )
+            if asyncio.iscoroutine(upd_op) or hasattr(upd_op, "__await__"):
+                await upd_op
+
+            del_op = db["pending_registrations"].delete_one({"_id": pending["_id"]})
+            if asyncio.iscoroutine(del_op) or hasattr(del_op, "__await__"):
+                await del_op
+
+            session_id = await AuthService.create_session(user_id_str, req=req, db=db)
+            tokens = await AuthService._issue_token_pair(user_id_str, session_id=session_id, db=db)
+
+            return {
+                "access_token": tokens["access_token"],
+                "refresh_token": tokens["refresh_token"],
+                "token_type": "bearer",
+                "role": user_doc.get("role", ROLE_USER),
+                "plan_type": user_doc.get("plan_type", PLAN_FREE),
+                "is_verified": True,
+                "email_otp_verified": True,
+                "email_link_verified": True,
+                "email_verified": True,
+                "phone_verified": True,
+                "require_mobile_otp": False,
+                "email": clean_email,
+                "phone": pending.get("phone"),
+                "message": "Account verified and activated successfully!"
+            }
+
+        # 4. Standard OTP verification against DB otps
         is_valid = await OTPService.verify_otp(clean_email, otp, purpose=purpose, req=req)
         if not is_valid:
             raise HTTPException(
@@ -677,60 +727,87 @@ class AuthService:
                 detail="Invalid or expired OTP code."
             )
 
-        # Check pending registration first
-        if db is not None:
-            pending = await db["pending_registrations"].find_one({"email_normalized": clean_email})
-            if pending:
-                await db["pending_registrations"].update_one(
-                    {"_id": pending["_id"]},
-                    {"$set": {"email_otp_verified": True}}
+        if db is not None and pending:
+            await db["pending_registrations"].update_one(
+                {"_id": pending["_id"]},
+                {"$set": {"email_otp_verified": True}}
+            )
+            await AuditLogService.log_event("EMAIL_OTP_VERIFIED", email=clean_email, status="SUCCESS", req=req, db=db)
+
+            updated_pending = await db["pending_registrations"].find_one({"_id": pending["_id"]}) or pending
+            clean_phone = updated_pending.get("phone")
+            is_link_verified = updated_pending.get("email_link_verified", False)
+
+            if is_link_verified:
+                # BOTH Email verification mechanisms succeeded -> Activate account directly (no mobile OTP required)
+                now = datetime.now(timezone.utc)
+
+                user_doc = await UserService.create_user(
+                    email=updated_pending["email"],
+                    full_name=updated_pending["full_name"],
+                    password_hash=updated_pending["hashed_password"],
+                    provider="email",
+                    phone=updated_pending.get("phone"),
+                    gender=updated_pending.get("gender"),
+                    is_verified=True,
+                    db=db
                 )
-                await AuditLogService.log_event("EMAIL_OTP_VERIFIED", email=clean_email, status="SUCCESS", req=req, db=db)
-
-                # Re-fetch updated pending document
-                updated_pending = await db["pending_registrations"].find_one({"_id": pending["_id"]})
-                clean_phone = updated_pending.get("phone")
-                is_link_verified = updated_pending.get("email_link_verified", False)
-
-                if is_link_verified:
-                    # BOTH Email verification mechanisms succeeded!
-                    await db["pending_registrations"].update_one(
-                        {"_id": pending["_id"]},
-                        {"$set": {"email_verified": True}}
-                    )
-                    await AuditLogService.log_event("EMAIL_VERIFIED", email=clean_email, status="SUCCESS", req=req, db=db)
-
-                    await OTPService.send_mobile_otp(clean_phone, req=req)
-                    await AuditLogService.log_event("MOBILE_OTP_SENT", email=clean_email, status="SUCCESS", details={"phone": clean_phone}, req=req, db=db)
-
-                    return {
-                        "access_token": None,
-                        "refresh_token": None,
-                        "token_type": "bearer",
-                        "require_mobile_otp": True,
-                        "email_otp_verified": True,
-                        "email_link_verified": True,
+                user_id_str = str(user_doc["_id"])
+                upd_op = db["users"].update_one(
+                    {"_id": user_doc["_id"]},
+                    {"$set": {
+                        "phone_normalized": updated_pending.get("phone_normalized"),
+                        "email_normalized": updated_pending.get("email_normalized"),
                         "email_verified": True,
-                        "phone_verified": False,
-                        "email": clean_email,
-                        "phone": clean_phone,
-                        "message": "Email verified! A 6-digit verification code has been sent to your mobile number."
-                    }
-                else:
-                    # OTP verified, link verification pending
-                    return {
-                        "access_token": None,
-                        "refresh_token": None,
-                        "token_type": "bearer",
-                        "require_email_link": True,
-                        "email_otp_verified": True,
-                        "email_link_verified": False,
-                        "email_verified": False,
-                        "phone_verified": False,
-                        "email": clean_email,
-                        "phone": clean_phone,
-                        "message": "OTP verified successfully. Please click the verification link sent to your email to complete email verification."
-                    }
+                        "account_status": "active",
+                        "email_verified_at": now
+                    }}
+                )
+                if asyncio.iscoroutine(upd_op) or hasattr(upd_op, "__await__"):
+                    await upd_op
+
+                del_op = db["pending_registrations"].delete_one({"_id": pending["_id"]})
+                if asyncio.iscoroutine(del_op) or hasattr(del_op, "__await__"):
+                    await del_op
+
+                session_id = await AuthService.create_session(user_id_str, req=req, db=db)
+                tokens = await AuthService._issue_token_pair(user_id_str, session_id=session_id, db=db)
+
+                await AuditLogService.log_event("EMAIL_VERIFIED", email=clean_email, status="SUCCESS", req=req, db=db)
+                await AuditLogService.log_event("EVENT_USER_REGISTERED", email=clean_email, user_id=user_id_str, status="SUCCESS", req=req, db=db)
+
+                return {
+                    "access_token": tokens["access_token"],
+                    "refresh_token": tokens["refresh_token"],
+                    "token_type": "bearer",
+                    "role": user_doc.get("role", ROLE_USER),
+                    "plan_type": user_doc.get("plan_type", PLAN_FREE),
+                    "is_verified": True,
+                    "email_otp_verified": True,
+                    "email_link_verified": True,
+                    "email_verified": True,
+                    "phone_verified": True,
+                    "require_mobile_otp": False,
+                    "email": clean_email,
+                    "phone": clean_phone,
+                    "message": "Account verified and activated successfully!"
+                }
+            else:
+                # OTP verified, link verification pending
+                return {
+                    "access_token": None,
+                    "refresh_token": None,
+                    "token_type": "bearer",
+                    "require_email_link": True,
+                    "email_otp_verified": True,
+                    "email_link_verified": False,
+                    "email_verified": False,
+                    "phone_verified": False,
+                    "require_mobile_otp": False,
+                    "email": clean_email,
+                    "phone": clean_phone,
+                    "message": "OTP verified successfully. Please click the verification link sent to your email to complete email verification."
+                }
 
         user = await UserService.find_by_email(clean_email, db)
         if not user:

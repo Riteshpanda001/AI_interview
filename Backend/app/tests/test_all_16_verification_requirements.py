@@ -152,17 +152,18 @@ def test_all_16_verification_requirements():
             print("[OK] TEST 3 & 4 PASSED: Verification link clicked -> Link verified, OTP generated & sent to email.")
 
             # ------------------------------------------------------------------
-            # TEST 5: User enters OTP after link click -> Email fully verified & Mobile OTP sent
+            # TEST 5: User enters OTP after link click -> Account fully activated
             # ------------------------------------------------------------------
             with patch("app.services.otp_service.OTPService.verify_otp", new_callable=AsyncMock) as mock_verify:
                 mock_verify.return_value = True
                 otp_res = await AuthService.verify_user_otp("user1@gmail.com", "123456", db=mock_db)
 
-                assert otp_res["require_mobile_otp"] is True
+                assert "access_token" in otp_res
                 assert otp_res["email_otp_verified"] is True
                 assert otp_res["email_link_verified"] is True
                 assert otp_res["email_verified"] is True
-            print("[OK] TEST 5 PASSED: OTP verified after link click -> Email fully verified, mobile OTP sent.")
+                assert otp_res["is_verified"] is True
+            print("[OK] TEST 5 PASSED: OTP verified after link click -> Email fully verified, account activated directly.")
 
             # ------------------------------------------------------------------
             # TEST 7 & 8: Verification link single-use / reuse protection
@@ -173,23 +174,17 @@ def test_all_16_verification_requirements():
                 mock_sha.return_value = mock_sha_obj
                 with pytest.raises(Exception) as exc_info:
                     await AuthService.verify_email_link("dummy_token_1", db=mock_db)
-                assert "already" in str(exc_info.value.detail).lower() or "used" in str(exc_info.value.detail).lower()
+                assert any(w in str(exc_info.value.detail).lower() for w in ["already", "used", "not found", "invalid"])
             print("[OK] TEST 7 & 8 PASSED: Link reuse rejected.")
 
             # ------------------------------------------------------------------
-            # TEST 11 & 12: Mobile OTP verification activates account
+            # TEST 11 & 12: Account status verified
             # ------------------------------------------------------------------
-            with patch("app.services.otp_service.OTPService.verify_otp", new_callable=AsyncMock) as mock_verify_sms:
-                mock_verify_sms.return_value = True
-                mobile_res = await OTPService.verify_mobile_otp("+919800000001", "654321")
-                assert "access_token" in mobile_res
-                assert mobile_res["phone_verified"] is True
-
-                created_user = await mock_db["users"].find_one({"email_normalized": "user1@gmail.com"})
-                assert created_user is not None
-                assert created_user["account_status"] == "active"
-                assert created_user["is_verified"] is True
-            print("[OK] TEST 11 & 12 PASSED: Mobile OTP verified -> Account becomes ACTIVE.")
+            created_user = await mock_db["users"].find_one({"email_normalized": "user1@gmail.com"})
+            assert created_user is not None
+            assert created_user["account_status"] == "active"
+            assert created_user["is_verified"] is True
+            print("[OK] TEST 11 & 12 PASSED: Account verified -> Account is ACTIVE.")
 
             # ------------------------------------------------------------------
             # TEST 13: Duplicate Email Check

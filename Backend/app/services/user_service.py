@@ -80,17 +80,8 @@ class UserService:
             "password": password_hash,
             "provider": provider,
             "auth_provider": auth_prov,
-            "google_id": google_id,
-            "google_email": clean_email if provider == "google" else None,
-            "google_verified": True if provider == "google" else False,
             "profile_picture": profile_picture,
             "avatar_url": profile_picture,
-            "phone": clean_phone or phone,
-            "phone_normalized": clean_phone,
-            "mobile_number": clean_phone or phone,
-            "email_verified": is_verified,
-            "phone_verified": is_verified if clean_phone else False,
-            "phone_verified_at": now if is_verified and clean_phone else None,
             "gender": gender,
             "role": ROLE_USER,
             "plan_type": PLAN_FREE,
@@ -103,6 +94,22 @@ class UserService:
             "created_at": now,
             "updated_at": now
         }
+        if google_id:
+            new_user["google_id"] = google_id
+            new_user["google_email"] = clean_email
+            new_user["google_verified"] = True
+        else:
+            new_user["google_verified"] = False
+
+        if clean_phone or phone:
+            new_user["phone"] = clean_phone or phone
+            new_user["mobile_number"] = clean_phone or phone
+            if clean_phone:
+                new_user["phone_normalized"] = clean_phone
+            new_user["phone_verified"] = is_verified
+            new_user["phone_verified_at"] = now if (is_verified and clean_phone) else None
+        else:
+            new_user["phone_verified"] = False
         if db is not None:
             result = await db["users"].insert_one(new_user)
             new_user["_id"] = result.inserted_id

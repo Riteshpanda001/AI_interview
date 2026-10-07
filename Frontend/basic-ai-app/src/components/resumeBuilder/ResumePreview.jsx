@@ -5,7 +5,15 @@ import useRequireAuth from "../../hooks/useRequireAuth";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api";
 
-const ResumePreview = ({ resumeData, selectedTemplate, setResumeData, isDemoMode = false, onOpenWorkspace }) => {
+const ResumePreview = ({
+  resumeData,
+  selectedTemplate,
+  setResumeData,
+  isDemoMode = false,
+  onOpenWorkspace,
+  sectionOrder = ["summary", "personal", "education", "skills", "experience", "projects", "certifications", "achievements", "languages"],
+  hiddenSections = []
+}) => {
   const { authFetch } = useAuth();
   const { requireAuth } = useRequireAuth();
   const { personal, summary, experience, education, skills, projects, certifications, achievements, languages } = resumeData || {};
@@ -17,13 +25,18 @@ const ResumePreview = ({ resumeData, selectedTemplate, setResumeData, isDemoMode
   const [isOverflowing, setIsOverflowing] = useState(false);
   const paperRef = useRef(null);
 
+  // Fallback section ordering
+  const activeOrder = (sectionOrder && sectionOrder.length > 0)
+    ? sectionOrder
+    : ["summary", "personal", "education", "skills", "experience", "projects", "certifications", "achievements", "languages"];
+
   // Check if content height overflows the A4 page container
   useEffect(() => {
     if (paperRef.current) {
       const isOver = paperRef.current.scrollHeight > paperRef.current.clientHeight + 8;
       setIsOverflowing(isOver);
     }
-  }, [resumeData, selectedTemplate, pageDensity, fontSize]);
+  }, [resumeData, selectedTemplate, pageDensity, fontSize, sectionOrder]);
 
   const handleAutoFit = () => {
     setPageDensity("compact");
@@ -305,6 +318,242 @@ const ResumePreview = ({ resumeData, selectedTemplate, setResumeData, isDemoMode
     handleAIImprove();
   };
 
+  const renderSection = (secKey) => {
+    if (hiddenSections && hiddenSections.includes(secKey)) return null;
+
+    switch (secKey) {
+      case "summary":
+        return (
+          <section key="summary" className="preview-sub-section">
+            <h3 className="section-heading">PROFESSIONAL SUMMARY</h3>
+            <p className="summary-text">
+              {summary || "Results-driven professional with strong analytical skills, expertise in developing scalable web applications, and a proven track record of delivering modern digital solutions."}
+            </p>
+          </section>
+        );
+
+      case "personal":
+        return (
+          <section key="personal" className="preview-sub-section">
+            <h3 className="section-heading">PERSONAL DETAILS</h3>
+            <div className="personal-details-grid">
+              {personal?.name && (
+                <div className="personal-detail-row">
+                  <span className="personal-detail-label">Full Name:</span>
+                  <span className="personal-detail-value">{personal.name}</span>
+                </div>
+              )}
+              {personal?.role && (
+                <div className="personal-detail-row">
+                  <span className="personal-detail-label">Role / Title:</span>
+                  <span className="personal-detail-value">{personal.role}</span>
+                </div>
+              )}
+              {personal?.phone && (
+                <div className="personal-detail-row">
+                  <span className="personal-detail-label">Phone:</span>
+                  <span className="personal-detail-value">{personal.phone}</span>
+                </div>
+              )}
+              {personal?.email && (
+                <div className="personal-detail-row">
+                  <span className="personal-detail-label">Email:</span>
+                  <span className="personal-detail-value">{personal.email}</span>
+                </div>
+              )}
+              {personal?.address && (
+                <div className="personal-detail-row">
+                  <span className="personal-detail-label">Address:</span>
+                  <span className="personal-detail-value">{personal.address}</span>
+                </div>
+              )}
+              {personal?.linkedin && (
+                <div className="personal-detail-row">
+                  <span className="personal-detail-label">LinkedIn:</span>
+                  <span className="personal-detail-value">{personal.linkedin}</span>
+                </div>
+              )}
+              {personal?.github && (
+                <div className="personal-detail-row">
+                  <span className="personal-detail-label">GitHub:</span>
+                  <span className="personal-detail-value">{personal.github}</span>
+                </div>
+              )}
+              {personal?.portfolio && (
+                <div className="personal-detail-row">
+                  <span className="personal-detail-label">Portfolio:</span>
+                  <span className="personal-detail-value">{personal.portfolio}</span>
+                </div>
+              )}
+              {(!personal || Object.values(personal || {}).every(v => !v)) && (
+                <div className="personal-detail-row">
+                  <span className="personal-detail-label">Email:</span>
+                  <span className="personal-detail-value">yourname@email.com</span>
+                </div>
+              )}
+            </div>
+          </section>
+        );
+
+      case "education":
+        return (
+          <section key="education" className="preview-sub-section">
+            <h3 className="section-heading">EDUCATION</h3>
+            {((education && education.length > 0) ? education : [
+              { institution: "State University", degree: "B.S. in Computer Science", duration: "2021 – 2025" }
+            ]).map((edu, idx) => (
+              <div key={idx} className="preview-edu-row">
+                <div className="edu-left-info">
+                  <strong className="edu-institution">{edu.institution || "College / School Name"}</strong>
+                  <div className="edu-sub-details">
+                    {[edu.degree, edu.branch, edu.cgpa ? `CGPA/Percentage: ${edu.cgpa}` : null]
+                      .filter(Boolean)
+                      .join(" | ")}
+                  </div>
+                </div>
+                <div className="edu-right-duration">{edu.duration || "2021 – 2025"}</div>
+              </div>
+            ))}
+          </section>
+        );
+
+      case "skills":
+        return (
+          <section key="skills" className="preview-sub-section">
+            <h3 className="section-heading">TECHNICAL SKILLS</h3>
+            <div className="preview-skills-grid-2col">
+              {((skills && skills.length > 0) ? skills : ["React.js", "JavaScript", "Node.js", "Python", "Git", "REST APIs"]).map((skill, idx) => (
+                <div key={idx} className="preview-skill-grid-item">
+                  {skill}
+                </div>
+              ))}
+            </div>
+          </section>
+        );
+
+      case "experience":
+        return (
+          <section key="experience" className="preview-sub-section">
+            <h3 className="section-heading">WORK EXPERIENCE</h3>
+            {((experience && experience.length > 0) ? experience : [
+              { company: "TechNova Solutions", role: "Software Engineer", duration: "Jan 2024 – Present", details: "Developed responsive web applications using React and Node.js.\nOptimized API endpoints to reduce page load times." }
+            ]).map((exp, idx) => (
+              <div key={idx} className="preview-item">
+                <div className="preview-item-header">
+                  <strong className="company-name">{exp.company || "Company Name"}</strong>
+                  <span className="exp-duration-right">{exp.duration || "Jan 2024 – Present"}</span>
+                </div>
+                {exp.role && <div className="exp-job-title">{exp.role}</div>}
+                {exp.details && (
+                  <div className="preview-item-desc">
+                    {exp.details.split("\n").map((line, lIdx) => (
+                      <div key={lIdx} className="bullet-point">
+                        {line.replace(/^[•\-\s]+/, "")}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </section>
+        );
+
+      case "projects":
+        return (
+          <section key="projects" className="preview-sub-section">
+            <h3 className="section-heading">PROJECTS</h3>
+            {((projects && projects.length > 0) ? projects : [
+              { name: "PrepNova AI Platform", skillsUsed: "React, Node.js", description: "Built an AI-powered mock interview simulator with real-time feedback." }
+            ]).map((proj, idx) => (
+              <div key={idx} className="preview-item">
+                <div className="preview-project-inline-header">
+                  <strong className="proj-title">{proj.name || "Project Title"}</strong>
+                  {proj.skillsUsed && (
+                    <span className="proj-skills-tag"> | {proj.skillsUsed}</span>
+                  )}
+                  {proj.duration && (
+                    <span className="exp-duration-right">{proj.duration}</span>
+                  )}
+                </div>
+                {proj.link && (
+                  <div className="proj-sub-links">
+                    <a href={proj.link} target="_blank" rel="noopener noreferrer" className="proj-link-tag">
+                      🔗 {proj.link}
+                    </a>
+                  </div>
+                )}
+                {proj.description && (
+                  <div className="preview-item-desc">
+                    {proj.description.split("\n").map((line, lIdx) => (
+                      <div key={lIdx} className="bullet-point">
+                        {line.replace(/^[•\-\s]+/, "")}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </section>
+        );
+
+      case "certifications":
+        return (
+          <section key="certifications" className="preview-sub-section">
+            <h3 className="section-heading">CERTIFICATIONS</h3>
+            {((certifications && certifications.length > 0) ? certifications : [
+              { name: "AWS Certified Solutions Architect", issuer: "Amazon Web Services", year: "2024" }
+            ]).map((cert, idx) => (
+              <div key={idx} className="preview-item">
+                <div className="preview-item-header">
+                  <strong className="cert-name">{cert.name || "Certification Name"}</strong>
+                  {cert.year && <span className="exp-duration-right">{cert.year}</span>}
+                </div>
+                {cert.issuer && (
+                  <div className="cert-sub-info">{cert.issuer}</div>
+                )}
+              </div>
+            ))}
+          </section>
+        );
+
+      case "achievements":
+      case "custom":
+        return (
+          <section key="achievements" className="preview-sub-section">
+            <h3 className="section-heading">KEY ACHIEVEMENTS</h3>
+            {((achievements && achievements.length > 0) ? achievements : [
+              { title: "First Place Winner", description: "Awarded top place in Annual Tech Hackathon 2024." }
+            ]).map((ach, idx) => (
+              <div key={idx} className="bullet-point achievement-bullet">
+                <span className="achievement-dot">▪</span>
+                <span>
+                  {ach.title && <strong>{ach.title}</strong>}
+                  {ach.description ? `: ${ach.description}` : ""}
+                </span>
+              </div>
+            ))}
+          </section>
+        );
+
+      case "languages":
+        return (
+          <section key="languages" className="preview-sub-section">
+            <h3 className="section-heading">LANGUAGES</h3>
+            <div className="languages-inline-list">
+              {((languages && languages.length > 0) ? languages : ["English (Native)", "Hindi (Fluent)"]).map((lang, idx, arr) => (
+                <span key={idx} className="language-tag">
+                  {lang}{idx < arr.length - 1 ? "  |  " : ""}
+                </span>
+              ))}
+            </div>
+          </section>
+        );
+
+      default:
+        return null;
+    }
+  };
+
   return (
     <section className="preview-section">
       <div className="section-header">
@@ -525,215 +774,7 @@ const ResumePreview = ({ resumeData, selectedTemplate, setResumeData, isDemoMode
 
           <div className="resume-body">
             <div className="main-col">
-
-              {/* ── 1. PROFESSIONAL SUMMARY ── */}
-              <section className="preview-sub-section">
-                <h3 className="section-heading">PROFESSIONAL SUMMARY</h3>
-                <p className="summary-text">
-                  {summary || "Results-driven professional with strong analytical skills, expertise in developing scalable web applications, and a proven track record of delivering modern digital solutions."}
-                </p>
-              </section>
-
-              {/* ── 2. PERSONAL DETAILS ── */}
-              <section className="preview-sub-section">
-                <h3 className="section-heading">PERSONAL DETAILS</h3>
-                <div className="personal-details-grid">
-                  {personal?.name && (
-                    <div className="personal-detail-row">
-                      <span className="personal-detail-label">Full Name:</span>
-                      <span className="personal-detail-value">{personal.name}</span>
-                    </div>
-                  )}
-                  {personal?.role && (
-                    <div className="personal-detail-row">
-                      <span className="personal-detail-label">Role / Title:</span>
-                      <span className="personal-detail-value">{personal.role}</span>
-                    </div>
-                  )}
-                  {personal?.phone && (
-                    <div className="personal-detail-row">
-                      <span className="personal-detail-label">Phone:</span>
-                      <span className="personal-detail-value">{personal.phone}</span>
-                    </div>
-                  )}
-                  {personal?.email && (
-                    <div className="personal-detail-row">
-                      <span className="personal-detail-label">Email:</span>
-                      <span className="personal-detail-value">{personal.email}</span>
-                    </div>
-                  )}
-                  {personal?.address && (
-                    <div className="personal-detail-row">
-                      <span className="personal-detail-label">Address:</span>
-                      <span className="personal-detail-value">{personal.address}</span>
-                    </div>
-                  )}
-                  {personal?.linkedin && (
-                    <div className="personal-detail-row">
-                      <span className="personal-detail-label">LinkedIn:</span>
-                      <span className="personal-detail-value">{personal.linkedin}</span>
-                    </div>
-                  )}
-                  {personal?.github && (
-                    <div className="personal-detail-row">
-                      <span className="personal-detail-label">GitHub:</span>
-                      <span className="personal-detail-value">{personal.github}</span>
-                    </div>
-                  )}
-                  {personal?.portfolio && (
-                    <div className="personal-detail-row">
-                      <span className="personal-detail-label">Portfolio:</span>
-                      <span className="personal-detail-value">{personal.portfolio}</span>
-                    </div>
-                  )}
-                  {(!personal || Object.values(personal || {}).every(v => !v)) && (
-                    <div className="personal-detail-row">
-                      <span className="personal-detail-label">Email:</span>
-                      <span className="personal-detail-value">yourname@email.com</span>
-                    </div>
-                  )}
-                </div>
-              </section>
-
-              {/* ── 3. EDUCATION ── */}
-              <section className="preview-sub-section">
-                <h3 className="section-heading">EDUCATION</h3>
-                {((education && education.length > 0) ? education : [
-                  { institution: "State University", degree: "B.S. in Computer Science", duration: "2021 – 2025" }
-                ]).map((edu, idx) => (
-                  <div key={idx} className="preview-edu-row">
-                    <div className="edu-left-info">
-                      <strong className="edu-institution">{edu.institution || "College / School Name"}</strong>
-                      <div className="edu-sub-details">
-                        {[edu.degree, edu.branch, edu.cgpa ? `CGPA/Percentage: ${edu.cgpa}` : null]
-                          .filter(Boolean)
-                          .join(" | ")}
-                      </div>
-                    </div>
-                    <div className="edu-right-duration">{edu.duration || "2021 – 2025"}</div>
-                  </div>
-                ))}
-              </section>
-
-              {/* ── 4. TECHNICAL SKILLS ── */}
-              <section className="preview-sub-section">
-                <h3 className="section-heading">TECHNICAL SKILLS</h3>
-                <div className="preview-skills-grid-2col">
-                  {((skills && skills.length > 0) ? skills : ["React.js", "JavaScript", "Node.js", "Python", "Git", "REST APIs"]).map((skill, idx) => (
-                    <div key={idx} className="preview-skill-grid-item">
-                      {skill}
-                    </div>
-                  ))}
-                </div>
-              </section>
-
-              {/* ── 5. WORK EXPERIENCE ── */}
-              <section className="preview-sub-section">
-                <h3 className="section-heading">WORK EXPERIENCE</h3>
-                {((experience && experience.length > 0) ? experience : [
-                  { company: "TechNova Solutions", role: "Software Engineer", duration: "Jan 2024 – Present", details: "Developed responsive web applications using React and Node.js.\nOptimized API endpoints to reduce page load times." }
-                ]).map((exp, idx) => (
-                  <div key={idx} className="preview-item">
-                    <div className="preview-item-header">
-                      <strong className="company-name">{exp.company || "Company Name"}</strong>
-                      <span className="exp-duration-right">{exp.duration || "Jan 2024 – Present"}</span>
-                    </div>
-                    {exp.role && <div className="exp-job-title">{exp.role}</div>}
-                    {exp.details && (
-                      <div className="preview-item-desc">
-                        {exp.details.split("\n").map((line, lIdx) => (
-                          <div key={lIdx} className="bullet-point">
-                            {line.replace(/^[•\-\s]+/, "")}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </section>
-
-              {/* ── 6. PROJECTS ── */}
-              <section className="preview-sub-section">
-                <h3 className="section-heading">PROJECTS</h3>
-                {((projects && projects.length > 0) ? projects : [
-                  { name: "PrepNova AI Platform", skillsUsed: "React, Node.js", description: "Built an AI-powered mock interview simulator with real-time feedback." }
-                ]).map((proj, idx) => (
-                  <div key={idx} className="preview-item">
-                    <div className="preview-project-inline-header">
-                      <strong className="proj-title">{proj.name || "Project Title"}</strong>
-                      {proj.skillsUsed && (
-                        <span className="proj-skills-tag"> | {proj.skillsUsed}</span>
-                      )}
-                      {proj.duration && (
-                        <span className="exp-duration-right">{proj.duration}</span>
-                      )}
-                    </div>
-                    {proj.link && (
-                      <div className="proj-sub-links">
-                        <a href={proj.link} target="_blank" rel="noopener noreferrer" className="proj-link-tag">
-                          🔗 {proj.link}
-                        </a>
-                      </div>
-                    )}
-                    {proj.description && (
-                      <div className="preview-item-desc">
-                        {proj.description.split("\n").map((line, lIdx) => (
-                          <div key={lIdx} className="bullet-point">
-                            {line.replace(/^[•\-\s]+/, "")}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </section>
-
-              {/* ── 7. CERTIFICATIONS ── */}
-              <section className="preview-sub-section">
-                <h3 className="section-heading">CERTIFICATIONS</h3>
-                {((certifications && certifications.length > 0) ? certifications : [
-                  { name: "AWS Certified Solutions Architect", issuer: "Amazon Web Services", year: "2024" }
-                ]).map((cert, idx) => (
-                  <div key={idx} className="preview-item">
-                    <div className="preview-item-header">
-                      <strong className="cert-name">{cert.name || "Certification Name"}</strong>
-                      {cert.year && <span className="exp-duration-right">{cert.year}</span>}
-                    </div>
-                    {cert.issuer && (
-                      <div className="cert-sub-info">{cert.issuer}</div>
-                    )}
-                  </div>
-                ))}
-              </section>
-
-              {/* ── 8. KEY ACHIEVEMENTS ── */}
-              <section className="preview-sub-section">
-                <h3 className="section-heading">KEY ACHIEVEMENTS</h3>
-                {((achievements && achievements.length > 0) ? achievements : [
-                  { title: "First Place Winner", description: "Awarded top place in Annual Tech Hackathon 2024." }
-                ]).map((ach, idx) => (
-                  <div key={idx} className="bullet-point achievement-bullet">
-                    <span className="achievement-dot">▪</span>
-                    <span>
-                      {ach.title && <strong>{ach.title}</strong>}
-                      {ach.description ? `: ${ach.description}` : ""}
-                    </span>
-                  </div>
-                ))}
-              </section>
-
-              {/* ── 9. LANGUAGES ── */}
-              <section className="preview-sub-section">
-                <h3 className="section-heading">LANGUAGES</h3>
-                <div className="languages-inline-list">
-                  {((languages && languages.length > 0) ? languages : ["English (Native)", "Hindi (Fluent)"]).map((lang, idx, arr) => (
-                    <span key={idx} className="language-tag">
-                      {lang}{idx < arr.length - 1 ? "  |  " : ""}
-                    </span>
-                  ))}
-                </div>
-              </section>
-
+              {activeOrder.map((secKey) => renderSection(secKey))}
             </div>
           </div>
         </div>

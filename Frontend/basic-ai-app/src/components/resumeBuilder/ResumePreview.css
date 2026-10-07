@@ -1318,13 +1318,147 @@
   margin-bottom: 25px;
   box-shadow: 0 4px 6px -1px rgba(217, 119, 6, 0.03);
 }
-.resume-paper.prague .preview-skill-tag {
-  background: #fef3c7;
-  color: #92400e;
-  border-radius: 8px;
+/* 15. Classic ATS (Serif typography, clean lines, highest ATS parseability) */
+.resume-paper.classic {
+  --tpl-accent: #1e293b;
+  font-family: 'Georgia', 'Times New Roman', serif;
+  background: #ffffff;
+  color: #111827;
 }
-.resume-paper.prague .side-col {
-  border-left: 1px dashed #f59e0b;
+.resume-paper.classic .resume-header {
+  border-bottom: 2px solid #111827;
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+.resume-paper.classic .name {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+.resume-paper.classic .section-heading {
+  font-size: 13.5px;
+  font-weight: 700;
+  border-bottom: 1px solid #111827;
+  color: #111827;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+  padding-bottom: 2px;
+}
+.resume-paper.classic .preview-skill-tag {
+  background: transparent;
+  border: 1px solid #9ca3af;
+  color: #111827;
+  border-radius: 2px;
+}
+
+/* 16. Academic / Research (Structured scholarly layout with publication focus) */
+.resume-paper.academic {
+  --tpl-accent: #475569;
+  font-family: 'Merriweather', 'Georgia', serif;
+  background: #fafaf9;
+  color: #1c1917;
+}
+.resume-paper.academic .resume-header {
+  border-bottom: 3px double #78716c;
+  padding-bottom: 14px;
+  margin-bottom: 18px;
+}
+.resume-paper.academic .name {
+  color: #292524;
+  font-size: 25px;
+}
+.resume-paper.academic .section-heading {
+  color: #44403c;
+  border-bottom: 1.5px solid #a8a29e;
+  font-size: 13px;
+  letter-spacing: 0.8px;
+}
+.resume-paper.academic .preview-skill-tag {
+  background: #f5f5f4;
+  color: #44403c;
+  border: 1px solid #d6d3d1;
+}
+
+/* 17. Tokyo High-Tech (Clean Slate & Modern Cyan Accent) */
+.resume-paper.tokyo {
+  --tpl-accent: #06b6d4;
+  font-family: 'Outfit', 'Inter', sans-serif;
+  background: #ffffff;
+}
+.resume-paper.tokyo .resume-header {
+  border-left: 5px solid #06b6d4;
+  padding-left: 18px;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 14px;
+}
+.resume-paper.tokyo .name {
+  color: #0f172a;
+}
+.resume-paper.tokyo .section-heading {
+  color: #0891b2;
+  border-bottom: 2px solid #06b6d4;
+}
+.resume-paper.tokyo .preview-skill-tag {
+  background: #ecfeff;
+  color: #0e7490;
+  border: 1px solid #a5f3fc;
+}
+
+/* 18. Executive Classic (Deep Navy and Gold Trim) */
+.resume-paper.executive {
+  --tpl-accent: #1e3a8a;
+  font-family: 'Inter', sans-serif;
+  background: #ffffff;
+}
+.resume-paper.executive .resume-header {
+  background: #0f172a;
+  color: #ffffff;
+  padding: 24px 28px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+}
+.resume-paper.executive .resume-header .name {
+  color: #f8fafc;
+}
+.resume-paper.executive .resume-header .header-job-title {
+  color: #38bdf8;
+}
+.resume-paper.executive .resume-header .contact-chip {
+  color: #cbd5e1;
+}
+.resume-paper.executive .resume-header .contact-link {
+  color: #93c5fd;
+}
+.resume-paper.executive .section-heading {
+  color: #1e3a8a;
+  border-bottom: 2px solid #3b82f6;
+}
+.resume-paper.executive .preview-skill-tag {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+}
+
+/* 19. Tech Engineer (Clean Minimal Monospace Touches) */
+.resume-paper.tech {
+  --tpl-accent: #6366f1;
+  font-family: 'Inter', system-ui, sans-serif;
+  background: #ffffff;
+}
+.resume-paper.tech .resume-header {
+  border-bottom: 2px solid #6366f1;
+  padding-bottom: 14px;
+}
+.resume-paper.tech .section-heading {
+  color: #4f46e5;
+  border-bottom: 1.5px solid #a5b4fc;
+}
+.resume-paper.tech .preview-skill-tag {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  background: #eef2ff;
+  color: #4338ca;
+  border: 1px solid #c7d2fe;
 }
 
 @media (max-width: 768px) {

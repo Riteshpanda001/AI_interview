@@ -42,16 +42,16 @@ const VerifyEmail = () => {
         setPhone(res.phone || "");
         setMessage(res.message || "Email link verified successfully!");
 
-        if (res.require_mobile_otp) {
+        if (res.access_token && res.is_verified) {
+          setStatus("LINK_VERIFIED");
+          setMessage("Account verified and activated successfully!");
+          navigate("/", { replace: true });
+        } else if (res.require_mobile_otp) {
           setStatus("BOTH_VERIFIED");
-          setTimeout(() => {
-            navigate(`/verify-otp?email=${encodeURIComponent(userEmail)}&phone=${encodeURIComponent(res.phone || "")}&step=mobile_otp`);
-          }, 1500);
+          navigate(`/verify-otp?email=${encodeURIComponent(userEmail)}&phone=${encodeURIComponent(res.phone || "")}&step=mobile_otp`, { replace: true });
         } else {
           setStatus("LINK_VERIFIED");
-          setTimeout(() => {
-            navigate(`/verify-otp?email=${encodeURIComponent(userEmail)}&link_verified=true`);
-          }, 1500);
+          navigate(`/verify-otp?email=${encodeURIComponent(userEmail)}&link_verified=true`, { replace: true });
         }
       } catch (err) {
         const errMsg = err.message || "";

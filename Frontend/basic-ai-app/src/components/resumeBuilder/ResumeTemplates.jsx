@@ -60,6 +60,46 @@ const templatesList = [
     accentColor: "#4338ca"
   },
   {
+    id: "classic",
+    name: "Classic ATS Professional",
+    tag: "Classic ATS",
+    desc: "A timeless, ultra-clean serif template designed for maximum ATS parseability and standard corporate applications.",
+    previewBg: "linear-gradient(to right, #1e293b, #334155)",
+    accentColor: "#1e293b"
+  },
+  {
+    id: "academic",
+    name: "Academic & Research",
+    tag: "Academic Style",
+    desc: "Designed for researchers, professors, and scholars highlighting publications, projects, and educational milestones.",
+    previewBg: "linear-gradient(to right, #475569, #64748b)",
+    accentColor: "#475569"
+  },
+  {
+    id: "tokyo",
+    name: "Tokyo High-Tech",
+    tag: "Tokyo Style",
+    desc: "Sleek, futuristic cyan accents and sharp modern typography tailored for high-growth tech professionals.",
+    previewBg: "linear-gradient(to right, #0891b2, #06b6d4)",
+    accentColor: "#06b6d4"
+  },
+  {
+    id: "executive",
+    name: "Executive Leadership",
+    tag: "Executive Style",
+    desc: "A distinguished deep navy banner format designed for Directors, VPs, and senior technical managers.",
+    previewBg: "linear-gradient(to right, #0f172a, #1e3a8a)",
+    accentColor: "#1e3a8a"
+  },
+  {
+    id: "tech",
+    name: "Tech Minimalist",
+    tag: "Tech Style",
+    desc: "Clean developer-first design with monospace skill tags and structured project impact sections.",
+    previewBg: "linear-gradient(to right, #4338ca, #6366f1)",
+    accentColor: "#6366f1"
+  },
+  {
     id: "prague",
     name: "Prague Amber Grid",
     tag: "Prague Style",

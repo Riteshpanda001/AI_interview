@@ -76,11 +76,13 @@ const Dashboard = ({ onPracticeNow }) => {
         }
       }
     } catch (err) {
-      console.warn("Dashboard fetch error:", err);
+      const errMsg = (err?.message || "").toLowerCase();
       const isNetErr =
-        err?.name === "TypeError" ||
-        err?.message?.toLowerCase().includes("fetch") ||
-        err?.message?.toLowerCase().includes("network");
+        errMsg === "failed to fetch" ||
+        errMsg.includes("networkerror") ||
+        errMsg.includes("network error") ||
+        errMsg.includes("econnrefused") ||
+        errMsg.includes("err_connection_refused");
 
       if (isNetErr) {
         setError("Unable to connect to backend server. Please make sure the backend is running on http://localhost:8000.");

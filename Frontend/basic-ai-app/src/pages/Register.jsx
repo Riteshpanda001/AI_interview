@@ -233,7 +233,17 @@ const Register = () => {
       await register(fullName.trim(), email.trim(), password, confirmPassword, phone.trim(), gender);
       navigate(`/verify-otp?email=${encodeURIComponent(email.trim())}&phone=${encodeURIComponent(phone.trim())}`);
     } catch (err) {
-      setErrorMsg(err.message || "Registration failed. Please check your details.");
+      if (err?.code === "EMAIL_ALREADY_REGISTERED" || err?.message?.toLowerCase().includes("email is already")) {
+        setStep("MODAL_EMAIL_EXISTS");
+      } else if (err?.code === "PHONE_ALREADY_REGISTERED" || err?.message?.toLowerCase().includes("mobile number is already")) {
+        setStep("MODAL_PHONE_EXISTS");
+      } else if (err?.code === "EXISTING_ACCOUNT" || err?.message?.toLowerCase().includes("already registered with")) {
+        setStep("MODAL_EXISTING_ACCOUNT");
+      } else if (err?.code === "IDENTITY_CONFLICT" || err?.message?.toLowerCase().includes("cannot be combined")) {
+        setStep("MODAL_IDENTITY_CONFLICT");
+      } else {
+        setErrorMsg(err?.message || "Registration failed. Please check your details.");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -273,11 +283,7 @@ const Register = () => {
 
     try {
       const res = await verifyOtp(email.trim(), fullOtp, "email_verification");
-      if (res?.require_mobile_otp) {
-        setOtpDigits(["", "", "", "", "", ""]);
-        setResendTimer(60);
-        setStep("MOBILE_OTP");
-      } else if (res?.access_token) {
+      if (res?.access_token || res?.is_verified) {
         setStep("SUCCESS");
       }
     } catch (err) {

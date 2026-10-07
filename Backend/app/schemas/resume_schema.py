@@ -51,6 +51,10 @@ class ResumeResponse(BaseModel):
     parsed_content: Dict[str, Any]
     selected_template: Optional[str] = "london"
     ats_score: Optional[int] = 85
+    accent_color: Optional[str] = "#3B82F6"
+    font_family: Optional[str] = "Inter"
+    section_order: Optional[List[str]] = None
+    hidden_sections: Optional[List[str]] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
 
@@ -62,6 +66,10 @@ class ResumeSaveRequest(BaseModel):
     selected_template: Optional[str] = "london"
     resume_data: ResumeContent
     ats_score: Optional[int] = 85
+    accent_color: Optional[str] = "#3B82F6"
+    font_family: Optional[str] = "Inter"
+    section_order: Optional[List[str]] = None
+    hidden_sections: Optional[List[str]] = None
 
 class ResumeRenameRequest(BaseModel):
     title: str
@@ -157,3 +165,8 @@ class VersionSnapshot(BaseModel):
     version_name: str
     created_at: datetime
     resume_data: Dict[str, Any]
+    selected_template: Optional[str] = "london"
+    accent_color: Optional[str] = "#3B82F6"
+    font_family: Optional[str] = "Inter"
+    section_order: Optional[List[str]] = None
+    hidden_sections: Optional[List[str]] = None

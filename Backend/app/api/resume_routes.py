@@ -340,11 +340,21 @@ async def generate_cover_letter(
     resume_data = payload.get("resume_data", {})
     job_description = payload.get("job_description", "")
     target_role = payload.get("target_role", "")
+    company = payload.get("company", "")
+    tone = payload.get("tone", "Professional")
+    additional_instructions = payload.get("additional_instructions", "")
 
     if not resume_data:
         raise HTTPException(status_code=400, detail="resume_data is required.")
 
-    return await AIService.generate_cover_letter(resume_data, job_description, target_role)
+    return await AIService.generate_cover_letter(
+        resume_data=resume_data,
+        job_description=job_description,
+        target_role=target_role,
+        company=company,
+        tone=tone,
+        additional_instructions=additional_instructions
+    )
 
 
 @router.post("/interview-tips")
@@ -357,8 +367,20 @@ async def generate_interview_tips(
     Returns technical topics, likely questions, behavioral tips, and strengths.
     """
     resume_data = payload.get("resume_data", {})
+    target_role = payload.get("target_role", "")
+    company = payload.get("company", "")
+    job_description = payload.get("job_description", "")
+    interview_type = payload.get("interview_type", "Mixed")
+    difficulty = payload.get("difficulty", "Medium")
 
     if not resume_data:
         raise HTTPException(status_code=400, detail="resume_data is required.")
 
-    return await AIService.generate_interview_prep_tips(resume_data)
+    return await AIService.generate_interview_prep_tips(
+        resume_data=resume_data,
+        target_role=target_role,
+        company=company,
+        job_description=job_description,
+        interview_type=interview_type,
+        difficulty=difficulty
+    )

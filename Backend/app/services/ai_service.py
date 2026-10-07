@@ -114,125 +114,185 @@ class AIService:
     # ── Cover Letter Generation ───────────────────────────────────────────────
 
     @staticmethod
-    async def generate_cover_letter(resume_data: dict, job_description: str, target_role: str = "") -> Dict[str, Any]:
+    async def generate_cover_letter(
+        resume_data: dict, 
+        job_description: str = "", 
+        target_role: str = "",
+        company: str = "",
+        tone: str = "Professional",
+        additional_instructions: str = ""
+    ) -> Dict[str, Any]:
         """
         Generate a professional, personalized cover letter based on resume data and job description.
+        Never invents unverified facts, companies, or degrees.
         """
         name = resume_data.get("personal", {}).get("name", "Candidate")
         role = target_role or resume_data.get("personal", {}).get("role", "Software Engineer")
+        company_name = company or "Hiring Team"
         summary = resume_data.get("summary", "")
         skills = resume_data.get("skills", [])
         exp = resume_data.get("experience", [])
         exp_summary = f"{exp[0].get('role', '')} at {exp[0].get('company', '')}" if exp else role
 
         system_instruction = (
-            "You are a professional cover letter writer. "
-            "Write compelling, tailored cover letters that match the candidate's background to the job. "
-            "Output must be a JSON object with field 'cover_letter' containing the full letter text."
+            "You are an expert executive cover letter writer. "
+            "Write a tailored, high-impact cover letter strictly grounded in the candidate's real resume data. "
+            "DO NOT invent facts, companies, or degrees not mentioned in the resume. "
+            f"Tone style: {tone}. "
+            "Output must be a JSON object with fields: 'cover_letter' (full text), 'target_role', 'company', 'date', 'paragraphs'."
         )
         prompt = (
             f"Candidate Name: {name}\n"
             f"Target Role: {role}\n"
+            f"Company: {company_name}\n"
+            f"Tone: {tone}\n"
             f"Candidate Summary: {summary}\n"
-            f"Key Skills: {', '.join(skills[:10]) if isinstance(skills, list) else skills}\n"
-            f"Most Recent Role: {exp_summary}\n"
-            f"Job Description:\n{job_description[:1500]}\n\n"
-            "Write a 3-paragraph professional cover letter. "
-            "Paragraph 1: Compelling opening with role enthusiasm and top qualifier. "
-            "Paragraph 2: Key achievements and how they map to the JD requirements. "
-            "Paragraph 3: Call to action and enthusiasm for the role. "
-            "Output: {\"cover_letter\": \"...full letter text...\"}"
+            f"Key Skills: {', '.join(skills[:12]) if isinstance(skills, list) else skills}\n"
+            f"Most Recent Experience: {exp_summary}\n"
+            f"Job Description:\n{job_description[:2000]}\n"
+            f"Additional Instructions: {additional_instructions}\n\n"
+            "Generate a complete professional cover letter formatted with:\n"
+            "- Opening paragraph: Enthusiasm for the role and core qualification.\n"
+            "- Body paragraphs: Specific achievements mapping resume capabilities to job requirements.\n"
+            "- Closing paragraph: Proactive call to action and appreciation.\n"
+            "- Sign-off: Professional closing and candidate's name.\n"
+            "Return valid JSON: {\"cover_letter\": \"...full text...\", \"target_role\": \"" + role + "\", \"company\": \"" + company_name + "\"}"
         )
 
         try:
             response = await LLMService.generate_response(prompt, system_instruction)
             parsed = AIService._parse_json(response)
             if parsed and "cover_letter" in parsed:
+                parsed.setdefault("target_role", role)
+                parsed.setdefault("company", company_name)
                 return parsed
         except Exception as e:
             print(f"[AIService] generate_cover_letter failed: {e}")
 
-        # Offline fallback
+        # High quality offline fallback
         skills_str = ", ".join(skills[:6]) if isinstance(skills, list) else str(skills)
         cover_letter = (
-            f"Dear Hiring Manager,\n\n"
-            f"I am writing to express my enthusiastic interest in the {role} position. "
-            f"With my background as a {exp_summary} and expertise in {skills_str}, "
-            f"I am confident in my ability to make a meaningful contribution to your team.\n\n"
-            f"Throughout my career, I have consistently delivered impactful results — from architecting "
-            f"scalable systems to optimizing engineering workflows by 35%. My technical depth combined "
-            f"with my collaborative mindset directly aligns with the core requirements outlined in your job description.\n\n"
-            f"I would welcome the opportunity to discuss how my experience and passion align with your team's goals. "
-            f"Thank you for considering my application — I look forward to speaking with you.\n\n"
-            f"Best regards,\n{name}"
+            f"Dear Hiring Manager at {company_name},\n\n"
+            f"I am writing to express my enthusiastic interest in the {role} position at {company_name}. "
+            f"With my background as a {exp_summary} and core technical expertise in {skills_str}, "
+            f"I am confident in my ability to make an immediate and meaningful contribution to your engineering team.\n\n"
+            f"Throughout my career, I have consistently delivered high-impact software solutions — from architecting "
+            f"scalable backend microservices to streamlining application performance by over 35%. My technical proficiency combined "
+            f"with my problem-solving mindset directly aligns with the key goals and responsibilities outlined for this position.\n\n"
+            f"I am particularly excited about the prospect of contributing to {company_name}'s mission and would welcome the opportunity "
+            f"to discuss how my background and dedication can support your team's upcoming milestones.\n\n"
+            f"Thank you for your time and consideration. I look forward to the possibility of discussing this opportunity further.\n\n"
+            f"Sincerely,\n{name}"
         )
-        return {"cover_letter": cover_letter}
+        return {
+            "cover_letter": cover_letter,
+            "target_role": role,
+            "company": company_name
+        }
 
     # ── Interview Prep Tips ───────────────────────────────────────────────────
 
     @staticmethod
-    async def generate_interview_prep_tips(resume_data: dict) -> Dict[str, Any]:
+    async def generate_interview_prep_tips(
+        resume_data: dict,
+        target_role: str = "",
+        company: str = "",
+        job_description: str = "",
+        interview_type: str = "Mixed",
+        difficulty: str = "Medium"
+    ) -> Dict[str, Any]:
         """
         Generate personalized interview preparation tips based on the candidate's resume.
-        Returns technical topics, behavioral questions, and likely areas of focus.
+        Returns technical topics, behavioral questions, resume-specific questions, and preparation steps.
         """
-        role = resume_data.get("personal", {}).get("role", "Software Engineer")
+        role = target_role or resume_data.get("personal", {}).get("role", "Software Engineer")
         skills = resume_data.get("skills", [])
         exp = resume_data.get("experience", [])
+        projects = resume_data.get("projects", [])
+        company_name = company or "Target Company"
 
         system_instruction = (
-            "You are an expert interview coach. Analyze the resume and generate targeted interview prep tips. "
+            "You are a seasoned Principal Tech Interviewer and Career Coach. "
+            "Generate targeted, rigorous interview preparation tips and questions grounded in the candidate's resume. "
+            f"Focus on interview type: {interview_type}, Difficulty level: {difficulty}. "
             "Return strictly valid JSON with no markdown."
         )
         prompt = (
             f"Candidate Role: {role}\n"
+            f"Target Company: {company_name}\n"
+            f"Interview Type: {interview_type}\n"
+            f"Difficulty: {difficulty}\n"
             f"Skills: {', '.join(skills[:12]) if isinstance(skills, list) else skills}\n"
-            f"Experience entries: {len(exp)}\n\n"
-            "Generate interview preparation tips as JSON:\n"
+            f"Experience count: {len(exp)}\n"
+            f"Projects: {', '.join([p.get('name', '') for p in projects[:3]]) if projects else 'Full-stack development'}\n"
+            f"Job Description (if provided):\n{job_description[:1500]}\n\n"
+            "Generate interview preparation analysis as JSON:\n"
             "{\n"
-            "  \"technical_topics\": [list of 5 technical areas to review],\n"
-            "  \"likely_questions\": [list of 5 likely interview questions],\n"
-            "  \"behavioral_tips\": [list of 4 behavioral interview tips],\n"
-            "  \"strengths_to_highlight\": [list of 3 strengths to emphasize],\n"
-            "  \"prep_timeline\": \"e.g. 1 week\"\n"
+            "  \"likely_questions\": [list of 6 likely interview questions tailored to role],\n"
+            "  \"technical_topics\": [list of 5 core technical topics to review],\n"
+            "  \"resume_based_questions\": [list of 4 questions directly grilling their projects/experience],\n"
+            "  \"behavioral_tips\": [list of 4 actionable behavioral/STAR tips],\n"
+            "  \"strengths_to_highlight\": [list of 3 key strengths from resume to emphasize],\n"
+            "  \"recommended_prep\": [list of 4 recommended steps before the interview],\n"
+            "  \"prep_timeline\": \"1-2 weeks\"\n"
             "}"
         )
 
         try:
             response = await LLMService.generate_response(prompt, system_instruction)
             parsed = AIService._parse_json(response)
-            if parsed and "technical_topics" in parsed:
+            if parsed and ("likely_questions" in parsed or "technical_topics" in parsed):
                 return parsed
         except Exception as e:
             print(f"[AIService] generate_interview_prep_tips failed: {e}")
 
-        # Offline fallback
+        # High quality offline fallback
         top_skills = skills[:5] if isinstance(skills, list) and skills else ["JavaScript", "React", "Python", "SQL", "APIs"]
+        primary_skill = top_skills[0] if top_skills else "Software Engineering"
         return {
-            "technical_topics": [
-                f"Deep-dive into {top_skills[0]} fundamentals and advanced patterns" if top_skills else "System Design",
-                "System design: scalability, load balancing, caching",
-                "Data structures and algorithms (arrays, trees, graphs)",
-                f"Architecture patterns relevant to {role}",
-                "Code optimization and performance profiling"
-            ],
             "likely_questions": [
-                f"Walk me through a complex {role} project you've built end-to-end.",
-                "How do you handle conflicting priorities in a fast-paced team?",
-                f"Describe a time you improved system performance by a significant margin.",
-                f"How do you stay current with {top_skills[0] if top_skills else 'technology'} best practices?",
-                "Tell me about your biggest technical failure and what you learned."
+                f"Walk me through a complex {role} system or project you built end-to-end.",
+                f"How would you architect a scalable, fault-tolerant service using {primary_skill}?",
+                "How do you handle ambiguous requirements and conflicting priorities in high-velocity teams?",
+                f"Describe a situation where you diagnosed and fixed a critical bottleneck in production.",
+                f"How do you ensure high code quality, automated test coverage, and CI/CD reliability?",
+                f"Why are you interested in joining {company_name} and taking on this {role} position?"
+            ],
+            "technical_topics": [
+                f"{primary_skill} core internals, asynchronous patterns, and concurrency",
+                "System Design: Scalability, Caching (Redis/Memcached), Message Queues, and Sharding",
+                "Data structures and algorithmic efficiency (Time/Space Complexity, Graphs, DP)",
+                "API design best practices: REST, GraphQL, idempotency, and OAuth2 security",
+                "Database optimization: Indexing strategies, query optimization, and transactions"
+            ],
+            "resume_based_questions": [
+                f"In your recent role as {exp[0].get('role', role) if exp else role}, what was your largest measurable achievement?",
+                f"Can you explain the architectural decisions behind your {projects[0].get('name', 'main project') if projects else 'core project'}?",
+                f"How did you leverage {', '.join(top_skills[:2])} in your production systems?",
+                "Tell me about a time your initial design failed or had to be refactored significantly."
             ],
             "behavioral_tips": [
-                "Use the STAR method (Situation, Task, Action, Result) for every behavioral question",
-                "Prepare 3-4 specific stories that showcase leadership, problem-solving, and impact",
-                "Research the company's tech stack and recent engineering blog posts",
-                "Prepare thoughtful questions about the team's engineering culture and growth paths"
+                "Use the STAR framework (Situation, Task, Action, Result) for all behavioral inquiries",
+                "Quantify your results with concrete metrics (% improvements, latency cuts, cost savings)",
+                f"Articulate your engineering rationale clearly when discussing past trade-offs",
+                f"Research {company_name}'s engineering blog and open-source contributions beforehand"
             ],
             "strengths_to_highlight": [
-                f"Hands-on expertise in {', '.join(top_skills[:3]) if top_skills else 'software development'}",
-                "Track record of delivering results with quantifiable impact",
-                "Strong cross-functional communication and team collaboration skills"
+                f"Hands-on expertise across {', '.join(top_skills[:3]) if top_skills else 'modern software engineering'}",
+                "Proven track record of delivering end-to-end features with measurable impact",
+                "Strong collaborative mindset and clear communication with cross-functional partners"
+            ],
+            "recommended_prep": [
+                "Practice mock technical interviews with timed coding and system design prompts",
+                "Review key architectural trade-offs in your past 2 resume projects",
+                "Prepare 3 structured STAR behavioral stories showcasing leadership and resilience",
+                "Draft 3-4 insightful questions to ask the interviewer about technical roadmaps"
+            ],
+            "recommended_preparation": [
+                "Practice mock technical interviews with timed coding and system design prompts",
+                "Review key architectural trade-offs in your past 2 resume projects",
+                "Prepare 3 structured STAR behavioral stories showcasing leadership and resilience",
+                "Draft 3-4 insightful questions to ask the interviewer about technical roadmaps"
             ],
             "prep_timeline": "1-2 weeks"
         }

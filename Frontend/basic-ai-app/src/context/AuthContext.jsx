@@ -20,9 +20,17 @@ export const extractErrorMessage = (data, defaultMsg = null) => {
     return data.detail;
   }
   if (Array.isArray(data.detail) && data.detail.length > 0) {
-    const firstErr = data.detail[0];
-    if (typeof firstErr === "string") return firstErr;
-    if (firstErr && typeof firstErr.msg === "string") return firstErr.msg;
+    const messages = data.detail
+      .map((err) => {
+        if (typeof err === "string") return err;
+        if (err && typeof err.msg === "string") {
+          const field = Array.isArray(err.loc) ? err.loc.filter((l) => l !== "body").join(".") : "";
+          return field ? `${field}: ${err.msg}` : err.msg;
+        }
+        return null;
+      })
+      .filter(Boolean);
+    if (messages.length > 0) return messages.join(". ");
   }
   if (typeof data.detail === "object" && data.detail !== null) {
     if (typeof data.detail.msg === "string") return data.detail.msg;
@@ -76,13 +84,13 @@ export const handleApiError = async (response) => {
       message = extractedMsg || "Please enter valid information.";
       break;
     case 429:
-      message = "Too many requests. Please wait and try again.";
+      message = extractedMsg || "Too many requests. Please wait and try again.";
       break;
     case 500:
-      message = "Something went wrong on the server. Please try again.";
+      message = extractedMsg || "Something went wrong on the server. Please try again.";
       break;
     case 503:
-      message = "The service is temporarily unavailable. Please try again later.";
+      message = extractedMsg || "The service is temporarily unavailable. Please try again later.";
       break;
     default:
       message = extractedMsg || `Request failed with status code ${status}.`;
@@ -91,21 +99,29 @@ export const handleApiError = async (response) => {
   throw new AuthError(message, status, code, false);
 };
 
+export const isGenuineNetworkFailure = (error) => {
+  if (!error) return false;
+  if (error instanceof AuthError || error?.name === "AuthError") {
+    return error.isNetworkError === true;
+  }
+  const msg = (error?.message || "").toLowerCase();
+  return (
+    msg === "failed to fetch" ||
+    msg.includes("networkerror") ||
+    msg.includes("network error") ||
+    msg.includes("econnrefused") ||
+    msg.includes("err_connection_refused") ||
+    msg.includes("err_name_not_resolved") ||
+    msg.includes("failed to establish a connection")
+  );
+};
+
 export const catchNetworkError = (error, defaultMsg = "Operation failed.") => {
-  if (error instanceof AuthError) {
+  if (error instanceof AuthError || error?.name === "AuthError") {
     throw error;
   }
 
-  const isNetworkFailure =
-    (error?.name === "TypeError" &&
-      (error?.message?.toLowerCase().includes("fetch") ||
-       error?.message?.toLowerCase().includes("networkerror") ||
-       error?.message?.toLowerCase().includes("network error") ||
-       error?.message?.toLowerCase().includes("failed to fetch"))) ||
-    error?.message === "Failed to fetch" ||
-    error?.message?.includes("ECONNREFUSED");
-
-  if (isNetworkFailure) {
+  if (isGenuineNetworkFailure(error)) {
     throw new AuthError(
       "Unable to connect to backend server. Please make sure the backend is running on http://localhost:8000.",
       0,
@@ -218,8 +234,8 @@ export const AuthProvider = ({ children }) => {
     let currentToken = isPublic ? null : (localStorage.getItem("access_token") || localStorage.getItem("token"));
 
     const headers = {
-      ...(options.headers || {}),
       ...(currentToken ? { Authorization: `Bearer ${currentToken}` } : {}),
+      ...(options.headers || {}),
     };
 
     let response = await fetch(url, { ...options, headers, credentials: options.credentials || "include" });
@@ -240,16 +256,20 @@ export const AuthProvider = ({ children }) => {
 
   // Fetch current user details from backend
   const fetchCurrentUser = async (authToken) => {
-    if (!authToken) {
+    const activeToken = authToken || localStorage.getItem("access_token") || localStorage.getItem("token");
+    if (!activeToken) {
       setLoading(false);
       return null;
     }
 
     try {
-      const response = await authFetch(`${API_BASE_URL}/users/me`);
+      const response = await authFetch(`${API_BASE_URL}/users/me`, {
+        headers: { Authorization: `Bearer ${activeToken}` },
+      });
       if (response.ok) {
         const userData = await response.json();
         setUser(userData);
+        setToken(activeToken);
         return userData;
       } else {
         clearTokens();

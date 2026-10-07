@@ -198,7 +198,7 @@ class MockCollection:
             return UpdateResult(matched_count=1, modified_count=1)
         return UpdateResult(matched_count=0, modified_count=0)
 
-    async def create_index(self, key_name, unique=False):
+    async def create_index(self, key_name, *args, **kwargs):
         pass
 
 class MockDatabase:
@@ -360,14 +360,26 @@ class DatabaseManager:
             self.db = self.mongo_client[settings.DATABASE_NAME]
             print("[DB] [OK] Connected to MongoDB database successfully.")
             
-            # Create MongoDB unique indexes safely
+            # Create MongoDB unique indexes safely with partial filter expression (avoids duplicate null collisions)
             try:
-                await self.db["users"].create_index("email_normalized", unique=True, sparse=True)
-                await self.db["users"].create_index("phone_normalized", unique=True, sparse=True)
-                await self.db["users"].create_index("google_id", unique=True, sparse=True)
-                await self.db["pending_registrations"].create_index("email_normalized", unique=True, sparse=True)
-                await self.db["pending_registrations"].create_index("phone_normalized", unique=True, sparse=True)
-                await self.db["pending_registrations"].create_index("verification_link_hash", unique=True, sparse=True)
+                await self.db["users"].create_index(
+                    "email_normalized", unique=True, partialFilterExpression={"email_normalized": {"$type": "string"}}
+                )
+                await self.db["users"].create_index(
+                    "phone_normalized", unique=True, partialFilterExpression={"phone_normalized": {"$type": "string"}}
+                )
+                await self.db["users"].create_index(
+                    "google_id", unique=True, partialFilterExpression={"google_id": {"$type": "string"}}
+                )
+                await self.db["pending_registrations"].create_index(
+                    "email_normalized", unique=True, partialFilterExpression={"email_normalized": {"$type": "string"}}
+                )
+                await self.db["pending_registrations"].create_index(
+                    "phone_normalized", unique=True, partialFilterExpression={"phone_normalized": {"$type": "string"}}
+                )
+                await self.db["pending_registrations"].create_index(
+                    "verification_link_hash", unique=True, partialFilterExpression={"verification_link_hash": {"$type": "string"}}
+                )
                 print("[DB] [OK] MongoDB unique indexes verified/created.")
             except Exception as idx_err:
                 print(f"[DB] [WARN] MongoDB index creation warning: {idx_err}")

@@ -64,12 +64,21 @@ class ResumeService:
             doc["parsed_content"] = doc["resume_data"]
         return doc
 
+    DEFAULT_SECTION_ORDER = [
+        "personal", "summary", "experience", "education", 
+        "skills", "projects", "certifications", "achievements", "languages"
+    ]
+
     @staticmethod
     async def save_or_update_resume(user_id: str, data: dict, db) -> dict:
         resume_id = data.get("id")
         title = data.get("title", "Untitled Resume")
         template = data.get("selected_template", "london")
         resume_data = data.get("resume_data", {})
+        accent_color = data.get("accent_color", "#3B82F6")
+        font_family = data.get("font_family", "Inter")
+        section_order = data.get("section_order") or ResumeService.DEFAULT_SECTION_ORDER
+        hidden_sections = data.get("hidden_sections") or []
         
         # Calculate real ATS score dynamically based on content
         ats_calc = ATSService.calculate_real_ats_score(resume_data)
@@ -91,7 +100,12 @@ class ResumeService:
                     "user_id": user_id,
                     "version_name": f"Snapshot - {now.strftime('%b %d, %H:%M')}",
                     "created_at": now,
-                    "resume_data": existing.get("parsed_content", {})
+                    "resume_data": existing.get("parsed_content", {}),
+                    "selected_template": existing.get("selected_template", template),
+                    "accent_color": existing.get("accent_color", accent_color),
+                    "font_family": existing.get("font_family", font_family),
+                    "section_order": existing.get("section_order", section_order),
+                    "hidden_sections": existing.get("hidden_sections", hidden_sections)
                 }
                 await db["resume_versions"].insert_one(snapshot)
 
@@ -100,6 +114,10 @@ class ResumeService:
                     "selected_template": template,
                     "parsed_content": resume_data,
                     "ats_score": ats_score,
+                    "accent_color": accent_color,
+                    "font_family": font_family,
+                    "section_order": section_order,
+                    "hidden_sections": hidden_sections,
                     "updated_at": now
                 }
                 await db["resumes"].update_one(query, {"$set": update_fields})
@@ -118,6 +136,10 @@ class ResumeService:
             "selected_template": template,
             "parsed_content": resume_data,
             "ats_score": ats_score,
+            "accent_color": accent_color,
+            "font_family": font_family,
+            "section_order": section_order,
+            "hidden_sections": hidden_sections,
             "share_token": str(uuid.uuid4())[:12],
             "share_access_type": "public",
             "created_at": now,
@@ -140,6 +162,10 @@ class ResumeService:
             "selected_template": existing.get("selected_template", "london"),
             "parsed_content": copy.deepcopy(existing.get("parsed_content", {})),
             "ats_score": existing.get("ats_score", 85),
+            "accent_color": existing.get("accent_color", "#3B82F6"),
+            "font_family": existing.get("font_family", "Inter"),
+            "section_order": existing.get("section_order", ResumeService.DEFAULT_SECTION_ORDER),
+            "hidden_sections": existing.get("hidden_sections", []),
             "share_token": str(uuid.uuid4())[:12],
             "created_at": now,
             "updated_at": now
@@ -391,6 +417,12 @@ class ResumeService:
             user_id,
             {
                 "id": resume_id,
+                "title": ver.get("title", "Untitled Resume"),
+                "selected_template": ver.get("selected_template", "london"),
+                "accent_color": ver.get("accent_color", "#3B82F6"),
+                "font_family": ver.get("font_family", "Inter"),
+                "section_order": ver.get("section_order", ResumeService.DEFAULT_SECTION_ORDER),
+                "hidden_sections": ver.get("hidden_sections", []),
                 "resume_data": restored_data
             },
             db

@@ -81,5 +81,104 @@ def test_save_or_update_resume_serialization():
         encoded = jsonable_encoder(result)
         assert encoded["id"] == "65a123456789abcdef012345"
         assert encoded["_id"] == "65a123456789abcdef012345"
+        assert "section_order" in encoded
+        assert "hidden_sections" in encoded
 
     asyncio.run(run())
+
+def test_section_order_persistence_and_restore():
+    from unittest.mock import AsyncMock, MagicMock
+    from bson import ObjectId
+
+    async def run():
+        mock_db = MagicMock()
+        resume_id = "507f1f77bcf86cd799439011"
+        version_id = "507f1f77bcf86cd799439022"
+        custom_order = ["summary", "skills", "experience", "education", "projects", "certifications", "personal"]
+        hidden_secs = ["certifications"]
+
+        mock_resume = {
+            "_id": ObjectId(resume_id),
+            "user_id": "test_user_id",
+            "title": "Full Stack Dev",
+            "selected_template": "tokyo",
+            "parsed_content": {"personal": {"name": "Jane Doe"}},
+            "section_order": custom_order,
+            "hidden_sections": hidden_secs
+        }
+
+        mock_version = {
+            "_id": ObjectId(version_id),
+            "resume_id": resume_id,
+            "user_id": "test_user_id",
+            "title": "Full Stack Dev Classic",
+            "version_name": "v1.0",
+            "resume_data": {"personal": {"name": "Jane Doe v1"}},
+            "selected_template": "classic",
+            "section_order": ["personal", "summary", "skills"],
+            "hidden_sections": []
+        }
+
+        mock_db["resumes"].find_one = AsyncMock(return_value=mock_resume)
+        mock_db["resumes"].update_one = AsyncMock(return_value=MagicMock(matched_count=1))
+        mock_db["resume_versions"].find_one = AsyncMock(return_value=mock_version)
+        mock_db["resume_versions"].insert_one = AsyncMock(return_value=MagicMock(inserted_id="ver_123"))
+
+        # Test restore_version
+        restored = await ResumeService.restore_version(resume_id, version_id, "test_user_id", mock_db)
+        assert restored is not None
+        assert restored["selected_template"] == "classic"
+        assert restored["section_order"] == ["personal", "summary", "skills"]
+        assert restored["hidden_sections"] == []
+
+    asyncio.run(run())
+
+def test_cover_letter_generation_service():
+    from app.services.ai_service import AIService
+
+    async def run():
+        resume_data = {
+            "personal": {"name": "Alex Smith", "email": "alex@example.com"},
+            "summary": "Full stack engineer with 5 years experience.",
+            "skills": ["React", "FastAPI", "MongoDB"],
+            "experience": [{"company": "Tech Corp", "role": "Senior Dev", "details": "Built web apps"}]
+        }
+        res = await AIService.generate_cover_letter(
+            resume_data=resume_data,
+            target_role="Lead Software Engineer",
+            company="Acme Corp",
+            job_description="Looking for a Python/React lead.",
+            tone="Confident"
+        )
+        assert "cover_letter" in res
+        assert len(res["cover_letter"]) > 50
+        assert "Alex Smith" in res["cover_letter"] or "Hiring Manager" in res["cover_letter"]
+
+    asyncio.run(run())
+
+def test_interview_prep_tips_service():
+    from app.services.ai_service import AIService
+
+    async def run():
+        resume_data = {
+            "personal": {"name": "Sam Taylor"},
+            "skills": ["Python", "FastAPI", "PostgreSQL", "Docker"],
+            "experience": [{"company": "Cloud Inc", "role": "Backend Dev", "details": "Designed microservices"}]
+        }
+        res = await AIService.generate_interview_prep_tips(
+            resume_data=resume_data,
+            target_role="Backend Engineer",
+            company="Stripe",
+            job_description="Seeking scalable API engineers.",
+            interview_type="Technical",
+            difficulty="Hard"
+        )
+        assert "likely_questions" in res
+        assert len(res["likely_questions"]) >= 3
+        assert "technical_topics" in res
+        assert len(res["technical_topics"]) >= 3
+        assert "resume_based_questions" in res
+        assert "recommended_preparation" in res
+
+    asyncio.run(run())
+

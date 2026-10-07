@@ -4,6 +4,9 @@ import AIPolishModal from "./AIPolishModal";
 import AIResumeAssistantModal from "./AIResumeAssistantModal";
 import BeforeAfterComparisonModal from "./BeforeAfterComparisonModal";
 import JobMatcherModal from "./JobMatcherModal";
+import CoverLetterModal from "./CoverLetterModal";
+import ResumeInterviewPrepModal from "./ResumeInterviewPrepModal";
+import PrintPreviewModal from "./PrintPreviewModal";
 import { useAuth } from "../../context/AuthContext";
 import { API_BASE_URL } from "../../utils/apiConfig";
 import "./CreateNewWorkspace.css";
@@ -16,6 +19,11 @@ const ACTION_VERBS = {
 
 const TEMPLATE_OPTIONS = [
   { id: "london", name: "London Modern Classic" },
+  { id: "classic", name: "Classic ATS Professional" },
+  { id: "academic", name: "Academic & Research" },
+  { id: "tokyo", name: "Tokyo High-Tech" },
+  { id: "executive", name: "Executive Leadership" },
+  { id: "tech", name: "Tech Minimalist" },
   { id: "harvard", name: "Harvard Executive Classic" },
   { id: "santiago", name: "Santiago Bold Mint" },
   { id: "dublin", name: "Dublin Split Teal" },
@@ -25,6 +33,30 @@ const TEMPLATE_OPTIONS = [
   { id: "brussels", name: "Brussels Slate Sidebar" },
   { id: "prague", name: "Prague Amber Grid" }
 ];
+
+const DEFAULT_SECTION_ORDER = [
+  "personal",
+  "summary",
+  "experience",
+  "education",
+  "skills",
+  "projects",
+  "certifications",
+  "achievements",
+  "languages"
+];
+
+const SECTION_LABELS = {
+  personal: { name: "Personal Details", icon: "👤", number: 1 },
+  summary: { name: "Professional Summary", icon: "✍️", number: 2 },
+  experience: { name: "Work Experience", icon: "💼", number: 3 },
+  education: { name: "Education", icon: "🎓", number: 4 },
+  skills: { name: "Technical Skills", icon: "🛠️", number: 5 },
+  projects: { name: "Projects", icon: "🚀", number: 6 },
+  certifications: { name: "Certifications", icon: "📜", number: 7 },
+  achievements: { name: "Key Achievements", icon: "🏆", number: 8 },
+  languages: { name: "Languages", icon: "🌐", number: 9 }
+};
 
 const CreateNewWorkspace = ({
   selectedTemplate,
@@ -51,7 +83,26 @@ const CreateNewWorkspace = ({
   const [showAssistantModal, setShowAssistantModal] = useState(false);
   const [showDiffModal, setShowDiffModal] = useState(false);
   const [showJobMatcherModal, setShowJobMatcherModal] = useState(false);
+  const [showCoverLetterModal, setShowCoverLetterModal] = useState(false);
+  const [showInterviewPrepModal, setShowInterviewPrepModal] = useState(false);
+  const [showPrintPreviewModal, setShowPrintPreviewModal] = useState(false);
+  const [showReorderDrawer, setShowReorderDrawer] = useState(false);
   const [polishedDataToCompare, setPolishedDataToCompare] = useState(null);
+
+  // Section Ordering & Visibility State
+  const [sectionOrder, setSectionOrder] = useState(() => {
+    if (resumeData?.section_order && Array.isArray(resumeData.section_order) && resumeData.section_order.length > 0) {
+      return resumeData.section_order;
+    }
+    return DEFAULT_SECTION_ORDER;
+  });
+  const [hiddenSections, setHiddenSections] = useState(() => {
+    return (resumeData?.hidden_sections && Array.isArray(resumeData.hidden_sections))
+      ? resumeData.hidden_sections
+      : [];
+  });
+  const [draggedIdx, setDraggedIdx] = useState(null);
+  const [dragOverIdx, setDragOverIdx] = useState(null);
 
   // Fetch Version History
   const handleFetchVersions = async () => {
@@ -83,7 +134,11 @@ const CreateNewWorkspace = ({
         if (res.ok) {
           const restored = await res.json();
           const targetData = restored.parsed_content || restored.resume_data || ver.resume_data;
+          const restoredOrder = restored.section_order || ver.section_order || DEFAULT_SECTION_ORDER;
+          const restoredHidden = restored.hidden_sections || ver.hidden_sections || [];
           setResumeData(targetData);
+          setSectionOrder(restoredOrder);
+          setHiddenSections(restoredHidden);
           alert(`✨ Restored snapshot "${ver.version_name || 'Version'}" successfully!`);
           setShowVersionModal(false);
           return;
@@ -94,9 +149,57 @@ const CreateNewWorkspace = ({
     }
     if (ver.resume_data) {
       setResumeData(ver.resume_data);
-      if (onSaveResume) onSaveResume(ver.resume_data, selectedTemplate);
+      if (ver.section_order) setSectionOrder(ver.section_order);
+      if (ver.hidden_sections) setHiddenSections(ver.hidden_sections);
+      if (onSaveResume) onSaveResume({ ...ver.resume_data, section_order: ver.section_order || sectionOrder, hidden_sections: ver.hidden_sections || hiddenSections }, selectedTemplate);
       alert(`✨ Restored version "${ver.version_name}" successfully!`);
       setShowVersionModal(false);
+    }
+  };
+
+  // Drag and drop section reordering handlers
+  const handleDragStart = (e, index) => {
+    setDraggedIdx(index);
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const handleDragOver = (e, index) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    if (dragOverIdx !== index) {
+      setDragOverIdx(index);
+    }
+  };
+
+  const handleDrop = (e, index) => {
+    e.preventDefault();
+    if (draggedIdx === null || draggedIdx === index) {
+      setDraggedIdx(null);
+      setDragOverIdx(null);
+      return;
+    }
+    const newOrder = [...sectionOrder];
+    const [moved] = newOrder.splice(draggedIdx, 1);
+    newOrder.splice(index, 0, moved);
+    setSectionOrder(newOrder);
+    setDraggedIdx(null);
+    setDragOverIdx(null);
+  };
+
+  const moveSection = (index, delta) => {
+    const newIdx = index + delta;
+    if (newIdx < 0 || newIdx >= sectionOrder.length) return;
+    const newOrder = [...sectionOrder];
+    const [moved] = newOrder.splice(index, 1);
+    newOrder.splice(newIdx, 0, moved);
+    setSectionOrder(newOrder);
+  };
+
+  const toggleHideSection = (secId) => {
+    if (hiddenSections.includes(secId)) {
+      setHiddenSections(hiddenSections.filter(s => s !== secId));
+    } else {
+      setHiddenSections([...hiddenSections, secId]);
     }
   };
 
@@ -166,12 +269,19 @@ const CreateNewWorkspace = ({
   useEffect(() => {
     setSaveStatus("saving");
     const timer = setTimeout(() => {
+      const fullPayload = {
+        ...resumeData,
+        section_order: sectionOrder,
+        hidden_sections: hiddenSections
+      };
       // LocalStorage auto-save
-      localStorage.setItem("active_resume_data", JSON.stringify(resumeData));
+      localStorage.setItem("active_resume_data", JSON.stringify(fullPayload));
+      localStorage.setItem("active_section_order", JSON.stringify(sectionOrder));
+      localStorage.setItem("active_hidden_sections", JSON.stringify(hiddenSections));
       
       // Async server sync if handler provided
       if (onSaveResume) {
-        onSaveResume(resumeData, selectedTemplate)
+        onSaveResume(fullPayload, selectedTemplate)
           .then(() => setSaveStatus("saved"))
           .catch(() => setSaveStatus("saved"));
       } else {
@@ -180,7 +290,7 @@ const CreateNewWorkspace = ({
     }, 1200);
 
     return () => clearTimeout(timer);
-  }, [resumeData, selectedTemplate]);
+  }, [resumeData, selectedTemplate, sectionOrder, hiddenSections]);
 
   // Handle Personal Info Edit
   const handlePersonalChange = (field, val) => {
@@ -533,6 +643,454 @@ const CreateNewWorkspace = ({
   if (hasProjects) atsScore += 10;
   if (hasMetrics) atsScore += 10;
 
+  const renderSectionHeader = (secId, idx) => {
+    const meta = SECTION_LABELS[secId] || { name: secId, icon: "📄", number: idx + 1 };
+    const isHidden = hiddenSections.includes(secId);
+
+    return (
+      <div className="section-drag-header">
+        <div className="section-drag-left">
+          <span
+            className="drag-handle-grip"
+            title="Drag to reorder section"
+            draggable
+            onDragStart={(e) => handleDragStart(e, idx)}
+            onDragOver={(e) => handleDragOver(e, idx)}
+            onDrop={(e) => handleDrop(e, idx)}
+          >
+            ☰
+          </span>
+          <span className="section-number-badge">{idx + 1}</span>
+          <h5 className="section-card-title">
+            <span className="sec-icon">{meta.icon}</span> {meta.name}
+          </h5>
+        </div>
+
+        <div className="section-drag-actions">
+          <button
+            type="button"
+            className="sec-ctrl-btn"
+            title="Move section up"
+            disabled={idx === 0}
+            onClick={() => moveSection(idx, -1)}
+          >
+            ▲
+          </button>
+          <button
+            type="button"
+            className="sec-ctrl-btn"
+            title="Move section down"
+            disabled={idx === sectionOrder.length - 1}
+            onClick={() => moveSection(idx, 1)}
+          >
+            ▼
+          </button>
+          <button
+            type="button"
+            className={`sec-ctrl-btn hide-toggle-btn ${isHidden ? "hidden-active" : ""}`}
+            title={isHidden ? "Show section on resume" : "Hide section from resume"}
+            onClick={() => toggleHideSection(secId)}
+          >
+            {isHidden ? "👁️‍🗨️ Hidden" : "👁️ Visible"}
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  const renderFormSection = (secId, idx) => {
+    const isHidden = hiddenSections.includes(secId);
+
+    switch (secId) {
+      case "summary":
+        return (
+          <div
+            key="summary"
+            className={`field-group-box draggable-section-box ${isHidden ? "is-hidden-section" : ""} ${dragOverIdx === idx ? "drag-target-active" : ""}`}
+            onDragOver={(e) => handleDragOver(e, idx)}
+            onDrop={(e) => handleDrop(e, idx)}
+          >
+            {renderSectionHeader("summary", idx)}
+            {!isHidden && (
+              <textarea
+                rows={3}
+                placeholder="Describe your core strengths, experience, and achievements in concise 20–30 words..."
+                value={resumeData.summary || ""}
+                onChange={(e) => handleSummaryChange(e.target.value)}
+              />
+            )}
+          </div>
+        );
+
+      case "personal":
+        return (
+          <div
+            key="personal"
+            className={`field-group-box draggable-section-box ${isHidden ? "is-hidden-section" : ""} ${dragOverIdx === idx ? "drag-target-active" : ""}`}
+            onDragOver={(e) => handleDragOver(e, idx)}
+            onDrop={(e) => handleDrop(e, idx)}
+          >
+            {renderSectionHeader("personal", idx)}
+            {!isHidden && (
+              <div className="flex-fields">
+                <input
+                  type="text"
+                  placeholder="Full Name"
+                  value={resumeData.personal?.name || ""}
+                  onChange={(e) => handlePersonalChange("name", e.target.value)}
+                />
+                <input
+                  type="text"
+                  placeholder="Address / City, Country"
+                  value={resumeData.personal?.address || ""}
+                  onChange={(e) => handlePersonalChange("address", e.target.value)}
+                />
+                <input
+                  type="text"
+                  placeholder="Mobile / Phone Number"
+                  value={resumeData.personal?.phone || ""}
+                  onChange={(e) => handlePersonalChange("phone", e.target.value)}
+                />
+                <input
+                  type="email"
+                  placeholder="Email Address"
+                  value={resumeData.personal?.email || ""}
+                  onChange={(e) => handlePersonalChange("email", e.target.value)}
+                />
+                <input
+                  type="text"
+                  placeholder="LinkedIn URL"
+                  value={resumeData.personal?.linkedin || ""}
+                  onChange={(e) => handlePersonalChange("linkedin", e.target.value)}
+                />
+                <input
+                  type="text"
+                  placeholder="GitHub URL"
+                  value={resumeData.personal?.github || ""}
+                  onChange={(e) => handlePersonalChange("github", e.target.value)}
+                />
+                <input
+                  type="text"
+                  placeholder="Portfolio URL"
+                  value={resumeData.personal?.portfolio || ""}
+                  onChange={(e) => handlePersonalChange("portfolio", e.target.value)}
+                />
+              </div>
+            )}
+          </div>
+        );
+
+      case "education":
+        return (
+          <div
+            key="education"
+            className={`field-group-box draggable-section-box ${isHidden ? "is-hidden-section" : ""} ${dragOverIdx === idx ? "drag-target-active" : ""}`}
+            onDragOver={(e) => handleDragOver(e, idx)}
+            onDrop={(e) => handleDrop(e, idx)}
+          >
+            {renderSectionHeader("education", idx)}
+            {!isHidden && (
+              <>
+                <div className="section-inline-title">
+                  <span className="sub-helper">List your degrees and institutions</span>
+                  <button className="small-add-btn" onClick={addEducation}>+ Add Education</button>
+                </div>
+                {resumeData.education?.map((edu, eIdx) => (
+                  <div key={eIdx} className="nested-field-card">
+                    <div className="nested-header">
+                      <span>Education #{eIdx + 1} ({edu.duration || '2021 – 2025'})</span>
+                      {resumeData.education.length > 1 && (
+                        <button className="small-del-btn" onClick={() => removeEducation(eIdx)}>Remove</button>
+                      )}
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Institution / College / School Name"
+                      value={edu.institution || ""}
+                      onChange={(e) => handleEducationChange(eIdx, "institution", e.target.value)}
+                    />
+                    <div className="input-row-half">
+                      <input
+                        type="text"
+                        placeholder="Degree (e.g. B.Tech / Intermediate / 10th)"
+                        value={edu.degree || ""}
+                        onChange={(e) => handleEducationChange(eIdx, "degree", e.target.value)}
+                      />
+                      <input
+                        type="text"
+                        placeholder="Branch / Stream (e.g. CSE / MPC / State Board)"
+                        value={edu.branch || ""}
+                        onChange={(e) => handleEducationChange(eIdx, "branch", e.target.value)}
+                      />
+                    </div>
+                    <div className="input-row-half">
+                      <input
+                        type="text"
+                        placeholder="CGPA / Percentage (e.g. 8.9 CGPA / 92%)"
+                        value={edu.cgpa || ""}
+                        onChange={(e) => handleEducationChange(eIdx, "cgpa", e.target.value)}
+                      />
+                      <input
+                        type="text"
+                        placeholder="Duration / Years (e.g. 2021 – 2025)"
+                        value={edu.duration || ""}
+                        onChange={(e) => handleEducationChange(eIdx, "duration", e.target.value)}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </>
+            )}
+          </div>
+        );
+
+      case "skills":
+        return (
+          <div
+            key="skills"
+            className={`field-group-box draggable-section-box ${isHidden ? "is-hidden-section" : ""} ${dragOverIdx === idx ? "drag-target-active" : ""}`}
+            onDragOver={(e) => handleDragOver(e, idx)}
+            onDrop={(e) => handleDrop(e, idx)}
+          >
+            {renderSectionHeader("skills", idx)}
+            {!isHidden && (
+              <input
+                type="text"
+                className="full-width-field"
+                placeholder="React, TypeScript, Node.js, Python, AWS (comma separated)"
+                value={resumeData.skills ? resumeData.skills.join(", ") : ""}
+                onChange={(e) => handleSkillsChange(e.target.value)}
+              />
+            )}
+          </div>
+        );
+
+      case "experience":
+        return (
+          <div
+            key="experience"
+            className={`field-group-box draggable-section-box ${isHidden ? "is-hidden-section" : ""} ${dragOverIdx === idx ? "drag-target-active" : ""}`}
+            onDragOver={(e) => handleDragOver(e, idx)}
+            onDrop={(e) => handleDrop(e, idx)}
+          >
+            {renderSectionHeader("experience", idx)}
+            {!isHidden && (
+              <>
+                <div className="section-inline-title">
+                  <span className="sub-helper">Roles, responsibilities, and achievements</span>
+                  <button className="small-add-btn" onClick={addExperience}>+ Add Position</button>
+                </div>
+                {resumeData.experience?.map((exp, expIdx) => (
+                  <div key={expIdx} className="nested-field-card">
+                    <div className="nested-header">
+                      <span>Position #{expIdx + 1} ({exp.duration || '2021 – 2025'})</span>
+                      {resumeData.experience.length > 1 && (
+                        <button className="small-del-btn" onClick={() => removeExperience(expIdx)}>Remove</button>
+                      )}
+                    </div>
+                    <div className="input-row-half">
+                      <input
+                        type="text"
+                        placeholder="Company Name"
+                        value={exp.company || ""}
+                        onChange={(e) => handleExperienceChange(expIdx, "company", e.target.value)}
+                      />
+                      <input
+                        type="text"
+                        placeholder="Job Role Title"
+                        value={exp.role || ""}
+                        onChange={(e) => handleExperienceChange(expIdx, "role", e.target.value)}
+                      />
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Duration (e.g. 2021 – 2025)"
+                      value={exp.duration || ""}
+                      onChange={(e) => handleExperienceChange(expIdx, "duration", e.target.value)}
+                    />
+                    <textarea
+                      rows={3}
+                      placeholder="Bullet points describing achievements with metrics..."
+                      value={exp.details || ""}
+                      onChange={(e) => handleExperienceChange(expIdx, "details", e.target.value)}
+                    />
+                  </div>
+                ))}
+              </>
+            )}
+          </div>
+        );
+
+      case "projects":
+        return (
+          <div
+            key="projects"
+            className={`field-group-box draggable-section-box ${isHidden ? "is-hidden-section" : ""} ${dragOverIdx === idx ? "drag-target-active" : ""}`}
+            onDragOver={(e) => handleDragOver(e, idx)}
+            onDrop={(e) => handleDrop(e, idx)}
+          >
+            {renderSectionHeader("projects", idx)}
+            {!isHidden && (
+              <>
+                <div className="section-inline-title">
+                  <span className="sub-helper">Key technical and personal projects</span>
+                  <button className="small-add-btn" onClick={addProject}>+ Add Project</button>
+                </div>
+                {resumeData.projects?.map((proj, pIdx) => (
+                  <div key={pIdx} className="nested-field-card">
+                    <div className="nested-header">
+                      <span>Project #{pIdx + 1}</span>
+                      {resumeData.projects.length > 1 && (
+                        <button className="small-del-btn" onClick={() => removeProject(pIdx)}>Remove</button>
+                      )}
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Project Title"
+                      value={proj.name || ""}
+                      onChange={(e) => handleProjectChange(pIdx, "name", e.target.value)}
+                    />
+                    <div className="input-row-half">
+                      <input
+                        type="text"
+                        placeholder="Skills / Tech Used (e.g. React, Node.js)"
+                        value={proj.skillsUsed || ""}
+                        onChange={(e) => handleProjectChange(pIdx, "skillsUsed", e.target.value)}
+                      />
+                      <input
+                        type="text"
+                        placeholder="Project Link (e.g. https://github.com/...)"
+                        value={proj.link || ""}
+                        onChange={(e) => handleProjectChange(pIdx, "link", e.target.value)}
+                      />
+                    </div>
+                    <textarea
+                      rows={3}
+                      placeholder="Project description and key results..."
+                      value={proj.description || ""}
+                      onChange={(e) => handleProjectChange(pIdx, "description", e.target.value)}
+                    />
+                  </div>
+                ))}
+              </>
+            )}
+          </div>
+        );
+
+      case "certifications":
+        return (
+          <div
+            key="certifications"
+            className={`field-group-box draggable-section-box ${isHidden ? "is-hidden-section" : ""} ${dragOverIdx === idx ? "drag-target-active" : ""}`}
+            onDragOver={(e) => handleDragOver(e, idx)}
+            onDrop={(e) => handleDrop(e, idx)}
+          >
+            {renderSectionHeader("certifications", idx)}
+            {!isHidden && (
+              <>
+                <div className="section-inline-title">
+                  <span className="sub-helper">Professional certifications & credentials</span>
+                  <button className="small-add-btn" onClick={addCertification}>+ Add Certification</button>
+                </div>
+                {(resumeData.certifications || []).map((cert, cIdx) => (
+                  <div key={cIdx} className="nested-field-card">
+                    <div className="nested-header">
+                      <span>Certification #{cIdx + 1}</span>
+                      <button className="small-del-btn" onClick={() => removeCertification(cIdx)}>Remove</button>
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Certification Name (e.g. AWS Certified Solutions Architect)"
+                      value={cert.name || ""}
+                      onChange={(e) => handleCertificationChange(cIdx, "name", e.target.value)}
+                    />
+                    <div className="input-row-half">
+                      <input
+                        type="text"
+                        placeholder="Issuing Organization (e.g. Amazon Web Services)"
+                        value={cert.issuer || ""}
+                        onChange={(e) => handleCertificationChange(cIdx, "issuer", e.target.value)}
+                      />
+                      <input
+                        type="text"
+                        placeholder="Year (e.g. 2024)"
+                        value={cert.year || ""}
+                        onChange={(e) => handleCertificationChange(cIdx, "year", e.target.value)}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </>
+            )}
+          </div>
+        );
+
+      case "achievements":
+        return (
+          <div
+            key="achievements"
+            className={`field-group-box draggable-section-box ${isHidden ? "is-hidden-section" : ""} ${dragOverIdx === idx ? "drag-target-active" : ""}`}
+            onDragOver={(e) => handleDragOver(e, idx)}
+            onDrop={(e) => handleDrop(e, idx)}
+          >
+            {renderSectionHeader("achievements", idx)}
+            {!isHidden && (
+              <>
+                <div className="section-inline-title">
+                  <span className="sub-helper">Awards, competitions, hackathons, & honors</span>
+                  <button className="small-add-btn" onClick={addAchievement}>+ Add Achievement</button>
+                </div>
+                {(resumeData.achievements || []).map((ach, aIdx) => (
+                  <div key={aIdx} className="nested-field-card">
+                    <div className="nested-header">
+                      <span>Achievement #{aIdx + 1}</span>
+                      <button className="small-del-btn" onClick={() => removeAchievement(aIdx)}>Remove</button>
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Achievement Title (e.g. 1st Place Global Hackathon)"
+                      value={ach.title || ""}
+                      onChange={(e) => handleAchievementChange(aIdx, "title", e.target.value)}
+                    />
+                    <textarea
+                      rows={2}
+                      placeholder="Details of your accomplishment..."
+                      value={ach.description || ""}
+                      onChange={(e) => handleAchievementChange(aIdx, "description", e.target.value)}
+                    />
+                  </div>
+                ))}
+              </>
+            )}
+          </div>
+        );
+
+      case "languages":
+        return (
+          <div
+            key="languages"
+            className={`field-group-box draggable-section-box ${isHidden ? "is-hidden-section" : ""} ${dragOverIdx === idx ? "drag-target-active" : ""}`}
+            onDragOver={(e) => handleDragOver(e, idx)}
+            onDrop={(e) => handleDrop(e, idx)}
+          >
+            {renderSectionHeader("languages", idx)}
+            {!isHidden && (
+              <input
+                type="text"
+                className="full-width-field"
+                placeholder="English (Native), Spanish (Fluent), German (Intermediate)"
+                value={resumeData.languages ? resumeData.languages.join(", ") : ""}
+                onChange={(e) => handleLanguagesChange(e.target.value)}
+              />
+            )}
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="create-workspace-overlay">
       {/* Top Toolbar */}
@@ -550,6 +1108,30 @@ const CreateNewWorkspace = ({
           <span className={`autosave-status ${saveStatus}`}>
             {saveStatus === "saving" ? "⏳ Saving..." : "✓ Auto-saved"}
           </span>
+
+          <button
+            className={`toolbar-btn secondary-btn reorder-toggle-btn ${showReorderDrawer ? "active" : ""}`}
+            onClick={() => setShowReorderDrawer(!showReorderDrawer)}
+            title="Reorder resume sections via drag & drop"
+          >
+            ⇅ Reorder
+          </button>
+
+          <button
+            className="toolbar-btn secondary-btn cover-letter-btn"
+            onClick={() => setShowCoverLetterModal(true)}
+            title="Generate AI Cover Letter from this resume"
+          >
+            📄 Cover Letter
+          </button>
+
+          <button
+            className="toolbar-btn secondary-btn interview-prep-btn"
+            onClick={() => setShowInterviewPrepModal(true)}
+            title="Generate personalized interview questions & prep"
+          >
+            🎯 Interview Prep
+          </button>
 
           {workspaceMode === "uploaded" ? (
             <button className="toolbar-btn secondary-btn ai-assistant-btn" onClick={() => setShowPolishModal(true)}>
@@ -573,6 +1155,10 @@ const CreateNewWorkspace = ({
             🔗 Share
           </button>
 
+          <button className="toolbar-btn secondary-btn print-prev-btn" onClick={() => setShowPrintPreviewModal(true)}>
+            👁️ Preview
+          </button>
+
           <button
             className="toolbar-btn primary-download"
             onClick={handleDownloadPdfOnly}
@@ -584,312 +1170,86 @@ const CreateNewWorkspace = ({
 
       {/* Main Workspace Body */}
       <div className="workspace-editor-body two-pane">
-          {/* Left Pane: Controls & Inputs */}
-          <div className="workspace-pane left-form-pane">
-            <div className="pane-scroll-area">
-              
-              {/* 1. Professional Summary */}
-              <div className="field-group-box">
-                <h5>✍️ 1. Professional Summary</h5>
-                <textarea
-                  rows={3}
-                  placeholder="Describe your core strengths, experience, and achievements in concise 20–30 words..."
-                  value={resumeData.summary || ""}
-                  onChange={(e) => handleSummaryChange(e.target.value)}
-                />
-              </div>
-
-              {/* 2. Personal Information */}
-              <div className="field-group-box">
-                <h5>👤 2. Personal Details</h5>
-                <div className="flex-fields">
-                  <input
-                    type="text"
-                    placeholder="Full Name"
-                    value={resumeData.personal?.name || ""}
-                    onChange={(e) => handlePersonalChange("name", e.target.value)}
-                  />
-                  <input
-                    type="text"
-                    placeholder="Address / City, Country"
-                    value={resumeData.personal?.address || ""}
-                    onChange={(e) => handlePersonalChange("address", e.target.value)}
-                  />
-                  <input
-                    type="text"
-                    placeholder="Mobile / Phone Number"
-                    value={resumeData.personal?.phone || ""}
-                    onChange={(e) => handlePersonalChange("phone", e.target.value)}
-                  />
-                  <input
-                    type="email"
-                    placeholder="Email Address"
-                    value={resumeData.personal?.email || ""}
-                    onChange={(e) => handlePersonalChange("email", e.target.value)}
-                  />
-                  <input
-                    type="text"
-                    placeholder="LinkedIn URL"
-                    value={resumeData.personal?.linkedin || ""}
-                    onChange={(e) => handlePersonalChange("linkedin", e.target.value)}
-                  />
-                  <input
-                    type="text"
-                    placeholder="GitHub URL"
-                    value={resumeData.personal?.github || ""}
-                    onChange={(e) => handlePersonalChange("github", e.target.value)}
-                  />
-                  <input
-                    type="text"
-                    placeholder="Portfolio URL"
-                    value={resumeData.personal?.portfolio || ""}
-                    onChange={(e) => handlePersonalChange("portfolio", e.target.value)}
-                  />
+        {/* Left Pane: Controls & Inputs */}
+        <div className="workspace-pane left-form-pane">
+          <div className="pane-scroll-area">
+            
+            {/* Quick Drag & Drop Section Reorder Drawer */}
+            {showReorderDrawer && (
+              <div className="section-reorder-drawer">
+                <div className="drawer-header">
+                  <span>☰ Drag & Drop Section Ordering</span>
+                  <button className="drawer-close-btn" onClick={() => setShowReorderDrawer(false)}>✕</button>
+                </div>
+                <p className="drawer-desc">Drag any section handle to reorder, or use arrow buttons. Changes update the live resume preview immediately.</p>
+                <div className="reorder-chips-list">
+                  {sectionOrder.map((secId, i) => {
+                    const meta = SECTION_LABELS[secId] || { name: secId, icon: "📄" };
+                    const isHidden = hiddenSections.includes(secId);
+                    return (
+                      <div
+                        key={secId}
+                        className={`reorder-chip-item ${dragOverIdx === i ? "drop-hover" : ""} ${isHidden ? "is-hidden" : ""}`}
+                        draggable
+                        onDragStart={(e) => handleDragStart(e, i)}
+                        onDragOver={(e) => handleDragOver(e, i)}
+                        onDrop={(e) => handleDrop(e, i)}
+                      >
+                        <span className="chip-grip">☰</span>
+                        <span className="chip-num">{i + 1}</span>
+                        <span className="chip-label">{meta.icon} {meta.name}</span>
+                        <div className="chip-btn-group">
+                          <button
+                            type="button"
+                            disabled={i === 0}
+                            onClick={() => moveSection(i, -1)}
+                            title="Move Up"
+                          >
+                            ▲
+                          </button>
+                          <button
+                            type="button"
+                            disabled={i === sectionOrder.length - 1}
+                            onClick={() => moveSection(i, 1)}
+                            title="Move Down"
+                          >
+                            ▼
+                          </button>
+                          <button
+                            type="button"
+                            className="chip-hide-btn"
+                            onClick={() => toggleHideSection(secId)}
+                            title={isHidden ? "Unhide" : "Hide"}
+                          >
+                            {isHidden ? "👁️‍🗨️" : "👁️"}
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
+            )}
 
-              {/* 3. Education */}
-              <div className="field-group-box">
-                <div className="section-inline-title">
-                  <h5>🎓 3. Education</h5>
-                  <button className="small-add-btn" onClick={addEducation}>+ Add Education</button>
-                </div>
-                {resumeData.education?.map((edu, idx) => (
-                  <div key={idx} className="nested-field-card">
-                    <div className="nested-header">
-                      <span>Education ({edu.duration || '2021 – 2025'})</span>
-                      {resumeData.education.length > 1 && (
-                        <button className="small-del-btn" onClick={() => removeEducation(idx)}>Remove</button>
-                      )}
-                    </div>
-                    <input
-                      type="text"
-                      placeholder="Institution / College / School Name"
-                      value={edu.institution || ""}
-                      onChange={(e) => handleEducationChange(idx, "institution", e.target.value)}
-                    />
-                    <div className="input-row-half">
-                      <input
-                        type="text"
-                        placeholder="Degree (e.g. B.Tech / Intermediate / 10th)"
-                        value={edu.degree || ""}
-                        onChange={(e) => handleEducationChange(idx, "degree", e.target.value)}
-                      />
-                      <input
-                        type="text"
-                        placeholder="Branch / Stream (e.g. CSE / MPC / State Board)"
-                        value={edu.branch || ""}
-                        onChange={(e) => handleEducationChange(idx, "branch", e.target.value)}
-                      />
-                    </div>
-                    <div className="input-row-half">
-                      <input
-                        type="text"
-                        placeholder="CGPA / Percentage (e.g. 8.9 CGPA / 92%)"
-                        value={edu.cgpa || ""}
-                        onChange={(e) => handleEducationChange(idx, "cgpa", e.target.value)}
-                      />
-                      <input
-                        type="text"
-                        placeholder="Duration / Years (e.g. 2021 – 2025)"
-                        value={edu.duration || ""}
-                        onChange={(e) => handleEducationChange(idx, "duration", e.target.value)}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
+            {/* Dynamic Section Forms Rendering */}
+            {sectionOrder.map((secId, idx) => renderFormSection(secId, idx))}
 
-              {/* 4. Technical Skills */}
-              <div className="field-group-box">
-                <h5>🛠️ 4. Technical Skills</h5>
-                <input
-                  type="text"
-                  className="full-width-field"
-                  placeholder="React, TypeScript, Node.js, Python, AWS (comma separated)"
-                  value={resumeData.skills ? resumeData.skills.join(", ") : ""}
-                  onChange={(e) => handleSkillsChange(e.target.value)}
-                />
-              </div>
-
-              {/* 5. Work Experience */}
-              <div className="field-group-box">
-                <div className="section-inline-title">
-                  <h5>💼 5. Work Experience</h5>
-                  <button className="small-add-btn" onClick={addExperience}>+ Add Position</button>
-                </div>
-                {resumeData.experience?.map((exp, idx) => (
-                  <div key={idx} className="nested-field-card">
-                    <div className="nested-header">
-                      <span>Experience ({exp.duration || '2021 – 2025'})</span>
-                      {resumeData.experience.length > 1 && (
-                        <button className="small-del-btn" onClick={() => removeExperience(idx)}>Remove</button>
-                      )}
-                    </div>
-                    <div className="input-row-half">
-                      <input
-                        type="text"
-                        placeholder="Company Name"
-                        value={exp.company || ""}
-                        onChange={(e) => handleExperienceChange(idx, "company", e.target.value)}
-                      />
-                      <input
-                        type="text"
-                        placeholder="Job Role Title"
-                        value={exp.role || ""}
-                        onChange={(e) => handleExperienceChange(idx, "role", e.target.value)}
-                      />
-                    </div>
-                    <input
-                      type="text"
-                      placeholder="Duration (e.g. 2021 – 2025)"
-                      value={exp.duration || ""}
-                      onChange={(e) => handleExperienceChange(idx, "duration", e.target.value)}
-                    />
-                    <textarea
-                      rows={3}
-                      placeholder="Bullet points describing achievements with metrics..."
-                      value={exp.details || ""}
-                      onChange={(e) => handleExperienceChange(idx, "details", e.target.value)}
-                    />
-                  </div>
-                ))}
-              </div>
-
-              {/* 6. Projects */}
-              <div className="field-group-box">
-                <div className="section-inline-title">
-                  <h5>🚀 6. Projects</h5>
-                  <button className="small-add-btn" onClick={addProject}>+ Add Project</button>
-                </div>
-                {resumeData.projects?.map((proj, idx) => (
-                  <div key={idx} className="nested-field-card">
-                    <div className="nested-header">
-                      <span>Project Details</span>
-                      {resumeData.projects.length > 1 && (
-                        <button className="small-del-btn" onClick={() => removeProject(idx)}>Remove</button>
-                      )}
-                    </div>
-                    <input
-                      type="text"
-                      placeholder="Project Title"
-                      value={proj.name || ""}
-                      onChange={(e) => handleProjectChange(idx, "name", e.target.value)}
-                    />
-                    <div className="input-row-half">
-                      <input
-                        type="text"
-                        placeholder="Skills / Tech Used (e.g. React, Node.js)"
-                        value={proj.skillsUsed || ""}
-                        onChange={(e) => handleProjectChange(idx, "skillsUsed", e.target.value)}
-                      />
-                      <input
-                        type="text"
-                        placeholder="Project Link (e.g. https://github.com/...)"
-                        value={proj.link || ""}
-                        onChange={(e) => handleProjectChange(idx, "link", e.target.value)}
-                      />
-                    </div>
-                    <textarea
-                      rows={3}
-                      placeholder="Project description and key results..."
-                      value={proj.description || ""}
-                      onChange={(e) => handleProjectChange(idx, "description", e.target.value)}
-                    />
-                  </div>
-                ))}
-              </div>
-
-              {/* 7. Certifications */}
-              <div className="field-group-box">
-                <div className="section-inline-title">
-                  <h5>📜 7. Certifications</h5>
-                  <button className="small-add-btn" onClick={addCertification}>+ Add Certification</button>
-                </div>
-                {(resumeData.certifications || []).map((cert, idx) => (
-                  <div key={idx} className="nested-field-card">
-                    <div className="nested-header">
-                      <span>Certification ({cert.year || '2021 – 2025'})</span>
-                      <button className="small-del-btn" onClick={() => removeCertification(idx)}>Remove</button>
-                    </div>
-                    <input
-                      type="text"
-                      placeholder="Certification Name (e.g. AWS Certified Solutions Architect)"
-                      value={cert.name || ""}
-                      onChange={(e) => handleCertificationChange(idx, "name", e.target.value)}
-                    />
-                    <div className="input-row-half">
-                      <input
-                        type="text"
-                        placeholder="Issuing Organization (e.g. Amazon Web Services)"
-                        value={cert.issuer || ""}
-                        onChange={(e) => handleCertificationChange(idx, "issuer", e.target.value)}
-                      />
-                      <input
-                        type="text"
-                        placeholder="Year (e.g. 2021 – 2025)"
-                        value={cert.year || ""}
-                        onChange={(e) => handleCertificationChange(idx, "year", e.target.value)}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* 8. Achievements */}
-              <div className="field-group-box">
-                <div className="section-inline-title">
-                  <h5>🏆 8. Key Achievements</h5>
-                  <button className="small-add-btn" onClick={addAchievement}>+ Add Achievement</button>
-                </div>
-                {(resumeData.achievements || []).map((ach, idx) => (
-                  <div key={idx} className="nested-field-card">
-                    <div className="nested-header">
-                      <span>Achievement Details</span>
-                      <button className="small-del-btn" onClick={() => removeAchievement(idx)}>Remove</button>
-                    </div>
-                    <input
-                      type="text"
-                      placeholder="Achievement Title (e.g. 1st Place Global Hackathon)"
-                      value={ach.title || ""}
-                      onChange={(e) => handleAchievementChange(idx, "title", e.target.value)}
-                    />
-                    <textarea
-                      rows={2}
-                      placeholder="Details of your accomplishment..."
-                      value={ach.description || ""}
-                      onChange={(e) => handleAchievementChange(idx, "description", e.target.value)}
-                    />
-                  </div>
-                ))}
-              </div>
-
-              {/* 9. Languages */}
-              <div className="field-group-box">
-                <h5>🌐 9. Languages</h5>
-                <input
-                  type="text"
-                  className="full-width-field"
-                  placeholder="English (Native), Spanish (Fluent), German (Intermediate)"
-                  value={resumeData.languages ? resumeData.languages.join(", ") : ""}
-                  onChange={(e) => handleLanguagesChange(e.target.value)}
-                />
-              </div>
-
-            </div>
-          </div>
-
-          {/* Right Pane: Live Resume Preview */}
-          <div className="workspace-pane right-preview-pane">
-            <div className="pane-scroll-area preview-sheet-area">
-              <ResumePreview
-                resumeData={resumeData}
-                selectedTemplate={selectedTemplate}
-                setResumeData={setResumeData}
-              />
-            </div>
           </div>
         </div>
+
+        {/* Right Pane: Live Resume Preview */}
+        <div className="workspace-pane right-preview-pane">
+          <div className="pane-scroll-area preview-sheet-area">
+            <ResumePreview
+              resumeData={resumeData}
+              selectedTemplate={selectedTemplate}
+              setResumeData={setResumeData}
+              sectionOrder={sectionOrder}
+              hiddenSections={hiddenSections}
+            />
+          </div>
+        </div>
+      </div>
 
       {/* Share Link Modal */}
       {showShareModal && (
@@ -1250,6 +1610,32 @@ const CreateNewWorkspace = ({
         resumeData={resumeData}
         setResumeData={setResumeData}
         onSaveResume={onSaveResume}
+      />
+
+      <CoverLetterModal
+        isOpen={showCoverLetterModal}
+        onClose={() => setShowCoverLetterModal(false)}
+        resumeData={resumeData}
+        resumeId={resumeId}
+        authFetch={authFetch}
+      />
+
+      <ResumeInterviewPrepModal
+        isOpen={showInterviewPrepModal}
+        onClose={() => setShowInterviewPrepModal(false)}
+        resumeData={resumeData}
+        resumeId={resumeId}
+        authFetch={authFetch}
+      />
+
+      <PrintPreviewModal
+        isOpen={showPrintPreviewModal}
+        onClose={() => setShowPrintPreviewModal(false)}
+        resumeData={resumeData}
+        selectedTemplate={selectedTemplate}
+        sectionOrder={sectionOrder}
+        hiddenSections={hiddenSections}
+        onDownloadDocx={handleDownloadDocx}
       />
     </div>
   );

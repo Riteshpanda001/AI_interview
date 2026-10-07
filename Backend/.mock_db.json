@@ -1,6 +1,6 @@
 {
   "ats_analyses": {
-    "6ac142f3bf6e10c8d1d974e2": {
+    "6ac6a16692e7cbb1931c8368": {
       "user_id": "test-user-ats-history-99",
       "resume_id": "res-1",
       "job_title": "Software Engineer",
@@ -94,19 +94,19 @@
           "Collaboration"
         ],
         "missing": [
-          "Customer Focus",
-          "Mentorship",
-          "Communication",
-          "Leadership",
-          "Time Management",
           "Attention to Detail",
-          "Strategic Planning",
-          "Problem Solving",
-          "Collaboration",
-          "Innovation",
-          "Adaptability",
           "Ownership",
-          "Critical Thinking"
+          "Time Management",
+          "Strategic Planning",
+          "Customer Focus",
+          "Problem Solving",
+          "Mentorship",
+          "Innovation",
+          "Leadership",
+          "Communication",
+          "Adaptability",
+          "Critical Thinking",
+          "Collaboration"
         ]
       },
       "experience_level": {
@@ -140,10 +140,10 @@
       ],
       "detailed_feedback": "Candidate achieved a deterministic ATS match score of 52%. Skills match score is 25/25, with 1 matched skill(s) and 0 gap(s) identified.",
       "ai_engine": "Deterministic Matrix & Gemini Explanation Engine",
-      "created_at": "2026-10-03T18:01:23.212722+00:00",
-      "_id": "6ac142f3bf6e10c8d1d974e2"
+      "created_at": "2026-10-07T19:45:42.611097+00:00",
+      "_id": "6ac6a16692e7cbb1931c8368"
     },
-    "6ac142f5bf6e10c8d1d974e4": {
+    "6ac6a16792e7cbb1931c836a": {
       "user_id": "test-user-ats-history-99",
       "resume_id": "res-1",
       "job_title": "Frontend Engineer",
@@ -237,19 +237,19 @@
           "Collaboration"
         ],
         "missing": [
-          "Customer Focus",
-          "Mentorship",
-          "Communication",
-          "Leadership",
-          "Time Management",
           "Attention to Detail",
-          "Strategic Planning",
-          "Problem Solving",
-          "Collaboration",
-          "Innovation",
-          "Adaptability",
           "Ownership",
-          "Critical Thinking"
+          "Time Management",
+          "Strategic Planning",
+          "Customer Focus",
+          "Problem Solving",
+          "Mentorship",
+          "Innovation",
+          "Leadership",
+          "Communication",
+          "Adaptability",
+          "Critical Thinking",
+          "Collaboration"
         ]
       },
       "experience_level": {
@@ -283,8 +283,8 @@
       ],
       "detailed_feedback": "Candidate achieved a deterministic ATS match score of 52%. Skills match score is 25/25, with 1 matched skill(s) and 0 gap(s) identified.",
       "ai_engine": "Deterministic Matrix & Gemini Explanation Engine",
-      "created_at": "2026-10-03T18:01:25.222341+00:00",
-      "_id": "6ac142f5bf6e10c8d1d974e4"
+      "created_at": "2026-10-07T19:45:43.900690+00:00",
+      "_id": "6ac6a16792e7cbb1931c836a"
     }
   },
   "activities": {
@@ -383,6 +383,462 @@
       },
       "created_at": "2026-10-03T18:01:25.223986+00:00",
       "_id": "6ac142f5bf6e10c8d1d974e5"
+    },
+    "6ac67ee5b8a98baf0369e213": {
+      "user_id": "test-user-ats-history-99",
+      "type": "ATS_ANALYZED",
+      "title": "\ud83d\udcc4 Resume Analyzed with ATS Engine",
+      "description": "Target Role: Software Engineer | ATS Score: 52%",
+      "metadata": {
+        "score": 52,
+        "job_title": "Software Engineer"
+      },
+      "created_at": "2026-10-07T17:18:29.787758+00:00",
+      "_id": "6ac67ee5b8a98baf0369e213"
+    },
+    "6ac67ee7b8a98baf0369e215": {
+      "user_id": "test-user-ats-history-99",
+      "type": "ATS_ANALYZED",
+      "title": "\ud83d\udcc4 Resume Analyzed with ATS Engine",
+      "description": "Target Role: Frontend Engineer | ATS Score: 52%",
+      "metadata": {
+        "score": 52,
+        "job_title": "Frontend Engineer"
+      },
+      "created_at": "2026-10-07T17:18:31.634260+00:00",
+      "_id": "6ac67ee7b8a98baf0369e215"
+    },
+    "6ac68b5d1f5a4d7731c905b2": {
+      "user_id": "test-user-ats-history-99",
+      "type": "ATS_ANALYZED",
+      "title": "\ud83d\udcc4 Resume Analyzed with ATS Engine",
+      "description": "Target Role: Software Engineer | ATS Score: 52%",
+      "metadata": {
+        "score": 52,
+        "job_title": "Software Engineer"
+      },
+      "created_at": "2026-10-07T18:11:41.888314+00:00",
+      "_id": "6ac68b5d1f5a4d7731c905b2"
+    },
+    "6ac68b5f1f5a4d7731c905b4": {
+      "user_id": "test-user-ats-history-99",
+      "type": "ATS_ANALYZED",
+      "title": "\ud83d\udcc4 Resume Analyzed with ATS Engine",
+      "description": "Target Role: Frontend Engineer | ATS Score: 52%",
+      "metadata": {
+        "score": 52,
+        "job_title": "Frontend Engineer"
+      },
+      "created_at": "2026-10-07T18:11:43.239021+00:00",
+      "_id": "6ac68b5f1f5a4d7731c905b4"
+    },
+    "6ac68d849c95f678e3a34ed2": {
+      "user_id": "test-user-ats-history-99",
+      "type": "ATS_ANALYZED",
+      "title": "\ud83d\udcc4 Resume Analyzed with ATS Engine",
+      "description": "Target Role: Software Engineer | ATS Score: 52%",
+      "metadata": {
+        "score": 52,
+        "job_title": "Software Engineer"
+      },
+      "created_at": "2026-10-07T18:20:52.960141+00:00",
+      "_id": "6ac68d849c95f678e3a34ed2"
+    },
+    "6ac68d869c95f678e3a34ed4": {
+      "user_id": "test-user-ats-history-99",
+      "type": "ATS_ANALYZED",
+      "title": "\ud83d\udcc4 Resume Analyzed with ATS Engine",
+      "description": "Target Role: Frontend Engineer | ATS Score: 52%",
+      "metadata": {
+        "score": 52,
+        "job_title": "Frontend Engineer"
+      },
+      "created_at": "2026-10-07T18:20:54.287561+00:00",
+      "_id": "6ac68d869c95f678e3a34ed4"
+    },
+    "6ac68dc1ff7298c1227e44a2": {
+      "user_id": "test-user-ats-history-99",
+      "type": "ATS_ANALYZED",
+      "title": "\ud83d\udcc4 Resume Analyzed with ATS Engine",
+      "description": "Target Role: Software Engineer | ATS Score: 52%",
+      "metadata": {
+        "score": 52,
+        "job_title": "Software Engineer"
+      },
+      "created_at": "2026-10-07T18:21:53.615744+00:00",
+      "_id": "6ac68dc1ff7298c1227e44a2"
+    },
+    "6ac68dc2ff7298c1227e44a4": {
+      "user_id": "test-user-ats-history-99",
+      "type": "ATS_ANALYZED",
+      "title": "\ud83d\udcc4 Resume Analyzed with ATS Engine",
+      "description": "Target Role: Frontend Engineer | ATS Score: 52%",
+      "metadata": {
+        "score": 52,
+        "job_title": "Frontend Engineer"
+      },
+      "created_at": "2026-10-07T18:21:54.564877+00:00",
+      "_id": "6ac68dc2ff7298c1227e44a4"
+    },
+    "6ac68e0a430c6cccb2dfbc96": {
+      "user_id": "test-user-ats-history-99",
+      "type": "ATS_ANALYZED",
+      "title": "\ud83d\udcc4 Resume Analyzed with ATS Engine",
+      "description": "Target Role: Software Engineer | ATS Score: 52%",
+      "metadata": {
+        "score": 52,
+        "job_title": "Software Engineer"
+      },
+      "created_at": "2026-10-07T18:23:06.223267+00:00",
+      "_id": "6ac68e0a430c6cccb2dfbc96"
+    },
+    "6ac68e0b430c6cccb2dfbc98": {
+      "user_id": "test-user-ats-history-99",
+      "type": "ATS_ANALYZED",
+      "title": "\ud83d\udcc4 Resume Analyzed with ATS Engine",
+      "description": "Target Role: Frontend Engineer | ATS Score: 52%",
+      "metadata": {
+        "score": 52,
+        "job_title": "Frontend Engineer"
+      },
+      "created_at": "2026-10-07T18:23:07.172256+00:00",
+      "_id": "6ac68e0b430c6cccb2dfbc98"
+    },
+    "6ac68e731e7fa2cfbfd0f216": {
+      "user_id": "test-user-ats-history-99",
+      "type": "ATS_ANALYZED",
+      "title": "\ud83d\udcc4 Resume Analyzed with ATS Engine",
+      "description": "Target Role: Software Engineer | ATS Score: 52%",
+      "metadata": {
+        "score": 52,
+        "job_title": "Software Engineer"
+      },
+      "created_at": "2026-10-07T18:24:51.206685+00:00",
+      "_id": "6ac68e731e7fa2cfbfd0f216"
+    },
+    "6ac68e751e7fa2cfbfd0f218": {
+      "user_id": "test-user-ats-history-99",
+      "type": "ATS_ANALYZED",
+      "title": "\ud83d\udcc4 Resume Analyzed with ATS Engine",
+      "description": "Target Role: Frontend Engineer | ATS Score: 52%",
+      "metadata": {
+        "score": 52,
+        "job_title": "Frontend Engineer"
+      },
+      "created_at": "2026-10-07T18:24:53.138051+00:00",
+      "_id": "6ac68e751e7fa2cfbfd0f218"
+    },
+    "6ac68ebd29b3a6bc2f47cbd9": {
+      "user_id": "test-user-ats-history-99",
+      "type": "ATS_ANALYZED",
+      "title": "\ud83d\udcc4 Resume Analyzed with ATS Engine",
+      "description": "Target Role: Software Engineer | ATS Score: 52%",
+      "metadata": {
+        "score": 52,
+        "job_title": "Software Engineer"
+      },
+      "created_at": "2026-10-07T18:26:05.688497+00:00",
+      "_id": "6ac68ebd29b3a6bc2f47cbd9"
+    },
+    "6ac68ebf29b3a6bc2f47cbdb": {
+      "user_id": "test-user-ats-history-99",
+      "type": "ATS_ANALYZED",
+      "title": "\ud83d\udcc4 Resume Analyzed with ATS Engine",
+      "description": "Target Role: Frontend Engineer | ATS Score: 52%",
+      "metadata": {
+        "score": 52,
+        "job_title": "Frontend Engineer"
+      },
+      "created_at": "2026-10-07T18:26:07.174695+00:00",
+      "_id": "6ac68ebf29b3a6bc2f47cbdb"
+    },
+    "6ac68fbc559e10a442cfbefc": {
+      "user_id": "test-user-ats-history-99",
+      "type": "ATS_ANALYZED",
+      "title": "\ud83d\udcc4 Resume Analyzed with ATS Engine",
+      "description": "Target Role: Software Engineer | ATS Score: 52%",
+      "metadata": {
+        "score": 52,
+        "job_title": "Software Engineer"
+      },
+      "created_at": "2026-10-07T18:30:20.321641+00:00",
+      "_id": "6ac68fbc559e10a442cfbefc"
+    },
+    "6ac68fbe559e10a442cfbefe": {
+      "user_id": "test-user-ats-history-99",
+      "type": "ATS_ANALYZED",
+      "title": "\ud83d\udcc4 Resume Analyzed with ATS Engine",
+      "description": "Target Role: Frontend Engineer | ATS Score: 52%",
+      "metadata": {
+        "score": 52,
+        "job_title": "Frontend Engineer"
+      },
+      "created_at": "2026-10-07T18:30:22.077138+00:00",
+      "_id": "6ac68fbe559e10a442cfbefe"
+    },
+    "6ac69234ca591500ad460d56": {
+      "user_id": "test-user-ats-history-99",
+      "type": "ATS_ANALYZED",
+      "title": "\ud83d\udcc4 Resume Analyzed with ATS Engine",
+      "description": "Target Role: Software Engineer | ATS Score: 52%",
+      "metadata": {
+        "score": 52,
+        "job_title": "Software Engineer"
+      },
+      "created_at": "2026-10-07T18:40:52.029801+00:00",
+      "_id": "6ac69234ca591500ad460d56"
+    },
+    "6ac69235ca591500ad460d58": {
+      "user_id": "test-user-ats-history-99",
+      "type": "ATS_ANALYZED",
+      "title": "\ud83d\udcc4 Resume Analyzed with ATS Engine",
+      "description": "Target Role: Frontend Engineer | ATS Score: 52%",
+      "metadata": {
+        "score": 52,
+        "job_title": "Frontend Engineer"
+      },
+      "created_at": "2026-10-07T18:40:53.007816+00:00",
+      "_id": "6ac69235ca591500ad460d58"
+    },
+    "6ac69475070603579691e1a6": {
+      "user_id": "test-user-ats-history-99",
+      "type": "ATS_ANALYZED",
+      "title": "\ud83d\udcc4 Resume Analyzed with ATS Engine",
+      "description": "Target Role: Software Engineer | ATS Score: 52%",
+      "metadata": {
+        "score": 52,
+        "job_title": "Software Engineer"
+      },
+      "created_at": "2026-10-07T18:50:29.431553+00:00",
+      "_id": "6ac69475070603579691e1a6"
+    },
+    "6ac69476070603579691e1a8": {
+      "user_id": "test-user-ats-history-99",
+      "type": "ATS_ANALYZED",
+      "title": "\ud83d\udcc4 Resume Analyzed with ATS Engine",
+      "description": "Target Role: Frontend Engineer | ATS Score: 52%",
+      "metadata": {
+        "score": 52,
+        "job_title": "Frontend Engineer"
+      },
+      "created_at": "2026-10-07T18:50:30.460367+00:00",
+      "_id": "6ac69476070603579691e1a8"
+    },
+    "6ac69638d2d8b58871bedac8": {
+      "user_id": "test-user-ats-history-99",
+      "type": "ATS_ANALYZED",
+      "title": "\ud83d\udcc4 Resume Analyzed with ATS Engine",
+      "description": "Target Role: Software Engineer | ATS Score: 52%",
+      "metadata": {
+        "score": 52,
+        "job_title": "Software Engineer"
+      },
+      "created_at": "2026-10-07T18:58:00.419474+00:00",
+      "_id": "6ac69638d2d8b58871bedac8"
+    },
+    "6ac69639d2d8b58871bedaca": {
+      "user_id": "test-user-ats-history-99",
+      "type": "ATS_ANALYZED",
+      "title": "\ud83d\udcc4 Resume Analyzed with ATS Engine",
+      "description": "Target Role: Frontend Engineer | ATS Score: 52%",
+      "metadata": {
+        "score": 52,
+        "job_title": "Frontend Engineer"
+      },
+      "created_at": "2026-10-07T18:58:01.535232+00:00",
+      "_id": "6ac69639d2d8b58871bedaca"
+    },
+    "6ac69871d43cadf970c84046": {
+      "user_id": "test-user-ats-history-99",
+      "type": "ATS_ANALYZED",
+      "title": "\ud83d\udcc4 Resume Analyzed with ATS Engine",
+      "description": "Target Role: Software Engineer | ATS Score: 52%",
+      "metadata": {
+        "score": 52,
+        "job_title": "Software Engineer"
+      },
+      "created_at": "2026-10-07T19:07:29.462093+00:00",
+      "_id": "6ac69871d43cadf970c84046"
+    },
+    "6ac69872d43cadf970c84048": {
+      "user_id": "test-user-ats-history-99",
+      "type": "ATS_ANALYZED",
+      "title": "\ud83d\udcc4 Resume Analyzed with ATS Engine",
+      "description": "Target Role: Frontend Engineer | ATS Score: 52%",
+      "metadata": {
+        "score": 52,
+        "job_title": "Frontend Engineer"
+      },
+      "created_at": "2026-10-07T19:07:30.743775+00:00",
+      "_id": "6ac69872d43cadf970c84048"
+    },
+    "6ac69941555e97c330d33bec": {
+      "user_id": "test-user-ats-history-99",
+      "type": "ATS_ANALYZED",
+      "title": "\ud83d\udcc4 Resume Analyzed with ATS Engine",
+      "description": "Target Role: Software Engineer | ATS Score: 52%",
+      "metadata": {
+        "score": 52,
+        "job_title": "Software Engineer"
+      },
+      "created_at": "2026-10-07T19:10:57.490890+00:00",
+      "_id": "6ac69941555e97c330d33bec"
+    },
+    "6ac69942555e97c330d33bee": {
+      "user_id": "test-user-ats-history-99",
+      "type": "ATS_ANALYZED",
+      "title": "\ud83d\udcc4 Resume Analyzed with ATS Engine",
+      "description": "Target Role: Frontend Engineer | ATS Score: 52%",
+      "metadata": {
+        "score": 52,
+        "job_title": "Frontend Engineer"
+      },
+      "created_at": "2026-10-07T19:10:58.464637+00:00",
+      "_id": "6ac69942555e97c330d33bee"
+    },
+    "6ac69b58269aa763052a8268": {
+      "user_id": "test-user-ats-history-99",
+      "type": "ATS_ANALYZED",
+      "title": "\ud83d\udcc4 Resume Analyzed with ATS Engine",
+      "description": "Target Role: Software Engineer | ATS Score: 52%",
+      "metadata": {
+        "score": 52,
+        "job_title": "Software Engineer"
+      },
+      "created_at": "2026-10-07T19:19:52.653591+00:00",
+      "_id": "6ac69b58269aa763052a8268"
+    },
+    "6ac69b59269aa763052a826a": {
+      "user_id": "test-user-ats-history-99",
+      "type": "ATS_ANALYZED",
+      "title": "\ud83d\udcc4 Resume Analyzed with ATS Engine",
+      "description": "Target Role: Frontend Engineer | ATS Score: 52%",
+      "metadata": {
+        "score": 52,
+        "job_title": "Frontend Engineer"
+      },
+      "created_at": "2026-10-07T19:19:53.735239+00:00",
+      "_id": "6ac69b59269aa763052a826a"
+    },
+    "6ac69e8879e82fa79d9acd99": {
+      "user_id": "test-user-ats-history-99",
+      "type": "ATS_ANALYZED",
+      "title": "\ud83d\udcc4 Resume Analyzed with ATS Engine",
+      "description": "Target Role: Software Engineer | ATS Score: 52%",
+      "metadata": {
+        "score": 52,
+        "job_title": "Software Engineer"
+      },
+      "created_at": "2026-10-07T19:33:28.159549+00:00",
+      "_id": "6ac69e8879e82fa79d9acd99"
+    },
+    "6ac69e8979e82fa79d9acd9b": {
+      "user_id": "test-user-ats-history-99",
+      "type": "ATS_ANALYZED",
+      "title": "\ud83d\udcc4 Resume Analyzed with ATS Engine",
+      "description": "Target Role: Frontend Engineer | ATS Score: 52%",
+      "metadata": {
+        "score": 52,
+        "job_title": "Frontend Engineer"
+      },
+      "created_at": "2026-10-07T19:33:29.496276+00:00",
+      "_id": "6ac69e8979e82fa79d9acd9b"
+    },
+    "6ac6a07e5301d04e588df313": {
+      "user_id": "test-user-ats-history-99",
+      "type": "ATS_ANALYZED",
+      "title": "\ud83d\udcc4 Resume Analyzed with ATS Engine",
+      "description": "Target Role: Software Engineer | ATS Score: 52%",
+      "metadata": {
+        "score": 52,
+        "job_title": "Software Engineer"
+      },
+      "created_at": "2026-10-07T19:41:50.014652+00:00",
+      "_id": "6ac6a07e5301d04e588df313"
+    },
+    "6ac6a07e5301d04e588df315": {
+      "user_id": "test-user-ats-history-99",
+      "type": "ATS_ANALYZED",
+      "title": "\ud83d\udcc4 Resume Analyzed with ATS Engine",
+      "description": "Target Role: Frontend Engineer | ATS Score: 52%",
+      "metadata": {
+        "score": 52,
+        "job_title": "Frontend Engineer"
+      },
+      "created_at": "2026-10-07T19:41:50.947985+00:00",
+      "_id": "6ac6a07e5301d04e588df315"
+    },
+    "6ac6a0acd73f2e2b6a1c160c": {
+      "user_id": "test-user-ats-history-99",
+      "type": "ATS_ANALYZED",
+      "title": "\ud83d\udcc4 Resume Analyzed with ATS Engine",
+      "description": "Target Role: Software Engineer | ATS Score: 52%",
+      "metadata": {
+        "score": 52,
+        "job_title": "Software Engineer"
+      },
+      "created_at": "2026-10-07T19:42:36.625282+00:00",
+      "_id": "6ac6a0acd73f2e2b6a1c160c"
+    },
+    "6ac6a0aed73f2e2b6a1c160e": {
+      "user_id": "test-user-ats-history-99",
+      "type": "ATS_ANALYZED",
+      "title": "\ud83d\udcc4 Resume Analyzed with ATS Engine",
+      "description": "Target Role: Frontend Engineer | ATS Score: 52%",
+      "metadata": {
+        "score": 52,
+        "job_title": "Frontend Engineer"
+      },
+      "created_at": "2026-10-07T19:42:38.459244+00:00",
+      "_id": "6ac6a0aed73f2e2b6a1c160e"
+    },
+    "6ac6a0db66f990ae99bbdeb7": {
+      "user_id": "test-user-ats-history-99",
+      "type": "ATS_ANALYZED",
+      "title": "\ud83d\udcc4 Resume Analyzed with ATS Engine",
+      "description": "Target Role: Software Engineer | ATS Score: 52%",
+      "metadata": {
+        "score": 52,
+        "job_title": "Software Engineer"
+      },
+      "created_at": "2026-10-07T19:43:23.300289+00:00",
+      "_id": "6ac6a0db66f990ae99bbdeb7"
+    },
+    "6ac6a0dc66f990ae99bbdeb9": {
+      "user_id": "test-user-ats-history-99",
+      "type": "ATS_ANALYZED",
+      "title": "\ud83d\udcc4 Resume Analyzed with ATS Engine",
+      "description": "Target Role: Frontend Engineer | ATS Score: 52%",
+      "metadata": {
+        "score": 52,
+        "job_title": "Frontend Engineer"
+      },
+      "created_at": "2026-10-07T19:43:24.549743+00:00",
+      "_id": "6ac6a0dc66f990ae99bbdeb9"
+    },
+    "6ac6a16692e7cbb1931c8369": {
+      "user_id": "test-user-ats-history-99",
+      "type": "ATS_ANALYZED",
+      "title": "\ud83d\udcc4 Resume Analyzed with ATS Engine",
+      "description": "Target Role: Software Engineer | ATS Score: 52%",
+      "metadata": {
+        "score": 52,
+        "job_title": "Software Engineer"
+      },
+      "created_at": "2026-10-07T19:45:42.613093+00:00",
+      "_id": "6ac6a16692e7cbb1931c8369"
+    },
+    "6ac6a16792e7cbb1931c836b": {
+      "user_id": "test-user-ats-history-99",
+      "type": "ATS_ANALYZED",
+      "title": "\ud83d\udcc4 Resume Analyzed with ATS Engine",
+      "description": "Target Role: Frontend Engineer | ATS Score: 52%",
+      "metadata": {
+        "score": 52,
+        "job_title": "Frontend Engineer"
+      },
+      "created_at": "2026-10-07T19:45:43.902485+00:00",
+      "_id": "6ac6a16792e7cbb1931c836b"
     }
   }
 }

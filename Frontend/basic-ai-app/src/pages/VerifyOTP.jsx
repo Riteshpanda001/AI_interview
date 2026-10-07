@@ -198,44 +198,45 @@ const VerifyOTP = () => {
     setSuccessMsg("");
 
     try {
-      if (mode === "EMAIL_OTP") {
-        if (!email) {
-          setErrorMsg("Email address is missing. Please return to login or registration.");
-          return;
-        }
-        const res = await verifyOtp(email, otpCode, "email_verification");
-        if (res?.require_mobile_otp) {
-          setSuccessMsg("Email verified! A 6-digit verification code has been sent to your mobile number.");
-          if (res.phone) setPhone(res.phone);
-          setTimeout(() => {
-            setMode("MOBILE_OTP");
-            setOtpDigits(["", "", "", "", "", ""]);
-            setTimeLeft(60);
-            setResendOtpCooldown(60);
-            setSuccessMsg("");
-          }, 1500);
-        } else if (res?.access_token) {
-          setSuccessMsg("Account successfully verified! Redirecting to Dashboard...");
-          setTimeout(() => {
-            navigate("/dashboard");
-          }, 1200);
-        }
-      } else {
-        // MOBILE_OTP mode
+      let res;
+      if (mode === "MOBILE_OTP") {
         if (!phone) {
           setErrorMsg("Mobile number is missing.");
           return;
         }
-        const res = await verifyMobileOtp(phone, otpCode);
-        if (res?.access_token || res?.phone_verified) {
-          setSuccessMsg("Mobile number verified! Account active. Redirecting to Dashboard...");
-          setTimeout(() => {
-            navigate("/dashboard");
-          }, 1200);
+        res = await verifyMobileOtp(phone, otpCode);
+      } else {
+        if (!email) {
+          setErrorMsg("Email address is missing. Please return to login or registration.");
+          return;
         }
+        res = await verifyOtp(email, otpCode, "email_verification");
+      }
+
+      if (res?.require_mobile_otp) {
+        setMode("MOBILE_OTP");
+        setOtpDigits(["", "", "", "", "", ""]);
+        if (res.phone) setPhone(res.phone);
+        setSuccessMsg("Email verified! A 6-digit SMS code has been sent to your mobile number.");
+        setTimeLeft(60);
+        setResendOtpCooldown(60);
+        return;
+      }
+
+      if (res?.require_email_link) {
+        setSuccessMsg("OTP confirmed. Please click the verification link sent to your email to complete activation.");
+        return;
+      }
+
+      if (res?.access_token || res?.is_verified) {
+        setSuccessMsg("Account successfully verified! Welcome to PreNova AI.");
+        navigate("/", { replace: true });
+      } else {
+        setSuccessMsg("Verification completed! Welcome to PreNova AI.");
+        navigate("/", { replace: true });
       }
     } catch (err) {
-      setErrorMsg(err.message || "Invalid or expired OTP code.");
+      setErrorMsg(err.message || "Invalid or expired verification code.");
     } finally {
       setIsLoading(false);
     }
@@ -253,7 +254,7 @@ const VerifyOTP = () => {
             {mode === "MOBILE_OTP" ? (
               <>
                 We sent a 6-digit verification code to:<br />
-                <strong>{phone || "your mobile number"}</strong>
+                <strong>{phone || "your registered mobile"}</strong>
               </>
             ) : isLinkVerified ? (
               <>
@@ -409,7 +410,7 @@ const VerifyOTP = () => {
                   Verifying Code...
                 </>
               ) : (
-                mode === "EMAIL_OTP" ? "Verify OTP" : "Verify Mobile OTP & Activate"
+                "Verify OTP & Activate"
               )}
             </button>
           </form>
